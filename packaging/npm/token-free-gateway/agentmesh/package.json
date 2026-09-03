@@ -1,0 +1,29 @@
+{
+  "name": "agentmesh",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AgentMesh OS — P2P mesh of heterogeneous AI + human agents orchestrated by Agent Router and Agent Cast",
+  "license": "MIT",
+  "packageManager": "pnpm@10.0.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "pnpm -r --filter './packages/**' run build",
+    "typecheck": "pnpm -r run typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "pnpm -r run lint",
+    "dev": "pnpm --parallel --filter @agentmesh/api --filter @agentmesh/web run dev",
+    "dev:api": "pnpm --filter @agentmesh/api run dev",
+    "dev:web": "pnpm --filter @agentmesh/web run dev",
+    "build:web": "pnpm --filter @agentmesh/web run build",
+    "deploy:worker": "pnpm build:web && wrangler deploy",
+    "clean": "pnpm -r exec rm -rf dist"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
