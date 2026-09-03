@@ -1,0 +1,16 @@
+name = "muhanai"
+main = "deploy/worker.ts"
+compatibility_date = "2026-09-03"
+
+[assets]
+directory = "apps/web/dist"
+binding = "ASSETS"
+
+[vars]
+API_ORIGIN = "http://110:3012"
+
+# Enable these routes after `wrangler whoami` succeeds and the zone is owned by this account.
+# routes = [
+#   { pattern = "muhanai.com/*", zone_name = "muhanai.com" },
+#   { pattern = "www.muhanai.com/*", zone_name = "muhanai.com" },
+# ]
