@@ -14,16 +14,24 @@ interface SidebarProps {
 const navClass = ({ isActive }: { isActive: boolean }) =>
   isActive ? "nav-item active" : "nav-item";
 
-function NavButton({ item, isCollapsed }: { item: SectionConfig; isCollapsed: boolean }) {
+function NavButton({
+  section,
+  label,
+  isCollapsed,
+}: {
+  section: SectionConfig;
+  label: string;
+  isCollapsed: boolean;
+}) {
   return (
     <NavLink
-      to={item.path}
-      end={item.path === "/"}
+      to={section.path}
+      end={section.path === "/"}
       className={navClass}
-      title={isCollapsed ? item.navLabel : undefined}
+      title={isCollapsed ? label : undefined}
     >
-      <span className="nav-icon">{item.icon}</span>
-      {!isCollapsed && <span className="nav-label">{item.navLabel}</span>}
+      <span className="nav-icon">{section.icon}</span>
+      {!isCollapsed && <span className="nav-label">{label}</span>}
     </NavLink>
   );
 }
@@ -64,8 +72,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed: collapsedProp = f
               {!isCollapsed && <span className="section-chevron">▼</span>}
             </div>
             <nav className="nav-items">
-              {items.map((item) => (
-                <NavButton key={item.id} item={item} isCollapsed={isCollapsed} />
+              {items.map(({ section, label }) => (
+                <NavButton
+                  key={`${group.id}-${section.id}`}
+                  section={section}
+                  label={label}
+                  isCollapsed={isCollapsed}
+                />
               ))}
             </nav>
           </div>

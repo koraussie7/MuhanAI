@@ -2560,3 +2560,45 @@ button:disabled {
   }
 }
   }
+
+/* Network Needs You (dashboard action strip, §2) */
+.network-needs-you {
+  margin-bottom:18px;
+}
+.needs-you-title {
+  font-size:13px;
+  letter-spacing:0.12em;
+  color:var(--accent);
+  margin-bottom:10px;
+}
+.needs-you-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:10px;
+}
+.need-card {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px 14px;
+  color:var(--fg);
+  text-align:left;
+  transition:border-color 0.15s ease;
+}
+.need-card:hover {
+  border-color:var(--accent);
+}
+.need-icon {
+  font-size:18px;
+}
+.need-text {
+  flex:1;
+  font-size:13px;
+}
+.need-count {
+  font-size:16px;
+  color:var(--accent);
+}
