@@ -1,107 +1,37 @@
-import React from 'react';
+import React, { useState } from "react";
+import { NavLink } from "react-router-dom";
+import { sidebarSections, type SectionConfig } from "../routes/section-config";
+
+// Sidebar navigation is generated from the route registry
+// (routes/section-config.tsx). Active state is derived from the router
+// location via NavLink, not from props.
 
 interface SidebarProps {
   isCollapsed?: boolean;
   onToggle?: () => void;
-  activePath?: string;
-  onItemClick?: (path: string) => void;
 }
 
-const NAV_SECTIONS = [
-  {
-    id: 'network',
-    label: 'NETWORK',
-    items: [
-      { path: 'dashboard', label: 'Dashboard', icon: '🏠' },
-      { path: 'agent-mesh', label: 'Agent Mesh', icon: '🕸️' },
-      { path: 'agent-cast', label: 'Agent Cast', icon: '📡' },
-      { path: 'agents', label: 'Agents', icon: '🤖' },
-      { path: 'human-agents', label: 'Human Agents', icon: '👤' },
-      { path: 'p2p-network', label: 'P2P Network', icon: '🌐' },
-    ]
-  },
-  {
-    id: 'intelligence',
-    label: 'INTELLIGENCE',
-    items: [
-      { path: 'knowledge', label: 'Knowledge', icon: '📚' },
-      { path: 'knowledge-graph', label: 'Knowledge Graph', icon: '🕸️' },
-      { path: 'search', label: 'Search', icon: '🔍' },
-      { path: 'verification', label: 'Verification', icon: '✅' },
-    ]
-  },
-  {
-    id: 'resources',
-    label: 'AI RESOURCES',
-    items: [
-      { path: 'llm-mesh', label: 'LLM Mesh', icon: '🧠' },
-      { path: 'mcp-skills', label: 'MCP / Skills', icon: '🔌' },
-      { path: 'compute-mesh', label: 'Compute Mesh', icon: '⚡' },
-      { path: 'models', label: 'Models', icon: '📦' },
-    ]
-  },
-  {
-    id: 'marketplace',
-    label: 'MARKETPLACE',
-    items: [
-      { path: 'agents-market', label: 'Agents', icon: '🤖' },
-      { path: 'human-experts', label: 'Human Experts', icon: '👤' },
-      { path: 'mcp-market', label: 'MCP', icon: '🔌' },
-      { path: 'knowledge-market', label: 'Knowledge', icon: '📚' },
-      { path: 'compute-market', label: 'Compute', icon: '⚡' },
-    ]
-  },
-  {
-    id: 'economy',
-    label: 'ECONOMY',
-    items: [
-      { path: 'token-bank', label: 'Token Bank', icon: '💰' },
-      { path: 'contributions', label: 'Contributions', icon: '📊' },
-      { path: 'reputation', label: 'Reputation', icon: '⭐' },
-    ]
-  },
-  {
-    id: 'workspace',
-    label: 'WORKSPACE',
-    items: [
-      { path: 'projects', label: 'Projects', icon: '📁' },
-      { path: 'tasks', label: 'Tasks', icon: '✓' },
-      { path: 'workflows', label: 'Workflows', icon: '🔄' },
-    ]
-  },
-  {
-    id: 'system',
-    label: 'SYSTEM',
-    items: [
-      { path: 'network-monitor', label: 'Network Monitor', icon: '📈' },
-      { path: 'settings', label: 'Settings', icon: '⚙️' },
-    ]
-  }
-];
+const navClass = ({ isActive }: { isActive: boolean }) =>
+  isActive ? "nav-item active" : "nav-item";
 
-export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, onToggle, activePath = '/', onItemClick }) => {
-  const renderSection = (section: typeof NAV_SECTIONS[0]) => (
-    <div key={section.id} className="nav-section">
-      <div className="nav-section-title">
-        {section.label}
-        {!isCollapsed && <span className="section-chevron">▼</span>}
-      </div>
-      <nav className="nav-items">
-        {section.items.map((item) => (
-          <button
-            key={item.path}
-            type="button"
-            className={`nav-item ${activePath === item.path ? 'active' : ''} ${isCollapsed ? 'collapsed' : ''}`}
-            title={isCollapsed ? item.label : undefined}
-            onClick={() => onItemClick?.(item.path)}
-          >
-            <span className="nav-icon">{item.icon}</span>
-            {!isCollapsed && <span className="nav-label">{item.label}</span>}
-          </button>
-        ))}
-      </nav>
-    </div>
+function NavButton({ item, isCollapsed }: { item: SectionConfig; isCollapsed: boolean }) {
+  return (
+    <NavLink
+      to={item.path}
+      end={item.path === "/"}
+      className={navClass}
+      title={isCollapsed ? item.navLabel : undefined}
+    >
+      <span className="nav-icon">{item.icon}</span>
+      {!isCollapsed && <span className="nav-label">{item.navLabel}</span>}
+    </NavLink>
   );
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed: collapsedProp = false, onToggle }) => {
+  const [collapsedState, setCollapsedState] = useState(false);
+  const isCollapsed = onToggle ? collapsedProp : collapsedState;
+  const toggle = onToggle ?? (() => setCollapsedState((v) => !v));
 
   return (
     <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
@@ -119,7 +49,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, onToggle,
         )}
         <button
           className="collapse-toggle"
-          onClick={onToggle}
+          onClick={toggle}
           aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {isCollapsed ? '▶' : '◀'}
@@ -127,7 +57,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, onToggle,
       </div>
 
       <div className="sidebar-nav">
-        {NAV_SECTIONS.map(renderSection)}
+        {sidebarSections().map(({ group, items }) => (
+          <div key={group.id} className="nav-section">
+            <div className="nav-section-title">
+              {group.label}
+              {!isCollapsed && <span className="section-chevron">▼</span>}
+            </div>
+            <nav className="nav-items">
+              {items.map((item) => (
+                <NavButton key={item.id} item={item} isCollapsed={isCollapsed} />
+              ))}
+            </nav>
+          </div>
+        ))}
       </div>
 
       <div className="sidebar-footer">

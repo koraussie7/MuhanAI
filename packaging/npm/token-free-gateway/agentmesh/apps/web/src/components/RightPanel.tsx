@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 
-interface RightPanelProps {
-  activeSection: string;
-}
+// Right panel with live network status. The active section is derived from
+// the router location; sections may tailor this panel later.
 
-export function RightPanel({ activeSection }: RightPanelProps) {
+export function RightPanel() {
+  const { pathname } = useLocation();
+  const activeSection = pathname.replace(/^\//, "") || "dashboard";
   const [agents, setAgents] = useState<any[]>([]);
   const [compute, setCompute] = useState<any>({});
   const [llm, setLlm] = useState<any>({});
