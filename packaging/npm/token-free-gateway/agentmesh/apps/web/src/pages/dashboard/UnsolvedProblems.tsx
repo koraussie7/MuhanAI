@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UNSOLVED_PROBLEMS } from '../data/mockData';
+import { UNSOLVED_PROBLEMS } from '../../data/mockData';
 
 interface UnsolvedProblem {
   id: string;

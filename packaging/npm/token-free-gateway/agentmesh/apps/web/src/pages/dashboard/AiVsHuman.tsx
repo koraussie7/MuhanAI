@@ -1,5 +1,5 @@
 import React from 'react';
-import { AI_VS_HUMAN } from '../data/mockData';
+import { AI_VS_HUMAN } from '../../data/mockData';
 
 interface AiVsHumanItem {
   id: string;

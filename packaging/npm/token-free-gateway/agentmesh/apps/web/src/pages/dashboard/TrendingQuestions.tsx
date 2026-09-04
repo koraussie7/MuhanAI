@@ -1,5 +1,5 @@
 import React from 'react';
-import { TRENDING_QUESTIONS } from '../data/mockData';
+import { TRENDING_QUESTIONS } from '../../data/mockData';
 
 interface TrendingQuestion {
   id: string;

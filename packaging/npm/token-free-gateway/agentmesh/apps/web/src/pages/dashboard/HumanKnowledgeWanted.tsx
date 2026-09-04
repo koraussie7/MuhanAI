@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { HUMAN_KNOWLEDGE_WANTED } from '../data/mockData';
+import { HUMAN_KNOWLEDGE_WANTED } from '../../data/mockData';
 
 interface HumanKnowledgeItem {
   id: string;

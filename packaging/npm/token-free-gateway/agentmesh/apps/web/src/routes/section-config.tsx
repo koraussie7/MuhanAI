@@ -1,40 +1,36 @@
 import type { ComponentType } from "react";
-import { Dashboard } from "../components/Dashboard";
-import { AgentCast } from "../components/AgentCast";
-import { NetworkPulse } from "../components/NetworkPulse";
-import { HelpNeeded } from "../components/HelpNeeded";
-import { VerifyMe } from "../components/VerifyMe";
-import { TrendingQuestions } from "../components/TrendingQuestions";
-import { HumanKnowledgeWanted } from "../components/HumanKnowledgeWanted";
-import { UnsolvedProblems } from "../components/UnsolvedProblems";
-import { AiVsHuman } from "../components/AiVsHuman";
-import { RewardsDisplay } from "../components/RewardsDisplay";
-import { TeachAI } from "../components/TeachAI";
-import {
-  AgentMeshPage,
-  ComputeMeshPage,
-  LlmMeshPage,
-  MarketplacePage,
-  NetworkMonitorPage,
-  P2pNetworkPage,
-  TokenBankPage,
-  VerificationPage,
-} from "../components/DashPages";
-import {
-  AgentsPage,
-  ContributionsPage,
-  HumanAgentsPage,
-  KnowledgeGraphPage,
-  KnowledgePage,
-  McpSkillsPage,
-  ModelsPage,
-  ProjectsPage,
-  ReputationPage,
-  SearchPage,
-  SettingsPage,
-  TasksPage,
-  WorkflowsPage,
-} from "../components/SpecPages";
+import { Dashboard } from "../pages/dashboard/Dashboard";
+import { NetworkPulse } from "../pages/dashboard/NetworkPulse";
+import { HelpNeeded } from "../pages/dashboard/HelpNeeded";
+import { VerifyMe } from "../pages/dashboard/VerifyMe";
+import { TrendingQuestions } from "../pages/dashboard/TrendingQuestions";
+import { HumanKnowledgeWanted } from "../pages/dashboard/HumanKnowledgeWanted";
+import { UnsolvedProblems } from "../pages/dashboard/UnsolvedProblems";
+import { AiVsHuman } from "../pages/dashboard/AiVsHuman";
+import { RewardsDisplay } from "../pages/dashboard/RewardsDisplay";
+import { TeachAI } from "../pages/dashboard/TeachAI";
+import { AgentCast } from "../pages/mesh/AgentCast";
+import { AgentMeshPage } from "../pages/mesh/AgentMeshPage";
+import { AgentsPage } from "../pages/mesh/AgentsPage";
+import { HumanAgentsPage } from "../pages/human/HumanAgentsPage";
+import { KnowledgePage } from "../pages/knowledge/KnowledgePage";
+import { KnowledgeGraphPage } from "../pages/knowledge/KnowledgeGraphPage";
+import { SearchPage } from "../pages/knowledge/SearchPage";
+import { VerificationPage } from "../pages/knowledge/VerificationPage";
+import { LlmMeshPage } from "../pages/ai/LlmMeshPage";
+import { ModelsPage } from "../pages/ai/ModelsPage";
+import { McpSkillsPage } from "../pages/resources/McpSkillsPage";
+import { ComputeMeshPage } from "../pages/resources/ComputeMeshPage";
+import { P2pNetworkPage } from "../pages/resources/P2pNetworkPage";
+import { MarketplacePage } from "../pages/marketplace/MarketplacePage";
+import { TokenBankPage } from "../pages/economy/TokenBankPage";
+import { ContributionsPage } from "../pages/economy/ContributionsPage";
+import { ReputationPage } from "../pages/economy/ReputationPage";
+import { ProjectsPage } from "../pages/workspace/ProjectsPage";
+import { TasksPage } from "../pages/workspace/TasksPage";
+import { WorkflowsPage } from "../pages/workspace/WorkflowsPage";
+import { NetworkMonitorPage } from "../pages/system/NetworkMonitorPage";
+import { SettingsPage } from "../pages/system/SettingsPage";
 
 // Single source of truth for navigation: every section declares its route,
 // labels, sidebar group and page component. The sidebar (via NavLink) and the
