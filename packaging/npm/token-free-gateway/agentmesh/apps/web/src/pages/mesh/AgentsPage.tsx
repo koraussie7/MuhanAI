@@ -4,32 +4,30 @@ import { Progress, SpecPage, StatGrid } from "../../components/common/spec";
 
 // =====================================================================
 // Priority #6: Agents (mesh registry)
+// Data source: GET /api/agents — the live AgentRegistry descriptors.
 // =====================================================================
-interface AgentInfo {
+interface AgentDescriptorView {
   id: string;
   name: string;
   type: string;
-  status: "online" | "offline" | "busy";
   capabilities: string[];
+  cost: number;
   latencyMs: number;
-  reputation: number;
-  successRate: number;
-  provider: string;
-  model: string;
+  health?: { online: boolean; latency: number; checkedAt?: number };
 }
 
-const STATUS_LABEL: Record<AgentInfo["status"], string> = {
-  online: "● Online",
-  offline: "○ Offline",
-  busy: "◐ Busy",
-};
+function statusLabel(agent: AgentDescriptorView): string {
+  if (agent.health?.online) return "● Online";
+  if (agent.health) return "○ Offline";
+  return "? Unknown";
+}
 
 export function AgentsPage() {
-  const [agents, setAgents] = useState<AgentInfo[]>([]);
+  const [agents, setAgents] = useState<AgentDescriptorView[]>([]);
   const [filter, setFilter] = useState("All");
 
   useEffect(() => {
-    load<AgentInfo[]>("/api/agents").then((d) => d && setAgents(d));
+    load<AgentDescriptorView[]>("/api/agents").then((d) => d && setAgents(d));
   }, []);
 
   const types = ["All", ...Array.from(new Set(agents.map((a) => a.type)))];
@@ -39,7 +37,7 @@ export function AgentsPage() {
   return (
     <SpecPage
       title="Agents"
-      subtitle="1,284 Agents Online — capabilities · latency · reputation · success rate"
+      subtitle={`${agents.filter((a) => a.health?.online).length}/${agents.length} online — live AgentRegistry`}
     >
       <div className="policy-row">
         {types.map((t) => (
@@ -57,17 +55,13 @@ export function AgentsPage() {
           <article className="mesh-card" key={a.id}>
             <div className="mesh-card-head">
               <strong>{a.name}</strong>
-              <span className="mesh-status">{STATUS_LABEL[a.status]}</span>
+              <span className="mesh-status">{statusLabel(a)}</span>
             </div>
             <p className="mesh-caps">{a.capabilities.join(" · ")}</p>
             <div className="mesh-meta">
-              <span>지연: {(a.latencyMs / 1000).toFixed(1)}s</span>
-              <span>평판: {a.reputation}</span>
-              <span>성공률: {a.successRate}%</span>
-            </div>
-            <div className="mesh-meta">
-              <span>모델: {a.model}</span>
-              <span>제공: {a.provider}</span>
+              <span>지연: {(a.latencyMs / 1000).toFixed(2)}s</span>
+              <span>타입: {a.type}</span>
+              <span>비용: {a.cost}</span>
             </div>
             <div className="mesh-actions">
               <button className="btn-secondary">Connect</button>
@@ -80,3 +74,4 @@ export function AgentsPage() {
     </SpecPage>
   );
 }
+

@@ -5,16 +5,21 @@ export interface OpenAICompatibleConfig {
   baseUrl: string;
   apiKey?: string;
   model?: string;
+  /** Human-readable name surfaced in agent descriptors. */
+  displayName?: string;
 }
 
 export class OpenAICompatibleAdapter extends BaseAdapter {
   readonly id: string;
+  readonly type = "llm" as const;
+  readonly displayName: string;
   private config: OpenAICompatibleConfig;
 
   constructor(id: string, config: OpenAICompatibleConfig) {
     super();
     this.id = id;
     this.config = config;
+    this.displayName = config.displayName ?? id;
   }
 
   override capabilities(): string[] {

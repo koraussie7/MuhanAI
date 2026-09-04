@@ -3,6 +3,8 @@ import { BaseAdapter } from "./base.js";
 
 export class MockAdapter extends BaseAdapter {
   readonly id = "mock";
+  readonly type = "mock" as const;
+  readonly displayName = "Mock Agent";
   capabilities() { return ["answer", "verify"]; }
 
   async execute(request: AgentRequest): Promise<AgentResult> {

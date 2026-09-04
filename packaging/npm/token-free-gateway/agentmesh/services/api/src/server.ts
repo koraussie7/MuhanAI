@@ -22,7 +22,6 @@ import {
   listKnowledge,
   knowledgeKinds,
   knowledgeGraph,
-  listMeshAgents,
   listHumanAgents,
   humanAgentCategories,
   listMcpServers,
@@ -37,7 +36,7 @@ import {
   type VerifyVote,
 } from "./feeds.js";
 
-export function buildServer() {
+export async function buildServer() {
   const registry = new AgentRegistry();
   registry.register(new MockAdapter());
 
@@ -52,9 +51,20 @@ export function buildServer() {
   const app = Fastify({ logger: true });
   void app.register(cors, { origin: true });
 
+  // Keep the registry health snapshot fresh: /api/pulse and /api/network/stats
+  // read from it instead of static demo numbers (Phase 3-A #1).
+  await registry.refreshHealth();
+  const healthTimer = setInterval(() => {
+    void registry.refreshHealth();
+  }, 30_000);
+  healthTimer.unref();
+
   app.get("/health", async () => ({ ok: true }));
   app.get("/api/agents", async () => registry.descriptors());
-  app.get("/api/network", async () => ({ agents: (await registry.descriptors()).length, status: "online" }));
+  app.get("/api/network", async () => {
+    const stats = await registry.stats();
+    return { agents: stats.online, total: stats.total, byType: stats.byType, status: "online" };
+  });
   app.post("/api/cast", async (request, reply) => {
     const body = request.body as { question?: unknown; agents?: unknown };
     if (typeof body.question !== "string" || !body.question.trim()) {
@@ -69,7 +79,10 @@ export function buildServer() {
   app.get("/api/events", async () => ({ message: "WebSocket event transport is planned for Phase 2" }));
 
   // ---- Network Pulse (spec: CLAUDE.md Part 1, priority #1) ----
-  app.get("/api/pulse", async () => pulse());
+  app.get("/api/pulse", async () => {
+    const stats = await registry.stats();
+    return pulse({ agentsOnline: stats.online });
+  });
 
   // ---- Help Needed / AI Needs Human (priority #2) ----
   app.get("/api/help-needed", async () => listHelpNeeded());
@@ -139,7 +152,6 @@ export function buildServer() {
   });
   app.get("/api/knowledge/kinds", async () => knowledgeKinds());
   app.get("/api/knowledge-graph", async () => knowledgeGraph());
-  app.get("/api/agents", async () => listMeshAgents());
   app.get("/api/human-agents", async (request) => {
     const { category } = request.query as { category?: string };
     return listHumanAgents(category);
@@ -152,7 +164,24 @@ export function buildServer() {
   app.get("/api/projects", async () => listProjects());
   app.get("/api/tasks", async () => listTasks());
   app.get("/api/workflows", async () => listWorkflows());
-  app.get("/api/network/stats", async () => networkStats());
+  app.get("/api/network/stats", async () => {
+    const base = networkStats();
+    const stats = await registry.stats();
+    return {
+      ...base,
+      // Real registry snapshot overrides the demo agent count and adds the
+      // type breakdown (llm/human/mcp/compute/search) for the mesh console.
+      agentsOnline: stats.online,
+      registry: {
+        total: stats.total,
+        online: stats.online,
+        byType: stats.byType,
+        onlineByType: stats.onlineByType,
+        avgLatencyMs: stats.avgLatencyMs,
+        checkedAt: stats.checkedAt,
+      },
+    };
+  });
   app.get("/api/search", async (request) => {
     const { q } = request.query as { q?: string };
     return search(typeof q === "string" ? q : undefined);
@@ -163,5 +192,5 @@ export function buildServer() {
 if (process.env.NODE_ENV !== "test") {
   const port = Number(process.env.PORT ?? 3001);
   const host = process.env.HOST ?? "127.0.0.1";
-  void buildServer().listen({ port, host });
+  void buildServer().then((app) => app.listen({ port, host }));
 }

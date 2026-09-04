@@ -47,7 +47,7 @@ const verifyItems: VerifyItem[] = [
   { id: "vf-3", claim: "베트남 모토바이 전동화 보조금은 2026년부터 시행된다.", sources: 2, votes: { correct: 3, wrong: 5, unsure: 14 }, createdAt: now() },
 ];
 
-export function pulse(): Pulse {
+export function pulse(network?: { agentsOnline?: number }): Pulse {
   return {
     newQuestions: helpNeeded.length,
     verifyRequests: verifyItems.length,
@@ -55,7 +55,9 @@ export function pulse(): Pulse {
     aiConflicts: helpNeeded.filter((i) => i.category === "info_conflict").length,
     knowledgeGaps: helpNeeded.filter((i) => i.category === "source_gap" || i.category === "experience_gap").length,
     mcpTasksWaiting: 0,
-    agentsOnline: 12_482, // TODO: wire to agent registry discovery (spec: packages/agent/discovery)
+    // Real source: AgentRegistry.stats(). Falls back to the demo number only
+    // when the caller does not supply a registry snapshot.
+    agentsOnline: network?.agentsOnline ?? 12_482,
   };
 }
 
