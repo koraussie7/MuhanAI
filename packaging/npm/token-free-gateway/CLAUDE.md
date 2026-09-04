@@ -1,437 +1,561 @@
-# CLAUDE.md
+# MUHAN AI - Complete Product & Architecture Specification
 
-## 1. Codebase Overview
+## Core Philosophy
+
+**"AI에게 질문하는 곳이 아니라, 함께 답을 만드는 네트워크."**
+
+UI 자체가 단순한 메뉴가 아니라 **네트워크의 참여를 계속 만들어내는 엔진**이 됩니다.
+
+---
+
+## Part 1: UI/UX Design Specification
+
+### Main Screen Layout (60-70% Network Activity Feed)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ MUHAN AI                         ● 12,482 Agents  3,821 Humans│
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  🌐 NETWORK PULSE                                           │
+│  23 Questions · 14 Verify · 8 Humans Needed · 31 AI Conflicts│
+│                                                             │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  🔥 HELP NEEDED (AI가 해결하지 못한 문제)                   │
+│  ┌───────────────────────────────────────────────────────┐  │
+│  │ 🔴 도움이 필요합니다                                  │  │
+│  │                                                       │  │
+│  │ "베트남에서 한국인이 사업자 등록을 할 때              │  │
+│  │  실제로 가장 많이 발생하는 문제는 무엇인가?"          │  │
+│  │                                                       │  │
+│  │ AI Confidence 64%   Human Answers 3                   │  │
+│  │ +120 Credit        👥 8명이 참여 중                   │  │
+│  │                                                       │  │
+│  │ [ 내가 아는 내용 추가 ] [ 검증하기 ] [ AI에게 맡기기 ]│  │
+│  └───────────────────────────────────────────────────────┘  │
+│                                                             │
+├─────────────────────────────────────────────────────────────┤
+│  🔥 TRENDING QUESTIONS                                      │
+│  AI Agent Mesh          ████████████████████ 482            │
+│  P2P AI                 ██████████████       341            │
+│  Vietnam Business       ███████████          284            │
+│                                                             │
+├─────────────────────────────────────────────────────────────┤
+│  🧠 KNOWLEDGE NEEDS VERIFICATION                            │
+│  "현재 이 정보가 맞는지 확인해주세요."                      │
+│  [ ✓ 맞음 ] [ ✕ 틀림 ] [ ? 모르겠음 ]                      │
+│                                                             │
+├─────────────────────────────────────────────────────────────┤
+│  👤 HUMAN KNOWLEDGE WANTED                                  │
+│  당신만 알고 있을 수 있는 경험                              │
+│  [ 경험 공유하기 ]                                          │
+│                                                             │
+├─────────────────────────────────────────────────────────────┤
+│                    ASK NETWORK                              │
+│          "무엇이든 네트워크에 물어보세요"                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Key Sections Detail
+
+#### 1. NETWORK PULSE (Top Bar)
+Real-time counters, each clickable:
+- `23 new questions` → Questions list
+- `14 verification requests` → Verify queue
+- `8 human experts needed` → Human Help Needed
+- `31 AI conflicts` → AI vs Human view
+- `12 knowledge gaps` → Knowledge gaps
+- `7 MCP tasks waiting` → MCP task queue
+
+#### 2. HELP NEEDED / AI NEEDS HUMAN
+Problems where AI confidence is low:
+```
+"미얀마 현지에서 실제 USDT P2P 거래 시 가장 안전한 거래 방식은?"
+AI Consensus: 61%
+Human Knowledge Needed: ★★★★★
+Reward: +250
+[ 내가 아는 내용 ]
+```
+
+#### 3. TRENDING QUESTIONS
+Trending Score = 참여자 수 + AI 충돌 + 인간 참여 + 검증 필요성 (NOT simple view count)
+
+#### 4. KNOWLEDGE NEEDS VERIFICATION (Verify Me)
+3-second micro-participation:
+```
+"다낭의 FPT 인터넷은 500Mbps 서비스를 제공한다."
+Sources: 3
+[ ✓ 맞음 ] [ ✕ 틀림 ] [ ? 잘 모르겠음 ]
+```
+
+#### 5. HUMAN KNOWLEDGE WANTED
+Experience-based knowledge (not just expertise):
+- "이 식당 실제로 가본 사람?"
+- "이 제품 써본 사람?"
+- "이 지역 살아본 사람?"
+- "이 프로그램 실제로 사용해본 사람?"
+
+#### 6. UNSOLVED PROBLEMS
+Categorized unsolved problems:
+- 🔥 AI가 해결하지 못함
+- 🔥 정보가 서로 충돌함
+- 🔥 실제 경험 부족
+- 🔥 검증된 자료 부족
+- 🔥 최신 정보 부족
+
+#### 7. AI vs HUMAN (Gamification)
+```
+Question: "다낭에서 가장 좋은 장기 거주 지역은?"
+AI Consensus: 68%
+Human Consensus: 91%
+Winner: 👤 HUMAN
+[ 결과 보기 ]
+```
+
+#### 8. TEACH AI
+Human teaches AI from experience:
+```
+"나는 미얀마에서 10년간 사업을 했는데..."
+[ Knowledge 생성 ] → Verification → Knowledge Base
+```
+
+#### 9. REWARDS UI
+Visible contribution credits:
+```
++120, +80, +250 Credits
+```
+
+#### 10. ASK NETWORK (Bottom)
+Unified entry point replacing traditional chat:
+```
+[ASK NETWORK] [AGENT CAST] [HUMAN AGENTS]
+```
+
+---
+
+## Part 2: Technical Architecture
+
+### Package Structure (agentmesh/)
 
 ```
 agentmesh/
-│
 ├── apps/
-│   ├── web/                         # 메인 Web UI
-│   │   ├── src/
-│   │   │   ├── components/
-│   │   │   │   ├── NetworkPanel/
-│   │   │   │   ├── AgentCast/
-│   │   │   │   ├── HumanConsole/
-│   │   │   │   ├── KnowledgePanel/
-│   │   │   │   ├── TokenBank/
-│   │   │   │   └── AgentSearch/
-│   │   │   ├── pages/
-│   │   │   │   ├── Home.tsx
-│   │   │   │   ├── Network.tsx
-│   │   │   │   ├── Knowledge.tsx
-│   │   │   │   ├── Agents.tsx
-│   │   │   │   └── TokenBank.tsx
-│   │   │   └── App.tsx
-│   │   └── package.json
-│   │
-│   └── node/                        # AI/P2P Node
-│       ├── src/
-│       │   ├── webllm/
-│       │   ├── p2p/
-│       │   ├── mcp/
-│       │   └── node.ts
-│       └── package.json
-│
+│   ├── web/
+│   ├── node/
+│   └── browser-extension/
 ├── packages/
-│   │
-│   ├── core/                        # 시스템 핵심
-│   │   ├── types/
-│   │   │   ├── agent.ts
-│   │   │   ├── request.ts
-│   │   │   ├── result.ts
-│   │   │   ├── knowledge.ts
-│   │   │   └── contribution.ts
-│   │   ├── events/
-│   │   └── interfaces/
-│   │
-│   ├── router/                      # Agent Router
-│   │   ├── router.ts
-│   │   ├── policy.ts
-│   │   ├── budget.ts
-│   │   └── health.ts
-│   │
-│   ├── agent/                       # Agent Mesh
-│   │   ├── registry.ts
-│   │   ├── discovery.ts
-│   │   ├── capability.ts
-│   │   └── executor.ts
-│   │
-│   ├── cast/                        # Agent Cast
-│   │   ├── cast.ts
-│   │   ├── fanout.ts
-│   │   ├── aggregator.ts
-│   │   ├── voting.ts
-│   │   └── consensus.ts
-│   │
-│   ├── human/                       # Human Agent
-│   │   ├── human-agent.ts
-│   │   ├── answer.ts
-│   │   ├── verify.ts
-│   │   ├── teach.ts
-│   │   └── reputation.ts
-│   │
-│   ├── evaluator/                   # 결과 평가
-│   │   ├── evaluator.ts
-│   │   ├── confidence.ts
-│   │   ├── relevance.ts
-│   │   ├── quality.ts
-│   │   └── contradiction.ts
-│   │
-│   ├── knowledge/                   # 통합 Knowledge Base
-│   │   ├── ingest.ts
-│   │   ├── extractor.ts
-│   │   ├── validator.ts
-│   │   ├── provenance.ts
-│   │   ├── vector.ts
-│   │   └── graph.ts
-│   │
-│   ├── token-bank/                  # Contribution Economy
-│   │   ├── ledger.ts
-│   │   ├── rewards.ts
-│   │   ├── reputation.ts
-│   │   └── anti-abuse.ts
-│   │
-│   ├── p2p/                         # P2P Network
-│   │   ├── peer.ts
-│   │   ├── discovery.ts
-│   │   ├── transport.ts
-│   │   └── compute.ts
-│   │
-│   ├── mcp/                         # MCP Network
-│   │   ├── registry.ts
-│   │   ├── discovery.ts
-│   │   ├── router.ts
-│   │   └── executor.ts
-│   │
-│   └── adapters/                    # LLM / AI Adapter
+│   ├── core/
+│   ├── agent/
+│   │   ├── registry/
+│   │   ├── discovery/
+│   │   ├── identity/
+│   │   ├── capabilities/
+│   │   └── a2a/
+│   ├── mesh/
+│   │   ├── libp2p/
+│   │   ├── gossip/
+│   │   ├── dht/
+│   │   ├── webrtc/
+│   │   └── federation/
+│   ├── router/
+│   │   ├── capability-router/
+│   │   ├── model-router/
+│   │   ├── compute-router/
+│   │   └── human-router/
+│   ├── cast/
+│   │   ├── fanout/
+│   │   ├── consensus/
+│   │   ├── voting/
+│   │   └── evaluator/
+│   ├── compute/
+│   │   ├── worker/
+│   │   ├── scheduler/
+│   │   ├── gpu/
+│   │   ├── webgpu/
+│   │   └── distributed-inference/
+│   ├── search/
+│   │   ├── infomesh/
+│   │   ├── crawler/
+│   │   └── mcp-search/
+│   ├── human/
+│   │   ├── answer/
+│   │   ├── verify/
+│   │   ├── teach/
+│   │   └── marketplace/
+│   ├── knowledge/
+│   │   ├── ingest/
+│   │   ├── provenance/
+│   │   ├── crdt/
+│   │   ├── graph/
+│   │   └── vector/
+│   ├── trust/
+│   │   ├── identity/
+│   │   ├── reputation/
+│   │   ├── web-of-trust/
+│   │   ├── signatures/
+│   │   └── anti-sybil/
+│   ├── token-bank/
+│   │   ├── contribution/
+│   │   ├── compute/
+│   │   ├── knowledge/
+│   │   └── reputation/
+│   ├── security/
+│   │   ├── egress/
+│   │   ├── credential-vault/
+│   │   ├── sandbox/
+│   │   ├── permissions/
+│   │   └── audit/
+│   └── adapters/
 │       ├── webllm/
+│       ├── ollama/
 │       ├── openai/
 │       ├── anthropic/
 │       ├── gemini/
 │       ├── openrouter/
-│       ├── localai/
-│       └── base.ts
-│
-├── services/
-│   ├── api/
-│   │   ├── routes/
-│   │   │   ├── cast.ts
-│   │   │   ├── agents.ts
-│   │   │   ├── human.ts
-│   │   │   ├── knowledge.ts
-│   │   │   └── token-bank.ts
-│   │   └── server.ts
-│   │
-│   ├── worker/
-│   │   ├── cast-worker.ts
-│   │   ├── knowledge-worker.ts
-│   │   └── reward-worker.ts
-│   │
-│   └── indexer/
-│
-├── infrastructure/
-│   ├── postgres/
-│   ├── redis/
-│   ├── vector-db/
-│   ├── graph-db/
-│   └── docker/
-│
-├── docs/
-│   ├── architecture.md
-│   ├── protocol.md
-│   ├── agent-mesh.md
-│   ├── agent-cast.md
-│   ├── human-agent.md
-│   ├── knowledge.md
-│   └── token-bank.md
-│
-├── docker-compose.yml
-├── pnpm-workspace.yaml
-├── package.json
-└── README.md
+│       ├── isek/
+│       ├── society/
+│       ├── agentfm/
+│       ├── mycellm/
+│       ├── p2ptokens/
+│       └── infomesh/
 ```
 
-## 2. Core Architecture Diagram
+### Core Data Flow
 
 ```
-                         ┌─────────────────────┐
-                         │       USER          │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │      WEB UI         │
-                         │ Soribada/eMule UX   │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │    AGENT ROUTER     │
-                         └──────────┬──────────┘
-                                    │
-                    ┌───────────────┼────────────────┐
-                    │               │                │
-                    ▼               ▼                ▼
-              ┌──────────┐   ┌───────────┐   ┌────────────┐
-              │ AGENT    │   │ AGENT     │   │ MCP        │
-              │ MESH     │   │ CAST      │   │ NETWORK    │
-              └────┬─────┘   └─────┬─────┘   └─────┬──────┘
-                   │               │               │
-          ┌────────┼───────┐       │       ┌───────┼───────┐
-          │        │       │       │       │       │       │
-          ▼        ▼       ▼       ▼       ▼       ▼       ▼
-       WebLLM     P2P    Local   Gemini  MCP     Web     Tools
-                         AI      Claude
-                                  GPT
-                                   │
-                                   ▼
-                         ┌─────────────────────┐
-                         │     EVALUATOR       │
-                         │ Quality / Consensus │
-                         └──────────┬──────────┘
-                                    │
-                          ┌─────────┴─────────┐
-                          │                   │
-                          ▼                   ▼
-                  ┌──────────────┐    ┌──────────────┐
-                  │ HUMAN AGENT  │    │ KNOWLEDGE    │
-                  │ Answer       │    │ ENGINE       │
-                  │ Verify       │    │              │
-                  │ Teach        │    │ Vector       │
-                  └──────┬───────┘    │ Graph        │
-                         │            │ Provenance   │
-                         └─────┬──────┴──────────────┘
-                               │
-                               ▼
-                       ┌─────────────────┐
-                       │   TOKEN BANK    │
-                       │ Contribution    │
-                       │ Compute         │
-                       │ Reputation      │
-                       └────────┬────────┘
-                                │
-                                ▼
-                       ┌─────────────────┐
-                       │ NETWORK GROWTH  │
-                       └─────────────────┘
+User Question
+    ↓
+Agent Router (capability/cost/trust scoring)
+    ↓
+┌─────────────────────────────────────────┐
+│ AGENT CAST (parallel fanout)            │
+├──────┬────────┬────────┬────────┬───────┤
+│ WebLLM │ LLM  │ Human  │ Search │ P2P  │
+│       │ Mesh  │ Agents │ (InfoMesh) Compute│
+└──────┴────────┴────────┴────────┴───────┘
+    ↓
+Evaluator / Consensus (miroclaw-style)
+    ↓
+Verification (AI vs AI, AI vs Human, Source vs Source)
+    ↓
+Knowledge Engine (CRDT + Provenance)
+    ↓
+Knowledge Graph
+    ↓
+Token Bank (Contribution Credits)
+    ↓
+Reputation / Trust Update
+    ↓
+Network Grows
 ```
 
-## 3. Key Modules
+---
 
-### 3.1 Agent Adapter
-All AI models and human agents share a common interface:
+## Part 3: External Project Integration Strategy
 
-```ts
-export interface AgentAdapter {
-  id: string;
-  capabilities(): string[];
-  health(): Promise<{ online: boolean; latency: number }>;
-  execute(request: AgentRequest): Promise<AgentResult>;
-}
-```
+### Tier 1 — Essential Adapters (Core Integration)
 
-Implementations include:
-- **WebLLM** – local LLM via WebGPU
-- **Gemini**, **Claude**, **GPT**, **OpenAI**, **Anthropic**, **OpenRouter**, **LocalAI**
-- **P2P AI** – decentralized models
-- **Human** – formalized human capability types (`answer`, `verify`, `teach`, `local_knowledge`, `expert`)
+| Project | Repo | AgentMesh Package | Key Integration |
+|---------|------|-------------------|-----------------|
+| **ISEK** | isekOS/ISEK | `packages/agent/a2a/`, `packages/agent/identity/`, `packages/agent/discovery/` | Agent Card, A2A protocol, Discovery, ERC-8004 identity |
+| **Society Protocol** | societycomputer/society-protocol | `packages/mesh/` | libp2p, GossipSub, Kad-DHT, CRDT knowledge pool, MCP/A2A bridge |
+| **AgentFM** | Agent-FM/agentfm-core | `packages/compute/worker/`, `packages/compute/scheduler/` | P2P compute mesh, task dispatch, OpenAI-compatible worker API |
+| **mycellm** | mycellm/mycellm | `packages/compute/distributed-inference/` | Heterogeneous GPU pool, QUIC transport, Ed25519 identity |
+| **InfoMesh** | dotnetpower/infomesh | `packages/search/infomesh/` | Decentralized web search, Kademlia DHT, FTS5, MCP-native |
+| **PinkyBrain** | PinkyBrain-ai/pinkybrain | `packages/trust/`, `packages/knowledge/crdt/` | CRDT, Web of Trust, Ed25519, reputation, specialist routing |
+| **peerd** | NotASithLord/peerd | `packages/agent/browser/`, `packages/security/sandbox/` | Browser agent loop, WebRTC, sandboxed VM, actor isolation |
+| **p2ptokens** | pur4v/p2ptokens | `packages/token-bank/compute/` | BitTorrent-style contribution accounting, upload/download ratio |
 
-### 3.2 Agent Router
-Selects the appropriate **Agent Set** based on task characteristics:
+### Tier 2 — Functional Reference (Architecture Patterns)
 
-```ts
-const decision = await router.select({
-  task,
-  complexity,
-  budget,
-  latency,
-  requiredCapabilities
-});
-```
+| Project | Purpose | Reference For |
+|---------|---------|---------------|
+| **miroclaw** | Multi-agent consensus | `packages/cast/consensus/`, `packages/cast/voting/` |
+| **nekoni** | Personal agent node | `packages/agent/registry/` (local node concept) |
+| **NeuroMesh** | Public compute marketplace | `packages/compute/` (public/private/trusted compute separation) |
+| **LLMesh** | Browser P2P mesh | `packages/mesh/webrtc/`, `packages/mesh/gossip/` |
+| **TknGate** | Zero-trust gateway | `packages/security/egress/`, `packages/security/credential-vault/` |
+| **distributed-ai-cluster** | GPU cluster architecture | `packages/compute/gpu/` |
 
-Examples:
-- Simple question → **WebLLM** (free, fast)
-- Complex coding → **Local GPU** or **P2P** agents
-- High‑difficulty reasoning → **Agent Cast** (Gemini + Claude + GPT)
-- Real‑time data → **Human Agent** or **MCP + Web Agent**
+### Integration Principle
 
-### 3.3 Agent Cast (Core Feature)
-Runs a configurable set of agents and aggregates results:
-
-```ts
-const result = await agentCast.run({
-  question,
-  agents: ["webllm", "p2p", "gemini", "claude", "human"]
-});
-```
-
-Internal flow:
-1. **Question** → dispatch to each agent
-2. **Aggregator** collects answers
-3. **Evaluator** scores confidence/quality
-4. **Consensus** merges the best answer
-
-### 3.4 Human Agent
-Treated as a first‑class agent with capabilities:
-- **answer** – provide a response
-- **verify** – validate a response
-- **teach** – contribute knowledge
-- **local_knowledge** – use local/on‑device knowledge
-- **expert** – specialized expertise
-
-Human answers flow through **Fact Extraction → Evidence → Validation → Knowledge Base**.
-
-### 3.5 Knowledge Engine
-Prevents raw LLM output from being stored directly.
+**Core protocols owned by AgentMesh, external projects connected via Adapters:**
 
 ```
-RAW AI RESPONSE
-   ↓
-Fact Extractor
-   ↓
-Source Extraction
-   ↓
-Cross Validation
-   ↓
-Confidence Score
-   ↓
-Knowledge Graph + Vector DB
-   ↓
-Validated Knowledge
+                 AgentMesh Core
+                      │
+        ┌─────────────┼─────────────┐
+        │             │             │
+      Protocol      Adapter       Reference
+        │             │             │
+       A2A          ISEK          miroclaw
+       MCP          Society       NeuroMesh
+       libp2p       AgentFM       LLMesh
+       WebRTC       InfoMesh      nekoni
 ```
 
-Knowledge record schema:
+---
 
-```ts
-interface KnowledgeRecord {
-  id: string;
-  claim: string;
-  evidence: Evidence[];
-  confidence: number;
-  provenance: Provenance[];
-  verifiedBy: string[];
-  createdAt: number;
-}
-```
+## Part 4: FreeLLMAPI Integration
 
-### 3.6 Token Bank (Contribution Economy)
-A ledger‑based system (initially non‑blockchain) that tracks contributions and separates metrics:
-
-```ts
-interface ContributionEvent {
-  actorId: string;
-  type:
-    | "answer"
-    | "verify"
-    | "teach"
-    | "compute"
-    | "mcp";
-  quality: number;
-  reward: number;
-  timestamp: number;
-}
-```
-
-Separated credits:
-- **Compute Credit**
-- **Knowledge Score**
-- **Reputation**
-
-### 3.7 Data Flow Summary
+### Role: LLM Provider Mesh Adapter
 
 ```
-USER → QUESTION → AGENT ROUTER → AGENT CAST → RESULTS → EVALUATOR → KNOWLEDGE NETWORK
-      │                │                │                │
-      ▼                ▼                ▼                ▼
-   WebLLM          P2P Agent   Premium Agents   HIGH/LOW CONFIDENCE
-                                                    │
-                                                    ▼
-                                            HUMAN AGENT
-                                                    │
-                                                    ▼
-                                           KNOWLEDGE DB
-                                                    │
-                                                    ▼
-                                           TOKEN BANK
-                                                    │
-                                                    ▼
-                                   CONTRIBUTION → NETWORK GROWTH
+AgentMesh Router
+    │
+    ▼
+┌─────────────────────────────────────┐
+│ LLM PROVIDER MESH                   │
+├─────────────────────────────────────┤
+│ FreeLLMAPI Adapter                  │
+│   ├── Gemini                        │
+│   ├── Groq                          │
+│   ├── Cerebras                      │
+│   ├── Mistral                       │
+│   ├── NVIDIA                        │
+│   └── 20+ free providers            │
+├─────────────────────────────────────┤
+│ P2P Compute (AgentFM/mycellm)       │
+├─────────────────────────────────────┤
+│ WebLLM (Browser)                    │
+└─────────────────────────────────────┘
 ```
 
-## 4. API (MVP)
+### Routing Policy (Cost-Aware)
 
-| Method | Endpoint                | Description                              |
-|--------|-------------------------|------------------------------------------|
-| POST   | `/api/cast`             | Run Agent Cast with selected agents      |
-| GET    | `/api/agents`           | List registered agents                  |
-| GET    | `/api/network`          | Network status & metrics                |
-| POST   | `/api/human/answer`     | Submit a human answer                    |
-| POST   | `/api/human/verify`     | Verify a human answer                    |
-| POST   | `/api/human/teach`      | Teach / contribute knowledge             |
-| GET    | `/api/knowledge/search` | Search knowledge base                    |
-| POST   | `/api/knowledge/validate`| Validate a knowledge claim               |
-| GET    | `/api/token-bank`       | Retrieve token‑bank balances             |
-| GET    | `/api/reputation`       | Get reputation scores                    |
-| WS     | `/api/events`           | Real‑time event stream                   |
-
-## 5. Tech Stack (MVP)
-
-| Layer          | Technologies                              |
-|----------------|-------------------------------------------|
-| Frontend       | React, Vite, TypeScript                   |
-| Local AI       | WebLLM + WebGPU                           |
-| P2P            | WebRTC                                    |
-| Backend        | Node.js, TypeScript, Fastify              |
-| API            | Fastify                                   |
-| Realtime       | WebSocket                                 |
-| Database       | PostgreSQL, pgvector (vector), Redis (cache) |
-| Vector Store   | pgvector (or Neo4j Graph layer)           |
-| Knowledge Graph| PostgreSQL Graph extension / Neo4j       |
-| MCP            | MCP SDK                                   |
-| Containers     | Docker, Docker‑Compose                    |
-
-## 6. Development Phases
-
-| Phase | Goal                                 | Core Components |
-|-------|--------------------------------------|-----------------|
-| **1** | Web UI + Router + WebLLM             | Web UI, Router, WebLLM |
-| **2** | Add external LLMs (OpenAI, Claude, Gemini, OpenRouter) | Adapter layer, Router extensions |
-| **3** | P2P, WebRTC, Local GPU support       | P2P modules, Transport, Compute |
-| **4** | Human Agent & Marketplace            | Human Agent, Reputation, Marketplace |
-| **5** | Knowledge Engine, Vector DB, Graph   | Knowledge Engine, Vector DB, Graph |
-| **6** | Token Bank, Reputation, Contribution Economy | Token Bank, Reputation, Contribution Ledger |
-
-The ultimate vision is an **AgentMesh OS** that fuses the P2P philosophy of eMule/Soribada with local AI (WebLLM), a mesh of heterogeneous agents, a knowledge‑driven network, and a token‑based contribution economy — all orchestrated through **Agent Cast** and **Agent Router**.
-
-## 7. Implementation Status and Commands
-The AgentMesh implementation is isolated under `agentmesh/` so the existing `token-free-gateway` npm package remains unchanged. Phase 1 currently includes shared TypeScript contracts, an in-memory agent registry and executor, deterministic routing, mock and WebLLM-boundary adapters, Agent Cast fan-out/consensus, a Fastify API, and a small React/Vite console. The human, knowledge, token-bank, P2P, and MCP packages currently expose interfaces only.
-
-Run commands from the `agentmesh/` directory:
-
-```bash
-pnpm install
-pnpm typecheck
-pnpm test
-pnpm build
-pnpm dev
+```typescript
+type RoutingPolicy = {
+  priority: "free" | "cheap" | "quality" | "latency" | "privacy" | "balanced";
+  maxCost?: number;
+};
 ```
 
-Use `pnpm dev:api` for the API at `http://127.0.0.1:3001` and `pnpm dev:web` for the Vite app at `http://localhost:5173`. Optional infrastructure is started with `docker compose --profile infra up -d`.
+**Tiered Fallback:**
+```
+General Query: WebLLM → FreeLLMAPI → P2P GPU → Paid API
+Complex Query: FreeLLMAPI → P2P GPU → Claude/GPT
+Urgent Query: Fastest Agent
+High Accuracy: Agent Cast (5 LLMs) → Human Verify → Consensus
+```
 
-## 8. Code Conventions
-- Use strict TypeScript and ESM imports with explicit `.js` extensions in package source.
-- Import shared contracts from `@agentmesh/core`; keep provider-specific behavior behind `AgentAdapter`.
-- Prefer small, pure functions for routing, filtering, aggregation, scoring, and validation.
-- Keep packages independently buildable with `pnpm --filter <package> build`.
-- Use Vitest for behavior tests, especially routing boundaries, empty inputs, unavailable agents, adapter failures, and consensus ties.
-- Validate and normalize API input at the HTTP boundary. Never trust browser-provided agent IDs or metadata.
-- Use `crypto.randomUUID()` for request IDs and millisecond Unix timestamps.
-- Document public interfaces when behavior is not obvious.
+### FreeLLMAPI Code to Adopt (Adapter Pattern)
 
-## 9. Security and Scope Rules
-- Never commit API keys, cookies, session exports, `.env` files, database credentials, or generated `dist/` output.
-- Never store raw model output as validated knowledge; route it through evidence, provenance, and validation first.
-- Never expose server-only secrets or Node-only modules to browser bundles.
-- Do not silently replace a requested agent with another provider; report selection and execution failures.
-- Do not introduce a database, blockchain, WebRTC transport, or external LLM SDK without an interface and tests.
-- Do not modify the original `token-free-gateway` package outside `agentmesh/` unless the task explicitly requires it.
+```
+packages/adapters/freellmapi/
+├── client.ts        # OpenAI-compatible HTTP client
+├── adapter.ts       # AgentAdapter implementation
+├── health.ts        # /v1/models + provider health
+├── models.ts        # Model catalog (signed catalog)
+├── routing.ts       # Smart routing / failover logic
+├── quota.ts         # Rate limit / quota tracking
+└── crypto.ts        # AES-256-GCM encrypted API keys (credential vault)
+```
+
+---
+
+## Part 5: Full Screen Implementations
+
+### Dashboard (Network Status)
+- 1,284 Agents Online, 7,542 Human Agents, 328 LLM Providers, 4,821 MCP Servers, 12,438 Compute Nodes, 18.4M Knowledge Records
+- Active Tasks: Researching, Coding, Verification, Translation, Data Analysis
+- Network Activity counters
+
+### Agent Mesh
+- Visual router topology (User → Router → Gemini/Claude/Local/Web/MCP/Human/P2P)
+- Agent cards with capabilities, latency, reputation, success rate
+- Connect/Use/View Profile actions
+
+### Agent Cast
+- Question input → checkbox selection of agents → CAST button
+- Real-time response streams from 8+ agents
+- Consensus visualization (91.2%)
+- Compare/Verify/Save Knowledge actions
+
+### Human Agents
+- Search by category (Vietnam, Crypto, AI, Korea, Business, Travel)
+- Human agent cards: specialty, rating, answer count, verification rate
+- "AI couldn't reach sufficient confidence. Ask Human Network?" flow
+
+### Knowledge & Knowledge Graph
+- Verified/Community/Human/AI/Web/Local knowledge tabs
+- Graph view: nodes (AI, Agent, Human, Expert, Knowledge, Source, Model, MCP) with edges
+- Click knowledge → see connected agents, humans, sources, documents
+
+### Verification Center
+- Pending verification queue (428 items)
+- High priority claims
+- Verification modes: AI vs AI, AI vs Web, AI vs Human, Human vs Human, Source vs Source
+- Confidence scoring after verification
+
+### LLM Mesh
+- Provider list: Gemini, Claude, GPT, Mistral, Groq, Cerebras, OpenRouter, FreeLLMAPI, LocalAI, Ollama, WebLLM
+- Router Policy: Best Quality / Lowest Cost / Fastest / Free First / Local First / Privacy First / Balanced / Custom
+
+### MCP Marketplace
+- Search MCP servers
+- Popular: Web Search, Google Drive, GitHub, Database, Shopping, Finance, Maps, Email
+- MCP cards: rating, users, tools count, latency, reliability, Install/Connect/Test
+
+### Compute Mesh
+- Online nodes: CPU (8,421), GPU (1,823), WebGPU (4,921), Mac (892), Linux (5,214), Windows (3,182)
+- Total compute: 128.4 TFLOPS
+- Share Compute: GPU selection, availability hours, Start Sharing
+
+### P2P Network
+- Peers: 1,284, Connected: 842, Searching: 127
+- Data: 12.8 TB, Compute: 4.2 PFLOPS
+- Tabs: Peers, Files, Models, Knowledge, Agents, Compute
+
+### Token Bank
+- Balance: 12,480 Credits, Earned Today: +320
+- Contribution breakdown: Answer (+120), Verify (+80), Teach (+250), Compute (+40), P2P Compute (+300), MCP (+500), Knowledge (+200)
+
+### Contribution & Reputation
+- My Contributions: Answers (1,842), Verified (492), Knowledge (128), Compute Hours (83), MCP (12)
+- Total: 98,421
+- Reputation scores: Overall (98.4), Answer (97), Verification (99), Knowledge (96), Compute (98), Trust (99)
+- Agents/LLMs/MCP/Compute Nodes/Knowledge all have reputation
+
+### Marketplace
+- Unified: Agents, Human Experts, MCP, Skills, Models, Knowledge, Compute, Workflows
+- "AI Capability App Store"
+
+### Projects
+- Project-based workspace (not chat rooms)
+- Each project: Agents, Knowledge, Tasks, Files, Workflows, Conversations, Contributions
+
+### Workflow (React Flow style)
+- Visual pipeline: Research → Web Search → LLM Cast → Human Verification → Knowledge Engine → Report
+
+### Network Monitor
+- Real-time metrics: agents, online, human agents, MCP, compute nodes, knowledge, requests/min, avg latency, success rate
+
+### Settings
+- Account, Privacy, Security
+- AI Preferences, Routing, Models
+- Network: P2P, WebRTC, Discovery
+- Contributions: Token Bank, Reputation
+- Agents, MCP, API, Developer
+
+---
+
+## Part 6: Sidebar Navigation (Final)
+
+```
+MUHAN AI
+━━━━━━━━━━━━━━━━━━
+
+🏠 Dashboard
+
+NETWORK
+◉ Agent Mesh
+◉ Agent Cast
+◉ Agents
+◉ Human Agents
+◉ P2P Network
+
+INTELLIGENCE
+◉ Knowledge
+◉ Knowledge Graph
+◉ Search
+◉ Verification
+
+AI RESOURCES
+◉ LLM Mesh
+◉ MCP / Skills
+◉ Compute Mesh
+◉ Models
+
+MARKETPLACE
+◉ Agents
+◉ Human Experts
+◉ MCP
+◉ Knowledge
+◉ Compute
+
+ECONOMY
+◉ Token Bank
+◉ Contributions
+◉ Reputation
+
+WORKSPACE
+◉ Projects
+◉ Tasks
+◉ Workflows
+
+SYSTEM
+◉ Network Monitor
+◉ Settings
+```
+
+### Top Bar (Always Visible)
+```
+Ask the Network
+──────────────────────────────
+무엇이든 물어보세요...
+
+[AI] [Agents] [Human] [Web] [Knowledge]
+```
+
+---
+
+## Part 7: Implementation Priority
+
+1. **Dashboard + Network Pulse + Feed API** (feed-api.ts, feed-store.ts) ✅
+2. **Sidebar + Layout (Left/Center/Right)** ✅
+3. **HelpNeeded + VerifyMe + HumanKnowledgeWanted** ✅
+4. **AgentCast + TrendingQuestions** ✅
+5. **Knowledge + KnowledgeGraph + Verification Center**
+6. **Agent Mesh + Human Agents + LLM Mesh**
+7. **MCP Marketplace + Compute Mesh + P2P Network**
+8. **Token Bank + Contribution + Reputation**
+9. **Projects + Workflows + Marketplace**
+10. **Network Monitor + Settings + Security**
+
+---
+
+## Part 8: Design Principles
+
+1. **Network First** — Show live network activity, not empty chat
+2. **Human-AI Symmetry** — AI and Human as equal network participants
+3. **Micro-Participation** — 3-second verify, 30-second answer, 3-minute teach
+4. **Visible Rewards** — Credits always visible, gamified but meaningful
+5. **Transparency** — AI confidence, consensus, sources, verification status
+6. **Progressive Disclosure** — Simple entry → deep network access
+
+---
+
+## Part 9: Key Differentiators
+
+| Traditional AI | MUHAN AI (AgentMesh) |
+|----------------|---------------------|
+| User ↔ AI | User → Network (AI + Human + Compute + Knowledge) |
+| Single model | Agent Cast → Multiple agents → Consensus |
+| Chat history | Knowledge Graph with provenance |
+| No verification | Verification Center (AI vs AI, AI vs Human) |
+| No economy | Token Bank + Contribution Ledger + Reputation |
+| Centralized | P2P Mesh (libp2p, GossipSub, Kad-DHT, WebRTC) |
+| Fixed models | LLM Mesh + FreeLLMAPI + P2P Compute + WebLLM |
+| No human loop | Human Agents as first-class network nodes |
+| No search | InfoMesh (decentralized MCP-native search) |
+| No security | TknGate-style zero-trust gateway |
+
+---
+
+## Part 10: WebLLM Integration (Obsidian Note Reference)
+
+**Key Insight**: WebLLM runs LLM entirely in browser via WebGPU/WASM.
+- Zero server cost for small models
+- Privacy-first (data never leaves browser)
+- Integrates as `packages/adapters/webllm/` and `packages/compute/webgpu/`
+- Falls back to FreeLLMAPI → P2P Compute → Paid API for larger models
+- Enables "Personal Agent Node" (nekoni-style) on user's device
+
+---
+
+## Part 11: Tagline
+
+> **“AI에게 질문하는 곳이 아니라, 함께 답을 만드는 네트워크.”**
