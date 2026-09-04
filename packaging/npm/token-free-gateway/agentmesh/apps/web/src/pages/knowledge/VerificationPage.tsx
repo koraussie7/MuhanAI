@@ -12,7 +12,17 @@ export function VerificationPage() {
     }[]
   >([]);
   useEffect(() => {
-    load<NonNullable<typeof items>>("/api/verify").then((d) => d && setItems(d));
+    let alive = true;
+    const fetchItems = () =>
+      load<NonNullable<typeof items>>("/api/verify").then((d) => {
+        if (alive && d) setItems(d);
+      });
+    fetchItems();
+    const timer = setInterval(fetchItems, 30_000);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+    };
   }, []);
   return (
     <Page

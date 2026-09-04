@@ -71,7 +71,7 @@ export class AgentRegistry {
     }));
   }
 
-  /** Aggregated network snapshot: counts by type, online ratio, latency. */
+    /** Aggregated network snapshot: counts by type, online ratio, latency. */
   async stats(): Promise<RegistryStats> {
     const descriptors = await this.descriptors();
     const byType: Partial<Record<AgentType, number>> = {};
@@ -93,6 +93,37 @@ export class AgentRegistry {
       onlineByType,
       avgLatencyMs: online > 0 ? Math.round(latencySum / online) : 0,
       checkedAt: Date.now(),
+    };
+  }
+
+  /**
+   * Network topology for visualization. All online agents connect to the
+   * central "muhan-router". Agent-to-agent edges are derived from declared
+   * capabilities so the Topology graph is data-driven, not static.
+   */
+  async topology(): Promise<{
+    agents: Array<{ id: string; type: AgentType; name: string }>;
+    connections: Array<{ from: string; to: string }>;
+  }> {
+    const descriptors = await this.descriptors();
+    const online = descriptors.filter((d) => d.health?.online);
+    const agents = online.map((d) => ({ id: d.id, type: d.type, name: d.name }));
+
+    const connections: Array<{ from: string; to: string }> = [];
+    const router = "muhan-router";
+
+    for (const d of online) {
+      connections.push({ from: router, to: d.id });
+      // Cross-connect agents that share capability domains (e.g. two LLMs).
+      for (const other of online) {
+        if (other.id <= d.id) continue;
+        connections.push({ from: d.id, to: other.id });
+      }
+    }
+
+    return {
+      agents: [{ id: router, type: "llm", name: "MUHAN AI" }, ...agents],
+      connections,
     };
   }
 }

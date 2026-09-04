@@ -18,7 +18,17 @@ export function ReputationPage() {
   } | null>(null);
 
   useEffect(() => {
-    load<ReputationData>("/api/reputation").then(setData);
+    let alive = true;
+    const fetchData = () =>
+      load<ReputationData>("/api/reputation").then((d) => {
+        if (alive && d) setData(d);
+      });
+    fetchData();
+    const timer = setInterval(fetchData, 30_000);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+    };
   }, []);
 
   return (

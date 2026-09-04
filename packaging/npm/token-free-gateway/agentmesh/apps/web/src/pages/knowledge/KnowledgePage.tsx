@@ -30,9 +30,19 @@ export function KnowledgePage() {
   }, []);
 
   useEffect(() => {
-    load<KnowledgeItem[]>(
-      `/api/knowledge${active !== "all" ? `?kind=${active}` : ""}`,
-    ).then((d) => d && setItems(d));
+    let alive = true;
+    const fetchItems = () =>
+      load<KnowledgeItem[]>(
+        `/api/knowledge${active !== "all" ? `?kind=${active}` : ""}`,
+      ).then((d) => {
+        if (alive && d) setItems(d);
+      });
+    fetchItems();
+    const timer = setInterval(fetchItems, 30_000);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+    };
   }, [active]);
 
   return (

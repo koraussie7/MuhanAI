@@ -1,59 +1,56 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
+import { load, apiPost } from "../../services/api";
 
-interface Agent {
+interface AgentDescriptor {
   id: string;
   name: string;
-  type: "AI" | "Human" | "Agent" | "MCP";
+  type: "llm" | "human" | "mcp" | "compute" | "search";
+  confidence?: number;
+}
+
+interface CastResultItem {
+  agentId: string;
+  answer: string;
   confidence: number;
-  isSelected: boolean;
 }
 
 interface CastResponse {
-  answer?: {
-    answer: string;
-    confidence: number;
-  };
-  results?: {
-    agentId: string;
-    answer: string;
-    confidence: number;
-  }[];
+  results: CastResultItem[];
+  answer: CastResultItem;
 }
 
 export function AgentCast() {
   const [question, setQuestion] = useState("");
-  const [agents, setAgents] = useState<Agent[]>([
-    { id: "1", name: "Gemini", type: "AI", confidence: 0.92, isSelected: false },
-    { id: "2", name: "Claude", type: "AI", confidence: 0.88, isSelected: false },
-    { id: "3", name: "Human Expert", type: "Human", confidence: 0.95, isSelected: false },
-    { id: "4", name: "Web Search", type: "Agent", confidence: 0.85, isSelected: false },
-    { id: "5", name: "Knowledge Agent", type: "Agent", confidence: 0.90, isSelected: false },
-    { id: "6", name: "P2P Agent", type: "Agent", confidence: 0.75, isSelected: false }
-  ]);
+  const [agents, setAgents] = useState<AgentDescriptor[]>([]);
+  const [selectedAgents, setSelectedAgents] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<CastResponse | null>(null);
 
+  useEffect(() => {
+    load<AgentDescriptor[]>("/api/agents").then((agentList) => {
+      if (agentList) {
+        setAgents(agentList);
+        setSelectedAgents(new Set(agentList.map((a) => a.id)));
+      }
+    });
+  }, []);
+
+  const toggleAgent = (id: string) => {
+    const next = new Set(selectedAgents);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setSelectedAgents(next);
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (selectedAgents.size === 0) return;
     setLoading(true);
     try {
-      const selectedAgents = agents.filter(a => a.isSelected);
-      if (selectedAgents.length === 0) {
-        alert("적어도 1개의 에이전트를 선택해주세요");
-        return;
-      }
-
-      const res = await fetch("/api/cast", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          question: setQuestion,
-          agents: selectedAgents.map(a => a.id)
-        })
+      const res = await apiPost<CastResponse>("/api/cast", {
+        question,
+        agents: Array.from(selectedAgents),
       });
-
-      const data = await res.json();
-      setResponse(data);
+      if (res) setResponse(res);
     } finally {
       setLoading(false);
     }
@@ -82,19 +79,19 @@ export function AgentCast() {
         <div className="agent-selection">
           <div className="selection-header">
             <span>에이전트 선택</span>
-            <span className="count">(선택한 에이전트: {agents.filter(a => a.isSelected).length})</span>
+            <span className="count">(선택한 에이전트: {selectedAgents.size})</span>
           </div>
 
           <div className="agent-list">
-            {agents.map(agent => (
+            {agents.map((agent) => (
               <label key={agent.id} className="agent-option">
                 <input
                   type="checkbox"
-                  checked={agent.isSelected}
+                  checked={selectedAgents.has(agent.id)}
                   onChange={() => toggleAgent(agent.id)}
                 />
                 <span className={`agent-badge ${agent.type}`}>
-                  {agent.name} ({Math.round(agent.confidence * 100)}%)
+                  {agent.name} ({Math.round((agent.confidence ?? 0) * 100)}%)
                 </span>
               </label>
             ))}
@@ -102,7 +99,7 @@ export function AgentCast() {
         </div>
 
         <div className="cast-actions">
-          <button type="submit" className="primary-button" disabled={loading || !question.trim()}>
+          <button type="submit" className="primary-button" disabled={loading || !question.trim() || selectedAgents.size === 0}>
             {loading ? "상담 중..." : "에이전트에게 문의"}
           </button>
         </div>
@@ -124,12 +121,12 @@ export function AgentCast() {
           {response.results && (
             <div className="cast-agent-results">
               <h3>개별 에이전트 답변</h3>
-              {response.results.map(agent => (
+              {response.results.map((agent) => (
                 <div key={agent.agentId} className="agent-response">
                   <div className="agent-card">
                     <div className="agent-header">
                       <span className="agent-badge">{agent.agentId}</span>
-                      <span>{(agent as unknown as { name?: string }).name ?? agent.agentId}</span>
+                      <span>{agent.agentId}</span>
                       <span className={`agent-confidence ${agent.confidence > 0.9 ? "high" : agent.confidence > 0.7 ? "medium" : "low"}`}>
                         {Math.round(agent.confidence * 100)}%
                       </span>
@@ -144,9 +141,4 @@ export function AgentCast() {
       )}
     </section>
   );
-}
-
-function toggleAgent(id: string) {
-  // This would be handled in the component's state
-  console.log("Toggling agent", id);
 }

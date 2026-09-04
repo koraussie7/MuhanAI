@@ -61,9 +61,10 @@ export async function buildServer() {
 
   app.get("/health", async () => ({ ok: true }));
   app.get("/api/agents", async () => registry.descriptors());
-  app.get("/api/network", async () => {
+    app.get("/api/network", async () => {
     const stats = await registry.stats();
-    return { agents: stats.online, total: stats.total, byType: stats.byType, status: "online" };
+    const topology = await registry.topology();
+    return { agents: stats.online, total: stats.total, byType: stats.byType, status: "online", topology };
   });
   app.post("/api/cast", async (request, reply) => {
     const body = request.body as { question?: unknown; agents?: unknown };
@@ -76,7 +77,37 @@ export async function buildServer() {
     const agents = body.agents ?? ["mock"];
     return cast.run({ id: crypto.randomUUID(), question: body.question, agents });
   });
-  app.get("/api/events", async () => ({ message: "WebSocket event transport is planned for Phase 2" }));
+    // ---- Network Events (SSE: Phase 3-A #4) ----
+  app.get("/api/events", (request, reply) => {
+    reply.header("Content-Type", "text/event-stream");
+    reply.header("Cache-Control", "no-cache");
+    reply.header("Connection", "keep-alive");
+    reply.header("Access-Control-Allow-Origin", "*");
+
+    const send = (data: unknown) =>
+      reply.raw.write(`data: ${JSON.stringify(data)}\n\n`);
+
+    send({ type: "connected", timestamp: Date.now() });
+
+    const timer = setInterval(async () => {
+      const stats = await registry.stats();
+      send({
+        type: "network.stats",
+        data: {
+          agentsOnline: stats.online,
+          totalAgents: stats.total,
+          byType: stats.onlineByType,
+          avgLatencyMs: stats.avgLatencyMs,
+        },
+        timestamp: Date.now(),
+      });
+    }, 5_000);
+
+    request.raw.on("close", () => {
+      clearInterval(timer);
+      reply.raw.end();
+    });
+  });
 
   // ---- Network Pulse (spec: CLAUDE.md Part 1, priority #1) ----
   app.get("/api/pulse", async () => {

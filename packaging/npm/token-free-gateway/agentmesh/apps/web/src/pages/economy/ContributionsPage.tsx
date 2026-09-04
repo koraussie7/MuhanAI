@@ -14,9 +14,18 @@ export function ContributionsPage() {
     total: number;
     items: { type: string; count: number; credits: number }[];
   } | null>(null);
-
   useEffect(() => {
-    load<ContributionsData>("/api/contributions").then(setData);
+    let alive = true;
+    const fetchData = () =>
+      load<ContributionsData>("/api/contributions").then((d) => {
+        if (alive && d) setData(d);
+      });
+    fetchData();
+    const timer = setInterval(fetchData, 30_000);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+    };
   }, []);
 
   return (

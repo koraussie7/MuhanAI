@@ -9,8 +9,19 @@ export function TokenBankPage() {
     entries: { reason: string; credits: number; at: string }[];
   } | null>(null);
   useEffect(() => {
-    load<{ reason: string; credits: number }[]>("/api/rewards/table").then((d) => d && setTable(d));
-    load<NonNullable<typeof balance>>("/api/rewards/anonymous").then((d) => d && setBalance(d));
+    let alive = true;
+    const fetchAll = () => {
+      load<{ reason: string; credits: number }[]>("/api/rewards/table").then((d) => d && setTable(d));
+      load<NonNullable<typeof balance>>("/api/rewards/anonymous").then((d) => {
+        if (alive && d) setBalance(d);
+      });
+    };
+    fetchAll();
+    const timer = setInterval(fetchAll, 30_000);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+    };
   }, []);
   return (
     <Page title="Token Bank" subtitle="Contribution Economy">
