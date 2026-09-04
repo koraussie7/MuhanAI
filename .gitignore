@@ -42,3 +42,8 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .vscode
 .cursor
 .cursorrulestsc.log
+.anytime/
+.opencode
+.claude/
+.http-forge/
+database.db
