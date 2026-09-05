@@ -119,3 +119,33 @@ export interface CastResult {
   consensusScore: number;
   selectedAgents: string[];
 }
+
+export interface SignedRecord {
+  id: string;
+  content: string;
+  type: string;
+  ownerId: string;
+  peerId: string;
+  signature: string;
+  publicKey: string;
+  timestamp: number;
+  vectorClock: Record<string, number>;
+  sources?: string[];
+  metadata?: Record<string, unknown>;
+}
+
+export interface FederationNode {
+  peerId: string;
+  address: string;
+  publicKey?: string;
+  lastSeen: number;
+  capabilities: string[];
+  reputation: number;
+  online: boolean;
+}
+
+export interface FederationSyncResult {
+  pulled: number;
+  pushed: number;
+  peers: FederationNode[];
+}

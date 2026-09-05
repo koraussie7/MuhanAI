@@ -13,6 +13,9 @@ import { RewardsDisplay } from "./components/RewardsDisplay";
 import { TeachAI } from "./components/TeachAI";
 import { NetworkPulse } from "./components/NetworkPulse";
 import { RightPanel } from "./components/RightPanel";
+import { SemanticVote } from "./components/SemanticVote";
+import { HiveBearPanel } from "./components/HiveBearPanel";
+import { FederationPanel } from "./components/FederationPanel";
 import {
   NetworkMonitorPage,
   AgentMeshPage,
@@ -67,6 +70,9 @@ const SECTIONS = [
   { id: "tasks", path: "/tasks", label: "Tasks", category: "Workspace" },
   { id: "workflows", path: "/workflows", label: "Workflows", category: "Workspace" },
   { id: "network-monitor", path: "/network-monitor", label: "Network Monitor", category: "Network" },
+  { id: "semantic-vote", path: "/semantic-vote", label: "Semantic Vote", category: "Intelligence" },
+  { id: "hivebear", path: "/hivebear", label: "HiveBear Mesh", category: "Resources" },
+  { id: "federation", path: "/federation", label: "Federation", category: "Intelligence" },
   { id: "settings", path: "/settings", label: "Settings", category: "System" },
 ];
 
@@ -213,6 +219,15 @@ export function App() {
             {activeSection === "teach-ai" && <TeachAI />}
             {activeSection === "network-pulse" && <NetworkPulse />}
             {activeSection === "network-monitor" && <NetworkMonitorPage />}
+
+            {/* Semantic Intelligence */}
+            {activeSection === "semantic-vote" && <SemanticVote onSubmit={(route) => navigate(`/agent-cast?route=${route}`)} />}
+
+            {/* Resources */}
+            {activeSection === "hivebear" && <HiveBearPanel />}
+
+            {/* Folklore Federation */}
+            {activeSection === "federation" && <FederationPanel />}
 
             {/* Network */}
             {activeSection === "agent-mesh" && <AgentMeshPage />}

@@ -68,4 +68,5 @@ Write the final answer only.`;
   }
 }
 
+export { HierarchicalAgentCast, hierarchicalAgentCast } from "./hierarchy.js";
 export const agentCast = new AgentCast();

@@ -7,3 +7,7 @@ export * from "./sources";
 export * from "./pgvector-store";
 export * from "./index-pipeline";
 export * from "./hybrid-search";
+export * from "./wheel";
+export * from "./folklore-types";
+export * from "./folklore-federation";
+export * from "./identity";

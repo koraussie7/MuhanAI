@@ -1,4 +1,5 @@
-import { CategoryContext, KnowledgeNode } from "../../shared/types";
+import type { CategoryContext, KnowledgeNode, FederationNode, SignedRecord, FederationSyncResult } from "@agentmesh/shared";
+import { FederationMesh } from "./folklore-federation.js";
 
 export interface GraphNode {
   id: string;
@@ -15,13 +16,14 @@ export interface GraphEdge {
   weight?: number;
 }
 
-/**
- * Lightweight in-memory knowledge graph.
- * Production: Neo4j / Amazon Neptune / Memgraph.
- */
 export class KnowledgeGraph {
   private nodes = new Map<string, GraphNode>();
   private edges: GraphEdge[] = [];
+  private federation?: FederationMesh;
+
+  setFederation(federation: FederationMesh): void {
+    this.federation = federation;
+  }
 
   upsertNode(node: GraphNode): void {
     this.nodes.set(node.id, node);
@@ -118,6 +120,33 @@ export class KnowledgeGraph {
       });
     }
     return Array.from(relatedUsers);
+  }
+
+  async federatedSearch(queryEmbedding: number[], queryText: string): Promise<SignedRecord[]> {
+    if (!this.federation) {
+      return [];
+    }
+    return this.federation.query(queryEmbedding, queryText);
+  }
+
+  async syncFederation(): Promise<FederationSyncResult> {
+    if (!this.federation) {
+      return { pulled: 0, pushed: 0, peers: [] };
+    }
+    return this.federation.sync();
+  }
+
+  addFederationPeer(peer: FederationNode): void {
+    if (this.federation) {
+      this.federation.addPeer(peer);
+    }
+  }
+
+  getFederationPeers(): FederationNode[] {
+    if (!this.federation) {
+      return [];
+    }
+    return this.federation.getPeers();
   }
 }
 
