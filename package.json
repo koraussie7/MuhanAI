@@ -1,0 +1,17 @@
+{
+	"name": "muhanai",
+	"version": "0.1.0",
+	"private": true,
+	"description": "MuhanAI — unified AI mesh platform",
+	"scripts": {
+		"build": "cd packaging/npm/token-free-gateway/agentmesh && pnpm -r --filter './packages/**' run build",
+		"typecheck": "cd packaging/npm/token-free-gateway/agentmesh && pnpm -r run typecheck",
+		"build:web": "cd packaging/npm/token-free-gateway/agentmesh && pnpm --filter @agentmesh/web run build",
+		"deploy:worker": "cd packaging/npm/token-free-gateway/agentmesh && pnpm build:web && wrangler deploy",
+		"dev:web": "cd packaging/npm/token-free-gateway/agentmesh && pnpm --filter @agentmesh/web run dev",
+		"db:generate": "cd packaging/npm/token-free-gateway/agentmesh && pnpm prisma generate",
+		"db:migrate": "cd packaging/npm/token-free-gateway/agentmesh && pnpm prisma migrate dev"
+	},
+	"devDependencies": {},
+	"dependencies": {}
+}

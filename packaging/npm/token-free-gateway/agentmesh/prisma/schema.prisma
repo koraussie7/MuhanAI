@@ -1,0 +1,290 @@
+// MuhanAI Prisma schema
+// Setup:
+//   1. cp .env.example .env
+//   2. docker compose up -d postgres
+//   3. npx prisma migrate dev --name init
+//   4. npx prisma generate
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector]
+}
+
+// ---------------------------------------------------------------------------
+// User + Personal MCP
+// ---------------------------------------------------------------------------
+
+model User {
+  id        String   @id // app-level userId (not forced cuid — allows external auth ids)
+  email     String?  @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile         UserProfile?
+  personalMcp     PersonalMcp?
+  knowledgeNodes  KnowledgeNode[]
+  memories        UserMemory[]
+  expertise       UserExpertise[]
+  skills          UserSkill[]
+  tools           UserTool[]
+  agentLinks      UserAgentLink[]
+  agentRuns       AgentRun[]
+  stats           UserStatsRow?
+}
+
+model UserProfile {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name                   String?
+  description            String?
+  languages              String[] @default(["en"])
+  timezone               String?
+  preferredJurisdiction  String[]
+  avatarUrl              String?
+  metadata               Json?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+}
+
+model UserStatsRow {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contributions   Int      @default(0)
+  citations       Int      @default(0)
+  helpfulness     Int      @default(0)
+  knowledgeCount  Int      @default(0)
+  memoryCount     Int      @default(0)
+  expertiseDomains Int     @default(0)
+  lastActiveAt    DateTime?
+  updatedAt       DateTime @updatedAt
+}
+
+model PersonalMcp {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String?  // mcp://user/{userId}
+  config    Json?
+  version   Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Category
+// ---------------------------------------------------------------------------
+
+model Category {
+  id          String   @id // e.g. "real-estate" or "real-estate.rental"
+  domain      String
+  subdomain   String?
+  description String?
+  riskLevel   String   @default("medium")
+  createdAt   DateTime @default(now())
+
+  jurisdictions CategoryJurisdiction[]
+  knowledge     KnowledgeNode[]
+
+  @@index([domain])
+}
+
+model CategoryJurisdiction {
+  id           String   @id @default(cuid())
+  categoryId   String
+  jurisdiction String
+  category     Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, jurisdiction])
+}
+
+// ---------------------------------------------------------------------------
+// Knowledge
+// ---------------------------------------------------------------------------
+
+model KnowledgeNode {
+  id          String   @id @default(cuid())
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  title       String
+  content     String
+  sourceType  String
+  visibility  String   @default("private")
+  confidence  Float    @default(0.5)
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  chunks      KnowledgeChunk[]
+  permissions KnowledgePermission?
+  citations   KnowledgeCitation[]
+
+  @@index([ownerId])
+  @@index([categoryId])
+  @@index([visibility])
+}
+
+model KnowledgeChunk {
+  id          String                       @id @default(cuid())
+  knowledgeId String
+  knowledge   KnowledgeNode                @relation(fields: [knowledgeId], references: [id], onDelete: Cascade)
+  content     String
+  chunkIndex  Int
+  // pgvector — enable after: CREATE EXTENSION vector;
+  embedding   Unsupported("vector(1536)")?
+  createdAt   DateTime                     @default(now())
+
+  @@index([knowledgeId])
+}
+
+model KnowledgePermission {
+  id             String        @id @default(cuid())
+  knowledgeId    String        @unique
+  knowledge      KnowledgeNode @relation(fields: [knowledgeId], references: [id], onDelete: Cascade)
+  readableBy     String[]
+  usableByAgents Boolean       @default(true)
+  commercialUse  Boolean       @default(false)
+}
+
+model KnowledgeCitation {
+  id          String        @id @default(cuid())
+  knowledgeId String
+  knowledge   KnowledgeNode @relation(fields: [knowledgeId], references: [id], onDelete: Cascade)
+  citedBy     String?
+  context     String?
+  createdAt   DateTime      @default(now())
+
+  @@index([knowledgeId])
+}
+
+// ---------------------------------------------------------------------------
+// Memory / Expertise / Skills
+// ---------------------------------------------------------------------------
+
+model UserMemory {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content        String
+  importance     Float     @default(0.5)
+  context        Json?     // CategoryContext
+  createdAt      DateTime  @default(now())
+  lastAccessedAt DateTime?
+
+  @@index([userId])
+}
+
+model UserExpertise {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domain        String
+  subdomain     String?
+  jurisdiction  String[]
+  level         Float    @default(0.1)
+  evidenceCount Int      @default(1)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId, domain])
+}
+
+model UserSkill {
+  id          String  @id @default(cuid())
+  userId      String
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  category    String?
+  proficiency Float   @default(0.5)
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+model UserTool {
+  id          String  @id @default(cuid())
+  userId      String
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  inputSchema Json?
+  outputSchema Json?
+
+  @@unique([userId, name])
+}
+
+model UserAgentLink {
+  id      String  @id @default(cuid())
+  userId  String
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agentId String
+  name    String
+  domain  String
+  version String?
+
+  @@unique([userId, agentId])
+}
+
+// ---------------------------------------------------------------------------
+// Agents / MCP registry
+// ---------------------------------------------------------------------------
+
+model Agent {
+  id            String   @id
+  name          String
+  domain        String
+  subdomain     String?
+  jurisdictions String[]
+  description   String?
+  systemPrompt  String?
+  createdAt     DateTime @default(now())
+
+  runs AgentRun[]
+}
+
+model AgentRun {
+  id         String   @id @default(cuid())
+  agentId    String
+  agent      Agent    @relation(fields: [agentId], references: [id])
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  question   String
+  output     String?
+  confidence Float?
+  latencyMs  Int?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([agentId])
+}
+
+model McpServer {
+  id        String    @id @default(cuid())
+  name      String
+  uri       String?
+  type      String // personal | expert | external
+  config    Json?
+  createdAt DateTime  @default(now())
+
+  tools McpTool[]
+}
+
+model McpTool {
+  id          String    @id @default(cuid())
+  serverId    String
+  server      McpServer @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  inputSchema Json?
+}

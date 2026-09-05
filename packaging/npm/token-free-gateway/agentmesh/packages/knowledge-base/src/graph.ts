@@ -1,0 +1,124 @@
+import { CategoryContext, KnowledgeNode } from "../../shared/types";
+
+export interface GraphNode {
+  id: string;
+  type: "user" | "domain" | "subdomain" | "jurisdiction" | "knowledge" | "expertise";
+  label: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface GraphEdge {
+  id: string;
+  from: string;
+  to: string;
+  relation: string;
+  weight?: number;
+}
+
+/**
+ * Lightweight in-memory knowledge graph.
+ * Production: Neo4j / Amazon Neptune / Memgraph.
+ */
+export class KnowledgeGraph {
+  private nodes = new Map<string, GraphNode>();
+  private edges: GraphEdge[] = [];
+
+  upsertNode(node: GraphNode): void {
+    this.nodes.set(node.id, node);
+  }
+
+  connect(from: string, to: string, relation: string, weight = 1): void {
+    const id = `${from}->${relation}->${to}`;
+    const existing = this.edges.find((e) => e.id === id);
+    if (existing) {
+      existing.weight = (existing.weight ?? 1) + weight;
+    } else {
+      this.edges.push({ id, from, to, relation, weight });
+    }
+  }
+
+  async connectKnowledge(params: {
+    userId: string;
+    category: CategoryContext;
+    knowledge: KnowledgeNode;
+  }): Promise<void> {
+    const { userId, category, knowledge } = params;
+
+    const userNodeId = `user:${userId}`;
+    this.upsertNode({ id: userNodeId, type: "user", label: userId });
+
+    const domainId = `domain:${category.domain}`;
+    this.upsertNode({
+      id: domainId,
+      type: "domain",
+      label: category.domain,
+    });
+    this.connect(userNodeId, domainId, "has_expertise");
+
+    if (category.subdomain) {
+      const subId = `subdomain:${category.domain}.${category.subdomain}`;
+      this.upsertNode({
+        id: subId,
+        type: "subdomain",
+        label: category.subdomain,
+      });
+      this.connect(domainId, subId, "has_subdomain");
+      this.connect(userNodeId, subId, "has_expertise");
+    }
+
+    if (category.jurisdiction) {
+      for (const j of category.jurisdiction) {
+        const jId = `jurisdiction:${j}`;
+        this.upsertNode({ id: jId, type: "jurisdiction", label: j });
+        this.connect(userNodeId, jId, "operates_in");
+        this.connect(domainId, jId, "applies_to");
+      }
+    }
+
+    const knId = `knowledge:${knowledge.id}`;
+    this.upsertNode({
+      id: knId,
+      type: "knowledge",
+      label: knowledge.title,
+      metadata: { categoryId: knowledge.categoryId },
+    });
+    this.connect(userNodeId, knId, "owns");
+    this.connect(knId, domainId, "about");
+  }
+
+  getNeighbors(nodeId: string, relation?: string): GraphNode[] {
+    const related = this.edges.filter(
+      (e) =>
+        (e.from === nodeId || e.to === nodeId) &&
+        (!relation || e.relation === relation)
+    );
+    const ids = new Set<string>();
+    for (const e of related) {
+      if (e.from !== nodeId) ids.add(e.from);
+      if (e.to !== nodeId) ids.add(e.to);
+    }
+    return Array.from(ids)
+      .map((id) => this.nodes.get(id))
+      .filter((n): n is GraphNode => !!n);
+  }
+
+  findRelatedUsers(userId: string, domain?: string): string[] {
+    const userNode = `user:${userId}`;
+    const domainNodes = domain
+      ? [`domain:${domain}`]
+      : this.getNeighbors(userNode, "has_expertise").map((n) => n.id);
+
+    const relatedUsers = new Set<string>();
+    for (const d of domainNodes) {
+      const users = this.edges
+        .filter((e) => e.to === d && e.relation === "has_expertise" && e.from.startsWith("user:"))
+        .map((e) => e.from.replace("user:", ""));
+      users.forEach((u) => {
+        if (u !== userId) relatedUsers.add(u);
+      });
+    }
+    return Array.from(relatedUsers);
+  }
+}
+
+export const knowledgeGraph = new KnowledgeGraph();
