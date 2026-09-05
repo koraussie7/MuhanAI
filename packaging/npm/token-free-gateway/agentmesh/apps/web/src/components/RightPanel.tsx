@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const API = "";
+const API = import.meta.env.VITE_API_BASE ?? "";
 
 const DEFAULT_COMPUTE = {
   cpu: 1284,

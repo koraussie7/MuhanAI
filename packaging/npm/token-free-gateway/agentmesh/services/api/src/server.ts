@@ -4,6 +4,8 @@ import { noemaRoutes } from "./noema-routes.js";
 import { semanticRoutes } from "./semantic-routes.js";
 import { hivebearRoutes } from "./hivebear-routes.js";
 import { knowledgeRoutes } from "./knowledge-routes.js";
+import { networkRoutes } from "./network-routes.js";
+import { agentsRoutes } from "./agents-routes.js";
 import { computeRoutes } from "./compute-routes.js";
 
 const app = Fastify({ logger: true });
@@ -14,6 +16,8 @@ await app.register(noemaRoutes);
 await app.register(semanticRoutes);
 await app.register(hivebearRoutes);
 await app.register(knowledgeRoutes);
+await app.register(networkRoutes);
+await app.register(agentsRoutes);
 await app.register(computeRoutes);
 
 const start = async () => {

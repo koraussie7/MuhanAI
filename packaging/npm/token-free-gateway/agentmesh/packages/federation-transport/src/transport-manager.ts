@@ -40,4 +40,8 @@ export class TransportManager {
   getTransport(): Transport {
     return this.transport;
   }
+
+  getPeers(): Array<{ peerId: string; address: string; online: boolean }> {
+    return this.transport.getPeers();
+  }
 }

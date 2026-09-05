@@ -10,5 +10,10 @@ export declare class TransportManager {
     start(): Promise<void>;
     stop(): Promise<void>;
     getTransport(): Transport;
+    getPeers(): Array<{
+        peerId: string;
+        address: string;
+        online: boolean;
+    }>;
 }
 //# sourceMappingURL=transport-manager.d.ts.map

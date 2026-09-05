@@ -172,15 +172,6 @@ export function AgentMeshPage() {
 }
 
 // ---- P2P Network (Harvested from peerd + nekoni: WebRTC PeerCanvas + Personal Node) ----
-const MOCK_PEERS: Peer[] = [
-  { id: "peer-kr-01-seoul", name: "Seoul-Node-Alpha", region: "KR", protocol: "webrtc", status: "connected", latencyMs: 14, capabilities: ["inference", "search", "verify"] },
-  { id: "peer-jp-02-tokyo", name: "Tokyo-Gpu-Cluster", region: "JP", protocol: "webrtc", status: "connected", latencyMs: 38, capabilities: ["gpu-compute", "model-cache"] },
-  { id: "peer-us-03-west", name: "US-West-Router", region: "US", protocol: "libp2p", status: "connected", latencyMs: 122, capabilities: ["routing", "gateway"] },
-  { id: "peer-eu-04-fra", name: "Frankfurt-Validator", region: "EU", protocol: "websocket", status: "connecting", latencyMs: 240, capabilities: ["verification", "audit"] },
-  { id: "peer-local-self", name: "This-Browser-Agent", region: "Local", protocol: "memory", status: "connected", latencyMs: 1, capabilities: ["sandbox", "browser-agent"] },
-  { id: "peer-sg-06-sing", name: "SG-Edge-Worker", region: "SG", protocol: "webrtc", status: "offline", capabilities: ["inference"] },
-];
-
 const LOCAL_NODE_DEMO: LocalNode = {
   id: "node-local-muhan-77",
   label: "My Personal Agent Node",
@@ -191,17 +182,49 @@ const LOCAL_NODE_DEMO: LocalNode = {
 };
 
 export function P2pNetworkPage() {
-  const [selectedPeerId, setSelectedPeerId] = useState<string | null>("peer-local-self");
+  const [peers, setPeers] = useState<Peer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedPeerId, setSelectedPeerId] = useState<string | null>(null);
   const [localNode, setLocalNode] = useState<LocalNode>(LOCAL_NODE_DEMO);
   const [tab, setTab] = useState<"canvas" | "personal">("canvas");
-  const selectedPeer = MOCK_PEERS.find((p) => p.id === selectedPeerId) ?? null;
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetch(`${API}/api/network`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.peers) {
+          const mapped: Peer[] = data.peers.map((p: any) => ({
+            id: p.id ?? p.peerId,
+            name: p.name ?? p.peerId,
+            region: p.region ?? "unknown",
+            protocol: (p.protocol ?? "loopback") as Peer["protocol"],
+            status: (p.status ?? "offline") as Peer["status"],
+            latencyMs: p.latencyMs ?? 1,
+            capabilities: p.capabilities ?? [],
+          }));
+          setPeers(mapped);
+          if (!selectedPeerId && mapped.length > 0) {
+            setSelectedPeerId(mapped[0]!.id);
+          }
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  const selectedPeer = peers.find((p) => p.id === selectedPeerId) ?? null;
 
   return (
     <Page title="P2P Network" subtitle="peerd WebRTC Browser Mesh · nekoni Personal Agent Node · Sandbox Isolation">
       <StatGrid
         stats={[
-          ["Peers", MOCK_PEERS.length],
-          ["Connected", MOCK_PEERS.filter((p) => p.status === "connected").length],
+          ["Peers", peers.length],
+          ["Connected", peers.filter((p) => p.status === "connected").length],
           ["Transport", "WebRTC / libp2p"],
           ["Compute", "4.2 PFLOPS"],
         ]}
@@ -209,7 +232,7 @@ export function P2pNetworkPage() {
 
       <div className="policy-row" style={{ marginTop: 16 }}>
         <button className={`policy-chip ${tab === "canvas" ? "active" : ""}`} onClick={() => setTab("canvas")}>
-          🕸️ Peer Canvas ({MOCK_PEERS.length})
+          🕸️ Peer Canvas ({peers.length})
         </button>
         <button className={`policy-chip ${tab === "personal" ? "active" : ""}`} onClick={() => setTab("personal")}>
           👤 Personal Node ({localNode.status})
@@ -218,7 +241,11 @@ export function P2pNetworkPage() {
 
       {tab === "canvas" ? (
         <>
-          <PeerCanvas peers={MOCK_PEERS} selectedId={selectedPeerId ?? undefined} onSelect={setSelectedPeerId} />
+          {loading ? (
+            <p className="dash-note">P2P 노드 목록을 불러오는 중…</p>
+          ) : (
+            <PeerCanvas peers={peers} selectedId={selectedPeerId ?? undefined} onSelect={setSelectedPeerId} />
+          )}
           <BrowserAgentPanel peer={selectedPeer} onClose={() => setSelectedPeerId(null)} />
         </>
       ) : (

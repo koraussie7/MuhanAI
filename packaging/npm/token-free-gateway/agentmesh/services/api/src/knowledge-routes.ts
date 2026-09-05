@@ -49,8 +49,8 @@ const TransportStartSchema = z.object({
   bootstrap: z.array(z.string()).default([]),
 });
 
-const federationInstances = new Map<string, FederationMesh>();
-const transportInstances = new Map<string, TransportManager>();
+export const federationInstances = new Map<string, FederationMesh>();
+export const transportInstances = new Map<string, TransportManager>();
 
 function getFederation(app: FastifyInstance): { federation: FederationMesh; transport: TransportManager } {
   const key = app.server.address() as string;

@@ -29,5 +29,8 @@ export class TransportManager {
     getTransport() {
         return this.transport;
     }
+    getPeers() {
+        return this.transport.getPeers();
+    }
 }
 //# sourceMappingURL=transport-manager.js.map

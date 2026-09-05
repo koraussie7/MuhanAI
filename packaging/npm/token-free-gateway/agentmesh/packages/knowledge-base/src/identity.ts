@@ -27,6 +27,10 @@ export class IdentityService {
     return this.identities.get(peerId);
   }
 
+  getAll(): Identity[] {
+    return Array.from(this.identities.values());
+  }
+
   async signRecord(peerId: string, record: Omit<SignedRecord, "signature" | "publicKey" | "peerId" | "timestamp" | "vectorClock">): Promise<SignedRecord> {
     const identity = this.identities.get(peerId);
     if (!identity) {
