@@ -150,7 +150,21 @@ export function App() {
               activeSection === "human-experts" ||
               activeSection === "mcp-market" ||
               activeSection === "knowledge-market" ||
-              activeSection === "compute-market") && <MarketplacePage />}
+              activeSection === "compute-market") && (
+              <MarketplacePage
+                defaultTab={
+                  activeSection === "human-experts"
+                    ? "human"
+                    : activeSection === "mcp-market"
+                      ? "mcp"
+                      : activeSection === "knowledge-market"
+                        ? "knowledge"
+                        : activeSection === "compute-market"
+                          ? "compute"
+                          : "agents"
+                }
+              />
+            )}
 
             {/* Economy */}
             {activeSection === "token-bank" && <TokenBankPage />}
