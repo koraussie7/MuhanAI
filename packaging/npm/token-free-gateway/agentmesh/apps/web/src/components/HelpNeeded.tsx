@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { AlertCircle, Users, Zap, CheckCircle2, Bot, ArrowRight, ShieldCheck, MessageSquarePlus } from "lucide-react";
 
 interface HelpNeededItem {
   id: string;
@@ -13,26 +14,6 @@ interface HelpNeededItem {
 
 const DEFAULT_ITEMS: HelpNeededItem[] = [
   {
-    id: "hn-1",
-    question: "베트남에서 한국인이 사업자 등록을 할 때 실제로 가장 많이 발생하는 문제는 무엇인가?",
-    aiConfidence: 0.64,
-    humanAnswers: 3,
-    reward: 120,
-    participants: 8,
-    category: "experience_gap",
-    createdAt: "",
-  },
-  {
-    id: "hn-2",
-    question: "미얀마 현지에서 실제 USDT P2P 거래 시 가장 안전한 거래 방식은?",
-    aiConfidence: 0.61,
-    humanAnswers: 1,
-    reward: 250,
-    participants: 5,
-    category: "info_conflict",
-    createdAt: "",
-  },
-  {
     id: "hn-3",
     question: "다낭 장기 거주 시 비자 런 규정의 2025년 최신 변경 사항은?",
     aiConfidence: 0.48,
@@ -40,6 +21,26 @@ const DEFAULT_ITEMS: HelpNeededItem[] = [
     reward: 300,
     participants: 11,
     category: "outdated",
+    createdAt: "",
+  },
+  {
+    id: "hn-2",
+    question: "미얀마 현지에서 실제 USDT P2P 거래 시 가장 안전한 거래 방식은?",
+    aiConfidence: 0.61,
+    humanAnswers: 2,
+    reward: 250,
+    participants: 6,
+    category: "info_conflict",
+    createdAt: "",
+  },
+  {
+    id: "hn-1",
+    question: "베트남에서 한국인이 사업자 등록을 할 때 실제로 가장 많이 발생하는 문제는 무엇인가?",
+    aiConfidence: 0.64,
+    humanAnswers: 4,
+    reward: 120,
+    participants: 9,
+    category: "experience_gap",
     createdAt: "",
   },
 ];
@@ -104,39 +105,88 @@ export function HelpNeeded() {
   }
 
   return (
-    <section id="help" className="help-needed">
-      <div className="section-heading">
-        <span className="section-label">02 / HELP NEEDED</span>
-        <h2>
-          AI가 해결하지 못한
-          <br />
-          <em>문제에 참여</em>하세요.
+    <section id="help" className="help-needed-section">
+      <div className="section-head-boxed">
+        <div className="head-badge-row">
+          <span className="head-badge-tag">02 / HUMAN IN THE LOOP</span>
+          <span className="head-status-live">● 3건 참여 대기</span>
+        </div>
+        <h2 className="section-boxed-title">
+          AI가 해결하지 못한 문제에 참여하세요
         </h2>
+        <p className="section-boxed-desc">
+          지식 베이스 충돌이나 최신 규정 변경 등으로 AI의 신뢰도가 낮은 문제입니다. 실제 경험을 공유하고 MHT 보상을 획득하세요.
+        </p>
       </div>
-      <div className="help-grid">
+
+      <div className="help-grid-boxed">
         {items.map((item) => (
-          <article className="help-card" key={item.id}>
-            <span className="help-badge">🔴 도움이 필요합니다</span>
-            <p className="help-question">{item.question}</p>
-            <div className="help-meta">
-              <span>AI Confidence {Math.round(item.aiConfidence * 100)}%</span>
-              <span>Human Answers {item.humanAnswers}</span>
-              <span className="help-reward">+{item.reward} Credit</span>
-              <span>👥 {item.participants}명 참여 중</span>
+          <article className="help-card-boxed" key={item.id}>
+            {/* Top Status & Badge */}
+            <div className="card-top-row">
+              <span className="urgency-badge">
+                <span className="urgency-dot" />
+                도움이 필요합니다
+              </span>
+              <span className="reward-chip-boxed">
+                <Zap size={13} />
+                +{item.reward} Credit
+              </span>
             </div>
-            <div className="help-actions">
+
+            {/* Question Title */}
+            <h3 className="help-question-title">{item.question}</h3>
+
+            {/* Metrics Chips Row */}
+            <div className="help-metrics-strip">
+              <div className="metric-chip">
+                <span className="metric-chip-lbl">AI Confidence</span>
+                <span className="metric-chip-val" style={{ color: item.aiConfidence < 0.5 ? 'var(--cline-rose)' : 'var(--cline-amber)' }}>
+                  {Math.round(item.aiConfidence * 100)}%
+                </span>
+              </div>
+
+              <div className="metric-chip">
+                <span className="metric-chip-lbl">Human Answers</span>
+                <span className="metric-chip-val">{item.humanAnswers}명</span>
+              </div>
+
+              <div className="metric-chip">
+                <span className="metric-chip-lbl">참여 인원</span>
+                <span className="metric-chip-val">
+                  <Users size={12} style={{ display: 'inline', marginRight: 3 }} />
+                  {item.participants}명
+                </span>
+              </div>
+            </div>
+
+            {/* Action Buttons Row */}
+            <div className="help-actions-row">
               <button
                 type="button"
-                className="primary-button small"
+                className={`card-btn-primary ${answered.has(item.id) ? 'done' : ''}`}
                 disabled={answered.has(item.id)}
                 onClick={() => answer(item.id)}
               >
+                <MessageSquarePlus size={14} />
                 {answered.has(item.id) ? "참여 완료 ✓" : "내가 아는 내용 추가"}
               </button>
-              <button type="button" className="secondary-button small" onClick={() => verify(item.id)}>
+
+              <button
+                type="button"
+                className="card-btn-secondary"
+                onClick={() => verify(item.id)}
+              >
+                <ShieldCheck size={14} />
                 검증하기
               </button>
-              <button type="button" className="secondary-button small" onClick={() => delegateToAI(item.id)}>
+
+              <button
+                type="button"
+                className="card-btn-ghost"
+                onClick={() => delegateToAI(item.id)}
+              >
+                <Bot size={14} />
                 AI에게 맡기기
               </button>
             </div>
