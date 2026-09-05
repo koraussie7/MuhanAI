@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="900" height="600">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0a"/>
+      <stop offset="100%" style="stop-color:#1a1a2e"/>
+    </linearGradient>
+    <linearGradient id="cloudGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#38bdf8"/>
+      <stop offset="100%" style="stop-color:#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="harvestGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981"/>
+      <stop offset="100%" style="stop-color:#059669"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="600" fill="url(#bg)" rx="12"/>
+  <text x="450" y="35" text-anchor="middle" fill="#e6ff87" font-family="Inter, system-ui, sans-serif" font-size="22" font-weight="bold">MuhanAI Architecture</text>
+  <text x="450" y="55" text-anchor="middle" fill="#888" font-family="Inter, system-ui, sans-serif" font-size="11">Unified AI Mesh Platform</text>
+  <g transform="translate(250, 80)">
+    <rect width="400" height="55" rx="8" fill="url(#cloudGrad)" opacity="0.15" stroke="url(#cloudGrad)" stroke-width="1.5"/>
+    <text x="200" y="25" text-anchor="middle" fill="#38bdf8" font-family="monospace" font-size="13" font-weight="bold">Cloudflare Worker</text>
+    <text x="200" y="42" text-anchor="middle" fill="#7dd3fc" font-family="monospace" font-size="10">Static Assets + API Proxy + KV</text>
+  </g>
+  <g transform="translate(120, 170)">
+    <rect width="660" height="180" rx="10" fill="#111" stroke="#e6ff87" stroke-width="2"/>
+    <text x="330" y="25" text-anchor="middle" fill="#e6ff87" font-family="monospace" font-size="14" font-weight="bold">AgentMesh OS (Monorepo)</text>
+    <g transform="translate(20, 40)">
+      <rect width="95" height="55" rx="5" fill="#1a1a1a" stroke="#e6ff87" stroke-width="1" opacity="0.8"/>
+      <text x="47" y="22" text-anchor="middle" fill="#e6ff87" font-family="monospace" font-size="9">agent-router</text>
+      <text x="47" y="42" text-anchor="middle" fill="#888" font-family="monospace" font-size="8">model routing</text>
+    </g>
+    <g transform="translate(125, 40)">
+      <rect width="95" height="55" rx="5" fill="#1a1a1a" stroke="#a855f7" stroke-width="1" opacity="0.8"/>
+      <text x="47" y="22" text-anchor="middle" fill="#a855f7" font-family="monospace" font-size="9">agent-mesh</text>
+      <text x="47" y="42" text-anchor="middle" fill="#888" font-family="monospace" font-size="8">P2P discovery</text>
+    </g>
+    <g transform="translate(230, 40)">
+      <rect width="95" height="55" rx="5" fill="#1a1a1a" stroke="#38bdf8" stroke-width="1" opacity="0.8"/>
+      <text x="47" y="22" text-anchor="middle" fill="#38bdf8" font-family="monospace" font-size="9">agent-cast</text>
+      <text x="47" y="42" text-anchor="middle" fill="#888" font-family="monospace" font-size="8">consensus</text>
+    </g>
+    <g transform="translate(335, 40)">
+      <rect width="95" height="55" rx="5" fill="#1a1a1a" stroke="#10b981" stroke-width="1" opacity="0.8"/>
+      <text x="47" y="22" text-anchor="middle" fill="#10b981" font-family="monospace" font-size="9">personal-mcp</text>
+      <text x="47" y="42" text-anchor="middle" fill="#888" font-family="monospace" font-size="8">user MCP</text>
+    </g>
+    <g transform="translate(440, 40)">
+      <rect width="95" height="55" rx="5" fill="#1a1a1a" stroke="#f59e0b" stroke-width="1" opacity="0.8"/>
+      <text x="47" y="22" text-anchor="middle" fill="#f59e0b" font-family="monospace" font-size="9">knowledge-base</text>
+      <text x="47" y="42" text-anchor="middle" fill="#888" font-family="monospace" font-size="8">RAG + pgvector</text>
+    </g>
+    <g transform="translate(545, 40)">
+      <rect width="90" height="55" rx="5" fill="#1a1a1a" stroke="#ec4899" stroke-width="1" opacity="0.8"/>
+      <text x="45" y="22" text-anchor="middle" fill="#ec4899" font-family="monospace" font-size="8">category-engine</text>
+      <text x="45" y="42" text-anchor="middle" fill="#888" font-family="monospace" font-size="8">taxonomy</text>
+    </g>
+    <g transform="translate(150, 105)">
+      <rect width="95" height="55" rx="5" fill="#1a1a1a" stroke="#e6ff87" stroke-width="1" opacity="0.8"/>
+      <text x="47" y="22" text-anchor="middle" fill="#e6ff87" font-family="monospace" font-size="9">llm-router</text>
+      <text x="47" y="42" text-anchor="middle" fill="#888" font-family="monospace" font-size="8">LLM fallback</text>
+    </g>
+    <g transform="translate(270, 105)">
+      <rect width="95" height="55" rx="5" fill="#1a1a1a" stroke="#38bdf8" stroke-width="1" opacity="0.8"/>
+      <text x="47" y="22" text-anchor="middle" fill="#38bdf8" font-family="monospace" font-size="9">db (Prisma)</text>
+      <text x="47" y="42" text-anchor="middle" fill="#888" font-family="monospace" font-size="8">PostgreSQL</text>
+    </g>
+    <g transform="translate(390, 105)">
+      <rect width="95" height="55" rx="5" fill="#1a1a1a" stroke="#a855f7" stroke-width="1" opacity="0.8"/>
+      <text x="47" y="22" text-anchor="middle" fill="#a855f7" font-family="monospace" font-size="9">shared</text>
+      <text x="47" y="42" text-anchor="middle" fill="#888" font-family="monospace" font-size="8">utilities</text>
+    </g>
+  </g>
+  <line x1="450" y1="350" x2="450" y2="380" stroke="#e6ff87" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
+  <g transform="translate(80, 385)">
+    <rect width="740" height="190" rx="10" fill="#0d0d0d" stroke="#10b981" stroke-width="1.5" opacity="0.9"/>
+    <text x="370" y="22" text-anchor="middle" fill="#10b981" font-family="monospace" font-size="13" font-weight="bold">Harvest UI - 14 Open-Source Repositories Adapted</text>
+    <g transform="translate(20, 35)">
+      <rect width="220" height="55" rx="6" fill="#1a2310" stroke="#e6ff87" stroke-width="1"/>
+      <text x="110" y="18" text-anchor="middle" fill="#e6ff87" font-family="monospace" font-size="10" font-weight="bold">Group A: Network / P2P</text>
+      <text x="110" y="35" text-anchor="middle" fill="#888" font-family="monospace" font-size="8">ISK - peerd - nekoni - LLMesh</text>
+      <text x="110" y="48" text-anchor="middle" fill="#666" font-family="monospace" font-size="7">Identity - PeerCanvas - Node - Topology</text>
+    </g>
+    <g transform="translate(250, 35)">
+      <rect width="240" height="55" rx="6" fill="#1a2310" stroke="#38bdf8" stroke-width="1"/>
+      <text x="120" y="18" text-anchor="middle" fill="#38bdf8" font-family="monospace" font-size="10" font-weight="bold">Group B: Intelligence / MCP</text>
+      <text x="120" y="35" text-anchor="middle" fill="#888" font-family="monospace" font-size="8">InfoMesh - Society - miroclaw - NeuroMesh</text>
+      <text x="120" y="48" text-anchor="middle" fill="#666" font-family="monospace" font-size="7">Search - KnowledgeGraph - ModelHub</text>
+    </g>
+    <g transform="translate(500, 35)">
+      <rect width="210" height="55" rx="6" fill="#1a2310" stroke="#a855f7" stroke-width="1"/>
+      <text x="105" y="18" text-anchor="middle" fill="#a855f7" font-family="monospace" font-size="10" font-weight="bold">Group C: Economy / Resources</text>
+      <text x="105" y="35" text-anchor="middle" fill="#888" font-family="monospace" font-size="8">p2ptokens - pinkybrain - agentfm</text>
+      <text x="105" y="48" text-anchor="middle" fill="#666" font-family="monospace" font-size="7">mycellm - tkngate - dac</text>
+    </g>
+    <g transform="translate(40, 100)">
+      <rect width="650" height="75" rx="6" fill="#111" stroke="#333" stroke-width="1"/>
+      <text x="325" y="16" text-anchor="middle" fill="#888" font-family="monospace" font-size="10">Visual Engines (Canvas / SVG Real-time)</text>
+      <g transform="translate(18, 26)"><rect width="80" height="28" rx="4" fill="#e6ff87" opacity="0.12" stroke="#e6ff87" stroke-width="0.7"/><text x="40" y="19" text-anchor="middle" fill="#e6ff87" font-family="monospace" font-size="8">SwarmRadar</text></g>
+      <g transform="translate(106, 26)"><rect width="70" height="28" rx="4" fill="#a855f7" opacity="0.12" stroke="#a855f7" stroke-width="0.7"/><text x="35" y="19" text-anchor="middle" fill="#a855f7" font-family="monospace" font-size="8">GpuRack</text></g>
+      <g transform="translate(184, 26)"><rect width="85" height="28" rx="4" fill="#38bdf8" opacity="0.12" stroke="#38bdf8" stroke-width="0.7"/><text x="42" y="19" text-anchor="middle" fill="#38bdf8" font-family="monospace" font-size="8">ConsensusDial</text></g>
+      <g transform="translate(277, 26)"><rect width="90" height="28" rx="4" fill="#10b981" opacity="0.12" stroke="#10b981" stroke-width="0.7"/><text x="45" y="19" text-anchor="middle" fill="#10b981" font-family="monospace" font-size="8">KnowledgeGraph</text></g>
+      <g transform="translate(375, 26)"><rect width="80" height="28" rx="4" fill="#f59e0b" opacity="0.12" stroke="#f59e0b" stroke-width="0.7"/><text x="40" y="19" text-anchor="middle" fill="#f59e0b" font-family="monospace" font-size="8">LiveBlock</text></g>
+      <g transform="translate(463, 26)"><rect width="75" height="28" rx="4" fill="#ec4899" opacity="0.12" stroke="#ec4899" stroke-width="0.7"/><text x="37" y="19" text-anchor="middle" fill="#ec4899" font-family="monospace" font-size="8">Latency</text></g>
+      <g transform="translate(546, 26)"><rect width="80" height="28" rx="4" fill="#d97706" opacity="0.12" stroke="#d97706" stroke-width="0.7"/><text x="40" y="19" text-anchor="middle" fill="#d97706" font-family="monospace" font-size="8">P2PConn</text></g>
+    </g>
+  </g>
+</svg>

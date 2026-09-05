@@ -1,6 +1,6 @@
 # MuhanAI
 
-**[English](README.md)**
+**[English](README.md)** | **[한국어](README_ko.md)**
 
 MuhanAI 是一个**统一 AI 网格平台**，将去中心化 에이전트、个人 MCP 工具、知识图谱、计算共享和通证经济整合为一个一致的 Web 体验。
 
@@ -15,6 +15,8 @@ MuhanAI 是一个**统一 AI 网格平台**，将去中心化 에이전트、个
 - **语言**: TypeScript 5.x
 
 ## 架构
+
+![Architecture Diagram](docs/images/architecture.svg)
 
 ```
 muhanai.com

@@ -1,6 +1,6 @@
 # MuhanAI
 
-**[한국어 문서](README_zh-CN.md)**
+**[한국어](README_ko.md)** | **[中文](README_zh-CN.md)**
 
 MuhanAI is a **unified AI mesh platform** that combines decentralized agents, personal MCP tools, knowledge graphs, compute sharing, and a token economy into one coherent web experience.
 
@@ -15,6 +15,8 @@ MuhanAI is a **unified AI mesh platform** that combines decentralized agents, pe
 - **Language**: TypeScript 5.x
 
 ## Architecture
+
+![Architecture Diagram](docs/images/architecture.svg)
 
 ```
 muhanai.com
