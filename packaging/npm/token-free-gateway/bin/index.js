@@ -13,11 +13,11 @@ const path = require("node:path");
 function platformPackageName() {
 	const platform = process.platform;
 	const arch = process.arch;
-	if (platform === "darwin" && arch === "arm64") return "@andeya/token-free-gateway-darwin-arm64";
-	if (platform === "darwin" && arch === "x64") return "@andeya/token-free-gateway-darwin-x64";
-	if (platform === "linux" && arch === "x64") return "@andeya/token-free-gateway-linux-x64";
-	if (platform === "linux" && arch === "arm64") return "@andeya/token-free-gateway-linux-arm64";
-	if (platform === "win32" && arch === "x64") return "@andeya/token-free-gateway-win32-x64";
+	if (platform === "darwin" && arch === "arm64") return "@muhanai/token-free-gateway-darwin-arm64";
+	if (platform === "darwin" && arch === "x64") return "@muhanai/token-free-gateway-darwin-x64";
+	if (platform === "linux" && arch === "x64") return "@muhanai/token-free-gateway-linux-x64";
+	if (platform === "linux" && arch === "arm64") return "@muhanai/token-free-gateway-linux-arm64";
+	if (platform === "win32" && arch === "x64") return "@muhanai/token-free-gateway-win32-x64";
 	return null;
 }
 
