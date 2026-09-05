@@ -60,6 +60,13 @@ import { ReputationMatrix } from './components/harvest/C/ReputationMatrix';
 import { SecuritySettings } from './components/harvest/C/SecuritySettings';
 import { TrustRing, WebOfTrustBadge } from './components/harvest/C/TrustRing';
 import { WorkerPool } from './components/harvest/C/WorkerPool';
+// Visual engines
+import { SwarmRadar } from './components/visuals/SwarmRadar';
+import { GpuRackVisualizer } from './components/visuals/GpuRackVisualizer';
+import { LiveBlockStream } from './components/visuals/LiveBlockStream';
+import { ConsensusDial } from './components/visuals/ConsensusDial';
+import { LatencyVisualizer } from './components/visuals/LatencyVisualizer';
+import { InteractiveKnowledgeGraph } from './components/visuals/InteractiveKnowledgeGraph';
 
 const SECTIONS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -527,6 +534,7 @@ export default function App() {
           {/* Agent Mesh */}
           {section === 'agent-mesh' && (
             <div className="space-y-4">
+              <SwarmRadar />
               <div className="flex gap-2 mb-2">
                 <button className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs">Identity Cards</button>
                 <button className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs">Mesh Topology</button>
@@ -538,7 +546,12 @@ export default function App() {
           )}
 
           {/* Agent Cast */}
-          {section === 'agent-cast' && <ConsensusView />}
+          {section === 'agent-cast' && (
+            <>
+              <ConsensusDial />
+              <ConsensusView />
+            </>
+          )}
 
           {/* Agents */}
           {section === 'agents' && (
@@ -576,7 +589,7 @@ export default function App() {
           {section === 'knowledge' && <KnowledgePool />}
 
           {/* Knowledge Graph */}
-          {section === 'knowledge-graph' && <KnowledgeGraphCanvas />}
+          {section === 'knowledge-graph' && <InteractiveKnowledgeGraph />}
 
           {/* Search */}
           {section === 'search' && <FederatedSearch />}
@@ -590,7 +603,12 @@ export default function App() {
           )}
 
           {/* LLM Mesh */}
-          {section === 'llm-mesh' && <ModelMeshGrid />}
+          {section === 'llm-mesh' && (
+            <div className="space-y-4">
+              <LatencyVisualizer />
+              <ModelMeshGrid />
+            </div>
+          )}
 
           {/* MCP / Skills */}
           {section === 'mcp-skills' && <McpSkills />}
@@ -598,6 +616,7 @@ export default function App() {
           {/* Compute Mesh */}
           {section === 'compute-mesh' && (
             <div className="space-y-4">
+              <GpuRackVisualizer />
               <GpuPool nodes={CLUSTER_NODES} />
               <InferencePool nodes={CLUSTER_NODES} />
             </div>
@@ -609,6 +628,7 @@ export default function App() {
           {/* Token Bank */}
           {section === 'token-bank' && (
             <div className="space-y-4">
+              <LiveBlockStream />
               <LedgerTable table={LEDGER_ROWS} entries={LEDGER_ENTRIES} />
               <RewardChip reason="Answer" credits={120} />
             </div>

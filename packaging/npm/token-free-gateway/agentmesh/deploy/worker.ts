@@ -8,8 +8,6 @@ interface AssetBinding {
   fetch(request: Request): Promise<Response>;
 }
 
-import { handleFeedApi } from "./feed-api";
-
 interface Env {
   ASSETS: AssetBinding;
   API_ORIGIN: string;
@@ -21,9 +19,6 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname.startsWith("/api/")) {
-      const feedResponse = await handleFeedApi(request, url.pathname, env.FEED_KV);
-      if (feedResponse) return feedResponse;
-
       if (url.pathname === "/api/cast" && env.API_ORIGIN) {
         const origin = new URL(env.API_ORIGIN);
         origin.pathname = "/api/cast";

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./components/visuals/visuals.css";
 
 @theme {
   --font-sans: "Inter", "Space Grotesk", system-ui, sans-serif;

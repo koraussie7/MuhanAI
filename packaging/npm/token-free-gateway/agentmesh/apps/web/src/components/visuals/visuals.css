@@ -1,0 +1,710 @@
+/* =====================================================================
+   14 Open-Source Visuals CSS (SwarmRadar, GpuRack, LiveBlock, ConsensusDial, LatencyViz, IKG)
+   ===================================================================== */
+
+/* 1. SwarmRadar (ISEK + LLMesh) */
+.visual-radar-card {
+  background: #0f130b;
+  border: 1px solid #283818;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 20px rgba(230, 255, 135, 0.04);
+}
+.visual-radar-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #1e2813;
+}
+.visual-radar-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #f4f5ed;
+}
+.radar-coords {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: #8c9e78;
+}
+.radar-blip-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e6ff87;
+  box-shadow: 0 0 8px #e6ff87;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+.visual-radar-body {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+.radar-canvas-wrap {
+  flex: 0 0 320px;
+  display: flex;
+  justify-content: center;
+}
+.radar-svg {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  overflow: visible;
+}
+.radar-blip-selected {
+  animation: pulse 1.2s infinite ease-in-out;
+}
+.radar-inspect-box {
+  flex: 1;
+  min-width: 240px;
+  background: #141a0e;
+  border: 1px solid #2b3a1a;
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.radar-inspect-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  color: #f4f5ed;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #233015;
+}
+.radar-kv {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-family: 'DM Mono', monospace;
+  color: #8c9e78;
+}
+.radar-kv code {
+  color: #e6ff87;
+}
+
+/* 2. GpuRackVisualizer (mycellm + distributed-ai-cluster) */
+.gpu-rack-container {
+  background: #0a0c0e;
+  border: 1px solid #1b2631;
+  border-radius: 8px;
+  padding: 18px;
+  margin-bottom: 20px;
+}
+.gpu-rack-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #16202a;
+}
+.gpu-rack-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #f4f5ed;
+}
+.gpu-rack-stats {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: #718096;
+  display: flex;
+  gap: 16px;
+}
+.gpu-rack-stats strong {
+  color: #38bdf8;
+}
+.rack-led-green {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 8px #38bdf8;
+}
+.gpu-rack-chassis {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+.gpu-blade-unit {
+  display: flex;
+  background: #10151c;
+  border: 1px solid #222d3d;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.blade-ear {
+  flex: 0 0 32px;
+  background: #171f2a;
+  border-right: 1px solid #283649;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+.rack-screw {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #475569;
+}
+.blade-slot {
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  color: #94a3b8;
+}
+.blade-faceplate {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 16px;
+  flex-wrap: wrap;
+}
+.blade-info-col {
+  flex: 1;
+  min-width: 180px;
+}
+.blade-model-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.blade-activity-led {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e6ff87;
+  box-shadow: 0 0 6px #e6ff87;
+}
+.blade-model-name {
+  font-size: 13px;
+  color: #f1f5f9;
+}
+.blade-temp-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  background: #1e293b;
+  color: #38bdf8;
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+.blade-job-name {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 3px;
+  font-family: 'DM Mono', monospace;
+}
+.blade-meter-col, .blade-load-col {
+  flex: 1;
+  min-width: 140px;
+}
+.blade-meter-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+.blade-bar-track {
+  height: 6px;
+  background: #1e293b;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.blade-bar-fill {
+  height: 100%;
+  transition: width 0.4s ease;
+}
+.blade-bar-fill.load {
+  background: linear-gradient(90deg, #38bdf8, #e6ff87);
+}
+.blade-fan-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: #64748b;
+}
+
+/* 3. LiveBlockStream (p2ptokens + PinkyBrain) */
+.block-stream-container {
+  background: #11120f;
+  border: 1px solid #2e3027;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.block-stream-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #24261f;
+}
+.block-stream-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #f4f5ed;
+}
+.block-pulse-cube {
+  width: 8px;
+  height: 8px;
+  background: #e6ff87;
+  box-shadow: 0 0 8px #e6ff87;
+  animation: rotateCube 3s infinite linear;
+}
+@keyframes rotateCube {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.block-stream-stat {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: #8c9e78;
+  display: flex;
+  gap: 16px;
+}
+.block-stream-stat strong {
+  color: #e6ff87;
+}
+.block-cards-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-top: 14px;
+  padding-bottom: 4px;
+}
+.ledger-block-box {
+  flex: 0 0 200px;
+  background: #171814;
+  border: 1px solid #32352b;
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.ledger-block-box.new-block {
+  border-color: #e6ff87;
+  box-shadow: 0 0 12px rgba(230, 255, 135, 0.2);
+  animation: slideInBlock 0.4s ease;
+}
+@keyframes slideInBlock {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.block-top-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+}
+.block-num {
+  font-weight: 700;
+  color: #e6ff87;
+}
+.block-time {
+  color: #71717a;
+}
+.block-hash {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: #a1a1aa;
+}
+.block-action-chip {
+  align-self: flex-start;
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  padding: 2px 6px;
+  border: 1px solid;
+  border-radius: 3px;
+  margin: 2px 0;
+}
+.block-contributor {
+  font-size: 11px;
+  color: #71717a;
+  display: flex;
+  gap: 4px;
+}
+.block-contributor strong {
+  color: #d4d4d8;
+}
+.block-bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  padding-top: 6px;
+  border-top: 1px solid #23251e;
+  margin-top: 4px;
+}
+.block-zero-gas {
+  color: #71717a;
+  font-size: 10px;
+}
+.block-reward {
+  color: #e6ff87;
+  font-weight: 700;
+  font-family: 'DM Mono', monospace;
+}
+
+/* 4. ConsensusDial (miroclaw + Society Protocol) */
+.consensus-dial-card {
+  background: #11120f;
+  border: 1px solid #2e3027;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.consensus-dial-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #24261f;
+}
+.consensus-dial-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #f4f5ed;
+}
+.consensus-ping-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #a855f7;
+  box-shadow: 0 0 8px #a855f7;
+}
+.consensus-badge-status {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: #a855f7;
+  font-weight: 700;
+}
+.consensus-dial-body {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.consensus-gauge-wrap {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.consensus-svg {
+  transform: rotate(-90deg);
+}
+.consensus-bg-circle {
+  fill: none;
+  stroke: #1e201a;
+}
+.consensus-progress-circle {
+  fill: none;
+  stroke: #e6ff87;
+  transition: stroke-dashoffset 0.8s ease;
+}
+.consensus-gauge-content {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.consensus-pct {
+  font-size: 32px;
+  font-weight: 800;
+  color: #f4f5ed;
+  font-family: 'DM Mono', monospace;
+}
+.consensus-label {
+  font-size: 11px;
+  color: #8c9e78;
+}
+.consensus-votes-column {
+  flex: 1;
+  min-width: 260px;
+}
+.votes-header-label {
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  color: #71717a;
+  text-transform: uppercase;
+}
+.votes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+.vote-row-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #171814;
+  border: 1px solid #2b2d24;
+  border-radius: 5px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+.vote-row-item:hover, .vote-row-item.selected {
+  border-color: #e6ff87;
+}
+.vote-agent-icon {
+  font-size: 20px;
+}
+.vote-agent-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.vote-agent-name {
+  font-size: 13px;
+  color: #f4f5ed;
+}
+.vote-agent-reason {
+  font-size: 11px;
+  color: #8c9e78;
+}
+.vote-status-col {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.vote-badge {
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+.vote-badge.agree {
+  background: rgba(230, 255, 135, 0.15);
+  color: #e6ff87;
+}
+.vote-badge.modify {
+  background: rgba(255, 184, 107, 0.15);
+  color: #ffb86b;
+}
+.vote-conf {
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  color: #a1a1aa;
+}
+
+/* 5. LatencyVisualizer (tkngate + peerd) */
+.latency-viz-card {
+  background: #11120f;
+  border: 1px solid #2e3027;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.latency-viz-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #24261f;
+}
+.latency-viz-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #f4f5ed;
+}
+.latency-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 8px #38bdf8;
+}
+.latency-fastest-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: #71717a;
+}
+.latency-routes-table {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+.latency-route-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #161713;
+  border: 1px solid #282a21;
+  border-radius: 4px;
+  padding: 8px 12px;
+}
+.latency-provider-info {
+  flex: 0 0 240px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.latency-p-name {
+  font-size: 13px;
+  color: #f4f5ed;
+}
+.failover-chip {
+  font-size: 9px;
+  font-family: 'DM Mono', monospace;
+  background: #3f1d1d;
+  color: #ff6b6b;
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+.latency-route-desc {
+  font-size: 11px;
+  color: #71717a;
+  display: block;
+}
+.latency-bar-container {
+  flex: 1;
+  height: 8px;
+  background: #20221a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.latency-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+.latency-num-col {
+  flex: 0 0 90px;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.cost-tier-tag {
+  font-size: 9px;
+  color: #71717a;
+  font-family: 'DM Mono', monospace;
+}
+
+/* 6. InteractiveKnowledgeGraph (NeuroMesh + Society Protocol) */
+.ikg-container {
+  background: #090a0f;
+  border: 1px solid #1c2230;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.ikg-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #161a25;
+}
+.ikg-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #f4f5ed;
+}
+.ikg-filters {
+  display: flex;
+  gap: 4px;
+}
+.ikg-body {
+  display: flex;
+  align-items: stretch;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+.ikg-canvas-wrap {
+  flex: 1;
+  min-width: 320px;
+  background: #06070a;
+  border: 1px solid #151822;
+  border-radius: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.ikg-svg {
+  width: 100%;
+  height: auto;
+  max-height: 380px;
+}
+.ikg-edge-active {
+  stroke-dashoffset: 0;
+  animation: edgeDash 1.5s infinite linear;
+}
+@keyframes edgeDash {
+  to { stroke-dashoffset: -16; }
+}
+.ikg-node-pulse {
+  animation: pulse 1.8s infinite ease-in-out;
+}
+.ikg-inspector {
+  flex: 0 0 240px;
+  background: #0c0f16;
+  border: 1px solid #1b212e;
+  border-radius: 6px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ikg-inspector-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #f4f5ed;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #1b212e;
+}
+.ikg-desc-box {
+  font-size: 12px;
+  color: #8c93a3;
+  line-height: 1.4;
+  background: #07090e;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #161a24;
+}
