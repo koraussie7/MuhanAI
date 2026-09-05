@@ -1,4 +1,4 @@
-import type React from 'react';
+import React, { useState } from 'react';
 import { NetworkPulse } from './NetworkPulse';
 import { HelpNeeded } from './HelpNeeded';
 import { TrendingQuestions } from './TrendingQuestions';
@@ -8,13 +8,28 @@ import { UnsolvedProblems } from './UnsolvedProblems';
 import { AiVsHuman } from './AiVsHuman';
 import { TeachAI } from './TeachAI';
 import { AskNetwork } from './AskNetwork';
-import { Sparkles, Radio, Users, CheckCircle2, Cpu, Zap } from 'lucide-react';
+import { P2PConnectionGraph } from './visuals/P2PConnectionGraph';
+import {
+  Sparkles,
+  Radio,
+  Users,
+  CheckCircle2,
+  Cpu,
+  Zap,
+  Network,
+  ListTodo,
+  ShieldCheck,
+  Flame,
+  ArrowUpRight,
+} from 'lucide-react';
 
 interface DashboardProps {
   onNavigate?: (path: string) => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
+  const [activeTab, setActiveTab] = useState<'tasks' | 'verify' | 'knowledge'>('tasks');
+
   const navigate = (path: string) => {
     if (onNavigate) {
       onNavigate(path);
@@ -25,67 +40,98 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   };
 
   return (
-    <main className="dashboard">
-      {/* Cline-Style Developer Banner */}
-      <div className="dashboard-hero-card" style={{ marginBottom: 20 }}>
+    <main className="dashboard" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* 1. Hero Summary & Quick Action Strip */}
+      <div className="dashboard-hero-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-              <span className="brand-badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: 'var(--cline-green)', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
+              <span
+                className="brand-badge"
+                style={{
+                  background: 'rgba(16, 185, 129, 0.15)',
+                  color: 'var(--cline-green)',
+                  borderColor: 'rgba(16, 185, 129, 0.3)',
+                }}
+              >
                 ● P2P MESH OPERATIONAL
               </span>
-              <span className="brand-badge">TOKEN-FREE GATEWAY</span>
+              <span className="brand-badge">TOKEN-FREE GATEWAY ACTIVE</span>
             </div>
             <h1 className="dashboard-hero-title">
               MuhanAI Autonomous Agent Mesh
             </h1>
             <p className="dashboard-hero-desc">
-              Cline 스타일의 탈중앙화 AI 에이전트 네트워크입니다. 로컬 및 분산 모델이 합의를 통해 검증된 지식을 생성하고 협력합니다.
+              Cline 스타일의 탈중앙화 AI 메쉬 네트워크입니다. 로컬 및 분산 모델이 WebRTC & libp2p P2P 연결을 통해 자율적으로 합의하고 협력합니다.
             </p>
           </div>
 
-          <button
-            type="button"
-            className="top-action-btn"
-            onClick={() => navigate('/agent-cast')}
-          >
-            <Radio size={14} />
-            Launch Agent Cast
-          </button>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              type="button"
+              className="top-action-btn"
+              onClick={() => navigate('/agent-cast')}
+            >
+              <Radio size={14} />
+              Launch Agent Cast
+            </button>
+            <button
+              type="button"
+              className="p2p-ping-btn"
+              onClick={() => navigate('/network')}
+            >
+              <Network size={14} />
+              Peer Nodes
+            </button>
+          </div>
         </div>
 
-        {/* Quick Actions Grid */}
-        <div className="quick-action-strip">
-          <div className="quick-action-tile" onClick={() => navigate('/agent-cast')}>
-            <Radio size={16} color="var(--cline-sky)" />
-            <span>Agent Cast</span>
+        {/* 4 Key Developer Telemetry Tiles */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+            gap: 12,
+            marginTop: 20,
+          }}
+        >
+          <div className="telemetry-stat-card">
+            <span className="telemetry-stat-lbl">Active P2P Nodes</span>
+            <span className="telemetry-stat-val" style={{ color: 'var(--cline-sky)' }}>
+              12,482 Peers
+            </span>
           </div>
-          <div className="quick-action-tile" onClick={() => navigate('/marketplace/human-experts')}>
-            <Users size={16} color="var(--cline-indigo)" />
-            <span>Human Experts</span>
+          <div className="telemetry-stat-card">
+            <span className="telemetry-stat-lbl">Consensus Quorum</span>
+            <span className="telemetry-stat-val" style={{ color: 'var(--cline-green)' }}>
+              98.5% Agreement
+            </span>
           </div>
-          <div className="quick-action-tile" onClick={() => navigate('/verification')}>
-            <CheckCircle2 size={16} color="var(--cline-green)" />
-            <span>Verification</span>
+          <div className="telemetry-stat-card">
+            <span className="telemetry-stat-lbl">Distributed Compute</span>
+            <span className="telemetry-stat-val">18,400 TFLOPS</span>
           </div>
-          <div className="quick-action-tile" onClick={() => navigate('/models')}>
-            <Sparkles size={16} color="var(--cline-amber)" />
-            <span>LLM Models</span>
-          </div>
-          <div className="quick-action-tile" onClick={() => navigate('/compute-mesh')}>
-            <Cpu size={16} color="var(--cline-rose)" />
-            <span>Compute Mesh</span>
+          <div className="telemetry-stat-card">
+            <span className="telemetry-stat-lbl">Token Cost</span>
+            <span className="telemetry-stat-val" style={{ color: 'var(--cline-amber)' }}>
+              0 MHT (Free Gateway)
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Network Pulse Ribbon */}
-      <div className="network-pulse-header" style={{ marginBottom: 20 }}>
+      {/* 2. INJECTED: Interactive Open-Source P2P Connection Mesh Topology Graph */}
+      <section aria-label="P2P Connection Mesh">
+        <P2PConnectionGraph />
+      </section>
+
+      {/* 3. Live Pulse Ribbon */}
+      <section aria-label="Network Pulse">
         <NetworkPulse />
-      </div>
+      </section>
 
-      {/* Ask Network Quick Prompt */}
-      <div className="ask-network-header" style={{ marginBottom: 24 }}>
+      {/* 4. Quick Ask Network Input */}
+      <section aria-label="Ask Network Prompt">
         <AskNetwork
           onSubmit={(question, targets) => {
             const params = new URLSearchParams();
@@ -94,59 +140,67 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             navigate(`/agent-cast?${params.toString()}`);
           }}
         />
-      </div>
+      </section>
 
-      {/* Main Grid Content */}
-      <div className="dashboard-content">
-        <section className="dashboard-main">
-          <HelpNeeded />
-          <TrendingQuestions maxItems={5} />
-          <VerifyMe />
-          <HumanKnowledgeWanted maxItems={3} />
-          <UnsolvedProblems maxItems={3} />
-          <AiVsHuman maxItems={2} />
-          <TeachAI />
-        </section>
+      {/* 5. Clean Tabbed Workstreams: Tasks / Verification / Knowledge */}
+      <section className="dash-workstream-container" style={{ marginTop: 8 }}>
+        <div className="dash-workstream-tabs">
+          <button
+            type="button"
+            className={`dash-tab-btn ${activeTab === 'tasks' ? 'active' : ''}`}
+            onClick={() => setActiveTab('tasks')}
+          >
+            <ListTodo size={15} />
+            <span>Tasks & Help Needed</span>
+            <span className="dash-tab-count">3</span>
+          </button>
 
-        <aside className="dashboard-sidebar">
-          <div className="sidebar-widget">
-            <h3 style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Zap size={14} color="var(--cline-amber)" />
-              YOUR MESH CREDITS
-            </h3>
-            <div className="user-stats">
-              <div className="user-stat">
-                <span className="stat-value">1,842</span>
-                <span className="stat-label">Answers</span>
-              </div>
-              <div className="user-stat">
-                <span className="stat-value">492</span>
-                <span className="stat-label">Verified</span>
-              </div>
-              <div className="user-stat">
-                <span className="stat-value">128</span>
-                <span className="stat-label">Knowledge</span>
-              </div>
-              <div className="user-stat">
-                <span className="stat-value" style={{ color: 'var(--cline-sky)' }}>98,421</span>
-                <span className="stat-label">MHT Credits</span>
-              </div>
-            </div>
+          <button
+            type="button"
+            className={`dash-tab-btn ${activeTab === 'verify' ? 'active' : ''}`}
+            onClick={() => setActiveTab('verify')}
+          >
+            <ShieldCheck size={15} />
+            <span>Verification & Quorum</span>
+            <span className="dash-tab-count">3</span>
+          </button>
+
+          <button
+            type="button"
+            className={`dash-tab-btn ${activeTab === 'knowledge' ? 'active' : ''}`}
+            onClick={() => setActiveTab('knowledge')}
+          >
+            <Flame size={15} />
+            <span>Trending Intelligence & Teach</span>
+            <span className="dash-tab-count">5</span>
+          </button>
+        </div>
+
+        {/* Tab 1: Help Needed & Unsolved Problems */}
+        {activeTab === 'tasks' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <HelpNeeded />
+            <UnsolvedProblems maxItems={4} />
           </div>
+        )}
 
-          <div className="sidebar-widget">
-            <h3>🔥 TRENDING TOPICS</h3>
-            <div className="trending-topics">
-              {['Cline Agent Swarm', 'P2P Consensus', 'Vietnam Tech Hub', 'Zero-Token Gateway', 'WebGPU Edge Inference'].map((topic, i) => (
-                <div key={topic} className="trending-topic" onClick={() => navigate(`/search?q=${encodeURIComponent(topic)}`)} style={{ cursor: 'pointer' }}>
-                  <span className="topic-rank">#{i + 1}</span>
-                  <span className="topic-name">{topic}</span>
-                </div>
-              ))}
-            </div>
+        {/* Tab 2: Verification Claims & Consensus */}
+        {activeTab === 'verify' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <VerifyMe />
+            <AiVsHuman maxItems={3} />
           </div>
-        </aside>
-      </div>
+        )}
+
+        {/* Tab 3: Trending Questions & Teach AI */}
+        {activeTab === 'knowledge' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <TrendingQuestions maxItems={5} />
+            <HumanKnowledgeWanted maxItems={3} />
+            <TeachAI />
+          </div>
+        )}
+      </section>
     </main>
   );
 };
