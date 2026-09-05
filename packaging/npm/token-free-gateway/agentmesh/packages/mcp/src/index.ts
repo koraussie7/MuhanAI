@@ -1,2 +1,3 @@
-export interface McpTool { name: string; description?: string; inputSchema: Record<string, unknown>; }
-export interface McpExecutor { execute(tool: string, input: Record<string, unknown>): Promise<unknown>; }
+export { InMemoryToolRegistry, createToolRegistry } from "./tool-registry.js";
+export { HttpToolDiscovery, createToolDiscovery } from "./tool-discovery.js";
+export { MuhanAIServer, createMuhanAIServer } from "./mcp-server.js";

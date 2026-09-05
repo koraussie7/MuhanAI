@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>MuhanAI Bridge Options</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 420px;
+        margin: 24px auto;
+        padding: 0 16px;
+        color: #0f172a;
+      }
+      input {
+        width: 100%;
+        padding: 8px;
+        margin: 8px 0 12px;
+      }
+      button {
+        padding: 8px 14px;
+        background: #10b981;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>MuhanAI Bridge</h1>
+    <p>API base for <code>POST /api/ai/import</code>. No AI account credentials are stored here.</p>
+    <label for="api">API base URL</label>
+    <input id="api" type="url" />
+    <button id="save" type="button">Save</button>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "name": "@agentmesh/extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MuhanAI Browser Bridge — Chrome MV3 extension scaffold (no credential storage)",
+  "scripts": {
+    "lint": "node -e \"console.log('scaffold: no bundler yet')\"",
+    "pack": "echo 'Load unpacked from apps/extension in chrome://extensions'"
+  }
+}

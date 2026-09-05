@@ -5,4 +5,6 @@ export interface ContributionEvent {
   quality: number;
   reward: number;
   timestamp: number;
+  quantity?: number;
+  evidenceRef?: string;
 }
