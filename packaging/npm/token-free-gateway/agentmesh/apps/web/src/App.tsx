@@ -1,5 +1,5 @@
-import { ConsensusDial } from "./components/visuals/ConsensusDial.js";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import "./styles/cline-theme.css";
 import { Sidebar } from "./components/Sidebar";
 import { Dashboard } from "./components/Dashboard";
 import { AgentCast } from "./components/AgentCast";
@@ -38,41 +38,46 @@ import {
   WorkflowsPage,
   SettingsPage,
 } from "./components/SpecPages";
+import { Search, Zap, Radio, ChevronRight } from "lucide-react";
 
 const SECTIONS = [
-  { id: "dashboard", path: "/", label: "Dashboard" },
-  { id: "agent-mesh", path: "/agent-mesh", label: "Agent Mesh" },
-  { id: "agent-cast", path: "/agent-cast", label: "Agent Cast" },
-  { id: "agents", path: "/agents", label: "Agents" },
-  { id: "human-agents", path: "/human-agents", label: "Human Agents" },
-  { id: "p2p-network", path: "/p2p-network", label: "P2P Network" },
-  { id: "knowledge", path: "/knowledge", label: "Knowledge" },
-  { id: "knowledge-graph", path: "/knowledge-graph", label: "Knowledge Graph" },
-  { id: "search", path: "/search", label: "Search" },
-  { id: "verification", path: "/verification", label: "Verification" },
-  { id: "llm-mesh", path: "/llm-mesh", label: "LLM Mesh" },
-  { id: "mcp-skills", path: "/mcp-skills", label: "MCP / Skills" },
-  { id: "compute-mesh", path: "/compute-mesh", label: "Compute Mesh" },
-  { id: "models", path: "/models", label: "Models" },
-  { id: "agents-market", path: "/marketplace/agents", label: "Agents Marketplace" },
-  { id: "human-experts", path: "/marketplace/human-experts", label: "Human Experts" },
-  { id: "mcp-market", path: "/marketplace/mcp", label: "MCP Marketplace" },
-  { id: "knowledge-market", path: "/marketplace/knowledge", label: "Knowledge Marketplace" },
-  { id: "compute-market", path: "/marketplace/compute", label: "Compute Marketplace" },
-  { id: "token-bank", path: "/token-bank", label: "Token Bank" },
-  { id: "contributions", path: "/contributions", label: "Contributions" },
-  { id: "reputation", path: "/reputation", label: "Reputation" },
-  { id: "projects", path: "/projects", label: "Projects" },
-  { id: "tasks", path: "/tasks", label: "Tasks" },
-  { id: "workflows", path: "/workflows", label: "Workflows" },
-  { id: "network-monitor", path: "/network-monitor", label: "Network Monitor" },
-  { id: "settings", path: "/settings", label: "Settings" },
+  { id: "dashboard", path: "/", label: "Dashboard", category: "Core" },
+  { id: "agent-mesh", path: "/agent-mesh", label: "Agent Mesh", category: "Core" },
+  { id: "agent-cast", path: "/agent-cast", label: "Agent Cast", category: "Core" },
+  { id: "agents", path: "/agents", label: "Agents", category: "Core" },
+  { id: "human-agents", path: "/human-agents", label: "Human Agents", category: "Core" },
+  { id: "p2p-network", path: "/p2p-network", label: "P2P Network", category: "Network" },
+  { id: "knowledge", path: "/knowledge", label: "Knowledge Lake", category: "Intelligence" },
+  { id: "knowledge-graph", path: "/knowledge-graph", label: "Knowledge Graph", category: "Intelligence" },
+  { id: "search", path: "/search", label: "Mesh Search", category: "Intelligence" },
+  { id: "verification", path: "/verification", label: "Verification", category: "Intelligence" },
+  { id: "llm-mesh", path: "/llm-mesh", label: "LLM Mesh", category: "Resources" },
+  { id: "mcp-skills", path: "/mcp-skills", label: "MCP / Skills", category: "Resources" },
+  { id: "compute-mesh", path: "/compute-mesh", label: "Compute Mesh", category: "Resources" },
+  { id: "models", path: "/models", label: "Models", category: "Resources" },
+  { id: "agents-market", path: "/marketplace/agents", label: "Agents Hub", category: "Marketplace" },
+  { id: "human-experts", path: "/marketplace/human-experts", label: "Human Experts", category: "Marketplace" },
+  { id: "mcp-market", path: "/marketplace/mcp", label: "MCP Marketplace", category: "Marketplace" },
+  { id: "knowledge-market", path: "/marketplace/knowledge", label: "Knowledge Market", category: "Marketplace" },
+  { id: "compute-market", path: "/marketplace/compute", label: "Compute Market", category: "Marketplace" },
+  { id: "token-bank", path: "/token-bank", label: "Token Bank", category: "Economy" },
+  { id: "contributions", path: "/contributions", label: "Contributions", category: "Economy" },
+  { id: "reputation", path: "/reputation", label: "Reputation", category: "Economy" },
+  { id: "projects", path: "/projects", label: "Projects", category: "Workspace" },
+  { id: "tasks", path: "/tasks", label: "Tasks", category: "Workspace" },
+  { id: "workflows", path: "/workflows", label: "Workflows", category: "Workspace" },
+  { id: "network-monitor", path: "/network-monitor", label: "Network Monitor", category: "Network" },
+  { id: "settings", path: "/settings", label: "Settings", category: "System" },
 ];
 
 const IMPLEMENTED_SECTIONS = new Set(SECTIONS.map((s) => s.id));
 
 function sectionIdFromPath(path: string) {
-  return SECTIONS.find((section) => section.path === path)?.id ?? (path.replace(/^\//, "") || "dashboard");
+  const cleanPath = path.split("?")[0] || "/";
+  const found = SECTIONS.find((s) => s.path === cleanPath);
+  if (found) return found.id;
+  const bare = cleanPath.replace(/^\//, "");
+  return bare || "dashboard";
 }
 
 function pathFromSectionId(id: string) {
@@ -80,42 +85,124 @@ function pathFromSectionId(id: string) {
 }
 
 export function App() {
-  const [activeSection, setActiveSection] = useState("dashboard");
+  const [activeSection, setActiveSection] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sectionIdFromPath(window.location.pathname);
+    }
+    return "dashboard";
+  });
+
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem("cline_sidebar_collapsed") === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const toggleSidebar = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("cline_sidebar_collapsed", String(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  const navigate = (path: string) => {
+    const nextSection = sectionIdFromPath(path);
+    setActiveSection(nextSection);
+    window.history.pushState(null, "", path);
+  };
+
+  useEffect(() => {
+    const onPopState = () => {
+      setActiveSection(sectionIdFromPath(window.location.pathname));
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  const currentSectionMeta = SECTIONS.find((s) => s.id === activeSection) ?? {
+    id: activeSection,
+    label: activeSection,
+    category: "MuhanAI",
+    path: `/${activeSection}`,
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+    }
+  };
 
   return (
     <div className="app-shell">
-      <Sidebar activePath={pathFromSectionId(activeSection)} onItemClick={(path) => setActiveSection(sectionIdFromPath(path))} />
+      {/* Sidebar with Cline styling */}
+      <Sidebar
+        activePath={pathFromSectionId(activeSection)}
+        onItemClick={navigate}
+        isCollapsed={isCollapsed}
+        onToggle={toggleSidebar}
+      />
+
+      {/* Main Wrapper */}
       <div className="main-wrapper">
+        {/* Top Header Bar */}
         <header className="top-bar">
           <div className="top-bar-left">
-            <h1 className="page-title">
-              {SECTIONS.find((s) => s.id === activeSection)?.label || "Dashboard"}
-            </h1>
+            <div className="breadcrumb-trail">
+              <span className="breadcrumb-root">MuhanAI</span>
+              <ChevronRight size={13} className="breadcrumb-separator" />
+              <span className="breadcrumb-root">{currentSectionMeta.category}</span>
+              <ChevronRight size={13} className="breadcrumb-separator" />
+              <span className="breadcrumb-current">{currentSectionMeta.label}</span>
+            </div>
           </div>
+
           <div className="top-bar-right">
-            <div className="global-search">
+            {/* Global Search Bar */}
+            <form className="top-search-wrap" onSubmit={handleSearchSubmit}>
+              <Search size={14} className="top-search-icon" />
               <input
                 type="text"
-                placeholder="Ask the Network..."
-                className="search-input"
+                placeholder="Ask network or search..."
+                className="top-search-input"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <button className="search-button">Search</button>
+              <span className="top-search-kbd">⌘K</span>
+            </form>
+
+            {/* Token-Free Gateway Badge */}
+            <div className="gateway-status-badge">
+              <Zap size={13} />
+              <span>Token-Free Gateway Active</span>
             </div>
-            <div className="user-menu">
-              <span className="user-credits">12,480 Credits</span>
-            </div>
+
+            {/* Top Launch Button */}
+            {activeSection !== "agent-cast" && (
+              <button
+                type="button"
+                className="top-action-btn"
+                onClick={() => navigate("/agent-cast")}
+              >
+                <Radio size={14} />
+                Agent Cast
+              </button>
+            )}
           </div>
         </header>
 
+        {/* Content Layout with Telemetry Sidebar */}
         <div className="content-layout">
           <main className="main-content" role="main">
-            {activeSection === "dashboard" && <Dashboard />}
-            {activeSection === "agent-cast" && (
-              <>
-                <ConsensusDial />
-                <AgentCast />
-              </>
-            )}
+            {activeSection === "dashboard" && <Dashboard onNavigate={navigate} />}
+            {activeSection === "agent-cast" && <AgentCast />}
             {activeSection === "help-needed" && <HelpNeeded />}
             {activeSection === "verify" && <VerifyMe />}
             {activeSection === "trending" && <TrendingQuestions />}
@@ -180,14 +267,15 @@ export function App() {
             {activeSection === "settings" && <SettingsPage />}
 
             {!IMPLEMENTED_SECTIONS.has(activeSection) && (
-              <div className="placeholder-page">
+              <div className="placeholder-page" style={{ padding: 40, textAlign: "center" }}>
                 <h2>{SECTIONS.find((section) => section.id === activeSection)?.label ?? activeSection}</h2>
-                <p>이 섹션은 구현 중입니다.</p>
+                <p style={{ color: "var(--cline-text-muted)" }}>이 섹션은 준비 중입니다.</p>
               </div>
             )}
           </main>
 
-          <RightPanel activeSection={activeSection} />
+          {/* Right Telemetry Panel */}
+          <RightPanel />
         </div>
       </div>
     </div>

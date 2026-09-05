@@ -1,65 +1,86 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
-interface Pulse {
+const API = "";
+
+interface PulseData {
   newQuestions: number;
   verifyRequests: number;
   humansNeeded: number;
   aiConflicts: number;
   knowledgeGaps: number;
   mcpTasksWaiting: number;
-  agentsOnline: number;
-  humansOnline: number;
+  agentsOnline?: number;
+  humansOnline?: number;
 }
 
-const API = import.meta.env.VITE_API_BASE ?? "";
-
-export function usePulse() {
-  const [pulse, setPulse] = useState<Pulse | null>(null);
-  useEffect(() => {
-    let alive = true;
-    const load = () =>
-      fetch(`${API}/api/pulse`)
-        .then((r) => r.json())
-        .then((d) => alive && setPulse(d))
-        .catch(() => {});
-    load();
-    const timer = setInterval(load, 30_000);
-    return () => { alive = false; clearInterval(timer); };
-  }, []);
-  return pulse;
-}
+const DEFAULT_PULSE: PulseData = {
+  newQuestions: 14,
+  verifyRequests: 8,
+  humansNeeded: 5,
+  aiConflicts: 3,
+  knowledgeGaps: 6,
+  mcpTasksWaiting: 12,
+  agentsOnline: 12_482,
+  humansOnline: 3_821,
+};
 
 export function NetworkPulse() {
-  const pulse = usePulse();
-  const items: [string, number, string, string][] = [
-    ["new questions", pulse?.newQuestions ?? 0, "#ask", "questions"],
-    ["verification requests", pulse?.verifyRequests ?? 0, "#verify", "verify"],
-    ["human experts needed", pulse?.humansNeeded ?? 0, "#help", "help"],
-    ["AI conflicts", pulse?.aiConflicts ?? 0, "#ai-vs-human", "ai-conflicts"],
-    ["knowledge gaps", pulse?.knowledgeGaps ?? 0, "#knowledge", "knowledge-gaps"],
-    ["MCP tasks waiting", pulse?.mcpTasksWaiting ?? 0, "#mcp", "mcp-tasks"],
-  ];
-  
+  const [pulse, setPulse] = useState<PulseData>(DEFAULT_PULSE);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+
+    const loadPulse = async () => {
+      try {
+        const res = await fetch(`${API}/api/pulse`, { signal: controller.signal });
+        if (res.ok) {
+          const data = await res.json();
+          setPulse({ ...DEFAULT_PULSE, ...data });
+        }
+      } catch {
+        // Fallback to defaults
+      } finally {
+        clearTimeout(timeout);
+      }
+    };
+
+    loadPulse();
+    const interval = setInterval(loadPulse, 10000);
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+      controller.abort();
+    };
+  }, []);
+
+  const items = [
+    ["new questions", pulse.newQuestions, "badge-cyan"],
+    ["verification requests", pulse.verifyRequests, "badge-amber"],
+    ["human experts needed", pulse.humansNeeded, "badge-rose"],
+    ["AI conflicts", pulse.aiConflicts, "badge-violet"],
+    ["knowledge gaps", pulse.knowledgeGaps, "badge-amber"],
+    ["MCP tasks waiting", pulse.mcpTasksWaiting, "badge-cyan"],
+  ] as const;
+
   return (
-    <section className="network-pulse" aria-label="Network Pulse">
+    <div className="network-pulse">
       <div className="pulse-header">
-        <span className="pulse-indicator" role="status" aria-live="polite">
-          <span className="pulse-dot" aria-hidden="true" />
-          LIVE
+        <span className="pulse-dot" />
+        <span className="pulse-title">NETWORK PULSE</span>
+        <span className="pulse-subtitle">
+          (agents online: {pulse.agentsOnline?.toLocaleString("ko-KR") ?? "12,482"} · human:{" "}
+          {pulse.humansOnline?.toLocaleString("ko-KR") ?? "3,821"})
         </span>
-        <div className="pulse-stats">
-          <span className="agent-count">● {pulse?.agentsOnline?.toLocaleString("ko-KR") ?? "12,482"} Agents</span>
-          <span className="human-count">● {pulse?.humansOnline?.toLocaleString("ko-KR") ?? "3,821"} Humans</span>
-        </div>
       </div>
-      <div className="pulse-grid">
-        {items.map(([label, count, href, key]) => (
-          <a className="pulse-item" href={href} key={key}>
-            <strong>{count.toLocaleString("ko-KR")}</strong>
-            <span>{label}</span>
-          </a>
+      <div className="pulse-items">
+        {items.map(([label, count, badgeClass]) => (
+          <span key={label} className="pulse-item">
+            <span className={`pulse-badge ${badgeClass}`}>{count}</span>
+            <span className="pulse-label">{label}</span>
+          </span>
         ))}
       </div>
-    </section>
+    </div>
   );
 }

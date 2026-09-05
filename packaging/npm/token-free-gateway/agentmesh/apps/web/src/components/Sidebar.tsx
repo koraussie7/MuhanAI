@@ -1,163 +1,195 @@
-import type React from 'react';
+import React from 'react';
+import {
+  LayoutDashboard,
+  Radio,
+  Network,
+  Activity,
+  Cpu,
+  Layers,
+  Database,
+  CheckCircle2,
+  Search,
+  Users,
+  Coins,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  Bot,
+  Zap,
+} from 'lucide-react';
 
-// [INJECTED] 전 메뉴 공통 인젝션 코드 - 모든 메뉴 클릭을 가로채서 로깅/이벤트 발행
-const INJECTED_TAG = 'muhan-menu-injected';
-function injectedLog(item: { path: string; label: string }) {
-  // 콘솔 로그 (개발자도구에서 확인)
-  console.log(`%c[INJECTED] 메뉴 클릭: ${item.label} (${item.path})`, 'color:#ff6b00;font-weight:bold');
-  // 커스텀 이벤트 - 외부에서 window.addEventListener('muhan:menu-click', ...) 로 수신 가능
-  window.dispatchEvent(new CustomEvent('muhan:menu-click', { detail: item }));
-  // 예: analytics 연동 자리 (필요시 주석 해제)
-  // (window as any).gtag?.('event', 'menu_click', { path: item.path, label: item.label });
+export interface NavItem {
+  id: string;
+  label: string;
+  path: string;
+  icon: React.ReactNode;
+  badge?: string;
 }
 
-interface SidebarProps {
-  isCollapsed?: boolean;
-  onToggle?: () => void;
-  activePath?: string;
-  onItemClick?: (path: string) => void;
+export interface NavGroup {
+  id: string;
+  title: string;
+  items: NavItem[];
 }
 
-const NAV_SECTIONS = [
+export const NAV_GROUPS: NavGroup[] = [
   {
-    id: 'network',
-    label: 'NETWORK',
+    id: 'core',
+    title: 'Core & Chat',
     items: [
-      { path: '/', label: 'Dashboard', icon: '🏠' },
-      { path: '/agent-mesh', label: 'Agent Mesh', icon: '🕸️' },
-      { path: '/agent-cast', label: 'Agent Cast', icon: '📡' },
-      { path: '/agents', label: 'Agents', icon: '🤖' },
-      { path: '/human-agents', label: 'Human Agents', icon: '👤' },
-      { path: '/p2p-network', label: 'P2P Network', icon: '🌐' },
-    ]
+      { id: 'dashboard', label: 'Dashboard', path: '/', icon: <LayoutDashboard size={18} /> },
+      { id: 'agent-cast', label: 'Agent Cast', path: '/agent-cast', icon: <Radio size={18} />, badge: 'LIVE' },
+      { id: 'agent-mesh', label: 'Agent Mesh', path: '/agent-mesh', icon: <Bot size={18} /> },
+    ],
   },
   {
-    id: 'intelligence',
-    label: 'INTELLIGENCE',
+    id: 'network',
+    title: 'P2P Network',
     items: [
-      { path: '/knowledge', label: 'Knowledge', icon: '📚' },
-      { path: '/knowledge-graph', label: 'Knowledge Graph', icon: '🕸️' },
-      { path: '/search', label: 'Search', icon: '🔍' },
-      { path: '/verification', label: 'Verification', icon: '✅' },
-    ]
+      { id: 'p2p-network', label: 'P2P Nodes', path: '/network', icon: <Network size={18} /> },
+      { id: 'network-monitor', label: 'Telemetry & Pulse', path: '/monitor', icon: <Activity size={18} /> },
+    ],
   },
   {
     id: 'resources',
-    label: 'AI RESOURCES',
+    title: 'Compute & Models',
     items: [
-      { path: '/llm-mesh', label: 'LLM Mesh', icon: '🧠' },
-      { path: '/mcp-skills', label: 'MCP / Skills', icon: '🔌' },
-      { path: '/compute-mesh', label: 'Compute Mesh', icon: '⚡' },
-      { path: '/models', label: 'Models', icon: '📦' },
-    ]
+      { id: 'models', label: 'LLM Models', path: '/models', icon: <Sparkles size={18} />, badge: 'Token-Free' },
+      { id: 'compute-mesh', label: 'Compute Mesh', path: '/compute-mesh', icon: <Cpu size={18} /> },
+      { id: 'mcp-skills', label: 'MCP Tools', path: '/mcp-skills', icon: <Layers size={18} /> },
+    ],
   },
   {
-    id: 'marketplace',
-    label: 'MARKETPLACE',
+    id: 'knowledge',
+    title: 'Knowledge Lake',
     items: [
-      { path: '/marketplace/agents', label: 'Agents', icon: '🤖' },
-      { path: '/marketplace/human-experts', label: 'Human Experts', icon: '👤' },
-      { path: '/marketplace/mcp', label: 'MCP', icon: '🔌' },
-      { path: '/marketplace/knowledge', label: 'Knowledge', icon: '📚' },
-      { path: '/marketplace/compute', label: 'Compute', icon: '⚡' },
-    ]
+      { id: 'knowledge-lake', label: 'Knowledge Graph', path: '/knowledge', icon: <Database size={18} /> },
+      { id: 'verification', label: 'Verification', path: '/verification', icon: <CheckCircle2 size={18} /> },
+      { id: 'search', label: 'Mesh Search', path: '/search', icon: <Search size={18} /> },
+    ],
+  },
+  {
+    id: 'market',
+    title: 'Marketplace',
+    items: [
+      { id: 'agents-market', label: 'Agent Hub', path: '/marketplace/agents', icon: <Bot size={18} /> },
+      { id: 'human-experts', label: 'Human Experts', path: '/marketplace/human-experts', icon: <Users size={18} /> },
+      { id: 'compute-market', label: 'Compute Market', path: '/marketplace/compute', icon: <Cpu size={18} /> },
+    ],
   },
   {
     id: 'economy',
-    label: 'ECONOMY',
+    title: 'Economy',
     items: [
-      { path: '/token-bank', label: 'Token Bank', icon: '💰' },
-      { path: '/contributions', label: 'Contributions', icon: '📊' },
-      { path: '/reputation', label: 'Reputation', icon: '⭐' },
-    ]
-  },
-  {
-    id: 'workspace',
-    label: 'WORKSPACE',
-    items: [
-      { path: '/projects', label: 'Projects', icon: '📁' },
-      { path: '/tasks', label: 'Tasks', icon: '✓' },
-      { path: '/workflows', label: 'Workflows', icon: '🔄' },
-    ]
+      { id: 'token-bank', label: 'Token Bank', path: '/token-bank', icon: <Coins size={18} /> },
+    ],
   },
   {
     id: 'system',
-    label: 'SYSTEM',
+    title: 'Settings',
     items: [
-      { path: '/network-monitor', label: 'Network Monitor', icon: '📈' },
-      { path: '/settings', label: 'Settings', icon: '⚙️' },
-    ]
-  }
+      { id: 'settings', label: 'Security & Keys', path: '/settings', icon: <Settings size={18} /> },
+    ],
+  },
 ];
 
-export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, onToggle, activePath = '/', onItemClick }) => {
-  const renderSection = (section: typeof NAV_SECTIONS[0]) => (
-    <div key={section.id} className="nav-section">
-      <div className="nav-section-title">
-        {section.label}
-        {!isCollapsed && <span className="section-chevron">▼</span>}
-      </div>
-      <nav className="nav-items">
-        {section.items.map((item) => (
-          <button
-            key={item.path}
-            type="button"
-            data-injected={INJECTED_TAG}
-            data-path={item.path}
-            className={`nav-item ${activePath === item.path ? 'active' : ''} ${isCollapsed ? 'collapsed' : ''}`}
-            title={isCollapsed ? item.label : undefined}
-            onClick={() => {
-              // [INJECTED] 전 메뉴 공통 코드 - 모든 메뉴에 동일하게 적용됨
-              injectedLog(item);
-              onItemClick?.(item.path);
-            }}
-          >
-            <span className="nav-icon">{item.icon}</span>
-            {!isCollapsed && <span className="nav-label">{item.label}</span>}
-          </button>
-        ))}
-      </nav>
-    </div>
-  );
+interface SidebarProps {
+  activePath: string;
+  onItemClick: (path: string) => void;
+  isCollapsed?: boolean;
+  onToggle?: () => void;
+}
 
+export const Sidebar: React.FC<SidebarProps> = ({
+  activePath,
+  onItemClick,
+  isCollapsed = false,
+  onToggle,
+}) => {
   return (
     <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+      {/* Brand Header */}
       <div className="sidebar-header">
-        {!isCollapsed && (
-          <div className="logo">
-            <span className="logo-icon">🧠</span>
-            <span className="logo-text">MUHAN AI</span>
+        <div className="brand-container" onClick={() => onItemClick('/')}>
+          <div className="brand-logo-icon">
+            <Bot size={20} />
           </div>
+          {!isCollapsed && (
+            <div className="brand-text-wrap">
+              <div className="brand-title-row">
+                <span className="brand-name">MuhanAI</span>
+                <span className="brand-badge">CLINE</span>
+              </div>
+              <span className="brand-subtitle">Token-Free Mesh</span>
+            </div>
+          )}
+        </div>
+        {onToggle && (
+          <button
+            type="button"
+            className="collapse-toggle-btn"
+            onClick={onToggle}
+            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          </button>
         )}
-        {isCollapsed && (
-          <div className="logo-collapsed">
-            <span className="logo-icon">🧠</span>
-          </div>
-        )}
-        <button
-          type="button"
-          className="collapse-toggle"
-          onClick={onToggle}
-          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          {isCollapsed ? '▶' : '◀'}
-        </button>
       </div>
 
-      <div className="sidebar-nav">
-        {NAV_SECTIONS.map(renderSection)}
+      {/* Navigation Content */}
+      <div className="sidebar-content">
+        {NAV_GROUPS.map((group) => (
+          <div key={group.id} className="sidebar-group">
+            {!isCollapsed && <span className="sidebar-group-title">{group.title}</span>}
+            {group.items.map((item) => {
+              const isActive =
+                activePath === item.path ||
+                (item.path !== '/' && activePath.startsWith(item.path));
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`nav-item-btn ${isActive ? 'active' : ''}`}
+                  onClick={() => onItemClick(item.path)}
+                  title={isCollapsed ? item.label : undefined}
+                >
+                  <span className="nav-item-icon">{item.icon}</span>
+                  {!isCollapsed && (
+                    <>
+                      <span className="nav-item-label">{item.label}</span>
+                      {item.badge && <span className="nav-item-badge">{item.badge}</span>}
+                    </>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        ))}
       </div>
 
+      {/* Footer Profile & Live Mesh Indicator */}
       <div className="sidebar-footer">
-        {!isCollapsed && (
-          <div className="network-status-mini">
-            <span className="status-indicator online"></span>
-            <span className="status-text">1,284 Agents Online</span>
+        <div className="footer-status-pill">
+          <span className="pulse-dot" />
+          {!isCollapsed ? (
+            <span>P2P Mesh: 12,482 Nodes</span>
+          ) : (
+            <span>Live</span>
+          )}
+        </div>
+
+        <div className="footer-user-card" onClick={() => onItemClick('/token-bank')}>
+          <div className="user-avatar">
+            <Zap size={15} />
           </div>
-        )}
-        <div className="user-menu-mini">
-          <div className="user-avatar">B</div>
-          {!isCollapsed && <span className="user-name">Brian</span>}
+          {!isCollapsed && (
+            <div className="user-info">
+              <span className="user-name">Token-Free Active</span>
+              <span className="user-credits">12,480 MHT · $0.00</span>
+            </div>
+          )}
         </div>
       </div>
     </aside>

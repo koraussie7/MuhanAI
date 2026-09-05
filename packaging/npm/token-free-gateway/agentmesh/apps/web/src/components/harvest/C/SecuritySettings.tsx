@@ -11,8 +11,7 @@ export function SecuritySettings() {
   const [relayEncrypt, setRelayEncrypt] = useState(true);
   const [apiVault, setApiVault] = useState(false);
   return (
-    <Page title="Security & Settings" subtitle="Zero-trust gateway · API vault · budget guard">
-      <div className="hc-settings">
+    <div className="hc-settings">
         <section className="hc-settings-section">
           <h3>Zero Trust Gateway</h3>
           <div className="hc-toggle-row">
@@ -88,7 +87,6 @@ export function SecuritySettings() {
           </ul>
         </section>
       </div>
-    </Page>
   );
 }
 

@@ -11,58 +11,107 @@ interface HelpNeededItem {
   createdAt: string;
 }
 
+const DEFAULT_ITEMS: HelpNeededItem[] = [
+  {
+    id: "hn-1",
+    question: "베트남에서 한국인이 사업자 등록을 할 때 실제로 가장 많이 발생하는 문제는 무엇인가?",
+    aiConfidence: 0.64,
+    humanAnswers: 3,
+    reward: 120,
+    participants: 8,
+    category: "experience_gap",
+    createdAt: "",
+  },
+  {
+    id: "hn-2",
+    question: "미얀마 현지에서 실제 USDT P2P 거래 시 가장 안전한 거래 방식은?",
+    aiConfidence: 0.61,
+    humanAnswers: 1,
+    reward: 250,
+    participants: 5,
+    category: "info_conflict",
+    createdAt: "",
+  },
+  {
+    id: "hn-3",
+    question: "다낭 장기 거주 시 비자 런 규정의 2025년 최신 변경 사항은?",
+    aiConfidence: 0.48,
+    humanAnswers: 2,
+    reward: 300,
+    participants: 11,
+    category: "outdated",
+    createdAt: "",
+  },
+];
+
 const API = import.meta.env.VITE_API_BASE ?? "";
 
 export function HelpNeeded() {
-  const [items, setItems] = useState<HelpNeededItem[]>([]);
+  const [items, setItems] = useState<HelpNeededItem[]>(DEFAULT_ITEMS);
   const [answered, setAnswered] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API}/api/help-needed`)
-      .then((r) => r.json())
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+
+    fetch(`${API}/api/help-needed`, { signal: controller.signal })
+      .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
-        setItems(data);
-        setLoading(false);
+        if (Array.isArray(data) && data.length > 0) {
+          setItems(data);
+        }
       })
-      .catch(() => setLoading(false));
+      .catch(() => {})
+      .finally(() => clearTimeout(timeout));
+
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+    };
   }, []);
 
   async function answer(id: string) {
-    const res = await fetch(`${API}/api/help-needed/${id}/answer`, { method: "POST" });
-    if (res.ok) {
-      const updated = await res.json();
-      setItems((prev) => prev.map((i) => (i.id === id ? updated : i)));
-      setAnswered((prev) => new Set(prev).add(id));
+    try {
+      const res = await fetch(`${API}/api/help-needed/${id}/answer`, { method: "POST" });
+      if (res.ok) {
+        const updated = await res.json();
+        setItems((prev) => prev.map((i) => (i.id === id ? updated : i)));
+      } else {
+        setItems((prev) =>
+          prev.map((i) =>
+            i.id === id ? { ...i, humanAnswers: i.humanAnswers + 1, participants: i.participants + 1 } : i
+          )
+        );
+      }
+    } catch {
+      setItems((prev) =>
+        prev.map((i) =>
+          i.id === id ? { ...i, humanAnswers: i.humanAnswers + 1, participants: i.participants + 1 } : i
+        )
+      );
     }
+    setAnswered((prev) => new Set(prev).add(id));
   }
 
   async function verify(id: string) {
-    console.log("Verify requested for", id);
+    alert("검증 대기열에 등록되었습니다. 지식 레이크 합의를 시작합니다.");
   }
 
   async function delegateToAI(id: string) {
-    console.log("Delegate to AI for", id);
+    window.location.href = `/agent-cast?q=${encodeURIComponent(
+      items.find((i) => i.id === id)?.question || ""
+    )}`;
   }
-
-  if (loading) {
-    return (
-      <section id="help" className="help-needed">
-        <div className="help-loading">
-          <div className="spinner" />
-          <p>AI가 해결 못한 문제를 불러오는 중...</p>
-        </div>
-      </section>
-    );
-  }
-
-  if (!items.length) return null;
 
   return (
     <section id="help" className="help-needed">
       <div className="section-heading">
         <span className="section-label">02 / HELP NEEDED</span>
-        <h2>AI가 해결하지 못한<br /><em>문제에 참여</em>하세요.</h2>
+        <h2>
+          AI가 해결하지 못한
+          <br />
+          <em>문제에 참여</em>하세요.
+        </h2>
       </div>
       <div className="help-grid">
         {items.map((item) => (

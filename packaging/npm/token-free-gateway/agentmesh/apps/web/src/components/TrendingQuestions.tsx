@@ -23,10 +23,10 @@ export const TrendingQuestions: React.FC<TrendingQuestionsProps> = ({
     .slice(0, maxItems);
 
   const getBarWidth = (participants: number, max: number) => {
-    return Math.min((participants / max) * 100, 100);
+    return Math.min((participants / Math.max(1, max)) * 100, 100);
   };
 
-  const maxParticipants = Math.max(...sortedQuestions.map(q => q.participants));
+  const maxParticipants = Math.max(1, ...sortedQuestions.map(q => q.participants));
 
   return (
     <section className="trending-questions-section">
@@ -36,6 +36,7 @@ export const TrendingQuestions: React.FC<TrendingQuestionsProps> = ({
           TRENDING QUESTIONS
         </h2>
       </div>
+
       <div className="trending-list">
         {sortedQuestions.map((question, index) => (
           <div key={question.id} className="trending-item">
@@ -51,7 +52,7 @@ export const TrendingQuestions: React.FC<TrendingQuestionsProps> = ({
             </div>
             <div className="trending-stats">
               <span className="participant-count">{question.participants.toLocaleString()}</span>
-              <span className="trend-indicator {question.trend}">
+              <span className={`trend-indicator ${question.trend ?? 'stable'}`}>
                 {question.trend === 'up' ? '↑' : question.trend === 'down' ? '↓' : '→'}
               </span>
             </div>

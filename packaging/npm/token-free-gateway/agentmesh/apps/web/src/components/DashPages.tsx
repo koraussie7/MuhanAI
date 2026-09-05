@@ -377,6 +377,7 @@ export function ComputeMeshPage() {
 // ---- Marketplace (Harvested from C: 5 Categories Grid) ----
 export function MarketplacePage({ defaultTab = "agents" as "agents" | "human" | "mcp" | "knowledge" | "compute" }: { defaultTab?: "agents" | "human" | "mcp" | "knowledge" | "compute" } = {}) {
   const [tab, setTab] = useState<"agents" | "human" | "mcp" | "knowledge" | "compute">(defaultTab);
+  useEffect(() => { setTab(defaultTab); }, [defaultTab]);
   return (
     <Page title="Marketplace" subtitle="AI Capability App Store — 탈중앙화 자원 및 에이전트 마켓">
       <div className="policy-row" style={{ marginBottom: 16 }}>
