@@ -1,5 +1,7 @@
 @import "tailwindcss";
+@import "./style.css";
 @import "./components/visuals/visuals.css";
+@import "./components/harvest/C/harvest-c.css";
 
 @theme {
   --font-sans: "Inter", "Space Grotesk", system-ui, sans-serif;
