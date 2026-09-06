@@ -12,7 +12,16 @@ import { networkRoutes } from "./network-routes.js";
 import { agentsRoutes } from "./agents-routes.js";
 import { computeRoutes } from "./compute-routes.js";
 
-const PUBLIC_PATHS = ["/api/pulse", "/api/network", "/api/agents", "/health"];
+const PUBLIC_PATH_PREFIXES = ["/api/pulse", "/api/network", "/api/agents"];
+const PUBLIC_PATH_EXACT = new Set(["/health"]);
+
+function isPublicPath(rawUrl: string | undefined): boolean {
+  if (!rawUrl) return false;
+  const path = rawUrl.split("?")[0];
+  if (!path) return false;
+  if (PUBLIC_PATH_EXACT.has(path)) return true;
+  return PUBLIC_PATH_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
+}
 
 export async function buildApp(options: { logger?: ReturnType<typeof getLogger> } = {}) {
   const isProduction = process.env.NODE_ENV === "production";
@@ -74,15 +83,20 @@ export async function buildApp(options: { logger?: ReturnType<typeof getLogger> 
     },
   });
 
-  // API Key authentication for non-public routes
+  // API Key authentication for non-public routes. Fail-closed: an unset
+  // API_KEY blocks every protected request rather than serving them open.
+  if (!process.env.API_KEY && isProduction) {
+    logger.warn("API_KEY env var is unset in production — every protected request will be rejected with 401. Set API_KEY before serving traffic.");
+  }
+
   app.addHook("onRequest", async (request, reply) => {
-    if (PUBLIC_PATHS.includes(request.url)) return;
+    if (isPublicPath(request.url)) return;
     if (!isProduction && process.env.DISABLE_AUTH === "true") return;
 
-    const apiKey = request.headers["x-api-key"];
     const validApiKey = process.env.API_KEY;
+    const apiKey = request.headers["x-api-key"];
 
-    if (validApiKey && apiKey !== validApiKey) {
+    if (!validApiKey || apiKey !== validApiKey) {
       reply.code(401).send({ error: "Unauthorized: invalid or missing API key" });
     }
   });

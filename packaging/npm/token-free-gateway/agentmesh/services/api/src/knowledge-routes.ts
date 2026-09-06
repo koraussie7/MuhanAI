@@ -5,6 +5,7 @@ import type { SignedRecord, FederationNode } from "@agentmesh/knowledge-base";
 import { FederationMesh } from "@agentmesh/knowledge-base";
 import { TransportManager } from "@agentmesh/federation-transport";
 import { identityService } from "@agentmesh/knowledge-base";
+import { clientError, formatZodError } from "./error-shapes.js";
 
 const RegisterSchema = z.object({
   id: z.string().min(1).max(256),
@@ -105,7 +106,7 @@ export async function knowledgeRoutes(app: FastifyInstance) {
   app.post("/api/knowledge/wheel/register", async (request, reply) => {
     const parse = RegisterSchema.safeParse(request.body);
     if (!parse.success) {
-      return reply.code(400).send({ error: parse.error.message });
+      return clientError(reply, 400, formatZodError(parse.error), request.id);
     }
 
     const { id, type, content, ownerId, shared } = parse.data;
@@ -117,7 +118,7 @@ export async function knowledgeRoutes(app: FastifyInstance) {
   app.post("/api/knowledge/wheel/query", async (request, reply) => {
     const parse = QuerySchema.safeParse(request.body);
     if (!parse.success) {
-      return reply.code(400).send({ error: parse.error.message });
+      return clientError(reply, 400, formatZodError(parse.error), request.id);
     }
 
     const result = wheelProtocol.query(parse.data.type, parse.data.requirement);
@@ -138,7 +139,7 @@ export async function knowledgeRoutes(app: FastifyInstance) {
   app.post("/api/knowledge/folklore/ingest", async (request, reply) => {
     const parse = IngestSchema.safeParse(request.body);
     if (!parse.success) {
-      return reply.code(400).send({ error: parse.error.message });
+      return clientError(reply, 400, formatZodError(parse.error), request.id);
     }
 
     const { content, type, ownerId, sources, metadata } = parse.data;
@@ -162,14 +163,15 @@ export async function knowledgeRoutes(app: FastifyInstance) {
       federation.ingest(record);
       return reply.code(201).send({ ingested: true, id: record.id, publicKey: record.publicKey, signature: record.signature });
     } catch (e) {
-      return reply.code(500).send({ error: (e as Error).message });
+      request.log.error({ err: e, route: "folklore/ingest" }, "folklore ingest failed");
+      return clientError(reply, 500, "Ingest failed", request.id);
     }
   });
 
   app.post("/api/knowledge/folklore/identity", async (request, reply) => {
     const parse = IdentityCreateSchema.safeParse(request.body);
     if (!parse.success) {
-      return reply.code(400).send({ error: parse.error.message });
+      return clientError(reply, 400, formatZodError(parse.error), request.id);
     }
 
     const identity = await identityService.createIdentity(parse.data.peerId);
@@ -197,7 +199,7 @@ export async function knowledgeRoutes(app: FastifyInstance) {
     const body = request.body as { record?: unknown };
     const parse = SignedRecordSchema.safeParse(body?.record);
     if (!parse.success) {
-      return reply.code(400).send({ error: parse.error.message });
+      return clientError(reply, 400, formatZodError(parse.error), request.id);
     }
     const valid = await identityService.verifyRecord(parse.data);
     return { valid, peerId: parse.data.peerId };
@@ -206,7 +208,7 @@ export async function knowledgeRoutes(app: FastifyInstance) {
   app.post("/api/knowledge/folklore/query", async (request, reply) => {
     const parse = FederationQuerySchema.safeParse(request.body);
     if (!parse.success) {
-      return reply.code(400).send({ error: parse.error.message });
+      return clientError(reply, 400, formatZodError(parse.error), request.id);
     }
 
     const embedding = parse.data.embedding ?? new Array(384).fill(0);
@@ -227,7 +229,7 @@ export async function knowledgeRoutes(app: FastifyInstance) {
   app.post("/api/knowledge/folklore/peers", async (request, reply) => {
     const parse = PeerSchema.safeParse(request.body);
     if (!parse.success) {
-      return reply.code(400).send({ error: parse.error.message });
+      return clientError(reply, 400, formatZodError(parse.error), request.id);
     }
 
     const peer: FederationNode = {
@@ -255,7 +257,7 @@ export async function knowledgeRoutes(app: FastifyInstance) {
   app.post("/api/knowledge/folklore/transport/start", async (request, reply) => {
     const parse = TransportStartSchema.safeParse(request.body);
     if (!parse.success) {
-      return reply.code(400).send({ error: parse.error.message });
+      return clientError(reply, 400, formatZodError(parse.error), request.id);
     }
 
     const { kind, listenAddr, bootstrap } = parse.data;
@@ -273,7 +275,8 @@ export async function knowledgeRoutes(app: FastifyInstance) {
         transportInstances.set(app.server.address() as string, newTransport);
         return { started: true, kind: "libp2p" };
       } catch (e) {
-        return reply.code(500).send({ error: (e as Error).message });
+        request.log.error({ err: e, route: "folklore/transport/start" }, "transport start failed");
+        return clientError(reply, 500, "Transport start failed", request.id);
       }
     }
 

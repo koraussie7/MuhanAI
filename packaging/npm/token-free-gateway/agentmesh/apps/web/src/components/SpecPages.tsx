@@ -196,7 +196,7 @@ export function TasksPage() {
 
 export function WorkflowsPage() {
   return (
-    <PageShell title="Autonomous Workflows (DAG)" subtitle="AgentFM 다중 에이전트 자율 파이프라인 시각화" badge="DAG Engine">
+    <PageShell title="Autonomous Workflows" subtitle="AgentFM 다중 에이전트 자율 파이프라인 시각화 (현재는 linear; DAG 분기는 후속)" badge="Pipeline">
       <WorkflowDAG />
     </PageShell>
   );

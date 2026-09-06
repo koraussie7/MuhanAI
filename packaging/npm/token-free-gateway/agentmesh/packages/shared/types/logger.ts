@@ -4,11 +4,7 @@
  * Defaults to pino-pretty when stdout is a TTY and `LOG_PRETTY=true`
  * (typical in dev); falls back to structured NDJSON in production.
  *
- * Consumers can override by setting `LOG_LEVEL` or calling
- * `setLogger(...)` (reserved for Agent A's server.ts integration).
- *
- * NOT exposed to server.ts by this commit — Agent A owns the wiring
- * to the Fastify request lifecycle.
+ * Consumers can override by setting `LOG_LEVEL`.
  */
 
 import pino, { type Logger as PinoLogger, type LoggerOptions } from "pino";
@@ -59,14 +55,6 @@ export function getLogger(opts: SharedLoggerOptions = {}): Logger {
   if (activeLogger) return activeLogger;
   activeLogger = pino(resolveOptions(opts));
   return activeLogger;
-}
-
-export function setLogger(logger: Logger | null): void {
-  activeLogger = logger;
-}
-
-export function childLogger(bindings: Record<string, unknown>, opts: SharedLoggerOptions = {}): Logger {
-  return getLogger(opts).child(bindings);
 }
 
 export type { LoggerOptions };

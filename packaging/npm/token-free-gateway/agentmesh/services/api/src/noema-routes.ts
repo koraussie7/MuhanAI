@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { NoemaService } from "./noema-service.js";
+import { clientError, formatZodError } from "./error-shapes.js";
 
 const SearchRequestSchema = z.object({
   query: z.string().min(1).max(1024),
@@ -51,7 +52,7 @@ export async function noemaRoutes(app: FastifyInstance) {
   app.post("/api/noema/search", async (request, reply) => {
     const parse = SearchRequestSchema.safeParse(request.body);
     if (!parse.success) {
-      return reply.code(400).send({ error: parse.error.message });
+      return clientError(reply, 400, formatZodError(parse.error), request.id);
     }
 
     const { query, limit, sources } = parse.data;
@@ -62,7 +63,7 @@ export async function noemaRoutes(app: FastifyInstance) {
   app.post("/api/noema/download", async (request, reply) => {
     const parse = DownloadRequestSchema.safeParse(request.body);
     if (!parse.success) {
-      return reply.code(400).send({ error: parse.error.message });
+      return clientError(reply, 400, formatZodError(parse.error), request.id);
     }
 
     const status = await service.startDownload(parse.data);
@@ -81,7 +82,7 @@ export async function noemaRoutes(app: FastifyInstance) {
   app.post("/api/noema/broadcast", async (request, reply) => {
     const parse = BroadcastSchema.safeParse(request.body);
     if (!parse.success) {
-      return reply.code(400).send({ error: parse.error.message });
+      return clientError(reply, 400, formatZodError(parse.error), request.id);
     }
     if (!isPathSafe(parse.data.filePath)) {
       return reply.code(400).send({
@@ -101,7 +102,7 @@ export async function noemaRoutes(app: FastifyInstance) {
   app.post("/api/noema/verify", async (request, reply) => {
     const parse = VerifySchema.safeParse(request.body);
     if (!parse.success) {
-      return reply.code(400).send({ error: parse.error.message });
+      return clientError(reply, 400, formatZodError(parse.error), request.id);
     }
     const { manifest, signature } = parse.data;
     const valid = await service.verifySignature(manifest, signature);

@@ -1,4 +1,3 @@
-import './cosmic-prompt.css';
 import React, { useState, useEffect, useRef } from "react";
 import { Sparkles, CornerDownLeft, PlusCircle } from "lucide-react";
 

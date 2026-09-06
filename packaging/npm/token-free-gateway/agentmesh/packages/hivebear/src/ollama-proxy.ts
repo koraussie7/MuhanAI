@@ -249,9 +249,20 @@ function literalOnlyCheck(target: string, allowPrivate?: boolean): SsrfCheck {
   return { ok: true };
 }
 
+// Headers that carry client identity / session material. We must strip these
+// from the forwarded request so the gateway's inbound auth never reaches the
+// upstream Ollama process (which is a third-party binary, not under our auth
+// boundary). Other headers (Content-Type, Accept, User-Agent) pass through.
+const STRIPPED_UPSTREAM_HEADERS = new Set([
+  "authorization",
+  "cookie",
+  "x-api-key",
+]);
+
 function normalizeHeaders(headers: http.IncomingHttpHeaders): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [key, value] of Object.entries(headers)) {
+    if (STRIPPED_UPSTREAM_HEADERS.has(key.toLowerCase())) continue;
     if (typeof value === "string") {
       out[key] = value;
     } else if (Array.isArray(value)) {

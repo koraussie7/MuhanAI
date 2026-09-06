@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { computeTribute } from "@agentmesh/compute";
+import { clientError, formatZodError } from "./error-shapes.js";
 
 const SubmitSchema = z.object({
   taskId: z.string().min(1).max(256),
@@ -19,7 +20,7 @@ export async function computeRoutes(app: FastifyInstance) {
   app.post("/api/compute/tribute", async (request, reply) => {
     const parse = SubmitSchema.safeParse(request.body);
     if (!parse.success) {
-      return reply.code(400).send({ error: parse.error.message });
+      return clientError(reply, 400, formatZodError(parse.error), request.id);
     }
 
     const ticket = {
@@ -55,7 +56,7 @@ export async function computeRoutes(app: FastifyInstance) {
   app.post("/api/compute/projects/weight", async (request, reply) => {
     const parse = SetWeightSchema.safeParse(request.body);
     if (!parse.success) {
-      return reply.code(400).send({ error: parse.error.message });
+      return clientError(reply, 400, formatZodError(parse.error), request.id);
     }
     const { projectId, weight } = parse.data;
     computeTribute.setProjectWeight(projectId, weight);

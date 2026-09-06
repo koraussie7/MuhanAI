@@ -1,6 +1,6 @@
-import { CosmicNode, CosmicEdge, CosmicPeer } from './types';
+import { CosmicNode, CosmicEdge, PeerInfo } from './types';
 
-export const INITIAL_PEERS: CosmicPeer[] = [
+export const INITIAL_PEERS: PeerInfo[] = [
   {
     id: 'peer-core-hub',
     name: 'Token-Free Gateway Origin Hub',
