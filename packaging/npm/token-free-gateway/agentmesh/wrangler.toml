@@ -2,14 +2,10 @@ name = "muhanai"
 main = "deploy/worker.ts"
 compatibility_date = "2026-09-03"
 
-# Keep API on a separate origin. Do not route api.muhanai.com back through
-# this Worker, otherwise API requests loop back into the Worker.
-# NOTE: routes must be a TOP-LEVEL key — placing it after [assets] makes TOML
-# parse it as an assets field, and the routes never get registered on the zone
-# (this caused Cloudflare 522: traffic fell through to a dead origin).
 routes = [
   { pattern = "muhanai.com/*", zone_name = "muhanai.com" },
   { pattern = "www.muhanai.com/*", zone_name = "muhanai.com" },
+  { pattern = "find.muhanai.com/*", zone_name = "muhanai.com" },
 ]
 workers_dev = false
 
