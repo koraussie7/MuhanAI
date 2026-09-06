@@ -10,6 +10,7 @@ import {
   Maximize2,
   Minimize2,
   ArrowLeft,
+  LayoutDashboard,
   ChevronDown,
   ChevronUp,
   Terminal,
@@ -87,10 +88,11 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
             type="button"
             className="cosmic-back-btn"
             onClick={onNavigateHome}
-            title="Back to MuhanAI Main Dashboard"
+            title="Open Developer Console & Knowledge IN Feed"
+            style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 600 }}
           >
-            <ArrowLeft size={14} />
-            <span>muhanai.com</span>
+            <LayoutDashboard size={14} className="text-sky-400" />
+            <span>Developer Console</span>
           </button>
 
           <div className="flex items-center gap-2.5 pl-2 border-l border-white/10">
@@ -98,7 +100,7 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="cosmic-brand-title font-mono font-bold tracking-wider text-sm">
-                  find.muhanai.com
+                  muhanai.com
                 </span>
                 <span className="cosmic-badge">COSMIC MESH</span>
               </div>

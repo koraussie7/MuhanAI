@@ -72,6 +72,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             <button
               type="button"
               className="top-action-btn"
+              style={{
+                background: "linear-gradient(135deg, rgba(14, 165, 233, 0.25), rgba(99, 102, 241, 0.25))",
+                borderColor: "rgba(56, 189, 248, 0.4)",
+                color: "#38bdf8",
+              }}
+              onClick={() => navigate('/')}
+            >
+              <Sparkles size={14} />
+              Cosmic Mesh
+            </button>
+            <button
+              type="button"
+              className="top-action-btn"
               onClick={() => navigate('/agent-cast')}
             >
               <Radio size={14} />
