@@ -7,46 +7,69 @@ import { TransportManager } from "@agentmesh/federation-transport";
 import { identityService } from "@agentmesh/knowledge-base";
 
 const RegisterSchema = z.object({
-  id: z.string().min(1),
-  type: z.string().min(1),
-  content: z.string().min(1),
-  ownerId: z.string().min(1),
+  id: z.string().min(1).max(256),
+  type: z.string().min(1).max(128),
+  content: z.string().min(1).max(65536),
+  ownerId: z.string().min(1).max(256),
   shared: z.boolean().default(true),
 });
 
 const QuerySchema = z.object({
-  type: z.string().min(1),
-  requirement: z.string().min(1),
+  type: z.string().min(1).max(128),
+  requirement: z.string().min(1).max(4096),
 });
 
 const IngestSchema = z.object({
-  content: z.string().min(1),
-  type: z.string().min(1),
-  ownerId: z.string().min(1),
-  sources: z.array(z.string()).optional(),
-  metadata: z.record(z.any()).optional(),
+  content: z.string().min(1).max(65536),
+  type: z.string().min(1).max(128),
+  ownerId: z.string().min(1).max(256),
+  sources: z.array(z.string().max(1024)).max(50).optional(),
+  metadata: z.record(z.unknown()).optional(),
 });
 
 const IdentityCreateSchema = z.object({
-  peerId: z.string().min(1),
+  peerId: z.string().min(1).max(256),
 });
 
 const FederationQuerySchema = z.object({
-  query: z.string().min(1),
-  embedding: z.array(z.number()).optional(),
+  query: z.string().min(1).max(4096),
+  embedding: z.array(z.number().finite()).max(8192).optional(),
 });
 
 const PeerSchema = z.object({
-  peerId: z.string().min(1),
-  address: z.string().min(1),
-  publicKey: z.string().optional(),
-  capabilities: z.array(z.string()).default([]),
+  peerId: z.string().min(1).max(256),
+  address: z.string().min(1).max(512),
+  publicKey: z.string().max(8192).optional(),
+  capabilities: z.array(z.string().max(128)).max(50).default([]),
 });
 
 const TransportStartSchema = z.object({
   kind: z.enum(["libp2p", "http", "loopback"]).default("loopback"),
-  listenAddr: z.string().optional(),
-  bootstrap: z.array(z.string()).default([]),
+  // Multiaddr-ish strings: only allow safe characters and a reasonable length.
+  listenAddr: z
+    .string()
+    .min(1)
+    .max(256)
+    .regex(/^[A-Za-z0-9./:-]+$/, "listenAddr contains invalid characters")
+    .optional(),
+  bootstrap: z
+    .array(z.string().min(1).max(512).regex(/^[A-Za-z0-9./:-]+$/))
+    .max(50)
+    .default([]),
+});
+
+const SignedRecordSchema = z.object({
+  id: z.string().min(1).max(512),
+  content: z.string().max(65536),
+  type: z.string().min(1).max(128),
+  ownerId: z.string().min(1).max(256),
+  peerId: z.string().min(1).max(256),
+  signature: z.string().min(1).max(8192),
+  publicKey: z.string().min(1).max(8192),
+  timestamp: z.number().int().nonnegative(),
+  vectorClock: z.record(z.string(), z.number().int().nonnegative()),
+  sources: z.array(z.string().max(1024)).max(50).optional(),
+  metadata: z.record(z.unknown()).optional(),
 });
 
 export const federationInstances = new Map<string, FederationMesh>();
@@ -171,13 +194,13 @@ export async function knowledgeRoutes(app: FastifyInstance) {
   });
 
   app.post("/api/knowledge/folklore/verify", async (request, reply) => {
-    const { record } = request.body as { record?: SignedRecord };
-    if (!record) {
-      return reply.code(400).send({ error: "record is required" });
+    const body = request.body as { record?: unknown };
+    const parse = SignedRecordSchema.safeParse(body?.record);
+    if (!parse.success) {
+      return reply.code(400).send({ error: parse.error.message });
     }
-
-    const valid = await identityService.verifyRecord(record);
-    return { valid, peerId: record.peerId };
+    const valid = await identityService.verifyRecord(parse.data);
+    return { valid, peerId: parse.data.peerId };
   });
 
   app.post("/api/knowledge/folklore/query", async (request, reply) => {

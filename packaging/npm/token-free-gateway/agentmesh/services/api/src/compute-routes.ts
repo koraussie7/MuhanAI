@@ -3,11 +3,16 @@ import { z } from "zod";
 import { computeTribute } from "@agentmesh/compute";
 
 const SubmitSchema = z.object({
-  taskId: z.string().min(1),
-  projectId: z.string().optional(),
+  taskId: z.string().min(1).max(256),
+  projectId: z.string().max(256).optional(),
   networkShare: z.number().min(0).max(1).default(0.5),
   personalShare: z.number().min(0).max(1).default(0.5),
   priority: z.enum(["low", "normal", "high"]).default("normal"),
+});
+
+const SetWeightSchema = z.object({
+  projectId: z.string().min(1).max(256),
+  weight: z.number().finite().min(0).max(1),
 });
 
 export async function computeRoutes(app: FastifyInstance) {
@@ -48,10 +53,11 @@ export async function computeRoutes(app: FastifyInstance) {
   });
 
   app.post("/api/compute/projects/weight", async (request, reply) => {
-    const { projectId, weight } = request.body as { projectId?: string; weight?: number };
-    if (!projectId || typeof weight !== "number") {
-      return reply.code(400).send({ error: "projectId and weight required" });
+    const parse = SetWeightSchema.safeParse(request.body);
+    if (!parse.success) {
+      return reply.code(400).send({ error: parse.error.message });
     }
+    const { projectId, weight } = parse.data;
     computeTribute.setProjectWeight(projectId, weight);
     return { set: true, projectId, weight };
   });

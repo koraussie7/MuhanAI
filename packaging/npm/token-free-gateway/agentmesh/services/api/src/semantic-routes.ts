@@ -3,12 +3,16 @@ import { z } from "zod";
 import { SemanticVotingClient, VOTE_TO_ROUTE } from "@agentmesh/semantic-vote";
 
 const VoteRequestSchema = z.object({
-  topicId: z.string().min(1),
-  text: z.string().min(1),
+  topicId: z.string().min(1).max(256),
+  text: z.string().min(1).max(8192),
 });
 
 const TopTopicsQuerySchema = z.object({
-  limit: z.number().int().positive().max(50).default(10),
+  limit: z.coerce.number().int().positive().max(50).default(10),
+});
+
+const ClassifySchema = z.object({
+  text: z.string().min(1).max(8192),
 });
 
 export async function semanticRoutes(app: FastifyInstance) {
@@ -43,12 +47,12 @@ export async function semanticRoutes(app: FastifyInstance) {
   });
 
   app.post("/api/semantic/classify", async (request, reply) => {
-    const { text } = request.body as { text?: string };
-    if (typeof text !== "string" || !text.trim()) {
-      return reply.code(400).send({ error: "text is required" });
+    const parse = ClassifySchema.safeParse(request.body);
+    if (!parse.success) {
+      return reply.code(400).send({ error: parse.error.message });
     }
 
-    const { primary, weights } = client.classify(text);
+    const { primary, weights } = client.classify(parse.data.text);
     const route = VOTE_TO_ROUTE[primary] ?? "ai";
 
     return {

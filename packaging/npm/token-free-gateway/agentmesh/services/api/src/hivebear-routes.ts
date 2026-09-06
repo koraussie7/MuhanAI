@@ -3,12 +3,12 @@ import { z } from "zod";
 import { HiveBearClient } from "@agentmesh/hivebear";
 
 const MeshStartSchema = z.object({
-  port: z.number().int().positive().max(65535).default(7878),
+  port: z.number().int().min(1024).max(65535).default(7878),
 });
 
 const ModelRunSchema = z.object({
-  modelId: z.string().min(1),
-  prompt: z.string().min(1),
+  modelId: z.string().min(1).max(256),
+  prompt: z.string().min(1).max(32768),
   stream: z.boolean().optional(),
 });
 
