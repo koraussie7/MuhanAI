@@ -1,4 +1,5 @@
 import React from 'react';
+import { CreditBalance } from './CreditBalance';
 
 interface SidebarProps {
   isCollapsed?: boolean;
@@ -139,7 +140,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, onToggle,
         )}
         <div className="user-menu-mini">
           <div className="user-avatar">B</div>
-          {!isCollapsed && <span className="user-name">Brian</span>}
+          {!isCollapsed && (
+            <>
+              <span className="user-name">Brian</span>
+              <CreditBalance userId="demo" variant="inline" />
+            </>
+          )}
         </div>
       </div>
     </aside>

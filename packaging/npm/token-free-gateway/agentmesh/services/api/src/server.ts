@@ -3,6 +3,7 @@ import cors from "@fastify/cors";
 import { AgentCast } from "@agentmesh/cast";
 import { AgentExecutor, AgentRegistry } from "@agentmesh/agent";
 import { MockAdapter, OpenAICompatibleAdapter } from "@agentmesh/adapters";
+import { ledger } from "@agentmesh/token-bank";
 import {
   pulse,
   listHelpNeeded,
@@ -116,6 +117,16 @@ export function buildServer() {
     return rewardsFor(actorId);
   });
   app.get("/api/unsolved", async () => unsolved());
+
+  // ---- Welcome Credits balance (Phase 1 wire-up) ----
+  app.get("/api/credits/balance", async (request, reply) => {
+    const { userId } = request.query as { userId?: unknown };
+    if (typeof userId !== "string" || !userId.trim()) {
+      return reply.code(400).send({ error: "userId is required" });
+    }
+    const balance = await ledger.balance(userId);
+    return { balance: balance.toString() };
+  });
   return app;
 }
 
