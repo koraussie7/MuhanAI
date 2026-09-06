@@ -16,9 +16,11 @@ import {
   ChevronRight,
   Sparkles,
   Bot,
+  X,
   Zap,
 } from 'lucide-react';
 import { NAV_GROUPS as NAV_GROUPS_CONFIG, isNavItemActive, type NavItem as NavItemConfig, type NavGroup as NavGroupConfig } from './sidebar-config.js';
+import { CreditBalance } from './CreditBalance.js';
 
 export type { NavItem, NavGroup } from './sidebar-config.js';
 export { isNavItemActive } from './sidebar-config.js';
@@ -67,6 +69,8 @@ interface SidebarProps {
   onItemClick: (path: string) => void;
   isCollapsed?: boolean;
   onToggle?: () => void;
+  isMobileOpen?: boolean;
+  onCloseMobile?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -74,12 +78,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onItemClick,
   isCollapsed = false,
   onToggle,
+  isMobileOpen = false,
+  onCloseMobile,
 }) => {
   return (
-    <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+    <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobileOpen ? 'mobile-open' : ''}`}>
       {/* Brand Header */}
       <div className="sidebar-header">
-        <div className="brand-container" onClick={() => onItemClick('/')}>
+        <div className="brand-container" onClick={() => { onItemClick('/'); onCloseMobile?.(); }}>
           <div className="brand-logo-icon">
             <Bot size={20} />
           </div>
@@ -93,17 +99,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
           )}
         </div>
-        {onToggle && (
-          <button
-            type="button"
-            className="collapse-toggle-btn"
-            onClick={onToggle}
-            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-          </button>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {onCloseMobile && (
+            <button
+              type="button"
+              className="mobile-sidebar-close-btn"
+              onClick={onCloseMobile}
+              title="Close sidebar"
+            >
+              <X size={16} />
+            </button>
+          )}
+          {onToggle && (
+            <button
+              type="button"
+              className="collapse-toggle-btn desktop-only"
+              onClick={onToggle}
+              title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Navigation Content */}
@@ -118,7 +136,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   key={item.id}
                   type="button"
                   className={`nav-item-btn ${isActive ? 'active' : ''}`}
-                  onClick={() => onItemClick(item.path)}
+                  onClick={() => { onItemClick(item.path); onCloseMobile?.(); }}
                   title={isCollapsed ? item.label : undefined}
                 >
                   <span className="nav-item-icon">{item.icon}</span>
@@ -153,7 +171,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {!isCollapsed && (
             <div className="user-info">
               <span className="user-name">Token-Free Active</span>
-              <span className="user-credits">12,480 MHT · $0.00</span>
+              <span className="user-credits">
+                <CreditBalance userId="demo" variant="inline" />
+              </span>
             </div>
           )}
         </div>

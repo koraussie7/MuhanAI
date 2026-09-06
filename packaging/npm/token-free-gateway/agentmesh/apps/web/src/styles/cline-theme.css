@@ -2241,3 +2241,19 @@ body, html {
   background: rgba(16, 185, 129, 0.18);
   border: 1px solid rgba(16, 185, 129, 0.45);
 }
+
+/* Welcome Credits Banner — pulsing glow on first impression */
+.welcome-credits-banner {
+  position: relative;
+  isolation: isolate;
+}
+.welcome-credits-glow {
+  animation: welcome-credits-pulse 4.5s ease-in-out infinite;
+}
+@keyframes welcome-credits-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.15); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .welcome-credits-glow { animation: none; }
+}

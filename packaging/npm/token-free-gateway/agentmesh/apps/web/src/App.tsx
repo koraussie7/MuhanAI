@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./styles/cline-theme.css";
+import "./styles/mobile.css";
 import { Sidebar } from "./components/Sidebar";
 import { Dashboard } from "./components/Dashboard";
 import { AgentCast } from "./components/AgentCast";
@@ -33,7 +34,7 @@ import {
   WorkflowsPage,
   SettingsPage,
 } from "./components/SpecPages";
-import { Search, Zap, Radio, ChevronRight, Sparkles } from "lucide-react";
+import { Search, Zap, Radio, ChevronRight, Sparkles, Menu } from "lucide-react";
 
 const SECTIONS = [
   { id: "dashboard", path: "/", label: "Dashboard", category: "Core" },
@@ -105,6 +106,7 @@ export function App() {
   });
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleSidebar = () => {
     setIsCollapsed((prev) => {
@@ -117,6 +119,7 @@ export function App() {
   };
 
   const navigate = (path: string) => {
+    setIsMobileMenuOpen(false);
     const nextSection = sectionIdFromPath(path);
     setActiveSection(nextSection);
     window.history.pushState(null, "", path);
@@ -167,13 +170,29 @@ export function App() {
         onItemClick={navigate}
         isCollapsed={isCollapsed}
         onToggle={toggleSidebar}
+        isMobileOpen={isMobileMenuOpen}
+        onCloseMobile={() => setIsMobileMenuOpen(false)}
       />
+      {isMobileMenuOpen && (
+        <div
+          className="mobile-drawer-backdrop"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
 
       {/* Main Wrapper */}
       <div className="main-wrapper">
         {/* Top Header Bar */}
         <header className="top-bar">
           <div className="top-bar-left">
+            <button
+              type="button"
+              className="mobile-menu-toggle-btn"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Open Navigation"
+            >
+              <Menu size={18} />
+            </button>
             <div className="breadcrumb-trail">
               <span className="breadcrumb-root">MuhanAI</span>
               <ChevronRight size={13} className="breadcrumb-separator" />
