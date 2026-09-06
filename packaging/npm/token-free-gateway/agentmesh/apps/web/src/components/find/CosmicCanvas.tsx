@@ -502,6 +502,20 @@ export const CosmicCanvas: React.FC<CosmicCanvasProps> = ({
     isDraggingCanvasRef.current = false;
   };
 
+
+  const handleDoubleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const lx = e.clientX - rect.left;
+    const ly = e.clientY - rect.top;
+    const hitNode = getNodeAt(lx, ly);
+    if (hitNode) {
+      smoothFocusNode(hitNode);
+      onSelectNode(hitNode);
+    }
+  };
+
   const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
     e.preventDefault();
     const canvas = canvasRef.current;
@@ -522,6 +536,47 @@ export const CosmicCanvas: React.FC<CosmicCanvasProps> = ({
     cameraRef.current.y = (sy - cy) / newZoom - worldY;
   };
 
+
+    const lastTapRef = useRef<{ time: number; x: number; y: number }>({ time: 0, x: 0, y: 0 });
+  const animFrameRef = useRef<number | null>(null);
+
+  // Smooth Focus Animation: transitions camera smoothly to center on a target node
+  const smoothFocusNode = (targetNode: CosmicNode) => {
+    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+
+    const startCamX = cameraRef.current.x;
+    const startCamY = cameraRef.current.y;
+    const startZoom = cameraRef.current.zoom;
+
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+    const targetCamX = -targetNode.x;
+    // On mobile, offset slightly upward so the bottom sheet drawer does not cover the node
+    const targetCamY = isMobile ? -targetNode.y + 60 : -targetNode.y;
+    const targetZoom = isMobile ? 0.92 : 1.35;
+
+    const duration = 460;
+    const startTime = performance.now();
+
+    const easeOutQuart = (x: number): number => 1 - Math.pow(1 - x, 4);
+
+    const step = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      const ease = easeOutQuart(progress);
+
+      cameraRef.current.x = startCamX + (targetCamX - startCamX) * ease;
+      cameraRef.current.y = startCamY + (targetCamY - startCamY) * ease;
+      cameraRef.current.zoom = startZoom + (targetZoom - startZoom) * ease;
+
+      if (progress < 1) {
+        animFrameRef.current = requestAnimationFrame(step);
+      } else {
+        animFrameRef.current = null;
+      }
+    };
+
+    animFrameRef.current = requestAnimationFrame(step);
+  };
 
   // Zoom Controls (+ / - / Reset Fit)
   const handleZoomDelta = (factor: number) => {
@@ -665,7 +720,21 @@ export const CosmicCanvas: React.FC<CosmicCanvasProps> = ({
       const lx = state.startX - rect.left;
       const ly = state.startY - rect.top;
       const hitNode = getNodeAt(lx, ly);
-      onSelectNode(hitNode);
+
+      const now = Date.now();
+      const timeDiff = now - lastTapRef.current.time;
+      const distDiff = Math.hypot(lx - lastTapRef.current.x, ly - lastTapRef.current.y);
+
+      if (timeDiff < 360 && distDiff < 28 && hitNode) {
+        // Double tap on node: trigger smooth auto-focus zoom!
+        smoothFocusNode(hitNode);
+        onSelectNode(hitNode);
+        lastTapRef.current = { time: 0, x: 0, y: 0 };
+      } else {
+        // Single tap
+        onSelectNode(hitNode);
+        lastTapRef.current = { time: now, x: lx, y: ly };
+      }
     }
 
     if (e.touches.length === 0) {
@@ -692,6 +761,7 @@ export const CosmicCanvas: React.FC<CosmicCanvasProps> = ({
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onWheel={handleWheel}
+        onDoubleClick={handleDoubleClick}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
