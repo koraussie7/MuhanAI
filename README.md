@@ -9,7 +9,7 @@
 [![P2P WebRTC](https://img.shields.io/badge/WebRTC_CRDT-Zero_Token-10B981?style=for-the-badge&logo=webrtc&logoColor=white)](https://muhanai.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-**[한국어 (Korean)](README_ko.md)** | **[Live Web (muhanai.com)](https://muhanai.com)** | **[Cosmic Mesh (find.muhanai.com)](https://muhanai.com/find)**
+**[한국어 (Korean)](README_ko.md)** | **[🌌 Cosmic Mesh (muhanai.com)](https://muhanai.com)** | **[🖥️ Developer Console (/dashboard)](https://muhanai.com/dashboard)**
 
 <br />
 
@@ -21,7 +21,7 @@ MuhanAI is a **decentralized AI agent mesh platform** combining zero-token infer
 
 ## 📸 Platform Previews
 
-### 1. Cosmic Obsidian Knowledge Mesh (`find.muhanai.com`)
+### 1. Cosmic Obsidian Knowledge Mesh (`muhanai.com` & `find.muhanai.com`)
 > *Full-screen universe silhouette with force-directed Obsidian knowledge graphs, real-time WebRTC peer connection shockwaves, and a top-center blinking ghost-typewriter Omnibar.*
 
 <div align="center">
@@ -34,7 +34,7 @@ MuhanAI is a **decentralized AI agent mesh platform** combining zero-token infer
 
 <br />
 
-### 2. Developer Console Dashboard (`muhanai.com`)
+### 2. Developer Console Dashboard (`muhanai.com/dashboard`)
 > *Unified developer dashboard with consolidated Knowledge IN (지식인) peer intelligence and live P2P telemetry.*
 
 <div align="center">
