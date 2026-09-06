@@ -1,3 +1,4 @@
+import { handleFediverseRequest } from "./fediverse";
 import { handleFeedApi } from "./feed-api";
 
 interface KVNamespace {
@@ -18,6 +19,10 @@ interface Env {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+
+        // ActivityPub & Fediverse Protocols (.well-known/webfinger, nodeinfo, actor, inbox/outbox)
+    const fediverseResponse = await handleFediverseRequest(request, url);
+    if (fediverseResponse) return fediverseResponse;
 
     if (url.pathname === "/test-worker") {
       return new Response("worker-alive", { status: 200 });

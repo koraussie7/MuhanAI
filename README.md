@@ -161,6 +161,17 @@ muhanai/
 
 ---
 
+
+---
+
+## 👥 Contributors
+
+- **Brian Y** ([@koraussie7](https://github.com/koraussie7)) — Creator & Architect
+- **Claude 3.7 Sonnet** (`claude@anthropic.com`) — Architecture & Knowledge Lake
+- **Gemini 2.5 Pro** (`gemini@google.com`) — Grounding & Fediverse ActivityPub Bridge
+
+See [CONTRIBUTORS.md](CONTRIBUTORS.md) for full details.
+
 ## 📄 License
 
 Distributed under the **MIT License**. See `LICENSE` for details.
