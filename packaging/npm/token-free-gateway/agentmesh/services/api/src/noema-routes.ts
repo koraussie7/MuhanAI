@@ -3,17 +3,47 @@ import { z } from "zod";
 import { NoemaService } from "./noema-service.js";
 
 const SearchRequestSchema = z.object({
-  query: z.string().min(1),
+  query: z.string().min(1).max(1024),
   limit: z.number().int().positive().max(50).default(10),
-  sources: z.array(z.enum(["hf", "mesh", "https"])).default(["hf", "mesh"]),
+  sources: z.array(z.enum(["hf", "mesh", "https"])).max(10).default(["hf", "mesh"]),
 });
 
 const DownloadRequestSchema = z.object({
-  manifestId: z.string().min(1),
-  destination: z.string().optional(),
-  sources: z.array(z.any()).optional(),
+  manifestId: z.string().min(1).max(256),
+  destination: z.string().max(1024).optional(),
+  // Bounded array of unknown sources — no per-item shape required (the
+  // NoemaService decides what it accepts), but capped to prevent a hostile
+  // caller from streaming an unbounded payload.
+  sources: z.array(z.unknown()).max(50).optional(),
   priority: z.enum(["speed", "privacy", "balanced"]).default("balanced"),
 });
+
+const BroadcastSchema = z.object({
+  manifestId: z.string().min(1).max(256),
+  filePath: z
+    .string()
+    .min(1)
+    .max(1024)
+    .regex(/^[A-Za-z0-9._/-]+$/, "filePath must contain only safe path characters"),
+  license: z
+    .string()
+    .min(1)
+    .max(64)
+    .regex(/^[A-Za-z0-9._-]+$/, "license must contain only safe characters"),
+  private: z.boolean().optional(),
+});
+
+const VerifySchema = z.object({
+  manifest: z.record(z.unknown()),
+  signature: z.string().min(1).max(4096),
+});
+
+function isPathSafe(filePath: string): boolean {
+  if (filePath.includes("..")) return false;
+  if (filePath.startsWith("/") || filePath.startsWith("\\")) return false;
+  if (filePath.includes("//")) return false;
+  return true;
+}
 
 export async function noemaRoutes(app: FastifyInstance) {
   const service = new NoemaService();
@@ -49,31 +79,31 @@ export async function noemaRoutes(app: FastifyInstance) {
   });
 
   app.post("/api/noema/broadcast", async (request, reply) => {
-    const body = request.body as {
-      manifestId?: string;
-      filePath?: string;
-      license?: string;
-      private?: boolean;
-    };
-
-    if (!body?.manifestId || !body?.filePath || !body?.license) {
-      return reply.code(400).send({ error: "manifestId, filePath, license required" });
+    const parse = BroadcastSchema.safeParse(request.body);
+    if (!parse.success) {
+      return reply.code(400).send({ error: parse.error.message });
+    }
+    if (!isPathSafe(parse.data.filePath)) {
+      return reply.code(400).send({
+        error: "filePath must be relative, contain no '..' segments, and not start with '/'",
+      });
     }
 
     const result = await service.broadcastModel({
-      manifestId: body.manifestId,
-      filePath: body.filePath,
-      license: body.license,
-      private: body.private,
+      manifestId: parse.data.manifestId,
+      filePath: parse.data.filePath,
+      license: parse.data.license,
+      private: parse.data.private,
     });
     return reply.code(201).send(result);
   });
 
   app.post("/api/noema/verify", async (request, reply) => {
-    const { manifest, signature } = request.body as {
-      manifest: Record<string, unknown>;
-      signature: string;
-    };
+    const parse = VerifySchema.safeParse(request.body);
+    if (!parse.success) {
+      return reply.code(400).send({ error: parse.error.message });
+    }
+    const { manifest, signature } = parse.data;
     const valid = await service.verifySignature(manifest, signature);
     return { valid };
   });
