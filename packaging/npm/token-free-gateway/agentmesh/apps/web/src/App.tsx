@@ -37,8 +37,9 @@ import {
 import { Search, Zap, Radio, ChevronRight, Sparkles, Menu } from "lucide-react";
 
 const SECTIONS = [
-  { id: "dashboard", path: "/", label: "Dashboard", category: "Core" },
-  { id: "find", path: "/find", label: "Cosmic Obsidian Mesh", category: "Intelligence" },
+  { id: "find", path: "/", label: "Cosmic Mesh", category: "Core" },
+  { id: "find-alt", path: "/find", label: "Cosmic Mesh", category: "Core" },
+  { id: "dashboard", path: "/dashboard", label: "Dashboard", category: "Core" },
   { id: "agent-cast", path: "/agent-cast", label: "Agent Cast", category: "Core" },
   { id: "agent-mesh", path: "/agent-mesh", label: "Agent Mesh", category: "Core" },
   { id: "p2p-network", path: "/network", label: "P2P Nodes", category: "Network" },
@@ -73,6 +74,12 @@ const IMPLEMENTED_SECTIONS = new Set(SECTIONS.map((s) => s.id));
 
 function sectionIdFromPath(path: string) {
   const cleanPath = path.split("?")[0] || "/";
+  if (cleanPath === "/" || cleanPath === "/find" || cleanPath === "") {
+    return "find";
+  }
+  if (cleanPath === "/dashboard") {
+    return "dashboard";
+  }
   if (typeof window !== "undefined") {
     const host = window.location.hostname;
     if (host === "find.muhanai.com" || host.startsWith("find.")) {
@@ -82,7 +89,7 @@ function sectionIdFromPath(path: string) {
   const found = SECTIONS.find((s) => s.path === cleanPath);
   if (found) return found.id;
   const bare = cleanPath.replace(/^\//, "");
-  return bare || "dashboard";
+  return bare || "find";
 }
 
 function pathFromSectionId(id: string) {
@@ -134,15 +141,11 @@ export function App() {
   }, []);
 
   // 1. Fullscreen Standalone View for find.muhanai.com or /find
-  if (activeSection === "find") {
+  if (activeSection === "find" || activeSection === "find-alt") {
     return (
       <FindPage
         onNavigateHome={() => {
-          if (typeof window !== "undefined" && window.location.hostname === "find.muhanai.com") {
-            window.location.href = "https://muhanai.com";
-          } else {
-            navigate("/");
-          }
+          navigate("/dashboard");
         }}
       />
     );
