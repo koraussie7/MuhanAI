@@ -3,19 +3,11 @@ import "./styles/cline-theme.css";
 import { Sidebar } from "./components/Sidebar";
 import { Dashboard } from "./components/Dashboard";
 import { AgentCast } from "./components/AgentCast";
-import { HelpNeeded } from "./components/HelpNeeded";
-import { VerifyMe } from "./components/VerifyMe";
-import { TrendingQuestions } from "./components/TrendingQuestions";
-import { HumanKnowledgeWanted } from "./components/HumanKnowledgeWanted";
-import { UnsolvedProblems } from "./components/UnsolvedProblems";
-import { AiVsHuman } from "./components/AiVsHuman";
-import { RewardsDisplay } from "./components/RewardsDisplay";
-import { TeachAI } from "./components/TeachAI";
-import { NetworkPulse } from "./components/NetworkPulse";
 import { RightPanel } from "./components/RightPanel";
 import { SemanticVote } from "./components/SemanticVote";
 import { HiveBearPanel } from "./components/HiveBearPanel";
 import { FederationPanel } from "./components/FederationPanel";
+import { FindPage as CosmicObsidianMesh } from "./components/find/FindPage";
 import {
   NetworkMonitorPage,
   AgentMeshPage,
@@ -41,47 +33,51 @@ import {
   WorkflowsPage,
   SettingsPage,
 } from "./components/SpecPages";
-import { FindPage } from "./components/find/FindPage";
-import { Search, Zap, Radio, ChevronRight } from "lucide-react";
+import { Search, Zap, Radio, ChevronRight, Sparkles } from "lucide-react";
 
 const SECTIONS = [
   { id: "dashboard", path: "/", label: "Dashboard", category: "Core" },
-  { id: "agent-mesh", path: "/agent-mesh", label: "Agent Mesh", category: "Core" },
+  { id: "find", path: "/find", label: "Cosmic Obsidian Mesh", category: "Intelligence" },
   { id: "agent-cast", path: "/agent-cast", label: "Agent Cast", category: "Core" },
-  { id: "agents", path: "/agents", label: "Agents", category: "Core" },
-  { id: "human-agents", path: "/human-agents", label: "Human Agents", category: "Core" },
-  { id: "p2p-network", path: "/p2p-network", label: "P2P Network", category: "Network" },
-  { id: "knowledge", path: "/knowledge", label: "Knowledge Lake", category: "Intelligence" },
-  { id: "knowledge-graph", path: "/knowledge-graph", label: "Knowledge Graph", category: "Intelligence" },
-  { id: "find", path: "/find", label: "Knowledge Cosmos", category: "Intelligence" },
-  { id: "search", path: "/search", label: "Mesh Search", category: "Intelligence" },
-  { id: "verification", path: "/verification", label: "Verification", category: "Intelligence" },
-  { id: "llm-mesh", path: "/llm-mesh", label: "LLM Mesh", category: "Resources" },
-  { id: "mcp-skills", path: "/mcp-skills", label: "MCP / Skills", category: "Resources" },
+  { id: "agent-mesh", path: "/agent-mesh", label: "Agent Mesh", category: "Core" },
+  { id: "p2p-network", path: "/network", label: "P2P Nodes", category: "Network" },
+  { id: "p2p-network-alt", path: "/p2p-network", label: "P2P Nodes", category: "Network" },
+  { id: "network-monitor", path: "/monitor", label: "Telemetry & Pulse", category: "Network" },
+  { id: "network-monitor-alt", path: "/network-monitor", label: "Telemetry & Pulse", category: "Network" },
+  { id: "models", path: "/models", label: "LLM Models", category: "Resources" },
   { id: "compute-mesh", path: "/compute-mesh", label: "Compute Mesh", category: "Resources" },
-  { id: "models", path: "/models", label: "Models", category: "Resources" },
-  { id: "agents-market", path: "/marketplace/agents", label: "Agents Hub", category: "Marketplace" },
+  { id: "mcp-skills", path: "/mcp-skills", label: "MCP Tools", category: "Resources" },
+  { id: "knowledge", path: "/knowledge", label: "Knowledge Graph", category: "Intelligence" },
+  { id: "knowledge-graph", path: "/knowledge-graph", label: "Knowledge Graph", category: "Intelligence" },
+  { id: "verification", path: "/verification", label: "Verification", category: "Intelligence" },
+  { id: "search", path: "/search", label: "Mesh Search", category: "Intelligence" },
+  { id: "agents-market", path: "/marketplace/agents", label: "Agent Hub", category: "Marketplace" },
   { id: "human-experts", path: "/marketplace/human-experts", label: "Human Experts", category: "Marketplace" },
+  { id: "compute-market", path: "/marketplace/compute", label: "Compute Market", category: "Marketplace" },
   { id: "mcp-market", path: "/marketplace/mcp", label: "MCP Marketplace", category: "Marketplace" },
   { id: "knowledge-market", path: "/marketplace/knowledge", label: "Knowledge Market", category: "Marketplace" },
-  { id: "compute-market", path: "/marketplace/compute", label: "Compute Market", category: "Marketplace" },
   { id: "token-bank", path: "/token-bank", label: "Token Bank", category: "Economy" },
   { id: "contributions", path: "/contributions", label: "Contributions", category: "Economy" },
   { id: "reputation", path: "/reputation", label: "Reputation", category: "Economy" },
   { id: "projects", path: "/projects", label: "Projects", category: "Workspace" },
   { id: "tasks", path: "/tasks", label: "Tasks", category: "Workspace" },
   { id: "workflows", path: "/workflows", label: "Workflows", category: "Workspace" },
-  { id: "network-monitor", path: "/network-monitor", label: "Network Monitor", category: "Network" },
+  { id: "settings", path: "/settings", label: "Settings", category: "System" },
   { id: "semantic-vote", path: "/semantic-vote", label: "Semantic Vote", category: "Intelligence" },
   { id: "hivebear", path: "/hivebear", label: "HiveBear Mesh", category: "Resources" },
   { id: "federation", path: "/federation", label: "Federation", category: "Intelligence" },
-  { id: "settings", path: "/settings", label: "Settings", category: "System" },
 ];
 
 const IMPLEMENTED_SECTIONS = new Set(SECTIONS.map((s) => s.id));
 
 function sectionIdFromPath(path: string) {
   const cleanPath = path.split("?")[0] || "/";
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    if (host === "find.muhanai.com" || host.startsWith("find.")) {
+      return "find";
+    }
+  }
   const found = SECTIONS.find((s) => s.path === cleanPath);
   if (found) return found.id;
   const bare = cleanPath.replace(/^\//, "");
@@ -134,6 +130,21 @@ export function App() {
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
+  // 1. Fullscreen Standalone View for find.muhanai.com or /find
+  if (activeSection === "find") {
+    return (
+      <CosmicObsidianMesh
+        onNavigateHome={() => {
+          if (typeof window !== "undefined" && window.location.hostname === "find.muhanai.com") {
+            window.location.href = "https://muhanai.com";
+          } else {
+            navigate("/");
+          }
+        }}
+      />
+    );
+  }
+
   const currentSectionMeta = SECTIONS.find((s) => s.id === activeSection) ?? {
     id: activeSection,
     label: activeSection,
@@ -150,7 +161,7 @@ export function App() {
 
   return (
     <div className="app-shell">
-      {/* Sidebar with Cline styling */}
+      {/* Sidebar with clean menu items matching NAV_GROUPS */}
       <Sidebar
         activePath={pathFromSectionId(activeSection)}
         onItemClick={navigate}
@@ -186,6 +197,22 @@ export function App() {
               <span className="top-search-kbd">⌘K</span>
             </form>
 
+            {/* Launch Cosmic Mesh / find.muhanai.com Button */}
+            <button
+              type="button"
+              className="top-action-btn"
+              style={{
+                background: "linear-gradient(135deg, rgba(14, 165, 233, 0.25), rgba(99, 102, 241, 0.25))",
+                borderColor: "rgba(56, 189, 248, 0.4)",
+                color: "#38bdf8",
+              }}
+              onClick={() => navigate("/find")}
+              title="Launch find.muhanai.com Cosmic Knowledge Mesh"
+            >
+              <Sparkles size={13} />
+              <span>find.muhanai.com</span>
+            </button>
+
             {/* Token-Free Gateway Badge */}
             <div className="gateway-status-badge">
               <Zap size={13} />
@@ -209,46 +236,29 @@ export function App() {
         {/* Content Layout with Telemetry Sidebar */}
         <div className="content-layout">
           <main className="main-content" role="main">
+            {/* Dashboard: Houses all 지식인 UI and Network Pulse */}
             {activeSection === "dashboard" && <Dashboard onNavigate={navigate} />}
+
+            {/* Core & Chat */}
             {activeSection === "agent-cast" && <AgentCast />}
-            {activeSection === "help-needed" && <HelpNeeded />}
-            {activeSection === "verify" && <VerifyMe />}
-            {activeSection === "trending" && <TrendingQuestions />}
-            {activeSection === "human-knowledge" && <HumanKnowledgeWanted />}
-            {activeSection === "unsolved" && <UnsolvedProblems />}
-            {activeSection === "ai-vs-human" && <AiVsHuman />}
-            {activeSection === "rewards" && <RewardsDisplay />}
-            {activeSection === "teach-ai" && <TeachAI />}
-            {activeSection === "network-pulse" && <NetworkPulse />}
-            {activeSection === "network-monitor" && <NetworkMonitorPage />}
-
-            {/* Semantic Intelligence */}
-            {activeSection === "semantic-vote" && <SemanticVote onSubmit={(route) => navigate(`/agent-cast?route=${route}`)} />}
-
-            {/* Resources */}
-            {activeSection === "hivebear" && <HiveBearPanel />}
-
-            {/* Folklore Federation */}
-            {activeSection === "federation" && <FederationPanel />}
-
-            {/* Network */}
             {activeSection === "agent-mesh" && <AgentMeshPage />}
             {activeSection === "agents" && <AgentsPage />}
             {activeSection === "human-agents" && <HumanAgentsPage />}
-            {activeSection === "p2p-network" && <P2pNetworkPage />}
 
-            {/* Intelligence */}
-            {activeSection === "knowledge" && <KnowledgePage />}
-            {activeSection === "knowledge-graph" && <KnowledgeGraphPage />}
-            {activeSection === "find" && <FindPage onNavigateHome={() => navigate("/")} />}
-            {activeSection === "search" && <SearchPage />}
-            {activeSection === "verification" && <VerificationPage />}
+            {/* P2P Network */}
+            {(activeSection === "p2p-network" || activeSection === "p2p-network-alt") && <P2pNetworkPage />}
+            {(activeSection === "network-monitor" || activeSection === "network-monitor-alt") && <NetworkMonitorPage />}
 
-            {/* AI Resources */}
-            {activeSection === "llm-mesh" && <LlmMeshPage />}
-            {activeSection === "mcp-skills" && <McpSkillsPage />}
-            {activeSection === "compute-mesh" && <ComputeMeshPage />}
+            {/* Compute & Resources */}
             {activeSection === "models" && <ModelsPage />}
+            {activeSection === "compute-mesh" && <ComputeMeshPage />}
+            {activeSection === "mcp-skills" && <McpSkillsPage />}
+            {activeSection === "llm-mesh" && <LlmMeshPage />}
+
+            {/* Knowledge Lake */}
+            {(activeSection === "knowledge" || activeSection === "knowledge-graph") && <KnowledgePage />}
+            {activeSection === "verification" && <VerificationPage />}
+            {activeSection === "search" && <SearchPage />}
 
             {/* Marketplace */}
             {(activeSection === "agents-market" ||
@@ -283,6 +293,11 @@ export function App() {
 
             {/* System */}
             {activeSection === "settings" && <SettingsPage />}
+
+            {/* Semantic Intelligence & Federation */}
+            {activeSection === "semantic-vote" && <SemanticVote onSubmit={(route) => navigate(`/agent-cast?route=${route}`)} />}
+            {activeSection === "hivebear" && <HiveBearPanel />}
+            {activeSection === "federation" && <FederationPanel />}
 
             {!IMPLEMENTED_SECTIONS.has(activeSection) && (
               <div className="placeholder-page" style={{ padding: 40, textAlign: "center" }}>
