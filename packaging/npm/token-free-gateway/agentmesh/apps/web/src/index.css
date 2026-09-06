@@ -1182,3 +1182,87 @@ body {
     flex-shrink: 0 !important;
   }
 }
+
+
+/* Floating Zoom & Fit Controls on Canvas */
+.cosmic-floating-zoom-controls {
+  position: absolute;
+  right: 16px;
+  bottom: 84px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 35;
+  pointer-events: auto;
+}
+
+.cosmic-zoom-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(8, 12, 23, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #f8fafc;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.cosmic-zoom-btn:hover,
+.cosmic-zoom-btn:active {
+  background: rgba(56, 189, 248, 0.25);
+  border-color: #38bdf8;
+  transform: scale(1.08);
+}
+
+.cosmic-zoom-btn.fit {
+  font-size: 15px;
+}
+
+@media (max-width: 768px) {
+  .cosmic-floating-zoom-controls {
+    right: 12px;
+    bottom: 76px;
+    gap: 6px;
+  }
+  .cosmic-zoom-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 16px;
+  }
+}
+
+
+/* Refined Floating Zoom & Ticker Positioning on Mobile */
+@media (max-width: 768px) {
+  .cosmic-bottom-ticker {
+    bottom: 10px !important;
+    left: 10px !important;
+    right: auto !important;
+    max-width: calc(100vw - 76px) !important;
+    font-size: 10px !important;
+    z-index: 40 !important;
+  }
+
+  .cosmic-floating-zoom-controls {
+    right: 10px !important;
+    bottom: 10px !important;
+    gap: 6px !important;
+    z-index: 60 !important;
+  }
+
+  .cosmic-zoom-btn {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 16px !important;
+    touch-action: manipulation !important;
+  }
+}
