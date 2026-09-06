@@ -20,6 +20,7 @@
     "@agentmesh/federation-transport": "workspace:*",
     "@agentmesh/shared": "workspace:*",
     "@agentmesh/credits": "workspace:*",
+    "@agentmesh/db": "workspace:*",
     "@prisma/client": "^5.22.0",
     "fastify": "^5.12.1",
     "@fastify/cors": "^10.1.0",

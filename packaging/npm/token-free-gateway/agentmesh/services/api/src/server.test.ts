@@ -75,6 +75,7 @@ describe("api server hardening", () => {
   describe("rate limiting", () => {
     beforeEach(async () => {
       delete process.env.API_KEY;
+      process.env.DISABLE_AUTH = "true";
       process.env.RATE_LIMIT_MAX = "3";
       process.env.RATE_LIMIT_WINDOW = "1 minute";
       app = await buildApp({ logger: pino({ level: "silent" }) });
@@ -104,6 +105,7 @@ describe("api server hardening", () => {
   describe("body size limit", () => {
     beforeEach(async () => {
       delete process.env.API_KEY;
+      process.env.DISABLE_AUTH = "true";
       app = await buildApp({ logger: pino({ level: "silent" }) });
     });
 
