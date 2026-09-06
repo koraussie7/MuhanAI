@@ -57,7 +57,12 @@ function playCosmicChime() {
 export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
   const [nodes, setNodes] = useState<CosmicNode[]>(INITIAL_NODES);
   const [edges, setEdges] = useState<CosmicEdge[]>(INITIAL_EDGES);
-  const [selectedNode, setSelectedNode] = useState<CosmicNode | null>(INITIAL_NODES[0] ?? null);
+  const [selectedNode, setSelectedNode] = useState<CosmicNode | null>(() => {
+    if (typeof window !== "undefined" && window.innerWidth <= 768) {
+      return null;
+    }
+    return INITIAL_NODES[0] ?? null;
+  });
   const [shockwaves, setShockwaves] = useState<Shockwave[]>([]);
   const [searchFilter, setSearchFilter] = useState('');
   const [activeTypeFilters, setActiveTypeFilters] = useState<Record<NodeType, boolean>>(ALL_TYPE_FILTERS);

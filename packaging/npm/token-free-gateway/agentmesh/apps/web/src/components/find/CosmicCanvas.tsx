@@ -15,6 +15,15 @@ interface CosmicCanvasProps {
   centerGravity: number;
 }
 
+
+const getOptimalInitialZoom = () => {
+  if (typeof window === 'undefined') return 1.0;
+  const w = window.innerWidth;
+  if (w <= 480) return 0.44; // Compact mobile phone overview: fits all nodes & stars
+  if (w <= 768) return 0.60; // Tablets
+  return 1.0;                // Desktop
+};
+
 export const CosmicCanvas: React.FC<CosmicCanvasProps> = ({
   nodes,
   edges,
@@ -30,7 +39,8 @@ export const CosmicCanvas: React.FC<CosmicCanvasProps> = ({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // Pan and Zoom Camera State
-  const cameraRef = useRef<{ x: number; y: number; zoom: number }>({ x: 0, y: 0, zoom: 1.0 });
+  const cameraRef = useRef<{ x: number; y: number; zoom: number }>({ x: 0, y: 0, zoom: getOptimalInitialZoom() });
+  const touchStateRef = useRef<any>({ mode: 'none', startX: 0, startY: 0, lastX: 0, lastY: 0, startTime: 0, initialPinchDist: 0, initialZoom: 1.0, midX: 0, midY: 0, moved: false });
   const isDraggingCanvasRef = useRef<boolean>(false);
   const dragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
@@ -512,15 +522,211 @@ export const CosmicCanvas: React.FC<CosmicCanvasProps> = ({
     cameraRef.current.y = (sy - cy) / newZoom - worldY;
   };
 
+
+  // Zoom Controls (+ / - / Reset Fit)
+  const handleZoomDelta = (factor: number) => {
+    const oldZoom = cameraRef.current.zoom;
+    const newZoom = Math.min(3.5, Math.max(0.18, oldZoom * factor));
+    cameraRef.current.zoom = newZoom;
+  };
+
+  const handleResetFit = () => {
+    cameraRef.current.x = 0;
+    cameraRef.current.y = 0;
+    cameraRef.current.zoom = getOptimalInitialZoom();
+  };
+
+  // Touch Handlers for Mobile (Pinch-to-zoom, 1-finger pan & node drag, tap)
+  const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+
+    if (e.touches.length === 1) {
+      const t = e.touches[0];
+      if (!t) return;
+      const lx = t.clientX - rect.left;
+      const ly = t.clientY - rect.top;
+      const hitNode = getNodeAt(lx, ly);
+
+      if (hitNode) {
+        draggedNodeRef.current = hitNode;
+        touchStateRef.current = {
+          mode: 'drag-node',
+          startX: t.clientX,
+          startY: t.clientY,
+          lastX: t.clientX,
+          lastY: t.clientY,
+          startTime: Date.now(),
+          initialPinchDist: 0,
+          initialZoom: cameraRef.current.zoom,
+          midX: 0,
+          midY: 0,
+          moved: false,
+        };
+      } else {
+        touchStateRef.current = {
+          mode: 'pan',
+          startX: t.clientX,
+          startY: t.clientY,
+          lastX: t.clientX,
+          lastY: t.clientY,
+          startTime: Date.now(),
+          initialPinchDist: 0,
+          initialZoom: cameraRef.current.zoom,
+          midX: 0,
+          midY: 0,
+          moved: false,
+        };
+      }
+    } else if (e.touches.length === 2) {
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      if (!t1 || !t2) return;
+      const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+      const midX = (t1.clientX + t2.clientX) / 2 - rect.left;
+      const midY = (t1.clientY + t2.clientY) / 2 - rect.top;
+
+      draggedNodeRef.current = null;
+      touchStateRef.current = {
+        mode: 'pinch',
+        startX: midX,
+        startY: midY,
+        lastX: midX,
+        lastY: midY,
+        startTime: Date.now(),
+        initialPinchDist: dist || 1,
+        initialZoom: cameraRef.current.zoom,
+        midX,
+        midY,
+        moved: true,
+      };
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const state = touchStateRef.current;
+
+    if (e.touches.length === 1 && (state.mode === 'pan' || state.mode === 'drag-node')) {
+      const t = e.touches[0];
+      if (!t) return;
+      const dx = t.clientX - state.lastX;
+      const dy = t.clientY - state.lastY;
+      state.lastX = t.clientX;
+      state.lastY = t.clientY;
+
+      if (Math.hypot(t.clientX - state.startX, t.clientY - state.startY) > 6) {
+        state.moved = true;
+      }
+
+      if (state.mode === 'drag-node' && draggedNodeRef.current) {
+        const lx = t.clientX - rect.left;
+        const ly = t.clientY - rect.top;
+        const world = screenToWorld(lx, ly);
+        draggedNodeRef.current.x = world.x;
+        draggedNodeRef.current.y = world.y;
+        draggedNodeRef.current.vx = 0;
+        draggedNodeRef.current.vy = 0;
+      } else if (state.mode === 'pan') {
+        cameraRef.current.x += dx / cameraRef.current.zoom;
+        cameraRef.current.y += dy / cameraRef.current.zoom;
+      }
+    } else if (e.touches.length === 2 && state.mode === 'pinch') {
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      if (!t1 || !t2) return;
+      const newDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+      const scale = newDist / (state.initialPinchDist || 1);
+
+      const oldZoom = cameraRef.current.zoom;
+      const newZoom = Math.min(3.5, Math.max(0.18, state.initialZoom * scale));
+
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      const { x: camX, y: camY } = cameraRef.current;
+      const worldX = (state.midX - cx) / oldZoom - camX;
+      const worldY = (state.midY - cy) / oldZoom - camY;
+
+      cameraRef.current.zoom = newZoom;
+      cameraRef.current.x = (state.midX - cx) / newZoom - worldX;
+      cameraRef.current.y = (state.midY - cy) / newZoom - worldY;
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    const state = touchStateRef.current;
+
+    if (!state.moved && Date.now() - state.startTime < 350 && canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const lx = state.startX - rect.left;
+      const ly = state.startY - rect.top;
+      const hitNode = getNodeAt(lx, ly);
+      onSelectNode(hitNode);
+    }
+
+    if (e.touches.length === 0) {
+      draggedNodeRef.current = null;
+      touchStateRef.current.mode = 'none';
+    } else if (e.touches.length === 1) {
+      const t = e.touches[0];
+      if (t) {
+        touchStateRef.current.mode = 'pan';
+        touchStateRef.current.lastX = t.clientX;
+        touchStateRef.current.lastY = t.clientY;
+      }
+    }
+  };
+
   return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 w-full h-full block select-none"
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-      onWheel={handleWheel}
-    />
+    <div className="relative w-full h-full">
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full block select-none"
+        style={{ touchAction: 'none' }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onWheel={handleWheel}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
+      />
+      {/* Floating Zoom & Cosmos Fit Controls */}
+      <div className="cosmic-floating-zoom-controls">
+        <button
+          type="button"
+          className="cosmic-zoom-btn"
+          onClick={() => handleZoomDelta(1.25)}
+          title="Zoom In"
+          aria-label="Zoom In"
+        >
+          +
+        </button>
+        <button
+          type="button"
+          className="cosmic-zoom-btn"
+          onClick={() => handleZoomDelta(0.8)}
+          title="Zoom Out"
+          aria-label="Zoom Out"
+        >
+          −
+        </button>
+        <button
+          type="button"
+          className="cosmic-zoom-btn fit"
+          onClick={handleResetFit}
+          title="Fit Cosmos"
+          aria-label="Fit Cosmos"
+        >
+          🎯
+        </button>
+      </div>
+    </div>
   );
 };
