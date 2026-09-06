@@ -17,12 +17,17 @@
     "@agentmesh/knowledge-base": "workspace:*",
     "@agentmesh/compute": "workspace:*",
     "@agentmesh/federation-transport": "workspace:*",
+    "@agentmesh/shared": "workspace:*",
     "fastify": "^5.12.1",
     "@fastify/cors": "^10.1.0",
+    "@fastify/helmet": "^13.1.1",
+    "@fastify/rate-limit": "^11.2.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "pino": "^10.3.1",
     "tsx": "^4.19.0",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
   }
 }
