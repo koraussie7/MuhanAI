@@ -319,3 +319,83 @@ model McpTool {
   description String?
   inputSchema Json?
 }
+
+// ---------------------------------------------------------------------------
+// Feed / Mesh (Help Needed, Verify, Human Wanted, Versus, Teach)
+// ---------------------------------------------------------------------------
+
+model HelpNeeded {
+  id           String   @id @default(cuid())
+  question     String
+  aiConfidence Float    @default(0.5)
+  humanAnswers Int      @default(0)
+  reward       Int      @default(100)
+  category     String
+  status       String   @default("open") // open, answered, closed
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  answers      HelpAnswer[]
+
+  @@index([status, category])
+  @@index([createdAt])
+}
+
+model HelpAnswer {
+  id           String   @id @default(cuid())
+  helpNeededId String
+  helpNeeded   HelpNeeded @relation(fields: [helpNeededId], references: [id], onDelete: Cascade)
+  content      String
+  userId       String?
+  reward       Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  @@index([helpNeededId])
+}
+
+model VerifyItem {
+  id        String   @id @default(cuid())
+  claim     String
+  sources   Int      @default(0)
+  correct   Int      @default(0)
+  wrong     Int      @default(0)
+  unsure    Int      @default(0)
+  status    String   @default("pending") // pending, verified, rejected
+  createdAt DateTime @default(now())
+
+  @@index([status])
+}
+
+model HumanWanted {
+  id          String   @id @default(cuid())
+  prompt      String
+  shares      Int      @default(0)
+  category    String?
+  createdAt   DateTime @default(now())
+
+  @@index([shares])
+}
+
+model VersusItem {
+  id              String   @id @default(cuid())
+  question        String
+  aiConsensus     Float    @default(0.5)
+  humanConsensus  Float    @default(0.5)
+  winner          String   @default("undecided") // ai, human, undecided
+  aiVotes         Int      @default(0)
+  humanVotes      Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  @@index([winner])
+}
+
+model TeachSubmission {
+  id        String   @id @default(cuid())
+  actorId   String
+  content   String
+  status    String   @default("verification_needed") // verification_needed, approved, rejected
+  reward    Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([status])
+}

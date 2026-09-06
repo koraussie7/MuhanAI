@@ -12,8 +12,10 @@ import { networkRoutes } from "./network-routes.js";
 import { agentsRoutes } from "./agents-routes.js";
 import { computeRoutes } from "./compute-routes.js";
 import { creditsRoutes } from "./credits-routes.js";
+import { feedRoutes } from "./feed-routes.js";
+import { authRoutes } from "./auth-routes.js";
 
-const PUBLIC_PATH_PREFIXES = ["/api/pulse", "/api/network", "/api/agents"];
+const PUBLIC_PATH_PREFIXES = ["/api/pulse", "/api/network", "/api/agents", "/api/auth"];
 const PUBLIC_PATH_EXACT = new Set(["/health"]);
 
 function isPublicPath(rawUrl: string | undefined): boolean {
@@ -118,6 +120,8 @@ export async function buildApp(options: { logger?: ReturnType<typeof getLogger> 
   await app.register(agentsRoutes);
   await app.register(computeRoutes);
   await app.register(creditsRoutes);
+  await app.register(feedRoutes);
+  await app.register(authRoutes);
 
   return app;
 }
