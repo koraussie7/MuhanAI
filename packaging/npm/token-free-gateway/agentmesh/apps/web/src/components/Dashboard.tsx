@@ -9,6 +9,8 @@ import { AiVsHuman } from './AiVsHuman';
 import { TeachAI } from './TeachAI';
 import { AskNetwork } from './AskNetwork';
 import { P2PConnectionGraph } from './visuals/P2PConnectionGraph';
+import { WelcomeCreditsBanner } from './WelcomeCreditsBanner';
+import { CreditBalance } from './CreditBalance';
 import {
   Sparkles,
   Radio,
@@ -116,9 +118,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             <span className="telemetry-stat-val" style={{ color: 'var(--cline-amber)' }}>
               0 MHT (Free Gateway)
             </span>
+            <span style={{ marginTop: 6 }}>
+              <CreditBalance userId="demo" />
+            </span>
           </div>
         </div>
       </div>
+
+      {/* 1b. Welcome Credits banner — first-impression onboarding for new users */}
+      <section aria-label="Welcome Credits">
+        <WelcomeCreditsBanner />
+      </section>
 
       {/* 2. INJECTED: Interactive Open-Source P2P Connection Mesh Topology Graph */}
       <section aria-label="P2P Connection Mesh">

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 type Props = {
   apiBase?: string;
   userId?: string;
+  variant?: "card" | "inline";
 };
 
 type CreditResponse = {
@@ -12,7 +13,7 @@ type CreditResponse = {
 const formatCredits = (value: string) =>
   new Intl.NumberFormat("en-US").format(Number(value));
 
-export function CreditBalance({ apiBase = "", userId = "demo" }: Props) {
+export function CreditBalance({ apiBase = "", userId = "demo", variant = "card" }: Props) {
   const [balance, setBalance] = useState("0");
   const [error, setError] = useState<string | null>(null);
 
@@ -37,6 +38,14 @@ export function CreditBalance({ apiBase = "", userId = "demo" }: Props) {
       cancelled = true;
     };
   }, [apiBase, userId]);
+
+  if (variant === "inline") {
+    return (
+      <span className="tabular-nums">
+        {error ?? `${formatCredits(balance)} MHT`}
+      </span>
+    );
+  }
 
   return (
     <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
