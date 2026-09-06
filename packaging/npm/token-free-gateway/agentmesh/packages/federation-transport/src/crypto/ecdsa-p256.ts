@@ -109,7 +109,20 @@ function bufferToHex(buffer: ArrayBuffer | Uint8Array): string {
     .join("");
 }
 
-function hexToBuffer(hex: string): ArrayBuffer {
-  const bytes = new Uint8Array(hex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)));
-  return bytes.buffer;
+export function hexToBuffer(hex: string): ArrayBuffer {
+  if (typeof hex !== "string") {
+    throw new TypeError("hexToBuffer: input must be a string");
+  }
+  if (hex.length === 0 || hex.length % 2 !== 0) {
+    throw new Error("hexToBuffer: hex string must have even length");
+  }
+  const out = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < out.length; i++) {
+    const byte = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+    if (!Number.isFinite(byte)) {
+      throw new Error(`hexToBuffer: invalid hex at byte ${i}`);
+    }
+    out[i] = byte;
+  }
+  return out.buffer;
 }

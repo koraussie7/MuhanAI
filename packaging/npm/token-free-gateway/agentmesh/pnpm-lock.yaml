@@ -113,6 +113,10 @@ importers:
         version: 12.5.1
 
   packages/hivebear:
+    dependencies:
+      '@agentmesh/shared':
+        specifier: workspace:*
+        version: link:../shared
     devDependencies:
       typescript:
         specifier: ^5.7.2
@@ -136,7 +140,11 @@ importers:
 
   packages/llm-router: {}
 
-  packages/noema: {}
+  packages/noema:
+    dependencies:
+      '@agentmesh/shared':
+        specifier: workspace:*
+        version: link:../shared
 
   packages/personal-mcp:
     dependencies:

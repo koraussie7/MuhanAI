@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { HiveBearClient } from "@agentmesh/hivebear";
+import { clientError, formatZodError } from "./error-shapes.js";
 
 const MeshStartSchema = z.object({
   port: z.number().int().min(1024).max(65535).default(7878),
@@ -18,7 +19,7 @@ export async function hivebearRoutes(app: FastifyInstance) {
   app.get("/api/hivebear/status", async (_request, reply) => {
     const status = await client.status();
     if (!status) {
-      return reply.code(503).send({ error: "HiveBear unavailable" });
+      return clientError(reply, 503, "HiveBear unavailable");
     }
     return status;
   });
@@ -26,12 +27,12 @@ export async function hivebearRoutes(app: FastifyInstance) {
   app.post("/api/hivebear/mesh/start", async (request, reply) => {
     const parse = MeshStartSchema.safeParse(request.body);
     if (!parse.success) {
-      return reply.code(400).send({ error: parse.error.message });
+      return clientError(reply, 400, formatZodError(parse.error), request.id);
     }
 
     const ok = await client.startMesh(parse.data.port);
     if (!ok) {
-      return reply.code(500).send({ error: "Failed to start mesh" });
+      return clientError(reply, 500, "Failed to start mesh", request.id);
     }
     return { started: true, port: parse.data.port };
   });
@@ -44,7 +45,7 @@ export async function hivebearRoutes(app: FastifyInstance) {
   app.post("/api/hivebear/run", async (request, reply) => {
     const parse = ModelRunSchema.safeParse(request.body);
     if (!parse.success) {
-      return reply.code(400).send({ error: parse.error.message });
+      return clientError(reply, 400, formatZodError(parse.error), request.id);
     }
 
     const { modelId, prompt, stream } = parse.data;
@@ -52,7 +53,8 @@ export async function hivebearRoutes(app: FastifyInstance) {
       const result = await client.runModel(modelId, prompt, { stream });
       return { output: result };
     } catch (e) {
-      return reply.code(500).send({ error: (e as Error).message });
+      request.log.error({ err: e, route: "hivebear/run" }, "model run failed");
+      return clientError(reply, 500, "Model run failed", request.id);
     }
   });
 }

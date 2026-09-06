@@ -18,82 +18,49 @@ import {
   Bot,
   Zap,
 } from 'lucide-react';
+import { NAV_GROUPS as NAV_GROUPS_CONFIG, isNavItemActive, type NavItem as NavItemConfig, type NavGroup as NavGroupConfig } from './sidebar-config.js';
 
-export interface NavItem {
-  id: string;
-  label: string;
-  path: string;
+export type { NavItem, NavGroup } from './sidebar-config.js';
+export { isNavItemActive } from './sidebar-config.js';
+
+interface NavItem extends NavItemConfig {
   icon: React.ReactNode;
-  badge?: string;
 }
 
-export interface NavGroup {
+interface NavGroup {
   id: string;
   title: string;
   items: NavItem[];
 }
 
-export const NAV_GROUPS: NavGroup[] = [
-  {
-    id: 'core',
-    title: 'Core & Chat',
-    items: [
-      { id: 'dashboard', label: 'Dashboard', path: '/', icon: <LayoutDashboard size={18} /> },
-      { id: 'agent-cast', label: 'Agent Cast', path: '/agent-cast', icon: <Radio size={18} />, badge: 'LIVE' },
-      { id: 'agent-mesh', label: 'Agent Mesh', path: '/agent-mesh', icon: <Bot size={18} /> },
-    ],
-  },
-  {
-    id: 'network',
-    title: 'P2P Network',
-    items: [
-      { id: 'p2p-network', label: 'P2P Nodes', path: '/network', icon: <Network size={18} /> },
-      { id: 'network-monitor', label: 'Telemetry & Pulse', path: '/monitor', icon: <Activity size={18} /> },
-    ],
-  },
-  {
-    id: 'resources',
-    title: 'Compute & Models',
-    items: [
-      { id: 'models', label: 'LLM Models', path: '/models', icon: <Sparkles size={18} />, badge: 'Token-Free' },
-      { id: 'compute-mesh', label: 'Compute Mesh', path: '/compute-mesh', icon: <Cpu size={18} /> },
-      { id: 'mcp-skills', label: 'MCP Tools', path: '/mcp-skills', icon: <Layers size={18} /> },
-    ],
-  },
-  {
-    id: 'knowledge',
-    title: 'Knowledge Lake',
-    items: [
-      { id: 'knowledge-lake', label: 'Knowledge Graph', path: '/knowledge', icon: <Database size={18} /> },
-      { id: 'verification', label: 'Verification', path: '/verification', icon: <CheckCircle2 size={18} /> },
-      { id: 'find', label: 'Cosmic Mesh', path: '/find', icon: <Search size={18} />, badge: 'NEW' },
-      { id: 'search', label: 'Mesh Search', path: '/search', icon: <Search size={18} /> },
-    ],
-  },
-  {
-    id: 'market',
-    title: 'Marketplace',
-    items: [
-      { id: 'agents-market', label: 'Agent Hub', path: '/marketplace/agents', icon: <Bot size={18} /> },
-      { id: 'human-experts', label: 'Human Experts', path: '/marketplace/human-experts', icon: <Users size={18} /> },
-      { id: 'compute-market', label: 'Compute Market', path: '/marketplace/compute', icon: <Cpu size={18} /> },
-    ],
-  },
-  {
-    id: 'economy',
-    title: 'Economy',
-    items: [
-      { id: 'token-bank', label: 'Token Bank', path: '/token-bank', icon: <Coins size={18} /> },
-    ],
-  },
-  {
-    id: 'system',
-    title: 'Settings',
-    items: [
-      { id: 'settings', label: 'Security & Keys', path: '/settings', icon: <Settings size={18} /> },
-    ],
-  },
-];
+export const NAV_GROUPS: NavGroup[] = NAV_GROUPS_CONFIG.map((group) => ({
+  id: group.id,
+  title: group.title,
+  items: group.items.map((item) => ({
+    ...item,
+    icon: renderIcon(item.iconKey),
+  })),
+}));
+
+function renderIcon(key: string): React.ReactNode {
+  switch (key) {
+    case 'layout-dashboard': return <LayoutDashboard size={18} />;
+    case 'radio': return <Radio size={18} />;
+    case 'bot': return <Bot size={18} />;
+    case 'network': return <Network size={18} />;
+    case 'activity': return <Activity size={18} />;
+    case 'sparkles': return <Sparkles size={18} />;
+    case 'cpu': return <Cpu size={18} />;
+    case 'layers': return <Layers size={18} />;
+    case 'database': return <Database size={18} />;
+    case 'check-circle': return <CheckCircle2 size={18} />;
+    case 'search': return <Search size={18} />;
+    case 'users': return <Users size={18} />;
+    case 'coins': return <Coins size={18} />;
+    case 'settings': return <Settings size={18} />;
+    default: return null;
+  }
+}
 
 interface SidebarProps {
   activePath: string;
@@ -145,9 +112,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div key={group.id} className="sidebar-group">
             {!isCollapsed && <span className="sidebar-group-title">{group.title}</span>}
             {group.items.map((item) => {
-              const isActive =
-                activePath === item.path ||
-                (item.path !== '/' && activePath.startsWith(item.path));
+              const isActive = isNavItemActive(item.path, activePath);
               return (
                 <button
                   key={item.id}

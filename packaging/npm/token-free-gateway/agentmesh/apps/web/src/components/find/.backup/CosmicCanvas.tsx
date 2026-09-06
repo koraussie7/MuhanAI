@@ -1,6 +1,12 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { CosmicNode, CosmicEdge, Shockwave, Star, NodeType } from './types';
-import { step as stepPhysics } from './physics';
+import {
+  step as stepPhysics,
+  isNodeVisible as isNodeVisiblePure,
+  findNodeAt as findNodeAtPure,
+  screenToWorld as screenToWorldPure,
+  computeZoom as computeZoomPure,
+} from './physics';
 
 interface CosmicCanvasProps {
   nodes: CosmicNode[];
@@ -253,24 +259,18 @@ export const CosmicCanvas: React.FC<CosmicCanvasProps> = ({
       simNodes.forEach((n) => nodeMap.set(n.id, n));
 
       // Filter visible nodes based on activeTypeFilters & search
-      const query = searchFilter.toLowerCase().trim();
-      const isNodeVisible = (n: CosmicNode) => {
-        if (!activeTypeFilters[n.type]) return false;
-        if (!query) return true;
-        return (
-          n.label.toLowerCase().includes(query) ||
-          n.frontmatter.title.toLowerCase().includes(query) ||
-          n.frontmatter.tags.some((t) => t.toLowerCase().includes(query))
-        );
-      };
+      const isNodeVisible = (n: CosmicNode) => isNodeVisiblePure(n, activeTypeFilters, searchFilter);
 
-      // Physics: delegated to ./physics so the constants live in one place
+      // Run the physics tick (repulsion + springs + integration)
       stepPhysics(simNodes, simEdges, {
         repelStrength,
         linkDistance,
         centerGravity,
         draggedNode: draggedNodeRef.current,
       });
+
+      // Build node lookup for edge rendering (kept inline — used only for rendering)
+      simNodes.forEach((n) => nodeMap.set(n.id, n));
 
       // 5. Render Edges (Filaments & Data Packets)
       simEdges.forEach((edge, idx) => {
@@ -415,14 +415,9 @@ export const CosmicCanvas: React.FC<CosmicCanvasProps> = ({
   // Screen to World coordinate conversion
   // screenX/Y should already be in canvas-local space (subtract rect.left/top at call sites)
   const screenToWorld = useCallback((screenX: number, screenY: number) => {
-    if (!canvasRef.current) return { x: 0, y: 0 };
     const cx = window.innerWidth / 2;
     const cy = window.innerHeight / 2;
-    const { x: camX, y: camY, zoom } = cameraRef.current;
-    return {
-      x: (screenX - cx) / zoom - camX,
-      y: (screenY - cy) / zoom - camY,
-    };
+    return screenToWorldPure(screenX, screenY, { cx, cy }, cameraRef.current);
   }, []);
 
   // Local-space screen coords (relative to the canvas rect, not the viewport)
@@ -435,17 +430,7 @@ export const CosmicCanvas: React.FC<CosmicCanvasProps> = ({
   const getNodeAt = useCallback(
     (localX: number, localY: number): CosmicNode | null => {
       const world = screenToWorld(localX, localY);
-      const hitTolerance = 16;
-      for (let i = simNodesRef.current.length - 1; i >= 0; i--) {
-        const node = simNodesRef.current[i];
-        if (!node) continue;
-        const dx = world.x - node.x;
-        const dy = world.y - node.y;
-        if (dx * dx + dy * dy <= (node.radius + hitTolerance) ** 2) {
-          return node;
-        }
-      }
-      return null;
+      return findNodeAtPure(simNodesRef.current, world.x, world.y, 16);
     },
     [screenToWorld]
   );
@@ -496,20 +481,12 @@ export const CosmicCanvas: React.FC<CosmicCanvasProps> = ({
     e.preventDefault();
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const zoomFactor = e.deltaY < 0 ? 1.12 : 0.89;
     const rect = canvas.getBoundingClientRect();
     const sx = e.clientX - rect.left;
     const sy = e.clientY - rect.top;
     const cx = window.innerWidth / 2;
     const cy = window.innerHeight / 2;
-    const { x: camX, y: camY, zoom: oldZoom } = cameraRef.current;
-    const newZoom = Math.min(3.5, Math.max(0.3, oldZoom * zoomFactor));
-    // Anchor zoom: keep the world point under the cursor stable across zoom
-    const worldX = (sx - cx) / oldZoom - camX;
-    const worldY = (sy - cy) / oldZoom - camY;
-    cameraRef.current.zoom = newZoom;
-    cameraRef.current.x = (sx - cx) / newZoom - worldX;
-    cameraRef.current.y = (sy - cy) / newZoom - worldY;
+    cameraRef.current = computeZoomPure(cameraRef.current, sx, sy, e.deltaY, { cx, cy });
   };
 
   return (

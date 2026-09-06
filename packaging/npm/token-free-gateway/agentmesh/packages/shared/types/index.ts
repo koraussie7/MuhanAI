@@ -96,9 +96,13 @@ export type {
 // Re-export runtime-friendly aliases for older imports
 export type { UserProfile as UserProfileV1 } from "./user-knowledge";
 
-// Shared logger — see ./logger.ts for usage. server.ts integration is Agent A's.
-export { getLogger, setLogger, childLogger } from "./logger.js";
+// Shared logger — see ./logger.ts for usage.
+export { getLogger } from "./logger.js";
 export type { Logger, SharedLoggerOptions, LoggerOptions } from "./logger.js";
+
+// Runtime abstraction — Bun or Node child-process spawn under a single API.
+export { spawn, runtime } from "../runtime.js";
+export type { SpawnOptions, SpawnResult } from "../runtime.js";
 
 export interface UserActivity {
   id: string;

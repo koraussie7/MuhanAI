@@ -1,16 +1,21 @@
+import { spawn } from "@agentmesh/shared";
 import type { ModelSearchResult, DownloadStatus } from "./types.js";
+
+// All spawn calls below pass args as an array — array-form args are passed
+// directly to execve() and bypass the shell, so user-controlled values
+// (query, manifestId, filePath, etc.) cannot be interpreted as shell
+// metacharacters. Do NOT change these to string interpolation.
 
 export class NoemaClient {
   constructor(private cliPath = "noema") {}
 
   async search(query: string, opts?: { limit?: number }): Promise<ModelSearchResult> {
     const limit = opts?.limit ?? 10;
-    const proc = Bun.spawn([this.cliPath, "hf", "search", query, "--json"], {
+    const proc = await spawn([this.cliPath, "hf", "search", query, "--json"], {
       stdout: "pipe",
       stderr: "pipe",
     });
-    const out = await new Response(proc.stdout).text();
-    const code = await proc.exited;
+    const [out, , code] = await Promise.all([proc.stdout, proc.stderr, proc.exitCode]);
     if (code !== 0) {
       throw new Error(`noema search failed: exit=${code} output=${out}`);
     }
@@ -22,12 +27,11 @@ export class NoemaClient {
   }
 
   async download(manifestId: string, dest = "./models"): Promise<DownloadStatus> {
-    const proc = Bun.spawn(
+    const proc = await spawn(
       [this.cliPath, "download", manifestId, "--into", dest, "--json"],
       { stdout: "pipe", stderr: "pipe" }
     );
-    const out = await new Response(proc.stdout).text();
-    const code = await proc.exited;
+    const [out, , code] = await Promise.all([proc.stdout, proc.stderr, proc.exitCode]);
     if (code !== 0) {
       throw new Error(`noema download failed: exit=${code} output=${out}`);
     }
@@ -48,12 +52,11 @@ export class NoemaClient {
 
   async status(manifestId: string): Promise<DownloadStatus | null> {
     try {
-      const proc = Bun.spawn([this.cliPath, "status", manifestId, "--json"], {
+      const proc = await spawn([this.cliPath, "status", manifestId, "--json"], {
         stdout: "pipe",
         stderr: "pipe",
       });
-      const out = await new Response(proc.stdout).text();
-      const code = await proc.exited;
+      const [out, , code] = await Promise.all([proc.stdout, proc.stderr, proc.exitCode]);
       if (code !== 0) return null;
       return JSON.parse(out) as DownloadStatus;
     } catch {
@@ -72,8 +75,8 @@ export class NoemaClient {
       opts.license,
     ];
     if (opts.share) args.push("--share");
-    const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });
-    const code = await proc.exited;
+    const proc = await spawn(args, { stdout: "pipe", stderr: "pipe" });
+    const code = await proc.exitCode;
     if (code !== 0) throw new Error(`noema import-local failed: exit=${code}`);
     return true;
   }
