@@ -1,10 +1,10 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
-import { CosmicCanvas } from "./CosmicCanvas";
-import { CosmicHud } from "./CosmicHud";
-import { ObsidianInspector } from "./ObsidianInspector";
-import { CosmicPromptBar } from "./CosmicPromptBar";
-import { INITIAL_NODES, INITIAL_EDGES, INITIAL_PEERS } from "./initialData";
-import { CosmicNode, CosmicEdge, NodeType, Shockwave, PeerInfo } from "./types";
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { CosmicCanvas } from './CosmicCanvas';
+import { CosmicHud } from './CosmicHud';
+import { ObsidianInspector } from './ObsidianInspector';
+import { CosmicPromptBar } from './CosmicPromptBar';
+import { INITIAL_NODES, INITIAL_EDGES, INITIAL_PEERS } from './initialData';
+import { CosmicNode, CosmicEdge, NodeType, Shockwave, PeerInfo } from './types';
 
 interface FindPageProps {
   onNavigateHome: () => void;
@@ -20,7 +20,6 @@ const ALL_TYPE_FILTERS: Record<NodeType, boolean> = {
 
 let shockwaveSeq = 0;
 
-// Web Audio API Synthesized Cosmic Chime
 function playCosmicChime() {
   try {
     const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
@@ -32,13 +31,13 @@ function playCosmicChime() {
     const osc2 = ctx.createOscillator();
     const gain = ctx.createGain();
 
-    osc1.type = "sine";
-    osc1.frequency.setValueAtTime(587.33, now); // D5
-    osc1.frequency.exponentialRampToValueAtTime(1174.66, now + 0.45); // D6
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(587.33, now);
+    osc1.frequency.exponentialRampToValueAtTime(1174.66, now + 0.45);
 
-    osc2.type = "triangle";
-    osc2.frequency.setValueAtTime(880.0, now); // A5
-    osc2.frequency.exponentialRampToValueAtTime(1760.0, now + 0.55); // A6
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(880.0, now);
+    osc2.frequency.exponentialRampToValueAtTime(1760.0, now + 0.55);
 
     gain.gain.setValueAtTime(0.14, now);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.9);
@@ -51,9 +50,7 @@ function playCosmicChime() {
     osc2.start(now);
     osc1.stop(now + 0.9);
     osc2.stop(now + 0.9);
-  } catch {
-    // Graceful fallback if AudioContext is not yet unlocked
-  }
+  } catch {}
 }
 
 export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
@@ -61,7 +58,7 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
   const [edges, setEdges] = useState<CosmicEdge[]>(INITIAL_EDGES);
   const [selectedNode, setSelectedNode] = useState<CosmicNode | null>(INITIAL_NODES[0] ?? null);
   const [shockwaves, setShockwaves] = useState<Shockwave[]>([]);
-  const [searchFilter, setSearchFilter] = useState("");
+  const [searchFilter, setSearchFilter] = useState('');
   const [activeTypeFilters, setActiveTypeFilters] = useState<Record<NodeType, boolean>>(ALL_TYPE_FILTERS);
   const [repelStrength, setRepelStrength] = useState(1.0);
   const [linkDistance, setLinkDistance] = useState(130);
@@ -71,8 +68,8 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
   const [latencyMs, setLatencyMs] = useState(28);
   const [eventsLog, setEventsLog] = useState<string[]>([
     `[init] muhanai.com/find mesh attached · ${INITIAL_PEERS.length} peers · ${INITIAL_NODES.length} notes · ${INITIAL_EDGES.length} synapses`,
-    "[init] CRDT knowledge lake subscribed — WebRTC shard #89 linked",
-    "[prompt] Cosmic Omnibar active: type to search or publish new Obsidian nodes",
+    '[init] CRDT knowledge lake subscribed — WebRTC shard #89 linked',
+    '[prompt] Cosmic Omnibar active: type to search or publish new Obsidian nodes',
   ]);
 
   const shockwaveTimers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
@@ -82,12 +79,12 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
   const edgesCount = edges.length;
   const selectedNodeId = selectedNode?.id ?? null;
 
-  const logEvent = useCallback((line: string) => {
+  const addEvent = useCallback((line: string) => {
     const ts = new Date().toISOString().slice(11, 19);
     setEventsLog((prev) => [`[${ts}] ${line}`, ...prev].slice(0, 14));
   }, []);
 
-  const spawnShockwave = useCallback((sx: number, sy: number, color = "#38bdf8") => {
+  const spawnShockwave = useCallback((sx: number, sy: number, color = '#38bdf8') => {
     const id = `sw-${++shockwaveSeq}`;
     setShockwaves((prev) => [
       ...prev,
@@ -104,23 +101,21 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
     (node: CosmicNode | null) => {
       setSelectedNode(node);
       if (node) {
-        logEvent(`selected node ${node.frontmatter.title} (${node.type})`);
+        addEvent(`selected node ${node.frontmatter.title} (${node.type})`);
       }
     },
-    [logEvent]
+    [addEvent]
   );
 
-  const handleToggleTypeFilter = useCallback((type: NodeType) => {
+  const toggleTypeFilter = useCallback((type: NodeType) => {
     setActiveTypeFilters((prev) => ({ ...prev, [type]: !prev[type] }));
   }, []);
 
-  // Search or Publish New Obsidian Node in the Cosmic Mesh
   const handleSearchOrPublish = useCallback(
     (query: string) => {
-      const clean = query.trim().replace(/^[[|]]$/g, "");
+      const clean = query.trim().replace(/^[[|]]$/g, '');
       const lower = clean.toLowerCase();
 
-      // 1. Check if matching node already exists
       const found = nodes.find(
         (n) =>
           n.label.toLowerCase().includes(lower) ||
@@ -130,26 +125,25 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
 
       if (found) {
         setSelectedNode(found);
-        spawnShockwave(found.x, found.y, found.color || "#38bdf8");
+        spawnShockwave(found.x, found.y, found.color || '#38bdf8');
         playCosmicChime();
-        logEvent(`🔍 Located existing node: ${found.frontmatter.title}`);
+        addEvent(`🔍 Located existing node: ${found.frontmatter.title}`);
         return;
       }
 
-      // 2. Publish New Node into Cosmic Space
       playCosmicChime();
       const angle = Math.random() * Math.PI * 2;
       const distance = 140 + Math.random() * 100;
       const nx = Math.cos(angle) * distance;
       const ny = Math.sin(angle) * distance;
       const newId = `note-user-${Date.now()}`;
-      const color = "#10b981";
+      const color = '#10b981';
 
       const newNode: CosmicNode = {
         id: newId,
         label: `[[${clean}.md]]`,
-        type: "note",
-        peerId: userPeerConnected ? "peer-local-user-browser" : "peer-anonymous-creator",
+        type: 'note',
+        peerId: userPeerConnected ? 'peer-local-user-browser' : 'peer-anonymous-creator',
         x: nx,
         y: ny,
         vx: 0,
@@ -159,36 +153,36 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
         connectionsCount: 2,
         frontmatter: {
           title: clean,
-          author: userPeerConnected ? "You (Active Peer)" : "Anonymous Contributor",
-          peerId: userPeerConnected ? "peer-local-user-browser" : "peer-anonymous-creator",
+          author: userPeerConnected ? 'You (Active Peer)' : 'Anonymous Contributor',
+          peerId: userPeerConnected ? 'peer-local-user-browser' : 'peer-anonymous-creator',
           created: new Date().toISOString().slice(0, 10),
-          tags: ["knowledge", "obsidian", "user-published", "p2p-mesh"],
-          links: ["note-muhanai-core", "note-webrtc-crdt"],
-          summary: "유저가 muhanai.com/find 상단 옴니바에서 우주 메쉬로 직접 발행한 옵시디언 지식 조각",
+          tags: ['knowledge', 'obsidian', 'user-published', 'p2p-mesh'],
+          links: ['note-muhanai-core', 'note-webrtc-crdt'],
+          summary: '유저가 muhanai.com/find 상단 옴니바에서 우주 메쉬로 직접 발행한 옵시디언 지식 조각',
           markdown: `# ${clean}\n\n사용자가 상단 옴니바를 통해 전체화면 우주 지식 메쉬에 실시간으로 발행한 지식 노드입니다.\n\n## Network Shard\n- **Sync Protocol**: WebRTC CRDT State Vector\n- **Origin Hub**: [[MuhanAI Origin MOC.md]]\n- **Verification**: [[CRDT Knowledge Lake.md]]\n\n- Published at: ${new Date().toISOString()}`,
         },
       };
 
       const newEdge: CosmicEdge = {
         id: `e-user-pub-${Date.now()}`,
-        source: "note-muhanai-core",
+        source: 'note-muhanai-core',
         target: newId,
-        label: "user-synapse",
+        label: 'user-synapse',
         weight: 1.3,
       };
 
       setNodes((prev) => [...prev, newNode]);
       setEdges((prev) => [...prev, newEdge]);
       setSelectedNode(newNode);
-      spawnShockwave(nx, ny, "#10b981");
+      spawnShockwave(nx, ny, '#10b981');
 
-      logEvent(`✨ Published new Obsidian node: [[${clean}.md]] into Cosmic Mesh`);
+      addEvent(`✨ Published new Obsidian node: [[${clean}.md]] into Cosmic Mesh`);
     },
-    [nodes, userPeerConnected, spawnShockwave, logEvent]
+    [nodes, userPeerConnected, spawnShockwave, addEvent]
   );
 
   const handleConnectSimulatedPeer = useCallback(() => {
-    const colors = ["#38bdf8", "#10b981", "#a855f7", "#f59e0b"];
+    const colors = ['#38bdf8', '#10b981', '#a855f7', '#f59e0b'];
     const angle = Math.random() * Math.PI * 2;
     const r = 320;
     const x = Math.cos(angle) * r;
@@ -198,7 +192,7 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
     const newNode: CosmicNode = {
       id,
       label: `[[Simulated Peer #${shockwaveSeq}.md]]`,
-      type: "peer",
+      type: 'peer',
       x,
       y,
       vx: 0,
@@ -208,29 +202,29 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
       connectionsCount: 0,
       frontmatter: {
         title: `Simulated Peer #${shockwaveSeq}`,
-        author: "Mesh Simulator",
+        author: 'Mesh Simulator',
         created: new Date().toISOString().slice(0, 10),
-        tags: ["peer", "simulated"],
+        tags: ['peer', 'simulated'],
         links: [],
-        summary: "Simulated remote peer joining the cosmic mesh.",
+        summary: 'Simulated remote peer joining the cosmic mesh.',
         markdown: `# Simulated Peer\n\nJoined at ${new Date().toISOString()}\n\nLocation (x,y) = (${Math.round(x)}, ${Math.round(y)})`,
       },
     };
     setNodes((prev) => [...prev, newNode]);
     spawnShockwave(x, y, color);
     playCosmicChime();
-    logEvent(`peer joined → ${newNode.frontmatter.title}`);
-  }, [logEvent, spawnShockwave]);
+    addEvent(`peer joined → ${newNode.frontmatter.title}`);
+  }, [addEvent, spawnShockwave]);
 
   const handleConnectUserPeer = useCallback(() => {
     setUserPeerConnected((prev) => {
       const next = !prev;
-      logEvent(next ? "user device mounted into P2P mesh" : "user device disconnected from P2P mesh");
+      addEvent(next ? 'user device mounted into P2P mesh' : 'user device disconnected from P2P mesh');
       return next;
     });
     setLatencyMs((prev) => Math.max(1, Math.round(prev + (Math.random() - 0.5) * 12)));
     playCosmicChime();
-  }, [logEvent]);
+  }, [addEvent]);
 
   const allNodesForInspector = useMemo(() => nodes, [nodes]);
 
@@ -250,7 +244,6 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
           centerGravity={centerGravity}
         />
 
-        {/* Top HUD Controls */}
         <CosmicHud
           peersCount={peersCount}
           notesCount={notesCount}
@@ -262,7 +255,7 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
           onConnectUserPeer={handleConnectUserPeer}
           userPeerConnected={userPeerConnected}
           activeTypeFilters={activeTypeFilters}
-          onToggleTypeFilter={handleToggleTypeFilter}
+          onToggleTypeFilter={toggleTypeFilter}
           repelStrength={repelStrength}
           onRepelChange={setRepelStrength}
           linkDistance={linkDistance}
@@ -273,7 +266,6 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
           onNavigateHome={onNavigateHome}
         />
 
-        {/* Top-Center Blinking Ghost Typewriter Omnibar (Mix of Option 2 & Option 4) */}
         <CosmicPromptBar
           onSearchOrPublish={handleSearchOrPublish}
           onFilterChange={setSearchFilter}
@@ -285,9 +277,7 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
           node={selectedNode}
           allNodes={allNodesForInspector}
           onClose={() => handleSelectNode(null)}
-          onSelectNode={(n) => {
-            handleSelectNode(n);
-          }}
+          onSelectNode={handleSelectNode}
         />
       )}
     </div>

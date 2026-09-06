@@ -7,7 +7,7 @@ import { RightPanel } from "./components/RightPanel";
 import { SemanticVote } from "./components/SemanticVote";
 import { HiveBearPanel } from "./components/HiveBearPanel";
 import { FederationPanel } from "./components/FederationPanel";
-import { FindPage as CosmicObsidianMesh } from "./components/find/FindPage";
+import { FindPage } from "./components/find/FindPage";
 import {
   NetworkMonitorPage,
   AgentMeshPage,
@@ -133,7 +133,7 @@ export function App() {
   // 1. Fullscreen Standalone View for find.muhanai.com or /find
   if (activeSection === "find") {
     return (
-      <CosmicObsidianMesh
+      <FindPage
         onNavigateHome={() => {
           if (typeof window !== "undefined" && window.location.hostname === "find.muhanai.com") {
             window.location.href = "https://muhanai.com";
