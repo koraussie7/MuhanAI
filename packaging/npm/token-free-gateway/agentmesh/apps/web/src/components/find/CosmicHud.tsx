@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { NodeType, PeerInfo } from './types';
+import { NodeType, CosmicPeer } from './types';
 import {
   Search,
   Zap,
@@ -138,17 +138,7 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 
         {/* Right Action Tools */}
         <div className="flex items-center gap-2.5">
-          {/* Obsidian Instant Search */}
-          <div className="relative">
-            <Search size={13} className="absolute left-2.5 top-2.5 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search [[notes]] or #tags..."
-              value={searchFilter}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="cosmic-search-input font-mono text-xs pl-8 pr-3 py-1.5 rounded-lg"
-            />
-          </div>
+
 
           {/* Connect Peer Action Buttons */}
           <button
