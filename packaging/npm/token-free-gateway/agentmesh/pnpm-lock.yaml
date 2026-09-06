@@ -73,6 +73,9 @@ importers:
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)(lightningcss@1.32.0)
 
   packages/db:
     dependencies:
@@ -165,8 +168,15 @@ importers:
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)(lightningcss@1.32.0)
 
-  packages/shared: {}
+  packages/shared:
+    dependencies:
+      pino:
+        specifier: ^10.3.1
+        version: 10.3.1
 
   services/api:
     dependencies:

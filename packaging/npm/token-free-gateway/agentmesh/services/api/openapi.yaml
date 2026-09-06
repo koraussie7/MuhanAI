@@ -1,0 +1,948 @@
+openapi: 3.1.0
+info:
+  title: MuhanAI AgentMesh API
+  version: 0.1.0
+  description: |
+    HTTP contract for the @agentmesh/api service (Fastify). Routes are split across
+    the following files under `services/api/src/`:
+      - agents-routes.ts
+      - network-routes.ts
+      - knowledge-routes.ts
+      - compute-routes.ts
+      - hivebear-routes.ts
+      - semantic-routes.ts
+      - noema-routes.ts
+
+    Body validation is performed with Zod schemas — request shapes below mirror
+    the corresponding Zod definitions. Error responses use `{ error: string }`
+    unless otherwise noted.
+  license:
+    name: MuhanAI Token-Free Gateway
+servers:
+  - url: http://localhost:8787
+    description: Local Fastify dev server (default port)
+paths:
+  # ─── agents ────────────────────────────────────────────────────────────
+  /api/agents:
+    get:
+      tags: [agents]
+      summary: List known agent identities
+      operationId: listAgents
+      responses:
+        "200":
+          description: Array of agent identities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AgentIdentity"
+
+  # ─── network ───────────────────────────────────────────────────────────
+  /api/network:
+    get:
+      tags: [network]
+      summary: Aggregate mesh snapshot (compute, llm, mcp, human, peers)
+      operationId: getNetwork
+      responses:
+        "200":
+          description: Mesh resource counters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NetworkSnapshot"
+  /api/pulse:
+    get:
+      tags: [network]
+      summary: Real-time pulse counters
+      operationId: getPulse
+      responses:
+        "200":
+          description: Snapshot of fresh activity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PulseSnapshot"
+
+  # ─── knowledge / wheel ─────────────────────────────────────────────────
+  /api/knowledge/wheel/register:
+    post:
+      tags: [knowledge]
+      summary: Register a knowledge component on the protocol wheel
+      operationId: wheelRegister
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WheelRegisterRequest"
+      responses:
+        "201":
+          description: Registered
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [registered, id]
+                properties:
+                  registered: { type: boolean }
+                  id: { type: string }
+        "400":
+          $ref: "#/components/responses/ZodError"
+  /api/knowledge/wheel/query:
+    post:
+      tags: [knowledge]
+      summary: Query the wheel for a component matching a requirement
+      operationId: wheelQuery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WheelQueryRequest"
+      responses:
+        "200":
+          description: Matching components (shape defined by wheel protocol)
+        "400":
+          $ref: "#/components/responses/ZodError"
+  /api/knowledge/wheel/shared:
+    get:
+      tags: [knowledge]
+      summary: List wheel components currently shared with the mesh
+      operationId: wheelListShared
+      responses:
+        "200":
+          description: Shared components
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  components: { type: array, items: {} }
+  /api/knowledge/wheel/share/{id}:
+    post:
+      tags: [knowledge]
+      summary: Mark a wheel component as shared
+      operationId: wheelMarkShared
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Marked shared
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  shared: { type: boolean }
+                  id: { type: string }
+
+  # ─── knowledge / folklore ──────────────────────────────────────────────
+  /api/knowledge/folklore/ingest:
+    post:
+      tags: [knowledge]
+      summary: Sign and ingest a folklore record into the federation
+      operationId: folkloreIngest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FolkloreIngestRequest"
+      responses:
+        "201":
+          description: Ingested
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignedRecordReceipt"
+        "400":
+          $ref: "#/components/responses/ZodError"
+        "500":
+          $ref: "#/components/responses/ErrorString"
+  /api/knowledge/folklore/identity:
+    post:
+      tags: [knowledge]
+      summary: Create a new peer identity (ed25519 keypair)
+      operationId: folkloreCreateIdentity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IdentityCreateRequest"
+      responses:
+        "201":
+          description: Identity created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentityReceipt"
+        "400":
+          $ref: "#/components/responses/ZodError"
+  /api/knowledge/folklore/identity/{peerId}:
+    get:
+      tags: [knowledge]
+      summary: Look up an existing peer identity
+      operationId: folkloreGetIdentity
+      parameters:
+        - in: path
+          name: peerId
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Identity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentityReceipt"
+        "404":
+          $ref: "#/components/responses/ErrorString"
+  /api/knowledge/folklore/verify:
+    post:
+      tags: [knowledge]
+      summary: Verify a signed record (does not ingest)
+      operationId: folkloreVerify
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [record]
+              properties:
+                record:
+                  $ref: "#/components/schemas/SignedRecord"
+      responses:
+        "200":
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid: { type: boolean }
+                  peerId: { type: string }
+        "400":
+          $ref: "#/components/responses/ErrorString"
+  /api/knowledge/folklore/query:
+    post:
+      tags: [knowledge]
+      summary: Semantic query across the folklore federation
+      operationId: folkloreQuery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FederationQueryRequest"
+      responses:
+        "200":
+          description: Top-K results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  query: { type: string }
+                  count: { type: integer }
+                  results: { type: array, items: {} }
+        "400":
+          $ref: "#/components/responses/ZodError"
+  /api/knowledge/folklore/peers:
+    get:
+      tags: [knowledge]
+      summary: List federation peers
+      operationId: folkloreListPeers
+      responses:
+        "200":
+          description: Peer list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count: { type: integer }
+                  peers:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/FederationPeer"
+    post:
+      tags: [knowledge]
+      summary: Add a peer to the federation
+      operationId: folkloreAddPeer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FederationPeerInput"
+      responses:
+        "201":
+          description: Peer added
+        "400":
+          $ref: "#/components/responses/ZodError"
+  /api/knowledge/folklore/peers/{peerId}:
+    delete:
+      tags: [knowledge]
+      summary: Remove a peer from the federation
+      operationId: folkloreRemovePeer
+      parameters:
+        - in: path
+          name: peerId
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Removed
+  /api/knowledge/folklore/sync:
+    post:
+      tags: [knowledge]
+      summary: Run a full gossip/CRDT sync with peers
+      operationId: folkloreSync
+      responses:
+        "200":
+          description: Sync result (shape defined by @agentmesh/knowledge-base)
+  /api/knowledge/folklore/transport/start:
+    post:
+      tags: [knowledge]
+      summary: Start a transport (libp2p/http/loopback) and tear down any prior transport
+      operationId: folkloreTransportStart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransportStartRequest"
+      responses:
+        "200":
+          description: Started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  started: { type: boolean }
+                  kind:
+                    type: string
+                    enum: [libp2p, http, loopback]
+        "400":
+          $ref: "#/components/responses/ZodError"
+        "500":
+          $ref: "#/components/responses/ErrorString"
+
+  # ─── compute ───────────────────────────────────────────────────────────
+  /api/compute/tribute:
+    post:
+      tags: [compute]
+      summary: Submit a tribute task to the compute mesh
+      operationId: submitTribute
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TributeSubmitRequest"
+      responses:
+        "202":
+          description: Queued ticket
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TributeTicket"
+        "400":
+          $ref: "#/components/responses/ZodError"
+  /api/compute/tribute/queue:
+    get:
+      tags: [compute]
+      summary: List queued tribute tasks
+      operationId: listTributeQueue
+      responses:
+        "200":
+          description: Queue
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count: { type: integer }
+                  queue:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TributeTicket"
+  /api/compute/tribute/next:
+    post:
+      tags: [compute]
+      summary: Pop the next runnable tribute
+      operationId: nextTribute
+      responses:
+        "200":
+          description: Next ticket
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TributeTicket"
+        "404":
+          $ref: "#/components/responses/ErrorString"
+  /api/compute/tribute/{taskId}:
+    delete:
+      tags: [compute]
+      summary: Cancel and remove a tribute
+      operationId: removeTribute
+      parameters:
+        - in: path
+          name: taskId
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Removed
+        "404":
+          $ref: "#/components/responses/ErrorString"
+  /api/compute/projects/weight:
+    post:
+      tags: [compute]
+      summary: Set a project's weight in the compute router
+      operationId: setProjectWeight
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [projectId, weight]
+              properties:
+                projectId: { type: string }
+                weight: { type: number }
+      responses:
+        "200":
+          description: Set
+        "400":
+          $ref: "#/components/responses/ErrorString"
+
+  # ─── hivebear ──────────────────────────────────────────────────────────
+  /api/hivebear/status:
+    get:
+      tags: [hivebear]
+      summary: HiveBear sidecar liveness/readiness
+      operationId: hivebearStatus
+      responses:
+        "200":
+          description: Live status
+        "503":
+          $ref: "#/components/responses/ErrorString"
+  /api/hivebear/mesh/start:
+    post:
+      tags: [hivebear]
+      summary: Start the HiveBear mesh daemon on a TCP port
+      operationId: hivebearStartMesh
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                port:
+                  type: integer
+                  minimum: 1
+                  maximum: 65535
+                  default: 7878
+      responses:
+        "200":
+          description: Started
+        "400":
+          $ref: "#/components/responses/ZodError"
+        "500":
+          $ref: "#/components/responses/ErrorString"
+  /api/hivebear/models:
+    get:
+      tags: [hivebear]
+      summary: Search local models available on the HiveBear mesh
+      operationId: hivebearSearchModels
+      responses:
+        "200":
+          description: Models
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  models:
+                    type: array
+                    items: {}
+  /api/hivebear/run:
+    post:
+      tags: [hivebear]
+      summary: Run a model on the HiveBear mesh
+      operationId: hivebearRunModel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HivebearRunRequest"
+      responses:
+        "200":
+          description: Output
+        "400":
+          $ref: "#/components/responses/ZodError"
+        "500":
+          $ref: "#/components/responses/ErrorString"
+
+  # ─── semantic-vote ─────────────────────────────────────────────────────
+  /api/semantic/vote:
+    post:
+      tags: [semantic-vote]
+      summary: Cast a semantic vote that routes the topic to a handler
+      operationId: semanticVote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VoteRequest"
+      responses:
+        "200":
+          description: Vote result + chosen route
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  topicId: { type: string }
+                  primary: { type: string }
+                  route: { type: string }
+                  timestamp: { type: integer }
+        "400":
+          $ref: "#/components/responses/ZodError"
+  /api/semantic/topics:
+    get:
+      tags: [semantic-vote]
+      summary: Top trending topics by votes
+      operationId: semanticTopTopics
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+      responses:
+        "200":
+          description: Topics list
+        "400":
+          $ref: "#/components/responses/ZodError"
+  /api/semantic/classify:
+    post:
+      tags: [semantic-vote]
+      summary: Classify free-form text into a primary route
+      operationId: semanticClassify
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text: { type: string }
+      responses:
+        "200":
+          description: Classification
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  primary: { type: string }
+                  route: { type: string }
+                  weights:
+                    type: object
+                    additionalProperties: { type: number }
+        "400":
+          $ref: "#/components/responses/ErrorString"
+
+  # ─── noema ─────────────────────────────────────────────────────────────
+  /api/noema/search:
+    post:
+      tags: [noema]
+      summary: Search model manifests across Hugging Face, mesh, and HTTPS
+      operationId: noemaSearch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NoemaSearchRequest"
+      responses:
+        "200":
+          description: Matches (manifest list)
+        "400":
+          $ref: "#/components/responses/ZodError"
+  /api/noema/download:
+    post:
+      tags: [noema]
+      summary: Start a multi-source model download via the noema CLI
+      operationId: noemaDownload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NoemaDownloadRequest"
+      responses:
+        "202":
+          description: Initial status (queued)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NoemaDownloadStatus"
+        "400":
+          $ref: "#/components/responses/ZodError"
+  /api/noema/status/{manifestId}:
+    get:
+      tags: [noema]
+      summary: Get the latest download status for a manifest
+      operationId: noemaDownloadStatus
+      parameters:
+        - in: path
+          name: manifestId
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NoemaDownloadStatus"
+        "404":
+          $ref: "#/components/responses/ErrorString"
+  /api/noema/broadcast:
+    post:
+      tags: [noema]
+      summary: Broadcast a local model manifest to the mesh
+      operationId: noemaBroadcast
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [manifestId, filePath, license]
+              properties:
+                manifestId: { type: string }
+                filePath: { type: string }
+                license: { type: string }
+                private: { type: boolean }
+      responses:
+        "201":
+          description: Broadcast confirmation
+        "400":
+          $ref: "#/components/responses/ErrorString"
+  /api/noema/verify:
+    post:
+      tags: [noema]
+      summary: Verify a signed manifest payload using an ed25519/ECDSA verify function
+      operationId: noemaVerify
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [manifest, signature]
+              properties:
+                manifest:
+                  type: object
+                  additionalProperties: true
+                signature: { type: string }
+      responses:
+        "200":
+          description: Validity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid: { type: boolean }
+
+components:
+  responses:
+    ZodError:
+      description: Zod validation failure
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: { type: string }
+    ErrorString:
+      description: Plain string error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: { type: string }
+
+  schemas:
+    AgentIdentity:
+      type: object
+      required: [id, name, type, online, capabilities, reputation, success, did, publicKey, fingerprint]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        type: { type: string, enum: [agent] }
+        online: { type: boolean }
+        capabilities:
+          type: array
+          items: { type: string }
+        reputation: { type: number }
+        success: { type: number }
+        did: { type: string }
+        publicKey: { type: string }
+        fingerprint: { type: string }
+
+    NetworkSnapshot:
+      type: object
+      properties:
+        compute:
+          type: object
+          properties:
+            cpu: { type: integer }
+            gpu: { type: integer }
+            webgpu: { type: integer }
+            totalTFLOPS: { type: number }
+        llm:
+          type: object
+          properties:
+            providers: { type: integer }
+            models: { type: integer }
+            free: { type: integer }
+        mcp:
+          type: object
+          properties:
+            servers: { type: integer }
+            tools: { type: integer }
+            categories: { type: integer }
+        human:
+          type: object
+          properties:
+            online: { type: integer }
+            available: { type: integer }
+            specialties: { type: integer }
+        peers:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              name: { type: string }
+              region: { type: string }
+              protocol: { type: string, enum: [loopback, libp2p, "Direct WebSocket", WebRTC] }
+              status: { type: string, enum: [connected, offline] }
+              latencyMs: { type: integer }
+              capabilities:
+                type: array
+                items: { type: string }
+        federationPeers:
+          type: array
+          items:
+            $ref: "#/components/schemas/FederationPeer"
+
+    PulseSnapshot:
+      type: object
+      properties:
+        agentsOnline: { type: integer }
+        newQuestions: { type: integer }
+        verifyRequests: { type: integer }
+        humansNeeded: { type: integer }
+        aiConflicts: { type: integer }
+        knowledgeGaps: { type: integer }
+        timestamp: { type: integer }
+
+    WheelRegisterRequest:
+      type: object
+      required: [id, type, content, ownerId]
+      properties:
+        id: { type: string, minLength: 1 }
+        type: { type: string, minLength: 1 }
+        content: { type: string, minLength: 1 }
+        ownerId: { type: string, minLength: 1 }
+        shared: { type: boolean, default: true }
+    WheelQueryRequest:
+      type: object
+      required: [type, requirement]
+      properties:
+        type: { type: string, minLength: 1 }
+        requirement: { type: string, minLength: 1 }
+
+    FolkloreIngestRequest:
+      type: object
+      required: [content, type, ownerId]
+      properties:
+        content: { type: string, minLength: 1 }
+        type: { type: string, minLength: 1 }
+        ownerId: { type: string, minLength: 1 }
+        sources:
+          type: array
+          items: { type: string }
+        metadata:
+          type: object
+          additionalProperties: true
+
+    SignedRecordReceipt:
+      type: object
+      required: [ingested, id]
+      properties:
+        ingested: { type: boolean }
+        id: { type: string }
+        publicKey: { type: string }
+        signature: { type: string }
+
+    SignedRecord:
+      type: object
+      description: |
+        Signed record shape produced by `@agentmesh/identity-service.signRecord()`.
+        Authoritative schema lives in @agentmesh/knowledge-base.
+      additionalProperties: true
+
+    IdentityCreateRequest:
+      type: object
+      required: [peerId]
+      properties:
+        peerId: { type: string, minLength: 1 }
+
+    IdentityReceipt:
+      type: object
+      required: [peerId, publicKey, fingerprint]
+      properties:
+        peerId: { type: string }
+        publicKey: { type: string }
+        fingerprint: { type: string }
+
+    FederationPeer:
+      type: object
+      required: [peerId, address]
+      properties:
+        peerId: { type: string }
+        address: { type: string }
+        online: { type: boolean }
+        reputation: { type: number }
+        capabilities:
+          type: array
+          items: { type: string }
+        lastSeen: { type: integer }
+    FederationPeerInput:
+      allOf:
+        - $ref: "#/components/schemas/FederationPeer"
+        - type: object
+          required: [peerId, address]
+          properties:
+            capabilities:
+              type: array
+              items: { type: string }
+              default: []
+
+    FederationQueryRequest:
+      type: object
+      required: [query]
+      properties:
+        query: { type: string, minLength: 1 }
+        embedding:
+          type: array
+          items: { type: number }
+
+    TransportStartRequest:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum: [libp2p, http, loopback]
+          default: loopback
+        listenAddr: { type: string }
+        bootstrap:
+          type: array
+          items: { type: string }
+          default: []
+
+    TributeSubmitRequest:
+      type: object
+      required: [taskId]
+      properties:
+        taskId: { type: string, minLength: 1 }
+        projectId: { type: string }
+        networkShare: { type: number, minimum: 0, maximum: 1, default: 0.5 }
+        personalShare: { type: number, minimum: 0, maximum: 1, default: 0.5 }
+        priority:
+          type: string
+          enum: [low, normal, high]
+          default: normal
+    TributeTicket:
+      allOf:
+        - $ref: "#/components/schemas/TributeSubmitRequest"
+        - type: object
+          properties:
+            status:
+              type: string
+              enum: [queued, running, done, failed]
+
+    HivebearRunRequest:
+      type: object
+      required: [modelId, prompt]
+      properties:
+        modelId: { type: string, minLength: 1 }
+        prompt: { type: string, minLength: 1 }
+        stream: { type: boolean }
+
+    VoteRequest:
+      type: object
+      required: [topicId, text]
+      properties:
+        topicId: { type: string, minLength: 1 }
+        text: { type: string, minLength: 1 }
+
+    NoemaSearchRequest:
+      type: object
+      required: [query]
+      properties:
+        query: { type: string, minLength: 1 }
+        limit: { type: integer, minimum: 1, maximum: 50, default: 10 }
+        sources:
+          type: array
+          items: { type: string, enum: [hf, mesh, https] }
+          default: [hf, mesh]
+    NoemaDownloadRequest:
+      type: object
+      required: [manifestId]
+      properties:
+        manifestId: { type: string, minLength: 1 }
+        destination: { type: string }
+        sources:
+          type: array
+          items: {}
+        priority:
+          type: string
+          enum: [speed, privacy, balanced]
+          default: balanced
+    NoemaDownloadStatus:
+      type: object
+      required: [manifestId, state]
+      properties:
+        manifestId: { type: string }
+        state:
+          type: string
+          enum: [queued, downloading, verifying, complete, failed]
+        progress: { type: number, minimum: 0, maximum: 1 }
+        bytesTransferred: { type: integer }
+        totalBytes: { type: integer }
+        activePeers: { type: integer }
+        error: { type: string }

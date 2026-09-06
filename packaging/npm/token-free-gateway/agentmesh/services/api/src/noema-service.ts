@@ -1,12 +1,31 @@
 import { NoemaClient } from "@agentmesh/noema";
 import type { ModelSearchRequest, DownloadStatus, BroadcastRequest } from "@agentmesh/noema";
 
+// CLI path validation: only allow alphanumeric, hyphens, underscores, slashes, dots
+const CLI_PATH_REGEX = /^[a-zA-Z0-9_\-\/\.]+$/;
+const MAX_CLI_PATH_LENGTH = 256;
+
+function sanitizeCliPath(path: string | undefined): string {
+  const defaultPath = "noema";
+  if (!path) return defaultPath;
+  if (path.length > MAX_CLI_PATH_LENGTH) return defaultPath;
+  if (!CLI_PATH_REGEX.test(path)) return defaultPath;
+  return path;
+}
+
+// Validate and sanitize string inputs to prevent injection
+function sanitizeInput(input: string, maxLength = 1024): string {
+  if (typeof input !== "string") return "";
+  return input.slice(0, maxLength).replace(/[;&|`$(){}[\]\\]/g, "");
+}
+
 export class NoemaService {
   private client: NoemaClient;
   private downloadCache = new Map<string, DownloadStatus>();
 
   constructor(cliPath?: string) {
-    this.client = new NoemaClient(cliPath ?? process.env.NOEMA_CLI ?? "noema");
+    const sanitizedPath = sanitizeCliPath(cliPath ?? process.env.NOEMA_CLI);
+    this.client = new NoemaClient(sanitizedPath);
   }
 
   async searchManifests(req: ModelSearchRequest) {
@@ -73,6 +92,26 @@ export class NoemaService {
   }
 
   async verifySignature(manifest: Record<string, unknown>, signature: string): Promise<boolean> {
-    return true;
+    try {
+      // Use the federation-transport ed25519/ECDSA verify function
+      const { verify } = await import("@agentmesh/federation-transport");
+      
+      // Create canonical payload from manifest (sorted keys for determinism)
+      const payload = JSON.stringify(manifest, Object.keys(manifest).sort());
+      
+      // Extract publicKey from manifest if available, otherwise reject
+      const publicKey = (manifest as Record<string, unknown>).publicKey as string | undefined;
+      if (!publicKey || typeof publicKey !== "string") {
+        return false;
+      }
+      
+      if (!signature || typeof signature !== "string") {
+        return false;
+      }
+      
+      return await verify(payload, signature, publicKey);
+    } catch {
+      return false;
+    }
   }
 }

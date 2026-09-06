@@ -10,7 +10,45 @@ import { computeRoutes } from "./compute-routes.js";
 
 const app = Fastify({ logger: true });
 
-await app.register(cors, { origin: true });
+// CORS: restrict to known origins in production, allow localhost in development
+const allowedOrigins = process.env.NODE_ENV === "production"
+  ? (process.env.ALLOWED_ORIGINS?.split(",") ?? ["https://muhanai.com", "https://www.muhanai.com"])
+  : ["http://localhost:3000", "http://localhost:5173", "http://localhost:3001"];
+
+await app.register(cors, {
+  origin: (origin, cb) => {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return cb(null, true);
+    if (allowedOrigins.includes(origin)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Not allowed by CORS"), false);
+    }
+  },
+  credentials: true,
+});
+
+// API Key authentication middleware for sensitive endpoints
+app.addHook("onRequest", async (request, reply) => {
+  // Skip auth for health check and public endpoints
+  const publicPaths = ["/api/pulse", "/api/network", "/api/agents", "/health"];
+  if (publicPaths.includes(request.url)) {
+    return;
+  }
+
+  // Skip auth in development if explicitly disabled
+  if (process.env.NODE_ENV !== "production" && process.env.DISABLE_AUTH === "true") {
+    return;
+  }
+
+  const apiKey = request.headers["x-api-key"];
+  const validApiKey = process.env.API_KEY;
+
+  // If API_KEY is set in env, require valid key for non-public routes
+  if (validApiKey && apiKey !== validApiKey) {
+    reply.code(401).send({ error: "Unauthorized: invalid or missing API key" });
+  }
+});
 
 await app.register(noemaRoutes);
 await app.register(semanticRoutes);

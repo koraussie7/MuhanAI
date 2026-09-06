@@ -1,4 +1,9 @@
 // Mock data for feed components (spec: CLAUDE.md Part 1, priority #9).
+// This file is only used when USE_MOCK_DATA=true or when API is unreachable.
+// In production, real data comes from the API endpoints.
+
+export const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === "true" || false;
+
 export interface UnsolvedProblem {
   id: string;
   title: string;

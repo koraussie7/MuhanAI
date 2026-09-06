@@ -6,4 +6,4 @@ export { LoopbackTransport } from "./loopback-transport.js";
 export { createQueryHandler, createPushHandler } from "./handlers.js";
 export type { QueryMessage, PushMessage, ProtocolMessage } from "./protocols/folklore.js";
 export { QUERY_PROTOCOL, PUSH_PROTOCOL, encodeMessage, decodeMessage } from "./protocols/folklore.js";
-export { generateKeyPair, sign, verify, computeFingerprint } from "./crypto/ed25519.js";
+export { generateKeyPair, sign, verify, computeFingerprint } from "./crypto/ecdsa-p256.js";

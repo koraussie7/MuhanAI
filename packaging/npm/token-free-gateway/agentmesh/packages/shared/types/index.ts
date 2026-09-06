@@ -96,6 +96,10 @@ export type {
 // Re-export runtime-friendly aliases for older imports
 export type { UserProfile as UserProfileV1 } from "./user-knowledge";
 
+// Shared logger — see ./logger.ts for usage. server.ts integration is Agent A's.
+export { getLogger, setLogger, childLogger } from "./logger.js";
+export type { Logger, SharedLoggerOptions, LoggerOptions } from "./logger.js";
+
 export interface UserActivity {
   id: string;
   userId: string;

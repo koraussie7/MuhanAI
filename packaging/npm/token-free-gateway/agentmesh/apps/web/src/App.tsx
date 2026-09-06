@@ -41,6 +41,7 @@ import {
   WorkflowsPage,
   SettingsPage,
 } from "./components/SpecPages";
+import { FindPage } from "./components/find/FindPage";
 import { Search, Zap, Radio, ChevronRight } from "lucide-react";
 
 const SECTIONS = [
@@ -52,6 +53,7 @@ const SECTIONS = [
   { id: "p2p-network", path: "/p2p-network", label: "P2P Network", category: "Network" },
   { id: "knowledge", path: "/knowledge", label: "Knowledge Lake", category: "Intelligence" },
   { id: "knowledge-graph", path: "/knowledge-graph", label: "Knowledge Graph", category: "Intelligence" },
+  { id: "find", path: "/find", label: "Knowledge Cosmos", category: "Intelligence" },
   { id: "search", path: "/search", label: "Mesh Search", category: "Intelligence" },
   { id: "verification", path: "/verification", label: "Verification", category: "Intelligence" },
   { id: "llm-mesh", path: "/llm-mesh", label: "LLM Mesh", category: "Resources" },
@@ -238,6 +240,7 @@ export function App() {
             {/* Intelligence */}
             {activeSection === "knowledge" && <KnowledgePage />}
             {activeSection === "knowledge-graph" && <KnowledgeGraphPage />}
+            {activeSection === "find" && <FindPage onNavigateHome={() => navigate("/")} />}
             {activeSection === "search" && <SearchPage />}
             {activeSection === "verification" && <VerificationPage />}
 

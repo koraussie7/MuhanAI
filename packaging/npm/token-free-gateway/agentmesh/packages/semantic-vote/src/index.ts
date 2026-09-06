@@ -14,12 +14,40 @@ const TAG_RULES: Array<{ tag: SemanticTag; patterns: RegExp[]; weight: number }>
   { tag: "analyze", patterns: [/분석|데이터|통계|분석|analyze|data|stats/i], weight: 0.6 },
 ];
 
+// Validate GUN relay URL to prevent SSRF
+function validateRelayUrl(url: string): string {
+  const DEFAULT_RELAY = "https://hive.p2pclaw.com/gun";
+  try {
+    const parsed = new URL(url);
+    // Only allow https protocol for security
+    if (parsed.protocol !== "https:") {
+      return DEFAULT_RELAY;
+    }
+    // Block private/internal IP ranges
+    const hostname = parsed.hostname;
+    if (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname.startsWith("192.168.") ||
+      hostname.startsWith("10.") ||
+      hostname.startsWith("172.") ||
+      hostname === "[::1]"
+    ) {
+      return DEFAULT_RELAY;
+    }
+    return url;
+  } catch {
+    return DEFAULT_RELAY;
+  }
+}
+
 export class SemanticVotingClient {
   private gun: any;
   private topicVotes = new Map<string, VoteWeight>();
 
   constructor(relayUrl = "https://hive.p2pclaw.com/gun") {
-    this.gun = Gun({ peers: [relayUrl] });
+    const validatedUrl = validateRelayUrl(relayUrl);
+    this.gun = Gun({ peers: [validatedUrl] });
   }
 
   classify(text: string): { primary: SemanticTag; weights: VoteWeight } {
