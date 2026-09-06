@@ -3,8 +3,9 @@ import { CosmicCanvas } from './CosmicCanvas';
 import { CosmicHud } from './CosmicHud';
 import { ObsidianInspector } from './ObsidianInspector';
 import { CosmicPromptBar } from './CosmicPromptBar';
+import './find.css';
 import { INITIAL_NODES, INITIAL_EDGES, INITIAL_PEERS } from './initialData';
-import { CosmicNode, CosmicEdge, NodeType, Shockwave, PeerInfo } from './types';
+import { CosmicNode, CosmicEdge, NodeType, Shockwave, CosmicPeer } from './types';
 
 interface FindPageProps {
   onNavigateHome: () => void;
@@ -64,7 +65,7 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
   const [linkDistance, setLinkDistance] = useState(130);
   const [centerGravity, setCenterGravity] = useState(0.8);
   const [userPeerConnected, setUserPeerConnected] = useState(false);
-  const [peers, setPeers] = useState<PeerInfo[]>(INITIAL_PEERS);
+  const [peers, setPeers] = useState<CosmicPeer[]>(INITIAL_PEERS);
   const [latencyMs, setLatencyMs] = useState(28);
   const [eventsLog, setEventsLog] = useState<string[]>([
     `[init] muhanai.com/find mesh attached · ${INITIAL_PEERS.length} peers · ${INITIAL_NODES.length} notes · ${INITIAL_EDGES.length} synapses`,
