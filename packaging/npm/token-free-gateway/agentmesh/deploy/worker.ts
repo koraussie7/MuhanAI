@@ -1,3 +1,4 @@
+import { handleMcpRequest } from "./mcp-server";
 import { handleFediverseRequest } from "./fediverse";
 import { handleFeedApi } from "./feed-api";
 
@@ -21,8 +22,12 @@ export default {
     const url = new URL(request.url);
 
         // ActivityPub & Fediverse Protocols (.well-known/webfinger, nodeinfo, actor, inbox/outbox)
-    const fediverseResponse = await handleFediverseRequest(request, url);
+    const fediverseResponse = await handleFediverseRequest(request, url, env.FEED_KV);
     if (fediverseResponse) return fediverseResponse;
+
+        // Model Context Protocol (MCP) server endpoints (/api/mcp/*, /.well-known/mcp.json)
+    const mcpResponse = await handleMcpRequest(request, url);
+    if (mcpResponse) return mcpResponse;
 
     if (url.pathname === "/test-worker") {
       return new Response("worker-alive", { status: 200 });
