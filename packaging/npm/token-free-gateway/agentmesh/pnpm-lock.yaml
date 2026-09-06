@@ -124,6 +124,9 @@ importers:
       '@agentmesh/cast':
         specifier: workspace:*
         version: link:../../packages/cast
+      '@agentmesh/token-bank':
+        specifier: workspace:*
+        version: link:../../packages/token-bank
       '@fastify/cors':
         specifier: ^10.0.1
         version: 10.1.0

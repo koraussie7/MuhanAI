@@ -8,6 +8,8 @@ import { UnsolvedProblems } from './UnsolvedProblems';
 import { AiVsHuman } from './AiVsHuman';
 import { TeachAI } from './TeachAI';
 import { AskNetwork } from './AskNetwork';
+import { WelcomeCreditsBanner } from './WelcomeCreditsBanner';
+import { CreditBalance } from './CreditBalance';
 
 export const Dashboard: React.FC = () => {
   return (
@@ -20,6 +22,11 @@ export const Dashboard: React.FC = () => {
           <AskNetwork />
         </div>
       </div>
+
+      {/* Phase 1: First-impression Welcome Credits banner */}
+      <section aria-label="Welcome Credits" style={{ marginBottom: 16 }}>
+        <WelcomeCreditsBanner />
+      </section>
 
       <div className="dashboard-content">
         <section className="dashboard-main">
@@ -78,9 +85,9 @@ export const Dashboard: React.FC = () => {
                 <span className="stat-value">128</span>
                 <span className="stat-label">Knowledge</span>
               </div>
+              {/* Phase 1: Live balance replaces static 98,421 */}
               <div className="user-stat">
-                <span className="stat-value">98,421</span>
-                <span className="stat-label">Total Credits</span>
+                <CreditBalance userId="demo" />
               </div>
             </div>
           </div>
