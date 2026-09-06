@@ -11,6 +11,7 @@ import { knowledgeRoutes } from "./knowledge-routes.js";
 import { networkRoutes } from "./network-routes.js";
 import { agentsRoutes } from "./agents-routes.js";
 import { computeRoutes } from "./compute-routes.js";
+import { creditsRoutes } from "./credits-routes.js";
 
 const PUBLIC_PATH_PREFIXES = ["/api/pulse", "/api/network", "/api/agents"];
 const PUBLIC_PATH_EXACT = new Set(["/health"]);
@@ -116,6 +117,7 @@ export async function buildApp(options: { logger?: ReturnType<typeof getLogger> 
   await app.register(networkRoutes);
   await app.register(agentsRoutes);
   await app.register(computeRoutes);
+  await app.register(creditsRoutes);
 
   return app;
 }
