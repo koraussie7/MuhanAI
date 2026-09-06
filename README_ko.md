@@ -160,6 +160,17 @@ muhanai/
 
 ---
 
+
+---
+
+## 👥 기여자 (Contributors)
+
+- **Brian Y** ([@koraussie7](https://github.com/koraussie7)) — 설계 및 총괄 아키텍트
+- **Claude 3.7 Sonnet** (`claude@anthropic.com`) — 시스템 아키텍처 및 CRDT 지식 레이크
+- **Gemini 2.5 Pro** (`gemini@google.com`) — 그라운딩 검증 및 페디버스(ActivityPub) 브릿지
+
+자세한 내용은 [CONTRIBUTORS.md](CONTRIBUTORS.md)를 참고하세요.
+
 ## 📄 라이선스
 
 본 프로젝트는 **MIT License**에 따라 배포됩니다.
