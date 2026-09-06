@@ -1,0 +1,49 @@
+import { useEffect, useState } from "react";
+
+type Props = {
+  apiBase?: string;
+  userId?: string;
+};
+
+type CreditResponse = {
+  balance: string;
+};
+
+const formatCredits = (value: string) =>
+  new Intl.NumberFormat("en-US").format(Number(value));
+
+export function CreditBalance({ apiBase = "", userId = "demo" }: Props) {
+  const [balance, setBalance] = useState("0");
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch(`${apiBase}/api/credits/balance?userId=${encodeURIComponent(userId)}`, {
+      credentials: "include",
+    })
+      .then((r) => (r.ok ? (r.json() as Promise<CreditResponse>) : Promise.reject(r)))
+      .then((data) => {
+        if (!cancelled) {
+          setBalance(data.balance);
+          setError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setError("—");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [apiBase, userId]);
+
+  return (
+    <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+      <span className="text-xs opacity-60">MUHAN CREDITS</span>
+      <strong className="tabular-nums">
+        {error ?? formatCredits(balance)}
+      </strong>
+    </div>
+  );
+}

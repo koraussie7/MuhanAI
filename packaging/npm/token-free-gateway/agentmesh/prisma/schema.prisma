@@ -37,6 +37,37 @@ model User {
   agentLinks      UserAgentLink[]
   agentRuns       AgentRun[]
   stats           UserStatsRow?
+  creditWallet    CreditWallet?
+  creditLedger    CreditLedger[]
+}
+
+// ---------------------------------------------------------------------------
+// Credits
+// ---------------------------------------------------------------------------
+
+model CreditWallet {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balance   BigInt   @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([balance])
+}
+
+model CreditLedger {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount         BigInt
+  direction      String
+  reason         String
+  idempotencyKey String   @unique
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  @@index([userId, createdAt])
 }
 
 model UserProfile {
