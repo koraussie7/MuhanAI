@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { CosmicNode } from './types';
 import { X, FileText, Link2, ExternalLink, Hash, Check, Copy, User, Calendar, ShieldCheck, Wifi } from 'lucide-react';
 
@@ -36,13 +36,9 @@ export const ObsidianInspector: React.FC<ObsidianInspectorProps> = ({
 
   const fm = node.frontmatter;
 
-  // Find backlinks: explicit links[] OR a [[Title]] reference in another note's body.
-  // Memoize the wiki-link regex so we don't recompile it on every render — the title
-  // only changes when the inspected node changes.
-  const backlinkWikiLink = useMemo(() => {
-    const escapedTitle = node.frontmatter.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    return new RegExp(`\\[\\[\\s*${escapedTitle}(\\.md)?\\s*\\]\\]`, 'i');
-  }, [node.frontmatter.title]);
+  // Find backlinks: explicit links[] OR a [[Title]] reference in another note's body
+  const escapedTitle = node.frontmatter.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const backlinkWikiLink = new RegExp(`\\[\\[\\s*${escapedTitle}(\\.md)?\\s*\\]\\]`, 'i');
   const backlinks = allNodes.filter((other) => {
     if (other.id === node.id) return false;
     return other.frontmatter.links.includes(node.id) || backlinkWikiLink.test(other.frontmatter.markdown);

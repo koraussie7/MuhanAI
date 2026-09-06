@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { SemanticVotingClient, VOTE_TO_ROUTE } from "@agentmesh/semantic-vote";
+import { clientError, formatZodError } from "./error-shapes.js";
 
 const VoteRequestSchema = z.object({
   topicId: z.string().min(1).max(256),
@@ -21,7 +22,7 @@ export async function semanticRoutes(app: FastifyInstance) {
   app.post("/api/semantic/vote", async (request, reply) => {
     const parse = VoteRequestSchema.safeParse(request.body);
     if (!parse.success) {
-      return reply.code(400).send({ error: parse.error.message });
+      return clientError(reply, 400, formatZodError(parse.error), request.id);
     }
 
     const { topicId, text } = parse.data;
@@ -39,7 +40,7 @@ export async function semanticRoutes(app: FastifyInstance) {
   app.get("/api/semantic/topics", async (request, reply) => {
     const parse = TopTopicsQuerySchema.safeParse(request.query);
     if (!parse.success) {
-      return reply.code(400).send({ error: parse.error.message });
+      return clientError(reply, 400, formatZodError(parse.error), request.id);
     }
 
     const topics = client.getTopTopics(parse.data.limit);
@@ -49,7 +50,7 @@ export async function semanticRoutes(app: FastifyInstance) {
   app.post("/api/semantic/classify", async (request, reply) => {
     const parse = ClassifySchema.safeParse(request.body);
     if (!parse.success) {
-      return reply.code(400).send({ error: parse.error.message });
+      return clientError(reply, 400, formatZodError(parse.error), request.id);
     }
 
     const { primary, weights } = client.classify(parse.data.text);

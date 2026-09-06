@@ -9,6 +9,7 @@ export interface ObsidianFrontmatter {
   links: string[];
   summary: string;
   markdown: string;
+  latency?: number;
 }
 
 export interface CosmicNode {
@@ -35,7 +36,7 @@ export interface CosmicEdge {
   weight?: number;
 }
 
-export interface CosmicPeer {
+export interface PeerInfo {
   id: string;
   name: string;
   region: string;
