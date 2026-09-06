@@ -9,7 +9,7 @@
 [![P2P WebRTC](https://img.shields.io/badge/WebRTC_CRDT-제로_토큰-10B981?style=for-the-badge&logo=webrtc&logoColor=white)](https://muhanai.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-**[English](README.md)** | **[웹 서비스 (muhanai.com)](https://muhanai.com)** | **[코스믹 메쉬 (find.muhanai.com)](https://muhanai.com/find)**
+**[English](README.md)** | **[🌌 코스믹 지식 메쉬 (muhanai.com)](https://muhanai.com)** | **[🖥️ 개발자 대시보드 (/dashboard)](https://muhanai.com/dashboard)**
 
 <br />
 
@@ -21,7 +21,7 @@ MuhanAI는 **API 토큰 비용 없는 추론 라우팅(Zero-Token Gateway)**, **
 
 ## 📸 실제 서비스 화면 프리뷰
 
-### 1. 코스믹 옵시디언 지식 메쉬 (`find.muhanai.com`)
+### 1. 코스믹 옵시디언 지식 메쉬 (`muhanai.com` 및 `find.muhanai.com`)
 > *우주 전체 실루엣을 배경으로 하는 물리 기반 옵시디언 지식 그래프, 실시간 WebRTC 피어 접속 초신성 애니메이션, 상단 중앙 깜박이는 고스트 타이프라이터 옴니바.*
 
 <div align="center">
@@ -34,7 +34,7 @@ MuhanAI는 **API 토큰 비용 없는 추론 라우팅(Zero-Token Gateway)**, **
 
 <br />
 
-### 2. 개발자 콘솔 대시보드 (`muhanai.com`)
+### 2. 개발자 콘솔 대시보드 (`muhanai.com/dashboard`)
 > *단일 대시보드 화면에 완전히 통합된 한국형 지식인(Knowledge IN) 집단지성 피드 및 실시간 P2P 텔레메트리.*
 
 <div align="center">
