@@ -6,6 +6,8 @@ export default defineConfig({
 			"packages/**/*.test.ts",
 			"services/**/*.test.ts",
 			"apps/web/src/**/*.test.{ts,tsx}",
+			// Workspace-level operational tests (gated by env var; see file header).
+			"tests/**/*.test.ts",
 		],
 		environment: "node",
 		passWithNoTests: true,

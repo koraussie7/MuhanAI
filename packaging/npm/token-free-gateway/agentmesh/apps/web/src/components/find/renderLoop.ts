@@ -73,6 +73,29 @@ export interface RenderSchedulerConfig {
 	now?: () => number;
 }
 
+/**
+ * Self-reported statistics. The scheduler tracks these in-process so callers
+ * (and the test suite) can verify behavior without instrumenting the DOM.
+ *
+ * `skippedFrameRatio` is the fraction of rAF callbacks that arrived inside
+ * the FPS budget and therefore suppressed `onTick`. A 240Hz monitor running
+ * at a 60Hz target will report ~0.75; the same monitor at a 30Hz target will
+ * report ~0.875.
+ *
+ * `effectiveFps` is the moving average of `onTick` invocations per second,
+ * computed over the last `windowMs` (default 1000).
+ */
+export interface SchedulerStats {
+	profile: QualityProfile;
+	rafCount: number;
+	onTickCount: number;
+	skippedFrameRatio: number;
+	effectiveFps: number;
+	lastDtMs: number;
+	minDtMs: number;
+	maxDtMs: number;
+}
+
 export interface RenderScheduler {
 	/** Begin the rAF chain. Idempotent. */
 	start(): void;
@@ -82,6 +105,12 @@ export interface RenderScheduler {
 	notifyInteraction(): void;
 	/** Synchronous snapshot of the current quality profile. */
 	getProfile(): QualityProfile;
+	/**
+	 * Self-reported stats snapshot. Cheap; safe to call from any context.
+	 * Useful for in-browser performance overlays and for the unit-test
+	 * verification of FPS-cap / idle-threshold / resume-fallback behavior.
+	 */
+	getStats(windowMs?: number): SchedulerStats;
 	/**
 	 * Cancel the rAF chain and detach all listeners. Idempotent.
 	 * Call from React `useEffect` cleanup.
@@ -137,6 +166,25 @@ export function createRenderScheduler(config: RenderSchedulerConfig): RenderSche
 	let removeVisibilityListener: (() => void) | null = null;
 	let destroyed = false;
 
+	// Self-reported stats. Counts every rAF callback and every onTick; the
+	// skipped-frame ratio derives from those. dt samples feed min/max/last.
+	let rafCount = 0;
+	let onTickCount = 0;
+	let lastDtMs = 0;
+	let minDtMs = Number.POSITIVE_INFINITY;
+	let maxDtMs = 0;
+	// Ring buffer of recent onTick timestamps for effectiveFps (ms granularity).
+	const recentTickTs: number[] = [];
+
+	function recordTickSample(ts: number): void {
+		recentTickTs.push(ts);
+		// Drop samples older than 5 seconds — plenty for any reasonable windowMs.
+		const cutoff = ts - 5000;
+		while (recentTickTs.length > 0 && (recentTickTs[0] ?? Infinity) < cutoff) {
+			recentTickTs.shift();
+		}
+	}
+
 	function getProfile(): QualityProfile {
 		if (!visible) return "hidden";
 		if (now() - lastInteractionAt >= idleAfterMs) return "idle";
@@ -146,17 +194,25 @@ export function createRenderScheduler(config: RenderSchedulerConfig): RenderSche
 	function frame(t: number): void {
 		if (!running || destroyed) return;
 		animId = null;
+		rafCount += 1;
 
 		if (!visible) {
 			running = false;
 			return;
 		}
 
-		// First frame after start/visibility-resume: dt is undefined, fall back to a
-		// 60Hz-equivalent so the first tick's physics step uses a sane delta.
+		// dt is the time elapsed since the last *onTick* (not since the last
+		// display frame). When running on a 240Hz monitor, four display frames
+		// arrive per 16.67ms; only the one whose cumulative dt ≥ minIntervalMs
+		// is allowed to fire onTick. The other three are observed (rafCount++)
+		// but otherwise no-op.
 		const dt = isFirstFrame ? 1000 / targetFps : t - lastFrameTime;
 		isFirstFrame = false;
-		lastFrameTime = t;
+		// Note: lastFrameTime is updated only when we actually fire onTick (below).
+		// Skip frames do not advance it — that is the cumulative-budget logic.
+		lastDtMs = dt;
+		if (dt < minDtMs) minDtMs = dt;
+		if (dt > maxDtMs) maxDtMs = dt;
 
 		const profile = getProfile();
 		const effectiveFps = profile === "idle" ? reducedIdleFps : targetFps;
@@ -170,6 +226,9 @@ export function createRenderScheduler(config: RenderSchedulerConfig): RenderSche
 		}
 
 		config.onTick(dt, profile);
+		lastFrameTime = t;
+		onTickCount += 1;
+		recordTickSample(now());
 
 		if (!running || destroyed) return;
 		animId = raf(frame);
@@ -180,6 +239,12 @@ export function createRenderScheduler(config: RenderSchedulerConfig): RenderSche
 		running = true;
 		isFirstFrame = true;
 		lastFrameTime = 0;
+		rafCount = 0;
+		onTickCount = 0;
+		minDtMs = Number.POSITIVE_INFINITY;
+		maxDtMs = 0;
+		lastDtMs = 0;
+		recentTickTs.length = 0;
 		animId = raf(frame);
 	}
 
@@ -226,6 +291,27 @@ export function createRenderScheduler(config: RenderSchedulerConfig): RenderSche
 
 	wireVisibility();
 
+	function getStats(windowMs = 1000): SchedulerStats {
+		const cutoff = now() - windowMs;
+		let ticksInWindow = 0;
+		for (let i = recentTickTs.length - 1; i >= 0; i--) {
+			if ((recentTickTs[i] ?? -Infinity) >= cutoff) ticksInWindow += 1;
+			else break;
+		}
+		const skippedFrameRatio = rafCount > 0 ? 1 - onTickCount / rafCount : 0;
+		const effectiveFps = windowMs > 0 ? (ticksInWindow * 1000) / windowMs : 0;
+		return {
+			profile: getProfile(),
+			rafCount,
+			onTickCount,
+			skippedFrameRatio,
+			effectiveFps,
+			lastDtMs,
+			minDtMs: minDtMs === Number.POSITIVE_INFINITY ? 0 : minDtMs,
+			maxDtMs,
+		};
+	}
+
 	function destroy(): void {
 		if (destroyed) return;
 		destroyed = true;
@@ -241,6 +327,7 @@ export function createRenderScheduler(config: RenderSchedulerConfig): RenderSche
 		stop,
 		notifyInteraction,
 		getProfile,
+		getStats,
 		destroy,
 	};
 }

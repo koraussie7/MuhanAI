@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -44,5 +44,20 @@ describe("loadOrCreateIdentity", () => {
 		writeFileSync(path, "{ not json", "utf8");
 		const id = await loadOrCreateIdentity(path);
 		expect(id.peerId).toMatch(/^12D3Koo/);
+	});
+
+	it("rotates peerId when the file is deleted (incident response)", async () => {
+		// Simulates the security-incident response: after a leaked key
+		// is removed from disk, the next loader call MUST produce a
+		// different peerId. This is the rotation contract relied on by
+		// ADR 0007.
+		const path = join(dir, "id.json");
+		const before = await loadOrCreateIdentity(path);
+		unlinkSync(path);
+		const after = await loadOrCreateIdentity(path);
+
+		expect(after.peerId).not.toBe(before.peerId);
+		expect(after.peerId).toMatch(/^12D3Koo/);
+		expect(after.format).toBe(IDENTITY_FORMAT_CURRENT);
 	});
 });
