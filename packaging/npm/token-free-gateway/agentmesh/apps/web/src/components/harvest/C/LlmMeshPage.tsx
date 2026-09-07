@@ -1,4 +1,9 @@
 import { useEffect, useState } from "react";
+import {
+	createHttpAdapter,
+	createResilientAdapter,
+	type ResourceAdapter,
+} from "./adapter.js";
 import { ApiVault, GatewayTable, PolicyChain } from "./GatewayPanel.js";
 import type { GatewayProvider } from "./GatewayPanel.js";
 
@@ -34,16 +39,13 @@ export interface LlmMeshSnapshot {
 	vault: LlmMeshVaultEntry[];
 }
 
-export interface LlmMeshAdapter {
-	loadSnapshot(): Promise<LlmMeshSnapshot>;
-}
+export interface LlmMeshAdapter extends ResourceAdapter<LlmMeshSnapshot> {}
 
 /**
- * Default stub adapter. Returns synthetic data so the UI renders without
- * a backend. Replace with an adapter that calls `/api/llm-mesh` once that
- * endpoint lands. The shape stays the same.
+ * Stub producer for fallback when the live endpoint is unreachable.
+ * Exported so tests can pair it with `createResilientAdapter`.
  */
-function stubAdapter(): LlmMeshAdapter {
+export function stubLlmMeshSnapshot(): LlmMeshSnapshot {
 	const baseRoutes: LlmMeshRoute[] = [
 		{ provider: "WebLLM (Local)", latencyMs: 18, costTier: "free", status: "optimal" },
 		{ provider: "P2P Mesh Node", latencyMs: 34, costTier: "free", status: "optimal" },
@@ -52,35 +54,38 @@ function stubAdapter(): LlmMeshAdapter {
 		{ provider: "Anthropic Claude", latencyMs: 820, costTier: "paid", status: "degraded" },
 	];
 	return {
-		async loadSnapshot() {
-			return {
-				gateways: [
-					{ name: "Gemini", status: "healthy", latencyMs: 180, costTier: "low" },
-					{ name: "Claude", status: "healthy", latencyMs: 220, costTier: "paid" },
-					{ name: "GPT", status: "healthy", latencyMs: 240, costTier: "paid" },
-					{ name: "Mistral", status: "degraded", latencyMs: 420, costTier: "low" },
-					{ name: "Groq", status: "healthy", latencyMs: 150, costTier: "low" },
-					{ name: "Cerebras", status: "healthy", latencyMs: 130, costTier: "low" },
-					{ name: "OpenRouter", status: "healthy", latencyMs: 360, costTier: "paid" },
-					{ name: "FreeLLMAPI", status: "healthy", latencyMs: 210, costTier: "free" },
-					{ name: "LocalAI", status: "healthy", latencyMs: 90, costTier: "free" },
-					{ name: "Ollama", status: "healthy", latencyMs: 110, costTier: "free" },
-					{ name: "WebLLM", status: "healthy", latencyMs: 60, costTier: "free" },
-				],
-				routes: baseRoutes,
-				vault: [
-					{ name: "openai", quota: 1000, used: 412 },
-					{ name: "anthropic", quota: 500, used: 188 },
-					{ name: "gemini", quota: 1500, used: 720 },
-					{ name: "groq", quota: 800, used: 96 },
-				],
-			};
-		},
+		gateways: [
+			{ name: "Gemini", status: "healthy", latencyMs: 180, costTier: "low" },
+			{ name: "Claude", status: "healthy", latencyMs: 220, costTier: "paid" },
+			{ name: "GPT", status: "healthy", latencyMs: 240, costTier: "paid" },
+			{ name: "Mistral", status: "degraded", latencyMs: 420, costTier: "low" },
+			{ name: "Groq", status: "healthy", latencyMs: 150, costTier: "low" },
+			{ name: "Cerebras", status: "healthy", latencyMs: 130, costTier: "low" },
+			{ name: "OpenRouter", status: "healthy", latencyMs: 360, costTier: "paid" },
+			{ name: "FreeLLMAPI", status: "healthy", latencyMs: 210, costTier: "free" },
+			{ name: "LocalAI", status: "healthy", latencyMs: 90, costTier: "free" },
+			{ name: "Ollama", status: "healthy", latencyMs: 110, costTier: "free" },
+			{ name: "WebLLM", status: "healthy", latencyMs: 60, costTier: "free" },
+		],
+		routes: baseRoutes,
+		vault: [
+			{ name: "openai", quota: 1000, used: 412 },
+			{ name: "anthropic", quota: 500, used: 188 },
+			{ name: "gemini", quota: 1500, used: 720 },
+			{ name: "groq", quota: 800, used: 96 },
+		],
 	};
 }
 
+function defaultLlmMeshAdapter(): LlmMeshAdapter {
+	return createResilientAdapter<LlmMeshSnapshot>(
+		createHttpAdapter<LlmMeshSnapshot>("/api/llm-mesh"),
+		stubLlmMeshSnapshot,
+	);
+}
+
 export interface LlmMeshPageProps {
-	/** Inject a real adapter; default = stub for UI dev. */
+	/** Inject a real adapter; default = resilient HTTP→stub. */
 	adapter?: LlmMeshAdapter;
 }
 
@@ -140,7 +145,7 @@ const POLICIES = [
 const MAX_LATENCY_MS = 1000;
 
 export function LlmMeshPage({ adapter }: LlmMeshPageProps = {}) {
-	const adp = adapter ?? stubAdapter();
+	const adp = adapter ?? defaultLlmMeshAdapter();
 	const [policyId, setPolicyId] = useState<string>("balanced");
 	const [snapshot, setSnapshot] = useState<LlmMeshSnapshot | null>(null);
 

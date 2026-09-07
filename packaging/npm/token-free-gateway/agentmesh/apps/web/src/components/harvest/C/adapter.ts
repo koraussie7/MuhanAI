@@ -83,3 +83,29 @@ export interface WritableResourceAdapter<TSnapshot>
 	extends ResourceAdapter<TSnapshot> {
 	saveSnapshot(snapshot: TSnapshot): Promise<void>;
 }
+
+/**
+ * Build a resilient adapter that tries the primary (typically HTTP) source
+ * first and falls back to a stub producer on any error. The fallback keeps
+ * the UI alive when the API is unreachable, in degraded mode (5xx), or
+ * simply not yet deployed to the current environment.
+ *
+ * The primary is attempted exactly once per `loadSnapshot()` call; the
+ * fallback is invoked synchronously and cannot fail. Errors from the
+ * primary are swallowed — callers that need to distinguish degraded from
+ * live should layer their own logging on top.
+ */
+export function createResilientAdapter<TSnapshot>(
+	primary: ResourceAdapter<TSnapshot>,
+	fallback: () => TSnapshot,
+): ResourceAdapter<TSnapshot> {
+	return {
+		async loadSnapshot() {
+			try {
+				return await primary.loadSnapshot();
+			} catch {
+				return fallback();
+			}
+		},
+	};
+}
