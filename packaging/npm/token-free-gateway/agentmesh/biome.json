@@ -9,8 +9,7 @@
 			"!**/node_modules",
 			"!**/coverage",
 			"!**/.agentmesh",
-			"!**/prisma/migrations",
-			"!**/apps/web/src/components/find/.backup"
+			"!**/prisma/migrations"
 		]
 	},
 	"formatter": {
