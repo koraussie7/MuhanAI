@@ -25,13 +25,9 @@ import type { Transport, TransportOptions } from "./types.js";
 export class Libp2pTransport implements Transport {
 	private handle: TransportHandle | null = null;
 	private queryHandler:
-		| ((message: {
-				query: string;
-				embedding?: number[];
-		  }) => Promise<SignedRecord[]>)
+		| ((message: { query: string; embedding?: number[] }) => Promise<SignedRecord[]>)
 		| null = null;
-	private pushHandler: ((records: SignedRecord[]) => Promise<void>) | null =
-		null;
+	private pushHandler: ((records: SignedRecord[]) => Promise<void>) | null = null;
 	private readonly identityPath: string;
 	/** Handlers registered via getPulseSource(). All share one floodsub subscription. */
 	private readonly pulseHandlers = new Set<(msg: PulseMessage) => void>();
@@ -40,6 +36,16 @@ export class Libp2pTransport implements Transport {
 
 	constructor(options: TransportOptions & { identityPath?: string }) {
 		this.identityPath = options.identityPath ?? "./.agentmesh/identity.json";
+	}
+
+	setQueryHandler(
+		handler: (message: { query: string; embedding?: number[] }) => Promise<SignedRecord[]>,
+	): void {
+		this.queryHandler = handler;
+	}
+
+	setPushHandler(handler: (records: SignedRecord[]) => Promise<void>): void {
+		this.pushHandler = handler;
 	}
 
 	async start(): Promise<void> {
@@ -51,9 +57,7 @@ export class Libp2pTransport implements Transport {
 			discovery: ["mdns"],
 		});
 		if (transportResult.isErr()) {
-			throw new Error(
-				`transport init failed: ${transportResult.error.message}`,
-			);
+			throw new Error(`transport init failed: ${transportResult.error.message}`);
 		}
 		this.handle = transportResult.value;
 
@@ -76,18 +80,13 @@ export class Libp2pTransport implements Transport {
 			| {
 					subscribe(topic: string): void;
 					publish(topic: string, data: Uint8Array): Promise<void>;
-					addEventListener(
-						type: string,
-						listener: (evt: CustomEvent<unknown>) => void,
-					): void;
+					addEventListener(type: string, listener: (evt: CustomEvent<unknown>) => void): void;
 			  }
 			| undefined;
 		if (pubsub && !this.pulseForwarderInstalled) {
 			pubsub.subscribe(PULSE_TOPIC);
 			pubsub.addEventListener("message", (evt) => {
-				const detail = (
-					evt as CustomEvent<{ topic?: string; data?: Uint8Array }>
-				).detail;
+				const detail = (evt as CustomEvent<{ topic?: string; data?: Uint8Array }>).detail;
 				if (detail.topic !== PULSE_TOPIC || !detail.data) return;
 				const msg = decodePulse(detail.data);
 				if (!msg) return; // malformed payload — silently drop
@@ -110,11 +109,7 @@ export class Libp2pTransport implements Transport {
 		}
 	}
 
-	async query(
-		peerId: string,
-		query: string,
-		embedding?: number[],
-	): Promise<SignedRecord[]> {
+	async query(peerId: string, query: string, embedding?: number[]): Promise<SignedRecord[]> {
 		if (!this.handle) return [];
 		try {
 			const stream = await this.handle.node.dialProtocol(
@@ -122,17 +117,11 @@ export class Libp2pTransport implements Transport {
 				peerIdFromString(peerId) as any,
 				QUERY_PROTOCOL,
 			);
-			stream.send(
-				new TextEncoder().encode(
-					JSON.stringify({ type: "query", query, embedding }),
-				),
-			);
+			stream.send(new TextEncoder().encode(JSON.stringify({ type: "query", query, embedding })));
 			const chunks: Uint8Array[] = [];
 			for await (const chunk of stream) {
 				chunks.push(
-					chunk instanceof Uint8Array
-						? chunk.subarray()
-						: new Uint8Array(chunk.slice()).subarray(),
+					chunk instanceof Uint8Array ? chunk.subarray() : new Uint8Array(chunk.slice()).subarray(),
 				);
 			}
 			const buf = Buffer.concat(chunks.map((c) => Buffer.from(c)));
@@ -153,15 +142,11 @@ export class Libp2pTransport implements Transport {
 				peerIdFromString(peerId) as any,
 				PUSH_PROTOCOL,
 			);
-			stream.send(
-				new TextEncoder().encode(JSON.stringify({ type: "push", records })),
-			);
+			stream.send(new TextEncoder().encode(JSON.stringify({ type: "push", records })));
 			const chunks: Uint8Array[] = [];
 			for await (const chunk of stream) {
 				chunks.push(
-					chunk instanceof Uint8Array
-						? chunk.subarray()
-						: new Uint8Array(chunk.slice()).subarray(),
+					chunk instanceof Uint8Array ? chunk.subarray() : new Uint8Array(chunk.slice()).subarray(),
 				);
 			}
 			const buf = Buffer.concat(chunks.map((c) => Buffer.from(c)));
@@ -254,26 +239,19 @@ export class Libp2pTransport implements Transport {
 }
 
 export interface Libp2pTransportOptions extends TransportOptions {
-	onQuery?: (message: {
-		query: string;
-		embedding?: number[];
-	}) => Promise<SignedRecord[]>;
+	onQuery?: (message: { query: string; embedding?: number[] }) => Promise<SignedRecord[]>;
 	onPush?: (records: SignedRecord[]) => Promise<void>;
 	identityPath?: string;
 }
 
-export function createLibp2pTransport(
-	options: Libp2pTransportOptions,
-): Libp2pTransport {
+export function createLibp2pTransport(options: Libp2pTransportOptions): Libp2pTransport {
 	const transport = new Libp2pTransport(options);
 
 	if (options.onQuery) {
-		// Bracket notation bypasses TS private check — the handlers are set
-		// post-construction so the constructor stays optional-args-only.
-		transport["queryHandler"] = options.onQuery;
+		transport.setQueryHandler(options.onQuery);
 	}
 	if (options.onPush) {
-		transport["pushHandler"] = options.onPush;
+		transport.setPushHandler(options.onPush);
 	}
 
 	return transport;
