@@ -47,20 +47,16 @@ const KEYLESS_PROVIDERS: KeylessProviderConfig[] = [
 		parse: (data) => (typeof data === "string" ? data : JSON.stringify(data)),
 	},
 	{
-		name: "openrouter-free",
-		endpoint: "https://openrouter.ai/api/v1/chat/completions",
+		name: "pollinations-api",
+		endpoint: "https://api.pollinations.ai/v1/chat/completions",
 		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-			"HTTP-Referer": "https://muhanai.com",
-			"X-Title": "MuhanAI Token-Free Gateway",
-		},
+		headers: { "Content-Type": "application/json" },
 		body: (req) => ({
-			model: req.model ?? "meta-llama/llama-3.2-3b-instruct:free",
 			messages: [
 				...(req.system ? [{ role: "system", content: req.system }] : []),
 				{ role: "user", content: req.prompt },
 			],
+			model: req.model ?? "openai/gpt-4o-mini",
 			temperature: req.temperature ?? 0.3,
 			max_tokens: req.maxTokens ?? 1024,
 		}),
@@ -106,18 +102,40 @@ async function callProvider(
 	const timer = setTimeout(() => controller.abort(), timeoutMs);
 
 	try {
-		const response = await fetch(config.endpoint, {
-			method: config.method,
-			headers: config.headers,
-			body: config.method === "POST" ? JSON.stringify(config.body(req)) : undefined,
-			signal: controller.signal,
-		});
+		let response: Response;
+
+		if (config.method === "POST") {
+			response = await fetch(config.endpoint, {
+				method: "POST",
+				headers: config.headers,
+				body: JSON.stringify(config.body(req)),
+				signal: controller.signal,
+			});
+		} else {
+			// GET: URL-encode the prompt into the endpoint
+			const promptText = req.system
+				? `${req.system}\n\n${req.prompt}`
+				: req.prompt;
+			const url = `${config.endpoint}${encodeURIComponent(promptText)}`;
+			response = await fetch(url, {
+				method: "GET",
+				headers: config.headers,
+				signal: controller.signal,
+			});
+		}
 
 		if (!response.ok) {
 			throw new Error(`${config.name} returned ${response.status}`);
 		}
 
-		const data = await response.json();
+		// Pollinations returns plain text, not JSON — try .json() first, fall back to .text()
+		let data: any;
+		const contentType = response.headers.get("content-type") ?? "";
+		if (contentType.includes("application/json")) {
+			data = await response.json();
+		} else {
+			data = await response.text();
+		}
 		const text = config.parse(data);
 
 		if (!text || text.trim().length === 0) {
