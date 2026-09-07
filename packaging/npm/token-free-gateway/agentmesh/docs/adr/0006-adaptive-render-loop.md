@@ -185,6 +185,69 @@ All listeners are `{ passive: true }` so they never block scrolling.
 - **`requestIdleCallback` for the loop** — does not work for visual
   animation; user expects 60Hz updates when they are interacting.
 
+## Phase 2: fixed-step physics accumulator
+
+After Phase 1 shipped, the render closure still called `physics.step()`
+once per render frame. That meant the simulation rate was implicitly tied
+to the render rate: 60Hz target → 60 physics steps/sec; 30Hz idle target
+→ 30 physics steps/sec; 240Hz monitor → still 60 because the scheduler
+capped onTick, but a future regression that bypasses the cap would
+silently break the simulation rate. We decouple them.
+
+### D7: `createPhysicsLoop` owns the simulation timestep
+
+A second DOM-free factory at `apps/web/src/components/find/physicsLoop.ts`
+implements the standard fixed-step accumulator (Glenn Fiedler, "Fix Your
+Timestep"):
+
+- The simulation always integrates by `fixedTimestepMs` (default 1/60 s).
+- The renderer calls `physicsLoop.advance(wallDtMs)` whenever a render
+  frame fires. The accumulator drains zero or more fixed steps until
+  residual < step.
+- The accumulator caps at `maxStepsPerAdvance` (default 5). A 5-second
+  background-resume cannot fire 300 physics steps; it fires 5 and discards
+  the residual so the simulation resumes from the latest known state.
+- The render receives `alpha = accumulator / fixedTimestepMs` (0..1) so
+  it can interpolate visuals between the last and next physics state.
+  CosmicCanvas uses alpha to nudge edge-packet pulse position by one
+  sub-frame so the pulse motion interpolates between physics ticks
+  instead of stuttering.
+
+### Why this matters
+
+1. **Deterministic simulation.** Same inputs + same elapsed wall time =
+   same node positions, regardless of render rate or stutter. Enables
+   record/replay (drag a node, run for 5s, expect identical positions
+   on replay) and visual regression tests.
+2. **Frame-rate-independent simulation.** The render scheduler's FPS cap
+   (30 fps idle, 60 fps active) no longer slows down physics. Physics
+   runs at 60Hz whenever the tab is visible, paused when hidden.
+3. **Bounded work per frame.** `maxStepsPerAdvance` makes a single render
+   frame's physics cost predictable — worst case `5 * O(n²)` repulsion
+   loops, ~80ms on a 200-node graph. Before Phase 2, a 500ms stall
+   delivered a 500ms mega-step that scaled forces proportionally and
+   could fling nodes off-screen before `INTEGRATION_DAMPING` could bleed
+   energy.
+4. **Future-proof for dt-driven physics.** Today `physics.ts` uses fixed
+   `INTEGRATION_DAMPING` and ignores dt. If a future change makes the
+   integrator dt-aware, the simulation will stay at 60Hz regardless of
+   the render rate — no other code changes required.
+
+### Implementation notes
+
+- `apps/web/src/components/find/physicsLoop.ts` — factory module (~120
+  lines, DOM-free, React-free).
+- `apps/web/src/components/find/physicsLoop.test.ts` — 7 unit tests in
+  `node:test`. Coverage: single-step drain, multi-step drain, sub-step
+  alpha, blow-up guard, reset, monotonic alpha, mid-accumulation drain.
+- `apps/web/src/components/find/CosmicCanvas.tsx` — render closure now
+  reads `alpha = physicsLoop.advance(dtMs)` and uses it for visual
+  interpolation. The `stepPhysics` call moved into the physicsLoop's
+  `onStep` closure so the loop owns the simulation rate. Cleanup
+  destroys both scheduler and physicsLoop on unmount.
+- `apps/web/src/components/find/physics.ts` — **unchanged** (still a
+  pure function called once per fixed tick).
+
 ## Implementation
 
 - `apps/web/src/components/find/renderLoop.ts` — factory module (~210
@@ -202,6 +265,8 @@ All listeners are `{ passive: true }` so they never block scrolling.
 
 - `node --import tsx --test src/components/find/renderLoop.test.ts` —
   19/19 pass (15 original + 4 Phase 1 verification scenarios).
+- `node --import tsx --test src/components/find/physicsLoop.test.ts` —
+  7/7 pass (Phase 2 fixed-step accumulator scenarios).
 - `node --import tsx --test src/components/find/physics.test.ts` — 40/40
   pass (regression guard: physics module untouched).
 - `npx tsc -p tsconfig.json --noEmit` — clean.
@@ -234,11 +299,30 @@ Fix: `lastFrameTime` updates **only on tick**, so dt accumulates across
 skipped frames and the budget fires correctly. The four Phase 1 tests
 now serve as regression guards against this class of bug.
 
+### Phase 2 verification (fixed-step accumulator)
+
+The Phase 2 test suite covers the simulation rate contract that the
+scheduler previously had to police implicitly. Scenarios run under
+`node:test` with injected timing — device-independent.
+
+| Scenario | Input | Expected | Verified |
+|---|---|---|---|
+| Single-step drain | advance(16.6667ms) | exactly 1 step, alpha in [0,1) | ✓ |
+| Three-step drain | advance(30ms @ step=10ms) | exactly 3 steps, alpha = 0 | ✓ |
+| Sub-step alpha | advance(8ms @ step=16.67ms) | 0 steps, alpha ≈ 0.48, acc = 8 | ✓ |
+| Blow-up guard | advance(10_000ms @ max=5) | exactly 5 steps, residual discarded | ✓ |
+| Reset | advance(8) → reset() → advance(10) | accumulator=0, 0 steps | ✓ |
+| Monotonic alpha | 4 × advance(20ms @ step=100ms) | alpha grows, 0 fires | ✓ |
+| Mid-accumulation drain | advance(80) → advance(30) @ step=100 | 0 → 1 steps, alpha ≈ 0.1 | ✓ |
+
 ### Expected runtime impact on `muhanai.com/find`
 
 - 240Hz monitor idle: 200+ fps → 30 fps after 5 s, → 0 fps after tab
-  hide. Estimated ~80% CPU reduction. **Verified by Scenario A/B above.**
+  hide. Estimated ~80% CPU reduction. **Verified by Phase 1 Scenario A/B.**
 - 60Hz monitor interaction: 60 fps → 60 fps (no change in steady state).
 - First tab-resume after a 5-minute background: bounded dt (16.67 ms
   fallback), physics simulation does not explode. **Verified by
-  Scenario D above.**
+  Phase 1 Scenario D + Phase 2 blow-up guard.**
+- Physics simulation now runs at 60 Hz regardless of render FPS — frame-
+  rate-independent, deterministic, bounded work per frame.
+  **Verified by Phase 2 accumulator scenarios.**
