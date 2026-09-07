@@ -20,7 +20,11 @@ export type {
 	ResourceAdapter,
 	WritableResourceAdapter,
 } from "./adapter.js";
-export { createHttpAdapter, createStubAdapter } from "./adapter.js";
+export {
+	createHttpAdapter,
+	createResilientAdapter,
+	createStubAdapter,
+} from "./adapter.js";
 export {
 	type LlmMeshAdapter,
 	type LlmMeshPageProps,
