@@ -44,7 +44,10 @@
 				"noAriaUnsupportedElements": "warn",
 				"noLabelWithoutControl": "warn",
 				"useSemanticElements": "warn",
-				"useAriaPropsSupportedByRole": "warn"
+				"useAriaPropsSupportedByRole": "warn",
+				"noRedundantRoles": "warn",
+				"noRedundantAlt": "warn",
+				"useAltText": "warn"
 			},
 			"complexity": {
 				"noCommaOperator": "warn"
