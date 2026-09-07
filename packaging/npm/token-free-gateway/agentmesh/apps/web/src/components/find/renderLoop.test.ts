@@ -11,8 +11,8 @@
 
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import { createRenderScheduler } from "./renderLoop";
 import type { QualityProfile } from "./renderLoop";
+import { createRenderScheduler } from "./renderLoop";
 
 // ------------------- Fake rAF harness -------------------
 //
@@ -66,12 +66,10 @@ interface VisibilityHarness {
 	onChange: (cb: (hidden: boolean) => void) => () => void;
 }
 
-function makeVisibility(initialVisible = true): VisibilityHarness {
-	let visible = initialVisible;
+function makeVisibility(_initialVisible = true): VisibilityHarness {
 	const listeners: Array<(hidden: boolean) => void> = [];
 	return {
 		setHidden(hidden: boolean) {
-			visible = !hidden;
 			for (const fn of listeners.slice()) fn(hidden);
 		},
 		listenerCount: () => listeners.length,
@@ -463,7 +461,10 @@ describe("createRenderScheduler Phase 1 verification (240Hz)", () => {
 		// Allow a tolerance band: cumulative float drift means a few expected
 		// ticks may land just below the 16.67ms threshold. 60Hz target gives
 		// ~60 ticks/s; we accept 50-65 as a valid implementation of the budget.
-		assert.ok(stats.onTickCount >= 50 && stats.onTickCount <= 65, `onTick ≈ 60, got ${stats.onTickCount}`);
+		assert.ok(
+			stats.onTickCount >= 50 && stats.onTickCount <= 65,
+			`onTick ≈ 60, got ${stats.onTickCount}`,
+		);
 		assert.equal(stats.rafCount, 240, "every display frame is observed");
 		// skippedFrameRatio = 1 - onTick/rafCount. At 60 ticks / 240 frames = 0.75.
 		const expectedRatio = 1 - stats.onTickCount / stats.rafCount;
