@@ -151,7 +151,7 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
 
 			playCosmicChime();
 			const angle = Math.random() * Math.PI * 2;
-			const distance = 140 + Math.random() * 100;
+			const distance = 180 + Math.random() * 340;
 			const nx = Math.cos(angle) * distance;
 			const ny = Math.sin(angle) * distance;
 			const newId = `note-user-${Date.now()}`;
