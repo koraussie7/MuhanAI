@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { ApiVault } from "./GatewayPanel.js";
 import type { GatewayProvider } from "./GatewayPanel.js";
+import { ApiVault } from "./GatewayPanel.js";
 
 /**
  * SecuritySettings — TASK-C tkngate zero-trust gateway control plane.
@@ -151,9 +151,7 @@ export function createHttpSecurityAdapter(): SecurityAdapter {
 			body: JSON.stringify(body),
 		});
 		if (!res.ok) {
-			throw new Error(
-				`[security] ${url} -> ${res.status} ${res.statusText ?? ""}`.trim(),
-			);
+			throw new Error(`[security] ${url} -> ${res.status} ${res.statusText ?? ""}`.trim());
 		}
 	}
 	return {
@@ -162,9 +160,7 @@ export function createHttpSecurityAdapter(): SecurityAdapter {
 				headers: { Accept: "application/json" },
 			});
 			if (!res.ok) {
-				throw new Error(
-					`[security] /api/security -> ${res.status} ${res.statusText ?? ""}`.trim(),
-				);
+				throw new Error(`[security] /api/security -> ${res.status} ${res.statusText ?? ""}`.trim());
 			}
 			return (await res.json()) as SecuritySnapshot;
 		},
