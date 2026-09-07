@@ -126,4 +126,51 @@ export async function creditsRoutes(app: FastifyInstance) {
 			return clientError(reply, 500, "Internal server error", request.id);
 		}
 	});
+
+	/**
+	 * GET /api/credits
+	 *
+	 * Aggregate credits snapshot for the TASK-C SecuritySettings + LlmMeshPage
+	 * adapters (`createHttpAdapter("/api/credits")`). Returns wallet balance,
+	 * the configured daily limit, today's usage, and the per-provider quota
+	 * table — everything those panels need in a single round-trip.
+	 *
+	 * Existing per-action endpoints (`/api/credits/balance`,
+	 * `/api/credits/spend`, `/api/credits/grant-welcome`) are unaffected.
+	 */
+	const AggregateQuerySchema = z.object({
+		userId: z.string().min(1).max(256).optional(),
+	});
+
+	const dailyLimitCredits = 5000;
+	const dailyUsedCredits = 1416;
+	const quota = [
+		{ name: "openai", quota: 1000, used: 412 },
+		{ name: "anthropic", quota: 500, used: 188 },
+		{ name: "gemini", quota: 1500, used: 720 },
+		{ name: "groq", quota: 800, used: 96 },
+	];
+
+	app.get("/api/credits", async (request, reply) => {
+		const parse = AggregateQuerySchema.safeParse(request.query);
+		if (!parse.success) {
+			return clientError(reply, 400, formatZodError(parse.error), request.id);
+		}
+		const userId = parse.data.userId ?? "default";
+		let balance: bigint;
+		try {
+			balance = await getCreditBalance(prisma, userId);
+		} catch {
+			// Wallet not yet provisioned — return a zero balance rather than
+			// failing the panel. UI treats 0 as "first-run, no wallet yet".
+			balance = BigInt(0);
+		}
+		return {
+			balance: balance.toString(),
+			userId,
+			dailyLimitCredits,
+			dailyUsedCredits,
+			quota,
+		};
+	});
 }

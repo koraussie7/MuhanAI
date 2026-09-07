@@ -13,9 +13,11 @@ import { feedRoutes } from "./feed-routes.js";
 import { PulseBridge } from "./gossip-bridge.js";
 import { hivebearRoutes } from "./hivebear-routes.js";
 import { knowledgeRoutes } from "./knowledge-routes.js";
+import { llmMeshRoutes } from "./llm-mesh-routes.js";
 import { networkRoutes } from "./network-routes.js";
 import { noemaRoutes } from "./noema-routes.js";
 import pulseRoutes from "./pulse-routes.js";
+import { securityRoutes } from "./security-routes.js";
 import { semanticRoutes } from "./semantic-routes.js";
 
 const PUBLIC_PATH_PREFIXES = ["/api/pulse", "/api/network", "/api/agents", "/api/auth"];
@@ -147,7 +149,9 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	await app.register(networkRoutes);
 	await app.register(agentsRoutes);
 	await app.register(computeRoutes);
+	await app.register(llmMeshRoutes);
 	await app.register(creditsRoutes);
+	await app.register(securityRoutes);
 	await app.register(feedRoutes);
 	await app.register(authRoutes);
 	await app.register(pulseRoutes);
