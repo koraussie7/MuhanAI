@@ -13,6 +13,7 @@ import { feedRoutes } from "./feed-routes.js";
 import { PulseBridge } from "./gossip-bridge.js";
 import { hivebearRoutes } from "./hivebear-routes.js";
 import { knowledgeRoutes } from "./knowledge-routes.js";
+import { happyRoutes } from "./happy-routes.js";
 import { llmRoutes } from "./llm-routes.js";
 import { llmMeshRoutes } from "./llm-mesh-routes.js";
 import { networkRoutes } from "./network-routes.js";
@@ -149,7 +150,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
 		return payload;
 	});
 
-	await app.register(noemaRoutes);
+await app.register(noemaRoutes);
 	await app.register(semanticRoutes);
 	await app.register(hivebearRoutes);
 	await app.register(knowledgeRoutes);
@@ -158,6 +159,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	await app.register(computeRoutes);
 	await app.register(llmMeshRoutes);
 	await app.register(llmRoutes);
+	await app.register(happyRoutes);
 	await app.register(creditsRoutes);
 	await app.register(securityRoutes);
 	await app.register(feedRoutes);

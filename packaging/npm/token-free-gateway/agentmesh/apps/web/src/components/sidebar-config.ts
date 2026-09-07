@@ -174,6 +174,13 @@ export const NAV_GROUPS: NavGroup[] = [
 				path: "/settings",
 				iconKey: "settings",
 			},
+			{
+				id: "happy",
+				label: "Happy Coder",
+				path: "/happy",
+				iconKey: "smartphone",
+				badge: "NEW",
+			},
 		],
 	},
 ];
