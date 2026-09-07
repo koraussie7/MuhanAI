@@ -10,6 +10,8 @@ import { ModelHub } from "./harvest/B2/ModelHub.js";
 import { ContributionHistory } from "./harvest/C/ContributionHistory.js";
 import { ReputationMatrix } from "./harvest/C/ReputationMatrix.js";
 import { SecuritySettings } from "./harvest/C/SecuritySettings.js";
+import { MuhanSettingsPanel } from "./MuhanSettingsPanel.js";
+import { BrowserProfilePanel } from "./BrowserProfilePanel.js";
 
 function PageShell({ title, subtitle, badge, children }: {
   title: string;
@@ -207,6 +209,8 @@ export function SettingsPage() {
   return (
     <PageShell title="System & Gateway Settings" subtitle="tkngate 제로트러스트 보안 및 게이트웨이 파라미터" badge="tkngate">
       <SecuritySettings />
+      <MuhanSettingsPanel />
+      <BrowserProfilePanel />
     </PageShell>
   );
 }
