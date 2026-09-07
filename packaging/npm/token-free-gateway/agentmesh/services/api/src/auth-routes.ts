@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
+import argon2 from "argon2";
 import { createToken, extractBearer, verifyToken } from "./auth.js";
 import { formatZodError } from "./error-shapes.js";
 
@@ -27,7 +28,7 @@ export async function authRoutes(app: FastifyInstance) {
 	 */
 	const memoryUsers = new Map<
 		string,
-		{ id: string; email: string; name?: string; password: string }
+		{ id: string; email: string; name?: string; passwordHash: string }
 	>();
 
 	app.post("/api/auth/register", async (request, reply) => {
@@ -40,6 +41,7 @@ export async function authRoutes(app: FastifyInstance) {
 
 		// In-memory + DB registration
 		const userId = `usr_${randomId()}`;
+		const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
 
 		try {
 			const prisma = await getPrisma();
@@ -54,6 +56,7 @@ export async function authRoutes(app: FastifyInstance) {
 					id: userId,
 					email: normalized,
 					name: name ?? null,
+					passwordHash,
 				},
 			});
 			const token = createToken(user);
@@ -70,7 +73,7 @@ export async function authRoutes(app: FastifyInstance) {
 				id: userId,
 				email: normalized,
 				name,
-				password,
+				passwordHash,
 			});
 			return reply.code(201).send({
 				token: createToken({ id: userId, email: normalized, name }),
@@ -92,9 +95,11 @@ export async function authRoutes(app: FastifyInstance) {
 			const user = await prisma.user.findUnique({
 				where: { email: normalized },
 			});
-			// No verifier stored — in a real service this checks a hash. For now we
-			// accept any matching password only for the in-memory fallback user.
-			if (!user) {
+			if (!user || !user.passwordHash) {
+				return reply.code(401).send({ error: "Invalid credentials" });
+			}
+			const valid = await argon2.verify(user.passwordHash, password);
+			if (!valid) {
 				return reply.code(401).send({ error: "Invalid credentials" });
 			}
 			const token = createToken(user);
@@ -104,7 +109,11 @@ export async function authRoutes(app: FastifyInstance) {
 			};
 		} catch {
 			const user = memoryUsers.get(normalized);
-			if (!user || user.password !== password) {
+			if (!user) {
+				return reply.code(401).send({ error: "Invalid credentials" });
+			}
+			const valid = await argon2.verify(user.passwordHash, password);
+			if (!valid) {
 				return reply.code(401).send({ error: "Invalid credentials" });
 			}
 			return {

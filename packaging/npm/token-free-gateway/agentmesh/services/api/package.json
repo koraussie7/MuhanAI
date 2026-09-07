@@ -9,7 +9,7 @@
 		"build": "tsc -p tsconfig.json",
 		"typecheck": "tsc -p tsconfig.json --noEmit",
 		"lint": "tsc -p tsconfig.json --noEmit",
-		"test": "tsx --test src/**/*.test.ts"
+		"test": "vitest run"
 	},
 	"dependencies": {
 		"@agentmesh/noema": "workspace:*",
@@ -22,7 +22,9 @@
 		"@agentmesh/credits": "workspace:*",
 		"@agentmesh/p2p": "workspace:*",
 		"@agentmesh/db": "workspace:*",
+		"@agentmesh/llm-router": "workspace:*",
 		"@prisma/client": "^5.22.0",
+		"argon2": "^0.40.0",
 		"fastify": "^5.12.1",
 		"@fastify/cors": "^10.1.0",
 		"@fastify/helmet": "^13.1.1",
