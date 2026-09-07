@@ -1,37 +1,38 @@
 {
-  "name": "@agentmesh/api",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "main": "src/server.ts",
-  "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "tsc -p tsconfig.json --noEmit",
-    "test": "tsx --test src/**/*.test.ts"
-  },
-  "dependencies": {
-    "@agentmesh/noema": "workspace:*",
-    "@agentmesh/semantic-vote": "workspace:*",
-    "@agentmesh/hivebear": "workspace:*",
-    "@agentmesh/knowledge-base": "workspace:*",
-    "@agentmesh/compute": "workspace:*",
-    "@agentmesh/federation-transport": "workspace:*",
-    "@agentmesh/shared": "workspace:*",
-    "@agentmesh/credits": "workspace:*",
-    "@agentmesh/db": "workspace:*",
-    "@prisma/client": "^5.22.0",
-    "fastify": "^5.12.1",
-    "@fastify/cors": "^10.1.0",
-    "@fastify/helmet": "^13.1.1",
-    "@fastify/rate-limit": "^11.2.0",
-    "zod": "^3.23.8"
-  },
-  "devDependencies": {
-    "pino": "^10.3.1",
-    "tsx": "^4.19.0",
-    "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
-  }
+	"name": "@agentmesh/api",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"main": "src/server.ts",
+	"scripts": {
+		"dev": "tsx watch src/server.ts",
+		"build": "tsc -p tsconfig.json",
+		"typecheck": "tsc -p tsconfig.json --noEmit",
+		"lint": "tsc -p tsconfig.json --noEmit",
+		"test": "tsx --test src/**/*.test.ts"
+	},
+	"dependencies": {
+		"@agentmesh/noema": "workspace:*",
+		"@agentmesh/semantic-vote": "workspace:*",
+		"@agentmesh/hivebear": "workspace:*",
+		"@agentmesh/knowledge-base": "workspace:*",
+		"@agentmesh/compute": "workspace:*",
+		"@agentmesh/federation-transport": "workspace:*",
+		"@agentmesh/shared": "workspace:*",
+		"@agentmesh/credits": "workspace:*",
+		"@agentmesh/p2p": "workspace:*",
+		"@agentmesh/db": "workspace:*",
+		"@prisma/client": "^5.22.0",
+		"fastify": "^5.12.1",
+		"@fastify/cors": "^10.1.0",
+		"@fastify/helmet": "^13.1.1",
+		"@fastify/rate-limit": "^11.2.0",
+		"zod": "^3.23.8"
+	},
+	"devDependencies": {
+		"pino": "^10.3.1",
+		"tsx": "^4.19.0",
+		"typescript": "^5.7.2",
+		"vitest": "^2.1.8"
+	}
 }
