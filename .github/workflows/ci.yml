@@ -6,6 +6,14 @@ on:
   pull_request:
     branches: [main]
 
+# The pnpm workspace (pnpm-lock.yaml, pnpm-workspace.yaml, apps/, packages/,
+# services/, client-adapter/) lives under packaging/npm/token-free-gateway/agentmesh.
+# actions/checkout runs from the repo root, so every subsequent step needs to
+# cd into the workspace before invoking pnpm.
+defaults:
+  run:
+    working-directory: packaging/npm/token-free-gateway/agentmesh
+
 jobs:
   check:
     name: Lint & Typecheck & Test
