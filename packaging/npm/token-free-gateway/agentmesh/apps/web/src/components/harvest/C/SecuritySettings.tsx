@@ -11,8 +11,8 @@ import type { GatewayProvider } from "./GatewayPanel.js";
  *   3. API Vault (encrypted key inventory)
  *
  * All data is fetched through a `SecurityAdapter` so the UI can develop
- * against a stub and swap to a real adapter (mu /api/security + /api/credits)
- * once those endpoints exist. The shape stays stable.
+ * against a stub and swap to a real adapter (`/api/security` + `/api/credits`)
+ * The shape stays stable.
  */
 
 export interface SecurityToggles {
@@ -55,18 +55,15 @@ export interface SecurityAdapter {
 	revokeKey(service: string): Promise<void>;
 }
 
-function stubAdapter(): SecurityAdapter {
-	let toggles: SecurityToggles = {
-		zeroTrustEnabled: true,
-		relayEncryption: true,
-		budgetGuardEnabled: true,
-		apiVaultEnabled: false,
-	};
-	let dailyLimit = 5000;
-
-	const snapshot = (): SecuritySnapshot => ({
-		toggles,
-		dailyLimitCredits: dailyLimit,
+function stubSnapshot(): SecuritySnapshot {
+	return {
+		toggles: {
+			zeroTrustEnabled: true,
+			relayEncryption: true,
+			budgetGuardEnabled: true,
+			apiVaultEnabled: false,
+		},
+		dailyLimitCredits: 5000,
 		dailyUsedCredits: 1416,
 		quota: [
 			{ name: "openai", quota: 1000, used: 412 },
@@ -132,31 +129,86 @@ function stubAdapter(): SecurityAdapter {
 				detail: "groq → rotated",
 			},
 		],
-	});
+	};
+}
 
+/**
+ * HTTP-backed SecurityAdapter. Talks to:
+ *   GET    /api/security
+ *   POST   /api/security/toggles
+ *   POST   /api/security/daily-limit
+ *   POST   /api/security/keys/:service/revoke
+ *
+ * On the read path, a network failure falls back to `stubSnapshot()` so
+ * the page is always renderable. Mutations throw — the caller is expected
+ * to surface the error to the user and revert optimistic state.
+ */
+export function createHttpSecurityAdapter(): SecurityAdapter {
+	async function postJson<T>(url: string, body: T): Promise<void> {
+		const res = await fetch(url, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(body),
+		});
+		if (!res.ok) {
+			throw new Error(
+				`[security] ${url} -> ${res.status} ${res.statusText ?? ""}`.trim(),
+			);
+		}
+	}
 	return {
 		async loadSnapshot() {
-			return snapshot();
+			const res = await fetch("/api/security", {
+				headers: { Accept: "application/json" },
+			});
+			if (!res.ok) {
+				throw new Error(
+					`[security] /api/security -> ${res.status} ${res.statusText ?? ""}`.trim(),
+				);
+			}
+			return (await res.json()) as SecuritySnapshot;
+		},
+		saveToggles(next) {
+			return postJson("/api/security/toggles", next);
+		},
+		saveDailyLimit(limit) {
+			return postJson("/api/security/daily-limit", { limit });
+		},
+		revokeKey(service) {
+			return postJson(`/api/security/keys/${encodeURIComponent(service)}/revoke`, {});
+		},
+	};
+}
+
+function defaultSecurityAdapter(): SecurityAdapter {
+	const live = createHttpSecurityAdapter();
+	return {
+		async loadSnapshot() {
+			try {
+				return await live.loadSnapshot();
+			} catch {
+				return stubSnapshot();
+			}
 		},
 		async saveToggles(next) {
-			toggles = next;
+			return live.saveToggles(next);
 		},
 		async saveDailyLimit(limit) {
-			dailyLimit = limit;
+			return live.saveDailyLimit(limit);
 		},
 		async revokeKey(service) {
-			console.warn(`[stub] revokeKey(${service})`);
+			return live.revokeKey(service);
 		},
 	};
 }
 
 export interface SecuritySettingsProps {
-	/** Inject a real adapter; default = stub for UI dev. */
+	/** Inject a real adapter; default = resilient HTTP→stub. */
 	adapter?: SecurityAdapter;
 }
 
 export function SecuritySettings({ adapter }: SecuritySettingsProps = {}) {
-	const adp = adapter ?? stubAdapter();
+	const adp = adapter ?? defaultSecurityAdapter();
 	const [snap, setSnap] = useState<SecuritySnapshot | null>(null);
 	const [busy, setBusy] = useState(false);
 
