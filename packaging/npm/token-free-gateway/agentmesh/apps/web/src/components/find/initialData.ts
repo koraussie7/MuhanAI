@@ -72,7 +72,28 @@ export const INITIAL_NODES: CosmicNode[] = [
 			tags: ["moc", "core", "mesh", "zero-token"],
 			links: ["note-webrtc-crdt", "note-zero-token-routing", "agent-claude", "agent-deepseek"],
 			summary: "MuhanAI 분산 P2P 지식 레이크 및 제로 토큰 게이트웨이의 최상위 Map of Content",
-			markdown: `# MuhanAI Origin MOC (Map of Content)\n\n분산 P2P 지식 레이크와 개인 MCP 에이전트, 토큰 없는 추론 라우팅을 통합한 지식 그래프의 중심 허브입니다.\n\n## Core Principles\n- **Zero-Token Gateway**: 브라우저와 엣지 노드가 결합하여 API 비용 없이 자율 합의 형성\n- **WebRTC Knowledge Lake**: [[CRDT Knowledge Lake.md]] 기반의 충돌 없는 지식 동기화\n- **Obsidian Graph Integration**: 유저가 개인 옵시디언 볼트를 연결하면 지식 파편이 우주 토폴로지에 실시간 맵핑됨\n\n## Sub-Graphs\n- [[Zero-Token Routing Architecture.md]]\n- [[CRDT Knowledge Lake.md]]\n- [[Personal Vault Sync Protocol.md]]`,
+			markdown: `# MuhanAI Origin MOC (Map of Content)\n\n분산 P2P 지식 레이크와 개인 MCP 에이전트, 토큰 없는 추론 라우팅을 통합한 지식 그래프의 중심 허브입니다.\n\n## Core Principles\n- **Zero-Token Gateway**: 브라우저와 엣지 노드가 결합하여 API 비용 없이 자율 합의 형성\n- **WebRTC Knowledge Lake**: [[CRDT Knowledge Lake.md]] 기반의 충돌 없는 지식 동기화\n- **Obsidian Graph Integration**: 유저가 개인 옵시디언 볼트를 연결하면 지식 파편이 우주 토폴로지에 실시간 맵핑됨\n\n## Sub-Graphs\n- [[Zero-Token Routing Architecture.md]]\n- [[CRDT Knowledge Lake.md]]\n- [[Personal Vault Sync Protocol.md]]\n- [[MuhanAI 공식 사용설명서.md]]`,
+		},
+	},
+	{
+		id: "note-user-guide",
+		label: "[[MuhanAI 공식 사용설명서.md]]",
+		type: "note",
+		x: 140,
+		y: -110,
+		vx: 0,
+		vy: 0,
+		radius: 15,
+		color: "#38bdf8",
+		connectionsCount: 4,
+		frontmatter: {
+			title: "MuhanAI 공식 사용설명서",
+			author: "MuhanAI Core Team",
+			created: "2026-09-06",
+			tags: ["guide", "manual", "rewards", "credit", "beginner", "intermediate", "advanced"],
+			links: ["note-muhanai-core"],
+			summary: "내가 사용하는 AI로 답하고 Credit을 받는 MuhanAI 초급·중급·고급 종합 사용설명서",
+			markdown: `# 📘 MuhanAI 공식 사용설명서 (User Guide)\n\n> **"내가 사용하는 AI로 답하고, 지식을 나누고, Credit을 받으세요."**\n\nMuhanAI는 하나의 AI에게 종속되는 곳이 아닙니다.\n**사람(Human), 내가 평소 쓰는 AI, 전문 Agent, 탈중앙 지식(Knowledge)**이 결합되어 서로의 문제를 해결해주고 보상을 나누는 **Human + AI 집단 지성 네트워크**입니다.\n\n---\n\n## 🧭 빠른 레벨별 로드맵\n\n- **[초급: Explorer]**: 질문 확인 → 내 AI(ChatGPT/Claude 등)로 답변 작성 → 검토 후 제출 → 🎁 Credit 획득\n- **[중급: Builder]**: 다중 AI 교차검증 → 나만의 Knowledge Base(옵시디언) 구축 → 영구 지식화 및 지속 보상\n- **[고급: Architect]**: 자율 Agent 배포 → MCP(도구/데이터) 연동 → P2P 탈중앙 메쉬 참여 → 생태계 리워드 극대화\n\n---\n\n## 🟢 1. 초급 사용자 가이드 (Explorer)\n### 핵심 개념: "내 AI가 곧 나의 자산"\n새로운 AI 프롬프트 엔지니어링이나 기술을 억지로 배울 필요가 없습니다. 여러분이 스마트폰이나 브라우저에서 이미 쓰고 있는 **ChatGPT, Claude, Gemini, Perplexity**를 그대로 활용하세요.\n\n### 5단계 스타터 미션\n1. **질문 탐색**: 해결할 만한 질문을 둘러보고 선택합니다.\n2. **내 AI에 질의**: 질문을 복사해 평소 쓰는 AI(ChatGPT, Claude 등)에 입력합니다.\n3. **검토 및 보완**: AI 답변 중 거짓(환각)이 없는지 확인하고 내 팁을 한 줄 추가합니다.\n4. **답변 등록**: MuhanAI에 완성된 솔루션을 제출합니다.\n5. **🎁 Credit 획득**: 참여 및 채택에 따른 Credit이 지갑에 쌓입니다.\n\n---\n\n## 🔵 2. 중급 사용자 가이드 (Knowledge Builder)\n### 핵심 개념: "AI 앙상블과 지식의 자산화"\n- 코딩은 **Claude/DeepSeek**, 최신 검색은 **Gemini/Perplexity**, 기획/요약은 **ChatGPT**처럼 각 AI의 장점을 조합합니다.\n- 일회성 답변에 그치지 않고, MuhanAI의 **Knowledge Base(마크다운/Obsidian 양식)**로 남겨두면 이후 해당 지식이 조회·인용될 때마다 지속적으로 보상이 누적됩니다.\n\n---\n\n## 🟣 3. 고급 사용자 가이드 (Agent & MCP Architect)\n### 핵심 개념: "AI에게 눈과 손을 달아주는 자율 메쉬"\n- 텍스트 대화형 AI를 넘어, 외부 API와 실제 시스템을 구동하는 **자율 Agent**와 **MCP 인터페이스**를 직접 구축하고 공유합니다.\n- 내가 만든 Agent나 MCP 도구를 다른 사용자들이 워크플로우에 채택할 때마다 개발자 로열티 Credit이 지급됩니다.\n- WebGPU 및 WebRTC DataChannel을 통해 제로 토큰 연산 노드로 참여하고 인프라 기여 보상을 획득합니다.\n\n---\n\n## 🎁 MuhanAI Credit & 보상 경제\n- **첫 참여 / 회원가입**: \x60+1,000 Credit\x60\n- **유용한 질문 등록**: \x60+100 ~ 500 Credit\x60\n- **AI 기반 답변 작성**: \x60+300 ~ 1,000 Credit\x60\n- **답변 평가 / 팩트체크**: \x60+20 ~ 100 Credit\x60\n- **지식 노드 승격**: \x60+1,000 ~ 3,000 Credit\x60\n- **Agent / MCP 공유**: \x60+2,000 ~ 10,000 Credit\x60\n\n모은 Credit은 **Reward Store**를 통해 디지털 상품권, 편의점/카페 기프티콘, 글로벌 클라우드/AI 크레딧 등으로 교환할 수 있습니다.`,
 		},
 	},
 	{
@@ -320,6 +341,13 @@ export const INITIAL_NODES: CosmicNode[] = [
 ];
 
 export const INITIAL_EDGES: CosmicEdge[] = [
+	{
+		id: "e-core-user-guide",
+		source: "note-muhanai-core",
+		target: "note-user-guide",
+		label: "manual",
+		weight: 1.5,
+	},
 	{
 		id: "e1",
 		source: "note-muhanai-core",
