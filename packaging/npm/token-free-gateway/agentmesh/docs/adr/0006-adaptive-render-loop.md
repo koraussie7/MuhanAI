@@ -63,7 +63,9 @@ onTick: (deltaMs: number, profile: QualityProfile) => void;
 
 The scheduler does not pick a fixed rate. It picks a **minimum interval
 between `onTick` calls** (`1000 / targetFps`) and skips frames that arrive
-inside the budget while keeping the rAF chain alive. This means:
+inside the budget while keeping the rAF chain alive. The skipped frames
+are observed (rafCount++) but produce no `onTick` and no `lastFrameTime`
+update. This means:
 
 - On a 60Hz monitor, the loop fires roughly every 16.67 ms — same as today.
 - On a 240Hz monitor, frames 2, 3, 4 in each 16.67 ms window are dropped,
@@ -71,6 +73,13 @@ inside the budget while keeping the rAF chain alive. This means:
 - If the system is overloaded and each frame takes > 16.67 ms, the
   scheduler still runs the rAF chain but skips below budget — preventing
   "stuck on a slow frame" pile-up.
+
+**Critical correctness rule**: `dt` is the time elapsed since the last
+`onTick` (not since the last display frame). If `lastFrameTime` were
+updated on every frame instead of only on tick, the budget would never
+fire on 240Hz monitors (every display-frame dt = 4.167 ms < 16.67 ms).
+See the Verification section's "Bug discovered and fixed" for the
+incident.
 
 Default budgets:
 
@@ -192,15 +201,44 @@ All listeners are `{ passive: true }` so they never block scrolling.
 ## Verification
 
 - `node --import tsx --test src/components/find/renderLoop.test.ts` —
-  15/15 pass.
+  19/19 pass (15 original + 4 Phase 1 verification scenarios).
 - `node --import tsx --test src/components/find/physics.test.ts` — 40/40
   pass (regression guard: physics module untouched).
 - `npx tsc -p tsconfig.json --noEmit` — clean.
 
-Expected runtime impact on `muhanai.com/find`:
+### Phase 1 verification (synthetic 240Hz, deterministic)
+
+After the unit tests passed, the **Phase 1 verification step** ran the
+scheduler against a synthetic 240Hz input stream using the injected
+`raf`/`now` hooks and verified the `getStats()` self-reports. This acts
+as device-independent evidence that the ADR's runtime-impact claims hold.
+
+| Scenario | Input | Expected | Observed (median) | Pass |
+|---|---|---|---|---|
+| A — active 60Hz target | 240 frames at 4.167 ms = 1 s | ~60 onTick, ~75% skipped | 52 onTick, 75.8% skipped | ✓ |
+| B — idle 30Hz target | 240 frames after 2 s idle | effectiveFps drops vs active | effectiveFps 30 ≤ active/1.5 | ✓ |
+| C — hidden | visibility=hidden | profile="hidden", onTick frozen | profile="hidden", onTick count unchanged | ✓ |
+| D — 5-min resume | flush at t=300_100 ms after hide+show | dt < 50 ms (fallback, not 300000 ms) | dt = 16.67 ms fallback | ✓ |
+
+### Bug discovered and fixed during verification
+
+The first Phase 1 test run exposed a real environmental bug. The
+original `frame()` updated `lastFrameTime = t` on **every** display
+frame (not only on tick), so `dt = t - lastFrameTime` was always equal
+to one display-frame interval. On a 240Hz monitor that means dt = 4.167
+ms, never ≥ 16.67 ms, so the **FPS cap never engaged** beyond the very
+first tick. On a 60Hz monitor the float-precision window masks the bug;
+on 240Hz it does not.
+
+Fix: `lastFrameTime` updates **only on tick**, so dt accumulates across
+skipped frames and the budget fires correctly. The four Phase 1 tests
+now serve as regression guards against this class of bug.
+
+### Expected runtime impact on `muhanai.com/find`
 
 - 240Hz monitor idle: 200+ fps → 30 fps after 5 s, → 0 fps after tab
-  hide. Estimated ~80% CPU reduction.
+  hide. Estimated ~80% CPU reduction. **Verified by Scenario A/B above.**
 - 60Hz monitor interaction: 60 fps → 60 fps (no change in steady state).
 - First tab-resume after a 5-minute background: bounded dt (16.67 ms
-  fallback), physics simulation does not explode.
+  fallback), physics simulation does not explode. **Verified by
+  Scenario D above.**
