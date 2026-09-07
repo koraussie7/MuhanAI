@@ -1,4 +1,5 @@
 import {
+	BookOpen,
 	ChevronDown,
 	ChevronUp,
 	Globe,
@@ -39,6 +40,7 @@ interface CosmicHudProps {
 	onGravityChange: (v: number) => void;
 	eventsLog: string[];
 	onNavigateHome: () => void;
+	onOpenUserGuide?: () => void;
 }
 
 export const CosmicHud: React.FC<CosmicHudProps> = ({
@@ -61,6 +63,7 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 	onGravityChange,
 	eventsLog,
 	onNavigateHome,
+	onOpenUserGuide,
 }) => {
 	const { lang, setLanguage, t, supportedLanguages } = useI18n();
 	const [showSettings, setShowSettings] = useState(false);
@@ -100,6 +103,22 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 					>
 						<LayoutDashboard size={14} className="text-sky-400" />
 						<span>Developer Console</span>
+					</button>
+					<button
+						type="button"
+						className="cosmic-back-btn"
+						onClick={onOpenUserGuide}
+						title="Open MuhanAI User Guide (초급·중급·고급 종합 사용설명서)"
+						style={{
+							display: "flex",
+							alignItems: "center",
+							gap: 6,
+							fontWeight: 600,
+							borderColor: "rgba(245, 158, 11, 0.4)",
+						}}
+					>
+						<BookOpen size={14} className="text-amber-400" />
+						<span>{t.ui?.userGuide || "사용설명서"}</span>
 					</button>
 
 					<div className="flex items-center gap-2.5 pl-2 border-l border-white/10">

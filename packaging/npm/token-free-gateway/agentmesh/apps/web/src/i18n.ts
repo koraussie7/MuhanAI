@@ -58,6 +58,7 @@ export interface I18nContent {
 		peerConnectBtn: string;
 		peerCancelBtn: string;
 		changeNickname: string;
+		userGuide: string;
 	};
 }
 
@@ -106,6 +107,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerConnectBtn: "⚡ 메쉬에 연결",
 			peerCancelBtn: "취소",
 			changeNickname: "닉네임 변경",
+			userGuide: "사용설명서",
 		},
 	},
 	en: {
@@ -154,6 +156,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerConnectBtn: "⚡ Connect to Mesh",
 			peerCancelBtn: "Cancel",
 			changeNickname: "Change Nickname",
+			userGuide: "User Guide",
 		},
 	},
 	ja: {
@@ -201,6 +204,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerConnectBtn: "⚡ メッシュに接続",
 			peerCancelBtn: "キャンセル",
 			changeNickname: "ニックネーム変更",
+			userGuide: "利用ガイド",
 		},
 	},
 	zh: {
@@ -247,6 +251,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerConnectBtn: "⚡ 连接网络",
 			peerCancelBtn: "取消",
 			changeNickname: "修改昵称",
+			userGuide: "使用指南",
 		},
 	},
 	es: {
@@ -295,6 +300,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerConnectBtn: "⚡ Conectar a la Malla",
 			peerCancelBtn: "Cancelar",
 			changeNickname: "Cambiar apodo",
+			userGuide: "Guía de Usuario",
 		},
 	},
 	de: {
@@ -343,6 +349,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerConnectBtn: "⚡ Mit Mesh verbinden",
 			peerCancelBtn: "Abbrechen",
 			changeNickname: "Nickname ändern",
+			userGuide: "Benutzerhandbuch",
 		},
 	},
 	fr: {
@@ -392,6 +399,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerConnectBtn: "⚡ Connecter au maillage",
 			peerCancelBtn: "Annuler",
 			changeNickname: "Changer de pseudo",
+			userGuide: "Guide d'Utilisation",
 		},
 	},
 	pt: {
@@ -439,6 +447,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerConnectBtn: "⚡ Conectar à Malha",
 			peerCancelBtn: "Cancelar",
 			changeNickname: "Alterar apelido",
+			userGuide: "Guia do Usuário",
 		},
 	},
 };
