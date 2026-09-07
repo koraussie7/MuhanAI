@@ -271,6 +271,14 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
 		[connectedPeerName, addEvent],
 	);
 
+	const handleOpenUserGuide = useCallback(() => {
+		const guideNode = nodes.find((n) => n.id === "note-user-guide");
+		if (guideNode) {
+			setSelectedNode(guideNode);
+			addEvent("📖 Opened MuhanAI Official User Guide [[MuhanAI 공식 사용설명서.md]]");
+		}
+	}, [nodes, addEvent]);
+
 	const allNodesForInspector = useMemo(() => nodes, [nodes]);
 
 	return (
@@ -310,6 +318,7 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
 					onGravityChange={setCenterGravity}
 					eventsLog={eventsLog}
 					onNavigateHome={onNavigateHome}
+					onOpenUserGuide={handleOpenUserGuide}
 				/>
 
 				<CosmicPromptBar
