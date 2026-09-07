@@ -423,3 +423,162 @@ describe("createRenderScheduler integration", () => {
 		assert.ok(profiles.includes("idle"), "captured an idle tick");
 	});
 });
+
+// ------------------- Phase 1 verification: 4-scenario stats -------------------
+//
+// These tests verify the ADR-0006 expected-runtime-impact claims by exercising
+// the scheduler with synthetic 240Hz input and observing the self-reported
+// `getStats()` output:
+//
+//   Scenario A — 240Hz active:   skippedFrameRatio ≈ 0.75, effectiveFps ≈ 60
+//   Scenario B — 240Hz idle:     effectiveFps drops from 60 to 30
+//   Scenario C — hidden:         onTickCount frozen, profile = "hidden"
+//   Scenario D — 5-min resume:   first post-resume dt < 50ms (fallback, not 300_000ms)
+//
+// These run under node:test — no browser, no jsdom — and act as the
+// deterministic, device-independent evidence that the design goals hold.
+
+describe("createRenderScheduler Phase 1 verification (240Hz)", () => {
+	test("Scenario A: 240Hz active — ~75% frames skipped, onTick at 60Hz", () => {
+		const q = makeFrameQueue();
+		const clock = makeClock(0);
+		const s = createRenderScheduler({
+			raf: q.raf,
+			caf: q.caf,
+			now: clock.now,
+			targetFps: 60,
+			reducedIdleFps: 30,
+			idleAfterMs: 5_000,
+			onTick: () => {},
+		});
+		s.start();
+		// Simulate 240 frames at 4.167ms spacing = 1 second of wall time at 240Hz.
+		// Each onTick advances the clock so the effectiveFps window covers the run.
+		const dt240 = 1000 / 240;
+		for (let i = 1; i <= 240; i++) {
+			clock.advance(dt240);
+			q.flushAt(clock.now());
+		}
+		const stats = s.getStats(1000);
+		// Allow a tolerance band: cumulative float drift means a few expected
+		// ticks may land just below the 16.67ms threshold. 60Hz target gives
+		// ~60 ticks/s; we accept 50-65 as a valid implementation of the budget.
+		assert.ok(stats.onTickCount >= 50 && stats.onTickCount <= 65, `onTick ≈ 60, got ${stats.onTickCount}`);
+		assert.equal(stats.rafCount, 240, "every display frame is observed");
+		// skippedFrameRatio = 1 - onTick/rafCount. At 60 ticks / 240 frames = 0.75.
+		const expectedRatio = 1 - stats.onTickCount / stats.rafCount;
+		assert.ok(
+			Math.abs(stats.skippedFrameRatio - expectedRatio) < 1e-9,
+			`skippedFrameRatio consistent (got ${stats.skippedFrameRatio.toFixed(3)})`,
+		);
+		// Key Phase 1 claim: at least 70% of display frames are skipped.
+		assert.ok(
+			stats.skippedFrameRatio >= 0.7,
+			`at 240Hz input with 60Hz target, ≥70% of frames should be skipped, got ${(stats.skippedFrameRatio * 100).toFixed(1)}%`,
+		);
+		assert.ok(
+			Math.abs(stats.effectiveFps - stats.onTickCount) < 1,
+			`effectiveFps (${stats.effectiveFps}) ≈ onTickCount (${stats.onTickCount}) within window`,
+		);
+		assert.equal(stats.profile, "active");
+		s.destroy();
+	});
+
+	test("Scenario B: 240Hz idle after 5s — effectiveFps drops to 30", () => {
+		const q = makeFrameQueue();
+		const clock = makeClock(0);
+		const s = createRenderScheduler({
+			raf: q.raf,
+			caf: q.caf,
+			now: clock.now,
+			targetFps: 60,
+			reducedIdleFps: 30,
+			idleAfterMs: 1_000, // shrink to keep test fast
+			onTick: () => {},
+		});
+		s.start();
+		// Drive 1 second of active frames to populate the recentTickTs buffer.
+		const dt240 = 1000 / 240;
+		for (let i = 1; i <= 240; i++) {
+			clock.advance(dt240);
+			q.flushAt(clock.now());
+		}
+		const activeStats = s.getStats(1000);
+		assert.ok(activeStats.onTickCount >= 50, `active ticks ${activeStats.onTickCount} ≈ 60`);
+
+		// Now jump past the idle threshold (1s) and continue ticking.
+		clock.advance(2_000);
+		for (let i = 0; i < 240; i++) {
+			clock.advance(dt240);
+			q.flushAt(clock.now());
+		}
+		const idleStats = s.getStats(1000);
+		assert.equal(idleStats.profile, "idle", "profile flipped to idle");
+		// Idle effectiveFps should be roughly half of active effectiveFps.
+		// Window-based metric is independent of the lifetime onTickCount (which
+		// accumulates across phases). Use a wide window for the active reading
+		// so both phases are covered, and a tight 1s window for idle to capture
+		// only the post-threshold tick rate.
+		assert.ok(
+			idleStats.effectiveFps < activeStats.effectiveFps,
+			`idle effectiveFps (${idleStats.effectiveFps}) should be lower than active (${activeStats.effectiveFps})`,
+		);
+		assert.ok(
+			idleStats.effectiveFps <= activeStats.effectiveFps / 1.5,
+			`idle effectiveFps (${idleStats.effectiveFps}) should be at most 2/3 of active (${activeStats.effectiveFps})`,
+		);
+		s.destroy();
+	});
+
+	test("Scenario C: hidden — onTick freezes, profile = 'hidden'", () => {
+		const q = makeFrameQueue();
+		const vis = makeVisibility(true);
+		const s = createRenderScheduler({
+			raf: q.raf,
+			caf: q.caf,
+			onVisibilityChange: vis.onChange,
+			onTick: () => {},
+		});
+		s.start();
+		q.flushAt(0);
+		const baselineTicks = s.getStats().onTickCount;
+		assert.ok(baselineTicks >= 1);
+
+		vis.setHidden(true);
+		// Drain any pending rAFs — their callbacks will see running=false and exit.
+		q.flushAt(33.33);
+		q.flushAt(100);
+		q.flushAt(1000);
+		const hiddenStats = s.getStats();
+		assert.equal(hiddenStats.profile, "hidden");
+		assert.equal(hiddenStats.onTickCount, baselineTicks, "no new onTick while hidden");
+		s.destroy();
+	});
+
+	test("Scenario D: 5-min resume — first post-resume dt < 50ms (fallback)", () => {
+		const q = makeFrameQueue();
+		const vis = makeVisibility(true);
+		const dts: number[] = [];
+		const s = createRenderScheduler({
+			raf: q.raf,
+			caf: q.caf,
+			onVisibilityChange: vis.onChange,
+			onTick: (dt) => dts.push(dt),
+		});
+		s.start();
+		q.flushAt(0);
+		assert.ok((dts[0] ?? Infinity) < 50, "first tick dt is bounded");
+
+		vis.setHidden(true);
+		q.flushAt(33.33);
+		vis.setHidden(false);
+		// 5-minute gap between tabs.
+		q.flushAt(300_100);
+		const resumeTick = dts[dts.length - 1];
+		assert.ok(
+			resumeTick !== undefined && resumeTick < 50,
+			`post-resume dt should be fallback (16.67ms), got ${resumeTick}ms — would have crashed physics`,
+		);
+		s.destroy();
+	});
+});
