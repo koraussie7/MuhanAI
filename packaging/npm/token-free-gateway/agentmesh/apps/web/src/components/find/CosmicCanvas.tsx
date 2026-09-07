@@ -1,8 +1,10 @@
 import type React from "react";
 import { useCallback, useEffect, useRef } from "react";
 import { step as stepPhysics } from "./physics";
-import { createRenderScheduler } from "./renderLoop";
+import type { PhysicsLoop } from "./physicsLoop";
+import { createPhysicsLoop } from "./physicsLoop";
 import type { RenderScheduler } from "./renderLoop";
+import { createRenderScheduler } from "./renderLoop";
 import type { CosmicEdge, CosmicNode, NodeType, Shockwave, Star } from "./types";
 
 interface CosmicCanvasProps {
@@ -85,6 +87,11 @@ export const CosmicCanvas: React.FC<CosmicCanvasProps> = ({
 
 	// Render Scheduler (mount-once, lives for the component lifetime)
 	const schedulerRef = useRef<RenderScheduler | null>(null);
+
+	// Physics accumulator (Phase 2). Created inside the render useEffect so
+	// its step closure can read inputs from the live ref without recreating
+	// the loop on slider changes. See ADR-0006 Phase 2.
+	const physicsLoopRef = useRef<PhysicsLoop | null>(null);
 
 	// Render-loop mutable state read every frame. Holding these in a ref —
 	// instead of recomputing the rAF closure whenever a slider moves —
@@ -196,9 +203,26 @@ export const CosmicCanvas: React.FC<CosmicCanvasProps> = ({
 		handleResize();
 		window.addEventListener("resize", handleResize);
 
-		const render = (_dtMs: number, _profile: ReturnType<RenderScheduler["getProfile"]>) => {
+		const render = (dtMs: number, _profile: ReturnType<RenderScheduler["getProfile"]>) => {
 			const inputs = renderInputsRef.current;
-			packetStepRef.current += 0.006;
+
+			// 4. Physics: drive the fixed-step accumulator. The physics module
+			// itself stays a pure function (no dt dependency today); the loop
+			// pattern guarantees that if it ever adopts dt-driven integration,
+			// the simulation rate stays decoupled from the render rate. See
+			// ADR-0006 Phase 2.
+			const physicsLoop = physicsLoopRef.current;
+			if (!physicsLoop) return;
+			const { alpha: physicsAlpha } = physicsLoop.advance(dtMs);
+
+			// packetStep is the visual phase of edge-packet pulses. Advancing
+			// it by `dtMs / 1000 * 0.36` (0.36 cycles per second) keeps the
+			// pulse rate wall-clock-stable regardless of render FPS. The
+			// physicsAlpha nudges it by one extra sub-frame so the pulse
+			// motion interpolates between physics steps, smoothing the
+			// stutter that would otherwise appear when the render frame
+			// falls between two physics ticks.
+			packetStepRef.current += dtMs * 0.00036 + physicsAlpha * 0.006;
 			const packetStep = packetStepRef.current;
 			const dpr = window.devicePixelRatio || 1;
 			ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -372,13 +396,13 @@ export const CosmicCanvas: React.FC<CosmicCanvasProps> = ({
 				);
 			};
 
-			// Physics: delegated to ./physics so the constants live in one place
-			stepPhysics(simNodes, simEdges, {
-				repelStrength: inputs.repelStrength,
-				linkDistance: inputs.linkDistance,
-				centerGravity: inputs.centerGravity,
-				draggedNode: draggedNodeRef.current,
-			});
+			// Physics: delegated to ./physics via the fixed-step accumulator
+			// (createPhysicsLoop). The accumulator fires stepPhysics zero or
+			// more times per render frame, decoupling simulation rate from
+			// render rate. The closure captures the latest inputs via the
+			// inputs ref so slider changes take effect on the next physics
+			// tick without rebuilding the loop. See ADR-0006 Phase 2.
+			void physicsAlpha; // alpha is consumed in the packetStep update above
 
 			// 5. Render Edges (Filaments & Data Packets)
 			simEdges.forEach((edge, idx) => {
@@ -519,6 +543,25 @@ export const CosmicCanvas: React.FC<CosmicCanvasProps> = ({
 			onTick: render,
 		});
 		schedulerRef.current = scheduler;
+
+		// Phase 2: fixed-step physics accumulator. The step closure reads
+		// the live inputs ref so slider changes take effect on the next
+		// physics tick without rebuilding the loop. See ADR-0006 Phase 2.
+		const physicsLoop = createPhysicsLoop({
+			fixedTimestepMs: 1000 / 60,
+			maxStepsPerAdvance: 5,
+			onStep: () => {
+				const inputs = renderInputsRef.current;
+				stepPhysics(simNodesRef.current, simEdgesRef.current, {
+					repelStrength: inputs.repelStrength,
+					linkDistance: inputs.linkDistance,
+					centerGravity: inputs.centerGravity,
+					draggedNode: draggedNodeRef.current,
+				});
+			},
+		});
+		physicsLoopRef.current = physicsLoop;
+
 		scheduler.start();
 
 		// Forward user activity to the scheduler so it can leave the idle
@@ -545,6 +588,8 @@ export const CosmicCanvas: React.FC<CosmicCanvasProps> = ({
 			}
 			scheduler.destroy();
 			schedulerRef.current = null;
+			physicsLoopRef.current?.destroy();
+			physicsLoopRef.current = null;
 			window.removeEventListener("resize", handleResize);
 		};
 	}, []);
