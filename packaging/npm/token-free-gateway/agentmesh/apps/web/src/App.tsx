@@ -17,6 +17,7 @@ import {
 } from "./components/DashPages";
 import { FederationPanel } from "./components/FederationPanel";
 import { FindPage } from "./components/find/FindPage";
+import { HappyPage } from "./components/HappyPage";
 import { HiveBearPanel } from "./components/HiveBearPanel";
 import { RightPanel } from "./components/RightPanel";
 import { SemanticVote } from "./components/SemanticVote";
@@ -174,6 +175,12 @@ const SECTIONS = [
 		category: "Workspace",
 	},
 	{ id: "settings", path: "/settings", label: "Settings", category: "System" },
+	{
+		id: "happy",
+		path: "/happy",
+		label: "Happy Coder",
+		category: "System",
+	},
 	{
 		id: "semantic-vote",
 		path: "/semantic-vote",
@@ -489,6 +496,9 @@ export function App() {
 						)}
 						{activeSection === "hivebear" && <HiveBearPanel />}
 						{activeSection === "federation" && <FederationPanel />}
+
+						{/* Happy Coder — Token-Free Gateway for Claude Code & Codex */}
+						{activeSection === "happy" && <HappyPage />}
 
 						{!IMPLEMENTED_SECTIONS.has(activeSection) && (
 							<div className="placeholder-page" style={{ padding: 40, textAlign: "center" }}>
