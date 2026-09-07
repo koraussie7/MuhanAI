@@ -6,11 +6,11 @@
  * the full architecture rationale and 8-repo lineage.
  */
 
-export * from "./identity.js";
-export * from "./pubsub.js";
-export * from "./transport.js";
-export * from "./peer-catalog.js";
 export * from "./bandwidth.js";
 export * from "./error.js";
-export * from "./trust-verifier.js";
+export * from "./identity.js";
+export * from "./peer-catalog.js";
 export * from "./peer-reputation.js";
+export * from "./pubsub.js";
+export * from "./transport.js";
+export * from "./trust-verifier.js";

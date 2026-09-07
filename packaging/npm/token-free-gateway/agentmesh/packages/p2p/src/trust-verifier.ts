@@ -35,91 +35,91 @@ import type { PublicKey } from "@libp2p/interface";
 export const MIN_VERIFICATION_RATE = 0.01;
 
 export interface VerificationRecord {
-  peerId: string;
-  publicKey: PublicKey;
-  firstSeen: number;
-  lastVerified: number;
-  verifiedCount: number;
+	peerId: string;
+	publicKey: PublicKey;
+	firstSeen: number;
+	lastVerified: number;
+	verifiedCount: number;
 }
 
 export type VerificationStatus = "verified" | "tofu" | "unverified" | "mismatch";
 
 export interface VerificationOutcome {
-  peerId: string;
-  status: VerificationStatus;
-  publicKey?: PublicKey;
-  reason?: string;
+	peerId: string;
+	status: VerificationStatus;
+	publicKey?: PublicKey;
+	reason?: string;
 }
 
 function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    if (a[i] !== b[i]) return false;
-  }
-  return true;
+	if (a.length !== b.length) return false;
+	for (let i = 0; i < a.length; i++) {
+		if (a[i] !== b[i]) return false;
+	}
+	return true;
 }
 
 export class TrustVerifier {
-  private records = new Map<string, VerificationRecord>();
+	private records = new Map<string, VerificationRecord>();
 
-  /**
-   * Verify a peer against its claimed public key.
-   *
-   * - First encounter (no record): record key, return `"tofu"`.
-   * - Subsequent match: increment `verifiedCount`, return `"verified"`.
-   * - Subsequent mismatch (key changed): return `"mismatch"` WITHOUT
-   *   overwriting the record — operator decides whether to `remove()` and
-   *   re-pin, or to keep the old pin and refuse the connection.
-   */
-  verify(peerId: string, publicKey: PublicKey): VerificationOutcome {
-    const prev = this.records.get(peerId);
-    const now = Date.now();
+	/**
+	 * Verify a peer against its claimed public key.
+	 *
+	 * - First encounter (no record): record key, return `"tofu"`.
+	 * - Subsequent match: increment `verifiedCount`, return `"verified"`.
+	 * - Subsequent mismatch (key changed): return `"mismatch"` WITHOUT
+	 *   overwriting the record — operator decides whether to `remove()` and
+	 *   re-pin, or to keep the old pin and refuse the connection.
+	 */
+	verify(peerId: string, publicKey: PublicKey): VerificationOutcome {
+		const prev = this.records.get(peerId);
+		const now = Date.now();
 
-    if (!prev) {
-      this.records.set(peerId, {
-        peerId,
-        publicKey,
-        firstSeen: now,
-        lastVerified: now,
-        verifiedCount: 1,
-      });
-      return { peerId, status: "tofu", publicKey };
-    }
+		if (!prev) {
+			this.records.set(peerId, {
+				peerId,
+				publicKey,
+				firstSeen: now,
+				lastVerified: now,
+				verifiedCount: 1,
+			});
+			return { peerId, status: "tofu", publicKey };
+		}
 
-    if (!bytesEqual(prev.publicKey.raw, publicKey.raw)) {
-      return {
-        peerId,
-        status: "mismatch",
-        reason: "public key changed",
-      };
-    }
+		if (!bytesEqual(prev.publicKey.raw, publicKey.raw)) {
+			return {
+				peerId,
+				status: "mismatch",
+				reason: "public key changed",
+			};
+		}
 
-    prev.lastVerified = now;
-    prev.verifiedCount += 1;
-    return { peerId, status: "verified", publicKey };
-  }
+		prev.lastVerified = now;
+		prev.verifiedCount += 1;
+		return { peerId, status: "verified", publicKey };
+	}
 
-  /**
-   * Check whether a peer has ever been verified (TOFU or otherwise).
-   * Does NOT trigger a verify() — purely a presence query.
-   */
-  isKnown(peerId: string): boolean {
-    return this.records.has(peerId);
-  }
+	/**
+	 * Check whether a peer has ever been verified (TOFU or otherwise).
+	 * Does NOT trigger a verify() — purely a presence query.
+	 */
+	isKnown(peerId: string): boolean {
+		return this.records.has(peerId);
+	}
 
-  get(peerId: string): VerificationRecord | undefined {
-    return this.records.get(peerId);
-  }
+	get(peerId: string): VerificationRecord | undefined {
+		return this.records.get(peerId);
+	}
 
-  remove(peerId: string): boolean {
-    return this.records.delete(peerId);
-  }
+	remove(peerId: string): boolean {
+		return this.records.delete(peerId);
+	}
 
-  size(): number {
-    return this.records.size;
-  }
+	size(): number {
+		return this.records.size;
+	}
 
-  all(): VerificationRecord[] {
-    return Array.from(this.records.values());
-  }
+	all(): VerificationRecord[] {
+		return Array.from(this.records.values());
+	}
 }

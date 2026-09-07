@@ -18,12 +18,7 @@ import { noemaRoutes } from "./noema-routes.js";
 import pulseRoutes from "./pulse-routes.js";
 import { semanticRoutes } from "./semantic-routes.js";
 
-const PUBLIC_PATH_PREFIXES = [
-	"/api/pulse",
-	"/api/network",
-	"/api/agents",
-	"/api/auth",
-];
+const PUBLIC_PATH_PREFIXES = ["/api/pulse", "/api/network", "/api/agents", "/api/auth"];
 const PUBLIC_PATH_EXACT = new Set(["/health"]);
 
 function isPublicPath(rawUrl: string | undefined): boolean {
@@ -31,9 +26,7 @@ function isPublicPath(rawUrl: string | undefined): boolean {
 	const path = rawUrl.split("?")[0];
 	if (!path) return false;
 	if (PUBLIC_PATH_EXACT.has(path)) return true;
-	return PUBLIC_PATH_PREFIXES.some(
-		(prefix) => path === prefix || path.startsWith(`${prefix}/`),
-	);
+	return PUBLIC_PATH_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
 }
 
 export interface BuildAppOptions {
@@ -51,8 +44,7 @@ export interface BuildAppOptions {
 export async function buildApp(options: BuildAppOptions = {}) {
 	const isProduction = process.env.NODE_ENV === "production";
 	const logger = options.logger ?? getLogger({ service: "api" });
-	const enableTransport =
-		options.enableTransport ?? process.env.NODE_ENV !== "test";
+	const enableTransport = options.enableTransport ?? process.env.NODE_ENV !== "test";
 	const identityPath = options.identityPath ?? "./.agentmesh/identity.json";
 
 	const app = Fastify({
@@ -60,11 +52,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
 		bodyLimit: 1024 * 1024, // 1MB explicit body cap (DoS protection)
 		genReqId(req) {
 			const incoming = req.headers["x-request-id"];
-			if (
-				typeof incoming === "string" &&
-				incoming.length > 0 &&
-				incoming.length < 256
-			) {
+			if (typeof incoming === "string" && incoming.length > 0 && incoming.length < 256) {
 				return incoming;
 			}
 			return randomUUID();
@@ -91,11 +79,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
 				"https://muhanai.com",
 				"https://www.muhanai.com",
 			])
-		: [
-				"http://localhost:3000",
-				"http://localhost:5173",
-				"http://localhost:3001",
-			];
+		: ["http://localhost:3000", "http://localhost:5173", "http://localhost:3001"];
 
 	await app.register(cors, {
 		origin: (origin, cb) => {
@@ -144,9 +128,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
 		const apiKey = request.headers["x-api-key"];
 
 		if (!validApiKey || apiKey !== validApiKey) {
-			reply
-				.code(401)
-				.send({ error: "Unauthorized: invalid or missing API key" });
+			reply.code(401).send({ error: "Unauthorized: invalid or missing API key" });
 		}
 	});
 

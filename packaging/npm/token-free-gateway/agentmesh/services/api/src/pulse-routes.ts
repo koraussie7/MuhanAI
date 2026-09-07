@@ -13,11 +13,7 @@
  * is responsible for attaching the PulseSource once the libp2p node starts.
  */
 
-import type {
-	FastifyInstance,
-	FastifyPluginAsync,
-	FastifyRequest,
-} from "fastify";
+import type { FastifyInstance, FastifyPluginAsync, FastifyRequest } from "fastify";
 import type { PulseBridge } from "./gossip-bridge.js";
 import { attachSsePulseSink } from "./pulse-stream.js";
 

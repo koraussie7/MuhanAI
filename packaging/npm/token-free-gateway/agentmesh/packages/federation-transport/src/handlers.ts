@@ -9,11 +9,7 @@
  */
 
 import type { SignedRecord } from "@agentmesh/shared";
-import {
-	decodeMessage,
-	encodeMessage,
-	type QueryMessage,
-} from "./protocols/folklore.js";
+import { decodeMessage, encodeMessage, type QueryMessage } from "./protocols/folklore.js";
 
 interface HandlerStream extends AsyncIterable<Uint8Array | Uint8ArrayList> {
 	send(data: Uint8Array): boolean;
