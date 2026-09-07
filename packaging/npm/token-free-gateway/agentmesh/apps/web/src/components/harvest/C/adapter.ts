@@ -26,9 +26,7 @@ export interface ResourceAdapter<TSnapshot> {
  * every `loadSnapshot()` call, so UI timestamps and counters stay "alive"
  * without a backend connection.
  */
-export function createStubAdapter<TSnapshot>(
-	produce: () => TSnapshot,
-): ResourceAdapter<TSnapshot> {
+export function createStubAdapter<TSnapshot>(produce: () => TSnapshot): ResourceAdapter<TSnapshot> {
 	return {
 		async loadSnapshot() {
 			return produce();
@@ -65,9 +63,7 @@ export function createHttpAdapter<TSnapshot>(
 				signal: options.signal,
 			});
 			if (!res.ok) {
-				throw new Error(
-					`[adapter] ${url} -> ${res.status} ${res.statusText ?? ""}`.trim(),
-				);
+				throw new Error(`[adapter] ${url} -> ${res.status} ${res.statusText ?? ""}`.trim());
 			}
 			return (await res.json()) as TSnapshot;
 		},
@@ -79,8 +75,7 @@ export function createHttpAdapter<TSnapshot>(
  * `saveToggles`, `revokeKey`, etc. extend this with their own `TCommand`
  * union instead of reinventing the contract.
  */
-export interface WritableResourceAdapter<TSnapshot>
-	extends ResourceAdapter<TSnapshot> {
+export interface WritableResourceAdapter<TSnapshot> extends ResourceAdapter<TSnapshot> {
 	saveSnapshot(snapshot: TSnapshot): Promise<void>;
 }
 

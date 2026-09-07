@@ -103,6 +103,10 @@ export async function llmMeshRoutes(app: FastifyInstance) {
 				status: statusFor(r.provider),
 			};
 		});
-		return { gateways, routes, vault: VAULT } satisfies LlmMeshSnapshot;
+		return {
+			gateways,
+			routes,
+			vault: VAULT.map((v) => ({ ...v })),
+		} satisfies LlmMeshSnapshot;
 	});
 }

@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
-import {
-	createHttpAdapter,
-	createResilientAdapter,
-	type ResourceAdapter,
-} from "./adapter.js";
-import { ApiVault, GatewayTable, PolicyChain } from "./GatewayPanel.js";
+import { createHttpAdapter, createResilientAdapter, type ResourceAdapter } from "./adapter.js";
 import type { GatewayProvider } from "./GatewayPanel.js";
+import { ApiVault, GatewayTable, PolicyChain } from "./GatewayPanel.js";
 
 /**
  * LlmMeshPage — TASK-C tkngate LLM Mesh & Gateway panel.

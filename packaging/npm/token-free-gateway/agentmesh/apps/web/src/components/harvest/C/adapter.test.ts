@@ -1,9 +1,5 @@
-import { describe, expect, it, vi, type Mock } from "vitest";
-import {
-	createHttpAdapter,
-	createStubAdapter,
-	type ResourceAdapter,
-} from "./adapter.js";
+import { describe, expect, it, type Mock, vi } from "vitest";
+import { createHttpAdapter, createStubAdapter, type ResourceAdapter } from "./adapter.js";
 
 function mockFetch(impl: Parameters<Mock>[0]): {
 	fetcher: typeof fetch;
@@ -50,10 +46,9 @@ describe("harvest/C adapter primitives", () => {
 					json: () => Promise.resolve({ gateways: [], vault: [] }),
 				}),
 			);
-			const a = createHttpAdapter<{ gateways: unknown[]; vault: unknown[] }>(
-				"/api/llm-mesh",
-				{ fetcher },
-			);
+			const a = createHttpAdapter<{ gateways: unknown[]; vault: unknown[] }>("/api/llm-mesh", {
+				fetcher,
+			});
 			const snap = await a.loadSnapshot();
 			expect(snap).toEqual({ gateways: [], vault: [] });
 			expect(fn).toHaveBeenCalledOnce();
@@ -75,9 +70,7 @@ describe("harvest/C adapter primitives", () => {
 				}),
 			);
 			const a = createHttpAdapter("/api/security", { fetcher });
-			await expect(a.loadSnapshot()).rejects.toThrow(
-				"/api/security -> 503 Service Unavailable",
-			);
+			await expect(a.loadSnapshot()).rejects.toThrow("/api/security -> 503 Service Unavailable");
 		});
 
 		it("forwards AbortSignal to the fetcher", async () => {
@@ -95,9 +88,7 @@ describe("harvest/C adapter primitives", () => {
 				signal: controller.signal,
 			});
 			await a.loadSnapshot();
-			const callArgs = fn.mock.calls[0]?.[1] as
-				| RequestInit
-				| undefined;
+			const callArgs = fn.mock.calls[0]?.[1] as RequestInit | undefined;
 			expect(callArgs?.signal).toBe(controller.signal);
 		});
 
