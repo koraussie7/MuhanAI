@@ -61,10 +61,7 @@ const DEFAULT_HEARTBEAT_MS = 15_000;
 
 export class PulseBridge {
 	private readonly sinks = new Set<PulseSink>();
-	private readonly handlers = new Map<
-		PulseSource,
-		(msg: PulseMessage) => void
-	>();
+	private readonly handlers = new Map<PulseSource, (msg: PulseMessage) => void>();
 	private readonly unsubscribers = new Map<PulseSource, () => void>();
 	private source: PulseSource | null = null;
 	private heartbeatTimer: NodeJS.Timeout | null = null;
@@ -110,9 +107,7 @@ export class PulseBridge {
 			}
 			this.logger.info("pulse-bridge: source attached");
 		} else {
-			this.logger.warn(
-				"pulse-bridge: source detached, degraded mode (heartbeat only)",
-			);
+			this.logger.warn("pulse-bridge: source detached, degraded mode (heartbeat only)");
 		}
 	}
 
@@ -163,12 +158,9 @@ export class PulseBridge {
 				try {
 					sink.heartbeat?.(ts);
 				} catch (e) {
-					this.logger.warn(
-						"pulse-bridge: heartbeat write failed, detaching sink",
-						{
-							err: (e as Error).message,
-						},
-					);
+					this.logger.warn("pulse-bridge: heartbeat write failed, detaching sink", {
+						err: (e as Error).message,
+					});
 					this.detach(sink);
 				}
 			}

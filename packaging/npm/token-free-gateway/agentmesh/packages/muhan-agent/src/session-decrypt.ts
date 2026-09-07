@@ -27,17 +27,17 @@ import type { SessionRoute } from "@agentmesh/gateway";
 export type SessionKey = Uint8Array;
 
 export interface DecryptedSession {
-  sessionId: string;
-  userId: string;
-  /** Plaintext request payload (JSON-decoded). */
-  payload: unknown;
-  /** ms since epoch the route was issued. */
-  issuedAt: number;
+	sessionId: string;
+	userId: string;
+	/** Plaintext request payload (JSON-decoded). */
+	payload: unknown;
+	/** ms since epoch the route was issued. */
+	issuedAt: number;
 }
 
 export interface SessionEnvelope {
-  iv: Uint8Array;
-  ciphertext: Uint8Array;
+	iv: Uint8Array;
+	ciphertext: Uint8Array;
 }
 
 const IV_BYTES = 12;
@@ -48,14 +48,14 @@ const KEY_BYTES = 32;
  * Returns an envelope suitable for embedding in a SessionRoute.ciphertext.
  */
 export async function encryptSessionPayload(
-  payload: unknown,
-  key: SessionKey,
+	payload: unknown,
+	key: SessionKey,
 ): Promise<SessionEnvelope> {
-  assertKey(key);
-  const iv = crypto.getRandomValues(new Uint8Array(IV_BYTES));
-  const plaintext = new TextEncoder().encode(JSON.stringify(payload));
-  const ciphertext = await aesGcmEncrypt(key, iv, plaintext);
-  return { iv, ciphertext };
+	assertKey(key);
+	const iv = crypto.getRandomValues(new Uint8Array(IV_BYTES));
+	const plaintext = new TextEncoder().encode(JSON.stringify(payload));
+	const ciphertext = await aesGcmEncrypt(key, iv, plaintext);
+	return { iv, ciphertext };
 }
 
 /**
@@ -63,58 +63,58 @@ export async function encryptSessionPayload(
  * Throws if the route is malformed or the key/cipher mismatch.
  */
 export async function decryptSessionRoute(
-  route: SessionRoute,
-  key: SessionKey,
+	route: SessionRoute,
+	key: SessionKey,
 ): Promise<DecryptedSession> {
-  assertKey(key);
-  const envelope = parseEnvelope(route.ciphertext);
-  const plaintext = await aesGcmDecrypt(key, envelope.iv, envelope.ciphertext);
-  const payload = JSON.parse(new TextDecoder().decode(plaintext));
-  return {
-    sessionId: route.sessionId,
-    userId: route.userId,
-    payload,
-    issuedAt: route.issuedAt,
-  };
+	assertKey(key);
+	const envelope = parseEnvelope(route.ciphertext);
+	const plaintext = await aesGcmDecrypt(key, envelope.iv, envelope.ciphertext);
+	const payload = JSON.parse(new TextDecoder().decode(plaintext));
+	return {
+		sessionId: route.sessionId,
+		userId: route.userId,
+		payload,
+		issuedAt: route.issuedAt,
+	};
 }
 
 function parseEnvelope(bytes: Uint8Array): SessionEnvelope {
-  // First 12 bytes = IV, rest = ciphertext (incl. 16-byte GCM tag).
-  if (bytes.byteLength < IV_BYTES + 16) {
-    throw new Error("session envelope too short");
-  }
-  return {
-    iv: bytes.slice(0, IV_BYTES),
-    ciphertext: bytes.slice(IV_BYTES),
-  };
+	// First 12 bytes = IV, rest = ciphertext (incl. 16-byte GCM tag).
+	if (bytes.byteLength < IV_BYTES + 16) {
+		throw new Error("session envelope too short");
+	}
+	return {
+		iv: bytes.slice(0, IV_BYTES),
+		ciphertext: bytes.slice(IV_BYTES),
+	};
 }
 
 function assertKey(key: SessionKey): void {
-  if (!(key instanceof Uint8Array)) {
-    throw new Error("session key must be a Uint8Array");
-  }
-  if (key.byteLength !== KEY_BYTES) {
-    throw new Error(`session key must be ${KEY_BYTES} bytes, got ${key.byteLength}`);
-  }
+	if (!(key instanceof Uint8Array)) {
+		throw new Error("session key must be a Uint8Array");
+	}
+	if (key.byteLength !== KEY_BYTES) {
+		throw new Error(`session key must be ${KEY_BYTES} bytes, got ${key.byteLength}`);
+	}
 }
 
 // WebCrypto wrappers — `globalThis.crypto.subtle` is available in Node 22.
 async function aesGcmEncrypt(
-  key: SessionKey,
-  iv: Uint8Array,
-  plaintext: Uint8Array,
+	key: SessionKey,
+	iv: Uint8Array,
+	plaintext: Uint8Array,
 ): Promise<Uint8Array> {
-  const ck = await crypto.subtle.importKey("raw", key, "AES-GCM", false, ["encrypt"]);
-  const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, ck, plaintext);
-  return new Uint8Array(ct);
+	const ck = await crypto.subtle.importKey("raw", key, "AES-GCM", false, ["encrypt"]);
+	const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, ck, plaintext);
+	return new Uint8Array(ct);
 }
 
 async function aesGcmDecrypt(
-  key: SessionKey,
-  iv: Uint8Array,
-  ciphertext: Uint8Array,
+	key: SessionKey,
+	iv: Uint8Array,
+	ciphertext: Uint8Array,
 ): Promise<Uint8Array> {
-  const ck = await crypto.subtle.importKey("raw", key, "AES-GCM", false, ["decrypt"]);
-  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, ck, ciphertext);
-  return new Uint8Array(pt);
+	const ck = await crypto.subtle.importKey("raw", key, "AES-GCM", false, ["decrypt"]);
+	const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, ck, ciphertext);
+	return new Uint8Array(pt);
 }

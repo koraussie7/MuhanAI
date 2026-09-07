@@ -1,5 +1,5 @@
 export * from "./category";
-export * from "./taxonomy";
-export * from "./jurisdiction";
 export * from "./classifier";
+export * from "./jurisdiction";
 export * from "./router";
+export * from "./taxonomy";

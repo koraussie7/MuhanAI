@@ -1,11 +1,10 @@
-export type {
-  ManifestSource,
-  ModelManifest,
-  ModelSearchRequest,
-  ModelSearchResult,
-  DownloadRequest,
-  DownloadStatus,
-  BroadcastRequest,
-} from "./types.js";
-
 export { NoemaClient } from "./client.js";
+export type {
+	BroadcastRequest,
+	DownloadRequest,
+	DownloadStatus,
+	ManifestSource,
+	ModelManifest,
+	ModelSearchRequest,
+	ModelSearchResult,
+} from "./types.js";

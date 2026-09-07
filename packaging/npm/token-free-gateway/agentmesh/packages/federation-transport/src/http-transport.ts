@@ -18,16 +18,9 @@ export class HttpTransport implements Transport {
 		// nothing to stop
 	}
 
-	async query(
-		_peerId: string,
-		query: string,
-		_embedding?: number[],
-	): Promise<SignedRecord[]> {
+	async query(_peerId: string, query: string, _embedding?: number[]): Promise<SignedRecord[]> {
 		try {
-			const target = new URL(
-				"/api/knowledge/folklore/query",
-				`${this.baseUrl}/`,
-			);
+			const target = new URL("/api/knowledge/folklore/query", `${this.baseUrl}/`);
 			const res = await fetch(target.toString(), {
 				method: "POST",
 				headers: { "content-type": "application/json" },
@@ -43,10 +36,7 @@ export class HttpTransport implements Transport {
 
 	async push(_peerId: string, records: SignedRecord[]): Promise<number> {
 		try {
-			const target = new URL(
-				"/api/knowledge/folklore/ingest",
-				`${this.baseUrl}/`,
-			);
+			const target = new URL("/api/knowledge/folklore/ingest", `${this.baseUrl}/`);
 			let pushed = 0;
 			for (const record of records) {
 				const res = await fetch(target.toString(), {

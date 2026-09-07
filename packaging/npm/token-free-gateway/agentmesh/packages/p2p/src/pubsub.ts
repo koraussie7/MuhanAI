@@ -36,9 +36,7 @@ export function encodePulse(msg: PulseMessage): Uint8Array {
 
 export function decodePulse(data: Uint8Array): PulseMessage | null {
 	try {
-		const obj = JSON.parse(
-			new TextDecoder().decode(data),
-		) as Partial<PulseMessage>;
+		const obj = JSON.parse(new TextDecoder().decode(data)) as Partial<PulseMessage>;
 		if (obj.v !== 1) return null;
 		if (
 			obj.kind !== "pulse" &&

@@ -15,24 +15,22 @@
 import { loadOrCreateIdentity } from "@agentmesh/p2p";
 
 export interface MachineIdentity {
-  /** Raw libp2p privateKey handle; concrete type lands in L2. */
-  privateKey: unknown;
-  peerId: string;
-  machineId: string;
+	/** Raw libp2p privateKey handle; concrete type lands in L2. */
+	privateKey: unknown;
+	peerId: string;
+	machineId: string;
 }
 
 export async function loadMachineIdentity(opts: {
-  /** Absolute path; default = ~/.muhanai/agent/identity.json */
-  filePath?: string;
+	/** Absolute path; default = ~/.muhanai/agent/identity.json */
+	filePath?: string;
 }): Promise<MachineIdentity> {
-  const filePath =
-    opts.filePath ??
-    `${process.env.HOME ?? "/tmp"}/.muhanai/agent/identity.json`;
-  const loaded = await loadOrCreateIdentity(filePath);
-  const machineId = `machine_${loaded.peerId.slice(-16)}`;
-  return {
-    privateKey: loaded.privateKey,
-    peerId: loaded.peerId,
-    machineId,
-  };
+	const filePath = opts.filePath ?? `${process.env.HOME ?? "/tmp"}/.muhanai/agent/identity.json`;
+	const loaded = await loadOrCreateIdentity(filePath);
+	const machineId = `machine_${loaded.peerId.slice(-16)}`;
+	return {
+		privateKey: loaded.privateKey,
+		peerId: loaded.peerId,
+		machineId,
+	};
 }

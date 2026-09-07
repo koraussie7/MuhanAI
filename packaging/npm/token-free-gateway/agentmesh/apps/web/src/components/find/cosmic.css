@@ -3,473 +3,654 @@
    ========================================================================== */
 
 .cosmic-mesh-viewport {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  background-color: #030611;
-  font-family: var(--cline-font-sans, system-ui, sans-serif);
-  color: #f8fafc;
-  z-index: 1000;
-  user-select: none;
+	position: fixed;
+	inset: 0;
+	width: 100vw;
+	height: 100vh;
+	overflow: hidden;
+	background-color: #030611;
+	font-family: var(--cline-font-sans, system-ui, sans-serif);
+	color: #f8fafc;
+	z-index: 1000;
+	user-select: none;
 }
 
 /* ---------------- Top Cosmic HUD Bar ---------------- */
 .cosmic-hud-container {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 16px;
-  z-index: 20;
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	padding: 16px;
+	z-index: 20;
 }
 
 .cosmic-top-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 10px 18px;
-  background: rgba(8, 12, 23, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 10px 18px;
+	background: rgba(8, 12, 23, 0.75);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 14px;
+	backdrop-filter: blur(16px);
+	-webkit-backdrop-filter: blur(16px);
+	box-shadow:
+		0 10px 30px rgba(0, 0, 0, 0.5),
+		inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .cosmic-back-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #94a3b8;
-  font-size: 12px;
-  font-family: var(--cline-font-mono, monospace);
-  transition: all 0.2s ease;
-  cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 12px;
+	border-radius: 8px;
+	background: rgba(255, 255, 255, 0.05);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	color: #94a3b8;
+	font-size: 12px;
+	font-family: var(--cline-font-mono, monospace);
+	transition: all 0.2s ease;
+	cursor: pointer;
 }
 
 .cosmic-back-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #f8fafc;
-  border-color: rgba(56, 189, 248, 0.3);
+	background: rgba(255, 255, 255, 0.1);
+	color: #f8fafc;
+	border-color: rgba(56, 189, 248, 0.3);
 }
 
 .cosmic-pulse-beacon {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #38bdf8;
-  box-shadow: 0 0 12px #38bdf8;
-  animation: cosmicBeaconPulse 2s infinite ease-in-out;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background: #38bdf8;
+	box-shadow: 0 0 12px #38bdf8;
+	animation: cosmicBeaconPulse 2s infinite ease-in-out;
 }
 
 @keyframes cosmicBeaconPulse {
-  0%, 100% {
-    transform: scale(0.9);
-    opacity: 0.8;
-    box-shadow: 0 0 8px #38bdf8;
-  }
-  50% {
-    transform: scale(1.3);
-    opacity: 1;
-    box-shadow: 0 0 18px #38bdf8, 0 0 28px rgba(56, 189, 248, 0.4);
-  }
+	0%,
+	100% {
+		transform: scale(0.9);
+		opacity: 0.8;
+		box-shadow: 0 0 8px #38bdf8;
+	}
+	50% {
+		transform: scale(1.3);
+		opacity: 1;
+		box-shadow:
+			0 0 18px #38bdf8,
+			0 0 28px rgba(56, 189, 248, 0.4);
+	}
 }
 
 .cosmic-brand-title {
-  background: linear-gradient(135deg, #f8fafc 30%, #38bdf8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+	background: linear-gradient(135deg, #f8fafc 30%, #38bdf8 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
 }
 
 .cosmic-badge {
-  font-size: 9px;
-  font-weight: 700;
-  font-family: var(--cline-font-mono, monospace);
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: rgba(56, 189, 248, 0.15);
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  color: #38bdf8;
-  letter-spacing: 0.05em;
+	font-size: 9px;
+	font-weight: 700;
+	font-family: var(--cline-font-mono, monospace);
+	padding: 2px 6px;
+	border-radius: 4px;
+	background: rgba(56, 189, 248, 0.15);
+	border: 1px solid rgba(56, 189, 248, 0.3);
+	color: #38bdf8;
+	letter-spacing: 0.05em;
 }
 
 .cosmic-search-input {
-  background: rgba(3, 7, 18, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #f8fafc;
-  outline: none;
-  transition: all 0.2s;
-  width: 220px;
+	background: rgba(3, 7, 18, 0.85);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	color: #f8fafc;
+	outline: none;
+	transition: all 0.2s;
+	width: 220px;
 }
 
 .cosmic-search-input:focus {
-  border-color: #38bdf8;
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
-  width: 260px;
+	border-color: #38bdf8;
+	box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+	width: 260px;
 }
 
 .cosmic-action-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: var(--cline-font-sans, sans-serif);
-  cursor: pointer;
-  transition: all 0.2s ease;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 14px;
+	border-radius: 8px;
+	font-size: 12px;
+	font-weight: 600;
+	font-family: var(--cline-font-sans, sans-serif);
+	cursor: pointer;
+	transition: all 0.2s ease;
 }
 
 .cosmic-action-btn.primary {
-  background: linear-gradient(135deg, #0ea5e9, #2563eb);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
+	background: linear-gradient(135deg, #0ea5e9, #2563eb);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	color: #ffffff;
+	box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
 }
 
 .cosmic-action-btn.primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.5);
+	transform: translateY(-1px);
+	box-shadow: 0 6px 20px rgba(14, 165, 233, 0.5);
 }
 
 .cosmic-action-btn.secondary {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #e2e8f0;
+	background: rgba(255, 255, 255, 0.06);
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	color: #e2e8f0;
 }
 
 .cosmic-action-btn.secondary:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.25);
+	background: rgba(255, 255, 255, 0.12);
+	border-color: rgba(255, 255, 255, 0.25);
 }
 
 .cosmic-action-btn.active {
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid #10b981;
-  color: #10b981;
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
+	background: rgba(16, 185, 129, 0.15);
+	border: 1px solid #10b981;
+	color: #10b981;
+	box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
 }
 
 .cosmic-icon-btn {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #94a3b8;
-  cursor: pointer;
-  transition: all 0.2s;
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 8px;
+	background: rgba(255, 255, 255, 0.05);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	color: #94a3b8;
+	cursor: pointer;
+	transition: all 0.2s;
 }
 
 .cosmic-icon-btn:hover,
 .cosmic-icon-btn.active {
-  background: rgba(255, 255, 255, 0.12);
-  color: #f8fafc;
-  border-color: rgba(56, 189, 248, 0.3);
+	background: rgba(255, 255, 255, 0.12);
+	color: #f8fafc;
+	border-color: rgba(56, 189, 248, 0.3);
 }
 
 /* ---------------- Physics Settings Panel ---------------- */
 .cosmic-settings-panel {
-  position: absolute;
-  top: 76px;
-  right: 16px;
-  width: 270px;
-  background: rgba(8, 12, 23, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  backdrop-filter: blur(20px);
-  padding: 14px;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
-  z-index: 30;
+	position: absolute;
+	top: 76px;
+	right: 16px;
+	width: 270px;
+	background: rgba(8, 12, 23, 0.9);
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 12px;
+	backdrop-filter: blur(20px);
+	padding: 14px;
+	box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+	z-index: 30;
 }
 
 .cosmic-slider {
-  width: 100%;
-  accent-color: #38bdf8;
-  cursor: pointer;
+	width: 100%;
+	accent-color: #38bdf8;
+	cursor: pointer;
 }
 
 .cosmic-type-chip {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 8px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  font-size: 10.5px;
-  font-family: var(--cline-font-mono, monospace);
-  color: #94a3b8;
-  cursor: pointer;
-  transition: all 0.15s;
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	padding: 3px 8px;
+	border-radius: 6px;
+	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	font-size: 10.5px;
+	font-family: var(--cline-font-mono, monospace);
+	color: #94a3b8;
+	cursor: pointer;
+	transition: all 0.15s;
 }
 
 .cosmic-type-chip.active {
-  background: rgba(56, 189, 248, 0.15);
-  border-color: rgba(56, 189, 248, 0.4);
-  color: #f8fafc;
+	background: rgba(56, 189, 248, 0.15);
+	border-color: rgba(56, 189, 248, 0.4);
+	color: #f8fafc;
 }
 
 .type-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
 }
 
-.type-dot.core { background: #38bdf8; }
-.type-dot.agent { background: #e6ff87; }
-.type-dot.peer { background: #10b981; }
-.type-dot.note { background: #a855f7; }
-.type-dot.tag { background: #f43f5e; }
+.type-dot.core {
+	background: #38bdf8;
+}
+.type-dot.agent {
+	background: #e6ff87;
+}
+.type-dot.peer {
+	background: #10b981;
+}
+.type-dot.note {
+	background: #a855f7;
+}
+.type-dot.tag {
+	background: #f43f5e;
+}
 
 /* ---------------- Bottom Event Ticker ---------------- */
 .cosmic-bottom-ticker {
-  max-width: 620px;
-  background: rgba(8, 12, 23, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  backdrop-filter: blur(16px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-  overflow: hidden;
+	max-width: 620px;
+	background: rgba(8, 12, 23, 0.85);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 10px;
+	backdrop-filter: blur(16px);
+	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+	overflow: hidden;
 }
 
 /* ---------------- Obsidian Markdown Drawer ---------------- */
 .obsidian-inspector-drawer {
-  position: absolute;
-  top: 16px;
-  bottom: 16px;
-  right: 16px;
-  width: 380px;
-  background: rgba(11, 16, 28, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  display: flex;
-  flex-direction: column;
-  z-index: 40;
-  animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  user-select: text;
+	position: absolute;
+	top: 16px;
+	bottom: 16px;
+	right: 16px;
+	width: 380px;
+	background: rgba(11, 16, 28, 0.92);
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 14px;
+	backdrop-filter: blur(24px);
+	-webkit-backdrop-filter: blur(24px);
+	box-shadow:
+		-10px 0 40px rgba(0, 0, 0, 0.65),
+		inset 0 1px 0 rgba(255, 255, 255, 0.1);
+	display: flex;
+	flex-direction: column;
+	z-index: 40;
+	animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+	user-select: text;
 }
 
 @keyframes slideInRight {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+	from {
+		transform: translateX(100%);
+		opacity: 0;
+	}
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
 }
 
 .obsidian-inspector-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(8, 12, 21, 0.6);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 16px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	background: rgba(8, 12, 21, 0.6);
 }
 
 .obsidian-tab-title {
-  font-size: 13px;
-  font-weight: 600;
-  font-family: var(--cline-font-mono, monospace);
-  color: #f8fafc;
+	font-size: 13px;
+	font-weight: 600;
+	font-family: var(--cline-font-mono, monospace);
+	color: #f8fafc;
 }
 
 .obsidian-icon-btn {
-  padding: 4px;
-  border-radius: 6px;
-  color: #94a3b8;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all 0.15s;
+	padding: 4px;
+	border-radius: 6px;
+	color: #94a3b8;
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	transition: all 0.15s;
 }
 
 .obsidian-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #f8fafc;
+	background: rgba(255, 255, 255, 0.08);
+	color: #f8fafc;
 }
 
 .obsidian-icon-btn.close:hover {
-  background: rgba(244, 63, 94, 0.15);
-  color: #f43f5e;
+	background: rgba(244, 63, 94, 0.15);
+	color: #f43f5e;
 }
 
 .obsidian-inspector-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+	flex: 1;
+	overflow-y: auto;
+	padding: 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
 }
 
 /* YAML Frontmatter Box */
 .obsidian-yaml-box {
-  background: rgba(4, 7, 14, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-family: var(--cline-font-mono, monospace);
-  font-size: 11.5px;
+	background: rgba(4, 7, 14, 0.7);
+	border: 1px solid rgba(255, 255, 255, 0.06);
+	border-radius: 8px;
+	padding: 10px 12px;
+	font-family: var(--cline-font-mono, monospace);
+	font-size: 11.5px;
 }
 
 .obsidian-yaml-delimit {
-  color: #64748b;
-  font-weight: 700;
+	color: #64748b;
+	font-weight: 700;
 }
 
 .obsidian-yaml-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin: 3px 0;
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	margin: 3px 0;
 }
 
 .yaml-key {
-  color: #7dd3fc;
-  min-width: 65px;
+	color: #7dd3fc;
+	min-width: 65px;
 }
 
 .yaml-val {
-  color: #cbd5e1;
+	color: #cbd5e1;
 }
 
 .obsidian-tag-pill {
-  font-size: 10px;
-  padding: 1px 6px;
-  border-radius: 4px;
-  background: rgba(244, 63, 94, 0.15);
-  border: 1px solid rgba(244, 63, 94, 0.3);
-  color: #fda4af;
+	font-size: 10px;
+	padding: 1px 6px;
+	border-radius: 4px;
+	background: rgba(244, 63, 94, 0.15);
+	border: 1px solid rgba(244, 63, 94, 0.3);
+	color: #fda4af;
 }
 
 /* Summary Callout */
 .obsidian-summary-callout {
-  padding: 10px 12px;
-  border-left: 3px solid #38bdf8;
-  background: rgba(56, 189, 248, 0.08);
-  border-radius: 0 8px 8px 0;
+	padding: 10px 12px;
+	border-left: 3px solid #38bdf8;
+	background: rgba(56, 189, 248, 0.08);
+	border-radius: 0 8px 8px 0;
 }
 
 /* Markdown Content */
 .obsidian-markdown-content {
-  line-height: 1.6;
-  font-size: 12.5px;
+	line-height: 1.6;
+	font-size: 12.5px;
 }
 
 .obsidian-wikilink-btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 1px 5px;
-  border-radius: 4px;
-  background: rgba(56, 189, 248, 0.12);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  color: #38bdf8;
-  font-family: var(--cline-font-mono, monospace);
-  font-size: 11px;
-  cursor: pointer;
-  transition: all 0.15s;
-  margin: 0 2px;
+	display: inline-flex;
+	align-items: center;
+	padding: 1px 5px;
+	border-radius: 4px;
+	background: rgba(56, 189, 248, 0.12);
+	border: 1px solid rgba(56, 189, 248, 0.25);
+	color: #38bdf8;
+	font-family: var(--cline-font-mono, monospace);
+	font-size: 11px;
+	cursor: pointer;
+	transition: all 0.15s;
+	margin: 0 2px;
 }
 
 .obsidian-wikilink-btn:hover {
-  background: rgba(56, 189, 248, 0.25);
-  color: #ffffff;
-  border-color: #38bdf8;
-  transform: translateY(-0.5px);
+	background: rgba(56, 189, 248, 0.25);
+	color: #ffffff;
+	border-color: #38bdf8;
+	transform: translateY(-0.5px);
 }
 
 .obsidian-code-block {
-  background: #030610;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
-  padding: 8px 10px;
-  margin: 8px 0;
-  overflow-x: auto;
-  font-family: var(--cline-font-mono, monospace);
-  font-size: 11px;
-  color: #a7f3d0;
+	background: #030610;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 6px;
+	padding: 8px 10px;
+	margin: 8px 0;
+	overflow-x: auto;
+	font-family: var(--cline-font-mono, monospace);
+	font-size: 11px;
+	color: #a7f3d0;
 }
 
 /* Backlinks Section */
 .obsidian-backlinks-section {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 12px;
+	border-top: 1px solid rgba(255, 255, 255, 0.08);
+	padding-top: 12px;
 }
 
 .obsidian-backlinks-title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11.5px;
-  font-weight: 600;
-  font-family: var(--cline-font-mono, monospace);
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 11.5px;
+	font-weight: 600;
+	font-family: var(--cline-font-mono, monospace);
+	color: #94a3b8;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
 }
 
 .obsidian-backlink-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 10px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  cursor: pointer;
-  transition: all 0.15s;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 6px 10px;
+	border-radius: 6px;
+	background: rgba(255, 255, 255, 0.03);
+	border: 1px solid rgba(255, 255, 255, 0.06);
+	cursor: pointer;
+	transition: all 0.15s;
 }
 
 .obsidian-backlink-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(56, 189, 248, 0.3);
+	background: rgba(255, 255, 255, 0.08);
+	border-color: rgba(56, 189, 248, 0.3);
 }
 
 .backlink-name {
-  font-family: var(--cline-font-mono, monospace);
-  font-size: 11.5px;
-  color: #e2e8f0;
+	font-family: var(--cline-font-mono, monospace);
+	font-size: 11.5px;
+	color: #e2e8f0;
 }
 
 .backlink-type {
-  font-size: 9.5px;
-  text-transform: uppercase;
-  color: #64748b;
-  font-family: var(--cline-font-mono, monospace);
+	font-size: 9.5px;
+	text-transform: uppercase;
+	color: #64748b;
+	font-family: var(--cline-font-mono, monospace);
 }
 
 /* Peer Provenance Card */
 .obsidian-peer-card {
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: rgba(16, 185, 129, 0.06);
-  border: 1px solid rgba(16, 185, 129, 0.2);
+	padding: 10px 12px;
+	border-radius: 8px;
+	background: rgba(16, 185, 129, 0.06);
+	border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 .status-pill.connected {
-  font-size: 9.5px;
-  font-family: var(--cline-font-mono, monospace);
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: rgba(16, 185, 129, 0.2);
-  color: #34d399;
+	font-size: 9.5px;
+	font-family: var(--cline-font-mono, monospace);
+	padding: 2px 6px;
+	border-radius: 4px;
+	background: rgba(16, 185, 129, 0.2);
+	color: #34d399;
+}
+
+/* ---------------- Connect Peer Active State ---------------- */
+.cosmic-action-btn.active {
+	background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.35));
+	border: 1px solid rgba(52, 211, 153, 0.5);
+	color: #34d399;
+	box-shadow: 0 0 14px rgba(16, 185, 129, 0.3);
+}
+
+.cosmic-action-btn.active:hover {
+	background: linear-gradient(135deg, rgba(16, 185, 129, 0.35), rgba(5, 150, 105, 0.45));
+	border-color: #34d399;
+	box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+}
+
+/* ---------------- Peer Nickname Prompt Modal ---------------- */
+.cosmic-modal-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(3, 7, 18, 0.82);
+	backdrop-filter: blur(14px);
+	-webkit-backdrop-filter: blur(14px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 9999;
+	padding: 16px;
+	animation: cosmicFadeIn 0.2s ease-out;
+}
+
+@keyframes cosmicFadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.cosmic-modal-box {
+	background: rgba(11, 16, 28, 0.96);
+	border: 1px solid rgba(56, 189, 248, 0.4);
+	border-radius: 16px;
+	padding: 24px;
+	width: 100%;
+	max-width: 440px;
+	box-shadow:
+		0 20px 60px rgba(0, 0, 0, 0.85),
+		0 0 35px rgba(56, 189, 248, 0.2);
+	animation: cosmicScaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+	pointer-events: auto;
+}
+
+@keyframes cosmicScaleUp {
+	from {
+		transform: scale(0.92);
+		opacity: 0;
+	}
+	to {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+.cosmic-modal-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 12px;
+}
+
+.cosmic-modal-title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 15px;
+	font-weight: 700;
+	color: #f8fafc;
+	font-family: var(--cline-font-sans, sans-serif);
+}
+
+.cosmic-modal-desc {
+	font-size: 12.5px;
+	color: #94a3b8;
+	line-height: 1.5;
+	margin-bottom: 18px;
+	font-family: var(--cline-font-sans, sans-serif);
+}
+
+.cosmic-modal-input-wrap {
+	position: relative;
+	margin-bottom: 20px;
+}
+
+.cosmic-modal-input {
+	width: 100%;
+	background: rgba(3, 7, 18, 0.95);
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	border-radius: 10px;
+	padding: 11px 14px 11px 40px;
+	font-size: 13.5px;
+	color: #f8fafc;
+	font-family: var(--cline-font-mono, monospace);
+	outline: none;
+	transition: all 0.2s ease;
+	box-sizing: border-box;
+}
+
+.cosmic-modal-input:focus {
+	border-color: #38bdf8;
+	box-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
+}
+
+.cosmic-modal-icon {
+	position: absolute;
+	left: 14px;
+	top: 50%;
+	transform: translateY(-50%);
+	font-size: 15px;
+	color: #38bdf8;
+	pointer-events: none;
+}
+
+.cosmic-modal-actions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 10px;
+}
+
+.cosmic-modal-cancel-btn {
+	padding: 9px 16px;
+	border-radius: 8px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #94a3b8;
+	background: transparent;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.cosmic-modal-cancel-btn:hover {
+	background: rgba(255, 255, 255, 0.06);
+	color: #f8fafc;
+}
+
+.cosmic-modal-submit-btn {
+	padding: 9px 20px;
+	border-radius: 8px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #ffffff;
+	background: linear-gradient(135deg, #0ea5e9, #2563eb);
+	border: 1px solid rgba(255, 255, 255, 0.25);
+	box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4);
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.cosmic-modal-submit-btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 6px 20px rgba(14, 165, 233, 0.6);
 }

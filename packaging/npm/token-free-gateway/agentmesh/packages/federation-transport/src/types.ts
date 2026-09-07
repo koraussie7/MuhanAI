@@ -13,11 +13,7 @@ export interface TransportOptions {
 export interface Transport {
 	start(): Promise<void>;
 	stop(): Promise<void>;
-	query(
-		peerId: string,
-		query: string,
-		embedding?: number[],
-	): Promise<SignedRecord[]>;
+	query(peerId: string, query: string, embedding?: number[]): Promise<SignedRecord[]>;
 	push(peerId: string, records: SignedRecord[]): Promise<number>;
 	getPeers(): Array<{ peerId: string; address: string; online: boolean }>;
 	addPeer(address: string): Promise<void>;

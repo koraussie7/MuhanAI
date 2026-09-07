@@ -1,11 +1,11 @@
-export * from "./store-types";
-export * from "./user-object";
 export * from "./knowledge";
 export * from "./memory";
-export * from "./skills";
 export * from "./permissions";
-export * from "./tools";
+export { PrismaUserKnowledgeStore } from "./prisma-store";
 export * from "./server";
 export * from "./service";
+export * from "./skills";
 export * from "./store-factory";
-export { PrismaUserKnowledgeStore } from "./prisma-store";
+export * from "./store-types";
+export * from "./tools";
+export * from "./user-object";

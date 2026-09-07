@@ -5,7 +5,6 @@ import { type MeshEdge, type MeshNode, MeshStats, MeshTopology } from "./harvest
 import { BrowserAgentPanel, type Peer, PeerCanvas } from "./harvest/A/PeerCanvas.js";
 import { type LocalNode, PersonalNodeControl } from "./harvest/A/PersonalNode.js";
 import { type ClusterNode, ClusterOverview } from "./harvest/C/ClusterView.js";
-import { type GatewayProvider, GatewayTable, PolicyChain } from "./harvest/C/GatewayPanel.js";
 import { type GpuNode, GpuPool } from "./harvest/C/GpuPool.js";
 import {
 	type LedgerEntry,
@@ -17,7 +16,6 @@ import {
 } from "./harvest/C/index.js";
 import { type ComputeWorker, WorkerPool } from "./harvest/C/WorkerPool.js";
 import { GpuRackVisualizer } from "./visuals/GpuRackVisualizer.js";
-import { LatencyVisualizer } from "./visuals/LatencyVisualizer.js";
 import { LiveBlockStream } from "./visuals/LiveBlockStream.js";
 import { SwarmRadar } from "./visuals/SwarmRadar.js";
 import "./harvest/C/harvest-c.css";
@@ -323,89 +321,8 @@ export function P2pNetworkPage() {
 	);
 }
 
-// ---- LLM Mesh (Harvested from tkngate: Zero-Trust Gateway Table + Policy Chain) ----
-const PROVIDERS = [
-	"Gemini",
-	"Claude",
-	"GPT",
-	"Mistral",
-	"Groq",
-	"Cerebras",
-	"OpenRouter",
-	"FreeLLMAPI",
-	"LocalAI",
-	"Ollama",
-	"WebLLM",
-];
-const POLICIES = [
-	"Best Quality",
-	"Lowest Cost",
-	"Fastest",
-	"Free First",
-	"Local First",
-	"Privacy First",
-	"Balanced",
-];
-const CHAIN_BY_POLICY: Record<string, string[]> = {
-	"Free First": [
-		"WebLLM (로컬 브라우저)",
-		"FreeLLMAPI (무료 쿼터)",
-		"P2P Compute (메시 공유)",
-		"Paid API (최후 폴백)",
-	],
-	"Local First": [
-		"WebLLM (로컬 브라우저)",
-		"LocalAI / Ollama (셀프호스트)",
-		"FreeLLMAPI (무료 쿼터)",
-		"Paid API (최후 폴백)",
-	],
-};
-
-export function LlmMeshPage() {
-	const [policy, setPolicy] = useState("Free First");
-	const chain = CHAIN_BY_POLICY[policy] ?? [
-		`${policy} 정책 평가`,
-		"헬스 체크 (latency / status)",
-		"예산·비용 등급 필터",
-		"라우팅 실행",
-	];
-	const gateways: GatewayProvider[] = PROVIDERS.slice(0, 6).map((name, i) => ({
-		name,
-		status: i === 3 ? "degraded" : "healthy",
-		latencyMs: 180 + i * 240,
-		costTier: i < 3 ? "free" : i < 5 ? "low" : "paid",
-	}));
-	return (
-		<Page
-			title="LLM Mesh & Gateway"
-			subtitle={`tkngate 제로트러스트 라우팅 엔진 · 정책: ${policy}`}
-		>
-			<LatencyVisualizer />
-			<div className="provider-cloud" style={{ marginBottom: 12 }}>
-				{PROVIDERS.map((p) => (
-					<span className="provider-chip" key={p}>
-						{p}
-					</span>
-				))}
-			</div>
-			<div className="policy-row" style={{ marginBottom: 16 }}>
-				{POLICIES.map((p) => (
-					<button
-						key={p}
-						className={p === policy ? "policy-chip active" : "policy-chip"}
-						onClick={() => setPolicy(p)}
-					>
-						{p}
-					</button>
-				))}
-			</div>
-			<PolicyChain chain={chain} />
-			<div style={{ marginTop: 16 }}>
-				<GatewayTable providers={gateways} />
-			</div>
-		</Page>
-	);
-}
+// ---- LLM Mesh (TASK-C: re-export from harvest/C) ----
+export { LlmMeshPage } from "./harvest/C/LlmMeshPage.js";
 
 // ---- Token Bank (Harvested from p2ptokens + PinkyBrain: Ledger + Trust Ring) ----
 export function TokenBankPage() {
