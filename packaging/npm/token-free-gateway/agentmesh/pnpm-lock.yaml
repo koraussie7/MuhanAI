@@ -98,6 +98,9 @@ importers:
 
   packages/federation-transport:
     dependencies:
+      '@agentmesh/p2p':
+        specifier: workspace:*
+        version: link:../p2p
       '@agentmesh/shared':
         specifier: workspace:*
         version: link:../shared
