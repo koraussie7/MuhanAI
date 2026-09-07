@@ -18,19 +18,19 @@
 import type { FastifyReply } from "fastify";
 
 export interface ClientErrorBody {
-  error: string;
-  requestId?: string;
+	error: string;
+	requestId?: string;
 }
 
 export function clientError(
-  reply: FastifyReply,
-  status: number,
-  message: string,
-  requestId?: string,
+	reply: FastifyReply,
+	status: number,
+	message: string,
+	requestId?: string,
 ): FastifyReply {
-  const body: ClientErrorBody = { error: message };
-  if (requestId) body.requestId = requestId;
-  return reply.code(status).send(body);
+	const body: ClientErrorBody = { error: message };
+	if (requestId) body.requestId = requestId;
+	return reply.code(status).send(body);
 }
 
 /**
@@ -44,17 +44,18 @@ export function clientError(
  * depending on which parser produced the issue; we strip that prefix so
  * the client only sees the user-facing field name.
  */
-export function formatZodError(error: { issues: Array<{ path: ReadonlyArray<unknown>; message: string }> }): string {
-  const first = error.issues[0];
-  if (!first) return "Invalid request";
-  const raw = first.path
-    .filter((p): p is string | number => typeof p === "string" || typeof p === "number")
-    .map((p) => String(p));
-  const segments = raw[0] === "body" || raw[0] === "params" || raw[0] === "querystring"
-    ? raw.slice(1)
-    : raw;
-  const field = segments.join(".");
-  return field ? `${field}: ${first.message}` : first.message;
+export function formatZodError(error: {
+	issues: Array<{ path: ReadonlyArray<unknown>; message: string }>;
+}): string {
+	const first = error.issues[0];
+	if (!first) return "Invalid request";
+	const raw = first.path
+		.filter((p): p is string | number => typeof p === "string" || typeof p === "number")
+		.map((p) => String(p));
+	const segments =
+		raw[0] === "body" || raw[0] === "params" || raw[0] === "querystring" ? raw.slice(1) : raw;
+	const field = segments.join(".");
+	return field ? `${field}: ${first.message}` : first.message;
 }
 
 /**
@@ -62,17 +63,17 @@ export function formatZodError(error: { issues: Array<{ path: ReadonlyArray<unkn
  * generic 500 to the client with the original logged at error level.
  */
 export function withSafeErrors<TArgs extends unknown[], TResult>(
-  reply: FastifyReply,
-  handler: (...args: TArgs) => Promise<TResult>,
+	reply: FastifyReply,
+	handler: (...args: TArgs) => Promise<TResult>,
 ): (...args: TArgs) => Promise<TResult | undefined> {
-  return async (...args: TArgs): Promise<TResult | undefined> => {
-    try {
-      return await handler(...args);
-    } catch (err) {
-      reply.log.error({ err }, "route handler threw");
-      const requestId = reply.request.id;
-      clientError(reply, 500, "Internal server error", requestId);
-      return undefined;
-    }
-  };
+	return async (...args: TArgs): Promise<TResult | undefined> => {
+		try {
+			return await handler(...args);
+		} catch (err) {
+			reply.log.error({ err }, "route handler threw");
+			const requestId = reply.request.id;
+			clientError(reply, 500, "Internal server error", requestId);
+			return undefined;
+		}
+	};
 }

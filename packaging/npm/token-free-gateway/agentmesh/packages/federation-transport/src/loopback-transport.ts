@@ -33,11 +33,7 @@ export class LoopbackTransport implements Transport {
 		this.peers.clear();
 	}
 
-	async query(
-		peerId: string,
-		query: string,
-		embedding?: number[],
-	): Promise<SignedRecord[]> {
+	async query(peerId: string, query: string, embedding?: number[]): Promise<SignedRecord[]> {
 		if (this.onQuery) {
 			return this.onQuery(peerId, query, embedding);
 		}

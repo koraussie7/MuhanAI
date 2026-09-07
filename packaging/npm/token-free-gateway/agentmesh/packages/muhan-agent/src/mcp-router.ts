@@ -19,25 +19,25 @@ import type { SessionHandler, SessionRequest, SessionResponse } from "./session-
 
 /** Map session capability names to MCP tool invocations. */
 export interface CapabilityMap {
-  [capability: string]: {
-    toolName: string;
-    /** Optional arg adapter from session args → tool args. */
-    adapt?: (args: Record<string, unknown>) => Record<string, unknown>;
-  };
+	[capability: string]: {
+		toolName: string;
+		/** Optional arg adapter from session args → tool args. */
+		adapt?: (args: Record<string, unknown>) => Record<string, unknown>;
+	};
 }
 
 /** Default capability map — single user, single MCP instance. */
 export function defaultCapabilityMap(): CapabilityMap {
-  return {
-    "personal-context": {
-      toolName: "knowledge",
-      adapt: (args) => ({ action: "list", userId: args.userId }),
-    },
-    "personal-snapshot": {
-      toolName: "memory",
-      adapt: (args) => ({ action: "snapshot", userId: args.userId }),
-    },
-  };
+	return {
+		"personal-context": {
+			toolName: "knowledge",
+			adapt: (args) => ({ action: "list", userId: args.userId }),
+		},
+		"personal-snapshot": {
+			toolName: "memory",
+			adapt: (args) => ({ action: "snapshot", userId: args.userId }),
+		},
+	};
 }
 
 /**
@@ -56,22 +56,22 @@ export function defaultCapabilityMap(): CapabilityMap {
  *   - integration analysis: docs/agentmesh/AIHAWK-INTEGRATION.md
  */
 export function browserCapabilityMap(): CapabilityMap {
-  return {
-    // Ladder rung 1 — named tools with selectors
-    browser_navigate:      { toolName: "browser_navigate" },
-    browser_click:         { toolName: "browser_click" },
-    browser_type:          { toolName: "browser_type" },
-    browser_select_option: { toolName: "browser_select_option" },
-    browser_press_key:     { toolName: "browser_press_key" },
-    // Ladder rung 2 — coordinates
-    browser_click_at:      { toolName: "browser_click_at" },
-    // Rung 2½ — perception (snapshot is needed before click_at)
-    browser_snapshot:      { toolName: "browser_snapshot" },
-    // Ladder rung 3 — eyes
-    browser_take_screenshot: { toolName: "browser_take_screenshot" },
-    // Ladder rung 4 — read-only evaluate (mutation rejected upstream)
-    browser_evaluate:      { toolName: "browser_evaluate" },
-  };
+	return {
+		// Ladder rung 1 — named tools with selectors
+		browser_navigate: { toolName: "browser_navigate" },
+		browser_click: { toolName: "browser_click" },
+		browser_type: { toolName: "browser_type" },
+		browser_select_option: { toolName: "browser_select_option" },
+		browser_press_key: { toolName: "browser_press_key" },
+		// Ladder rung 2 — coordinates
+		browser_click_at: { toolName: "browser_click_at" },
+		// Rung 2½ — perception (snapshot is needed before click_at)
+		browser_snapshot: { toolName: "browser_snapshot" },
+		// Ladder rung 3 — eyes
+		browser_take_screenshot: { toolName: "browser_take_screenshot" },
+		// Ladder rung 4 — read-only evaluate (mutation rejected upstream)
+		browser_evaluate: { toolName: "browser_evaluate" },
+	};
 }
 
 /**
@@ -84,7 +84,7 @@ export function browserCapabilityMap(): CapabilityMap {
  * AIHawk MCP client (likely over `mcp.clientSession(...)`).
  */
 export interface BrowserAdapter {
-  callBrowserTool(toolName: string, args: Record<string, unknown>): Promise<unknown>;
+	callBrowserTool(toolName: string, args: Record<string, unknown>): Promise<unknown>;
 }
 
 /**
@@ -92,30 +92,25 @@ export interface BrowserAdapter {
  * capability. Errors thrown by MCP are converted to SessionResponse.ok=false
  * so the runner can surface them without crashing the daemon.
  */
-export function buildMcpHandler(opts: {
-  mcp: PersonalMCP;
-  capability: string;
-}): SessionHandler {
-  const capMap = defaultCapabilityMap();
-  const mapping = capMap[opts.capability];
-  if (!mapping) {
-    throw new Error(`unknown MCP capability: ${opts.capability}`);
-  }
-  return async (req: SessionRequest): Promise<SessionResponse> => {
-    try {
-      const toolArgs = mapping.adapt
-        ? mapping.adapt(req.args ?? {})
-        : (req.args ?? {});
-      const result = await opts.mcp.callTool(mapping.toolName, toolArgs);
-      return { ok: true, correlationId: req.correlationId, result };
-    } catch (err) {
-      return {
-        ok: false,
-        correlationId: req.correlationId,
-        error: err instanceof Error ? err.message : String(err),
-      };
-    }
-  };
+export function buildMcpHandler(opts: { mcp: PersonalMCP; capability: string }): SessionHandler {
+	const capMap = defaultCapabilityMap();
+	const mapping = capMap[opts.capability];
+	if (!mapping) {
+		throw new Error(`unknown MCP capability: ${opts.capability}`);
+	}
+	return async (req: SessionRequest): Promise<SessionResponse> => {
+		try {
+			const toolArgs = mapping.adapt ? mapping.adapt(req.args ?? {}) : (req.args ?? {});
+			const result = await opts.mcp.callTool(mapping.toolName, toolArgs);
+			return { ok: true, correlationId: req.correlationId, result };
+		} catch (err) {
+			return {
+				ok: false,
+				correlationId: req.correlationId,
+				error: err instanceof Error ? err.message : String(err),
+			};
+		}
+	};
 }
 
 /**
@@ -125,27 +120,25 @@ export function buildMcpHandler(opts: {
  * and browser-MCP.
  */
 export function buildBrowserHandler(opts: {
-  browser: BrowserAdapter;
-  capability: string;
+	browser: BrowserAdapter;
+	capability: string;
 }): SessionHandler {
-  const capMap = browserCapabilityMap();
-  const mapping = capMap[opts.capability];
-  if (!mapping) {
-    throw new Error(`unknown browser capability: ${opts.capability}`);
-  }
-  return async (req: SessionRequest): Promise<SessionResponse> => {
-    try {
-      const toolArgs = mapping.adapt
-        ? mapping.adapt(req.args ?? {})
-        : (req.args ?? {});
-      const result = await opts.browser.callBrowserTool(mapping.toolName, toolArgs);
-      return { ok: true, correlationId: req.correlationId, result };
-    } catch (err) {
-      return {
-        ok: false,
-        correlationId: req.correlationId,
-        error: err instanceof Error ? err.message : String(err),
-      };
-    }
-  };
+	const capMap = browserCapabilityMap();
+	const mapping = capMap[opts.capability];
+	if (!mapping) {
+		throw new Error(`unknown browser capability: ${opts.capability}`);
+	}
+	return async (req: SessionRequest): Promise<SessionResponse> => {
+		try {
+			const toolArgs = mapping.adapt ? mapping.adapt(req.args ?? {}) : (req.args ?? {});
+			const result = await opts.browser.callBrowserTool(mapping.toolName, toolArgs);
+			return { ok: true, correlationId: req.correlationId, result };
+		} catch (err) {
+			return {
+				ok: false,
+				correlationId: req.correlationId,
+				error: err instanceof Error ? err.message : String(err),
+			};
+		}
+	};
 }

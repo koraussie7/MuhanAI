@@ -21,78 +21,76 @@
  * ciphertext + routing metadata.
  */
 
-import { SessionRouter } from "./routing.js";
-import {
-  GATEWAY_PUBSUB_TOPIC,
-  GATEWAY_PROTOCOL_VERSION,
-  encodeMessage,
-  decodeMessage,
-  type ProtocolMessage,
-  type SignedPayload,
-} from "./protocol.js";
 import type { PrismaClient } from "@prisma/client";
+import {
+	decodeMessage,
+	encodeMessage,
+	GATEWAY_PROTOCOL_VERSION,
+	GATEWAY_PUBSUB_TOPIC,
+	type ProtocolMessage,
+	type SignedPayload,
+} from "./protocol.js";
+import { SessionRouter } from "./routing.js";
 
 export interface GatewayConfig {
-  /** libp2p peer-id for this gateway instance. */
-  peerId: string;
-  /** Prisma handle for credit ledger / reputation lookups. */
-  prisma: PrismaClient;
-  /** Optional reputation floor; routes skip machines below this. */
-  minReputation?: number;
+	/** libp2p peer-id for this gateway instance. */
+	peerId: string;
+	/** Prisma handle for credit ledger / reputation lookups. */
+	prisma: PrismaClient;
+	/** Optional reputation floor; routes skip machines below this. */
+	minReputation?: number;
 }
 
 export interface GatewayHandle {
-  router: SessionRouter;
-  publish(msg: SignedPayload<ProtocolMessage>): Promise<void>;
-  subscribe(handler: (msg: SignedPayload<ProtocolMessage>) => void): () => void;
-  config: Readonly<GatewayConfig>;
+	router: SessionRouter;
+	publish(msg: SignedPayload<ProtocolMessage>): Promise<void>;
+	subscribe(handler: (msg: SignedPayload<ProtocolMessage>) => void): () => void;
+	config: Readonly<GatewayConfig>;
 }
 
 export function createGateway(config: GatewayConfig): GatewayHandle {
-  const router = new SessionRouter();
-  const subscribers = new Set<(msg: SignedPayload<ProtocolMessage>) => void>();
+	const router = new SessionRouter();
+	const subscribers = new Set<(msg: SignedPayload<ProtocolMessage>) => void>();
 
-  return {
-    router,
-    config: Object.freeze({ ...config }),
-    async publish(msg) {
-      const bytes = encodeMessage(msg.message);
-      // libp2p wiring is added in a follow-up commit; we keep the
-      // interface stable so callers can build against it now.
-      if (bytes.byteLength === 0) throw new Error("empty payload");
-      for (const fn of subscribers) fn(msg);
-    },
-    subscribe(handler) {
-      subscribers.add(handler);
-      return () => subscribers.delete(handler);
-    },
-  };
+	return {
+		router,
+		config: Object.freeze({ ...config }),
+		async publish(msg) {
+			const bytes = encodeMessage(msg.message);
+			// libp2p wiring is added in a follow-up commit; we keep the
+			// interface stable so callers can build against it now.
+			if (bytes.byteLength === 0) throw new Error("empty payload");
+			for (const fn of subscribers) fn(msg);
+		},
+		subscribe(handler) {
+			subscribers.add(handler);
+			return () => subscribers.delete(handler);
+		},
+	};
 }
 
-export {
-  SessionRouter,
-  GATEWAY_PUBSUB_TOPIC,
-  GATEWAY_PROTOCOL_VERSION,
-  encodeMessage,
-  decodeMessage,
-};
-
 export type {
-  ProtocolMessage,
-  SignedPayload,
-  MachineClaim,
-  MachineRevoke,
-  SessionRoute,
-  SessionAck,
-  PushRelay,
-  Heartbeat,
-  PushTokenHint,
-  MachinePlatform,
-  MachineRecord,
-  RoutingDecision,
+	Heartbeat,
+	MachineClaim,
+	MachinePlatform,
+	MachineRecord,
+	MachineRevoke,
+	ProtocolMessage,
+	PushRelay,
+	PushTokenHint,
+	RoutingDecision,
+	SessionAck,
+	SessionRoute,
+	SignedPayload,
 } from "./protocol-types.js";
-
 export {
-  heartbeatFromSigned,
-  sessionRouteIsFresh,
+	heartbeatFromSigned,
+	sessionRouteIsFresh,
 } from "./routing.js";
+export {
+	decodeMessage,
+	encodeMessage,
+	GATEWAY_PROTOCOL_VERSION,
+	GATEWAY_PUBSUB_TOPIC,
+	SessionRouter,
+};

@@ -7,17 +7,17 @@
  */
 
 export interface NavItem {
-  id: string;
-  label: string;
-  path: string;
-  iconKey: string;
-  badge?: string;
+	id: string;
+	label: string;
+	path: string;
+	iconKey: string;
+	badge?: string;
 }
 
 export interface NavGroup {
-  id: string;
-  title: string;
-  items: NavItem[];
+	id: string;
+	title: string;
+	items: NavItem[];
 }
 
 /**
@@ -29,65 +29,153 @@ export interface NavGroup {
  * Sidebar component is the only consumer.
  */
 export const NAV_GROUPS: NavGroup[] = [
-  {
-    id: "core",
-    title: "Core & Chat",
-    items: [
-      { id: "dashboard", label: "Dashboard", path: "/", iconKey: "layout-dashboard" },
-      { id: "agent-cast", label: "Agent Cast", path: "/agent-cast", iconKey: "radio", badge: "LIVE" },
-      { id: "agent-mesh", label: "Agent Mesh", path: "/agent-mesh", iconKey: "bot" },
-    ],
-  },
-  {
-    id: "network",
-    title: "P2P Network",
-    items: [
-      { id: "p2p-network", label: "P2P Nodes", path: "/network", iconKey: "network" },
-      { id: "network-monitor", label: "Telemetry & Pulse", path: "/monitor", iconKey: "activity" },
-    ],
-  },
-  {
-    id: "resources",
-    title: "Compute & Models",
-    items: [
-      { id: "models", label: "LLM Models", path: "/models", iconKey: "sparkles", badge: "Token-Free" },
-      { id: "compute-mesh", label: "Compute Mesh", path: "/compute-mesh", iconKey: "cpu" },
-      { id: "mcp-skills", label: "MCP Tools", path: "/mcp-skills", iconKey: "layers" },
-    ],
-  },
-  {
-    id: "knowledge",
-    title: "Knowledge Lake",
-    items: [
-      { id: "knowledge-lake", label: "Knowledge Graph", path: "/knowledge", iconKey: "database" },
-      { id: "verification", label: "Verification", path: "/verification", iconKey: "check-circle" },
-      { id: "find", label: "Cosmic Mesh", path: "/find", iconKey: "search", badge: "NEW" },
-      { id: "search", label: "Mesh Search", path: "/search", iconKey: "search" },
-    ],
-  },
-  {
-    id: "market",
-    title: "Marketplace",
-    items: [
-      { id: "agents-market", label: "Agent Hub", path: "/marketplace/agents", iconKey: "bot" },
-      { id: "human-experts", label: "Human Experts", path: "/marketplace/human-experts", iconKey: "users" },
-      { id: "compute-market", label: "Compute Market", path: "/marketplace/compute", iconKey: "cpu" },
-    ],
-  },
-  {
-    id: "economy",
-    title: "Economy",
-    items: [
-      { id: "token-bank", label: "Token Bank", path: "/token-bank", iconKey: "coins" },
-    ],
-  },
-  {
-    id: "system",
-    title: "Settings",
-    items: [
-      { id: "settings", label: "Security & Keys", path: "/settings", iconKey: "settings" },
-    ],
-  },
+	{
+		id: "core",
+		title: "Core & Chat",
+		items: [
+			{
+				id: "dashboard",
+				label: "Dashboard",
+				path: "/",
+				iconKey: "layout-dashboard",
+			},
+			{
+				id: "agent-cast",
+				label: "Agent Cast",
+				path: "/agent-cast",
+				iconKey: "radio",
+				badge: "LIVE",
+			},
+			{
+				id: "agent-mesh",
+				label: "Agent Mesh",
+				path: "/agent-mesh",
+				iconKey: "bot",
+			},
+		],
+	},
+	{
+		id: "network",
+		title: "P2P Network",
+		items: [
+			{
+				id: "p2p-network",
+				label: "P2P Nodes",
+				path: "/network",
+				iconKey: "network",
+			},
+			{
+				id: "network-monitor",
+				label: "Telemetry & Pulse",
+				path: "/monitor",
+				iconKey: "activity",
+			},
+		],
+	},
+	{
+		id: "resources",
+		title: "Compute & Models",
+		items: [
+			{
+				id: "models",
+				label: "LLM Models",
+				path: "/models",
+				iconKey: "sparkles",
+				badge: "Token-Free",
+			},
+			{
+				id: "compute-mesh",
+				label: "Compute Mesh",
+				path: "/compute-mesh",
+				iconKey: "cpu",
+			},
+			{
+				id: "mcp-skills",
+				label: "MCP Tools",
+				path: "/mcp-skills",
+				iconKey: "layers",
+			},
+		],
+	},
+	{
+		id: "knowledge",
+		title: "Knowledge Lake",
+		items: [
+			{
+				id: "knowledge-lake",
+				label: "Knowledge Graph",
+				path: "/knowledge",
+				iconKey: "database",
+			},
+			{
+				id: "verification",
+				label: "Verification",
+				path: "/verification",
+				iconKey: "check-circle",
+			},
+			{
+				id: "find",
+				label: "Cosmic Mesh",
+				path: "/find",
+				iconKey: "search",
+				badge: "NEW",
+			},
+			{
+				id: "search",
+				label: "Mesh Search",
+				path: "/search",
+				iconKey: "search",
+			},
+		],
+	},
+	{
+		id: "market",
+		title: "Marketplace",
+		items: [
+			{
+				id: "agents-market",
+				label: "Agent Hub",
+				path: "/marketplace/agents",
+				iconKey: "bot",
+			},
+			{
+				id: "human-experts",
+				label: "Human Experts",
+				path: "/marketplace/human-experts",
+				iconKey: "users",
+			},
+			{
+				id: "compute-market",
+				label: "Compute Market",
+				path: "/marketplace/compute",
+				iconKey: "cpu",
+			},
+		],
+	},
+	{
+		id: "economy",
+		title: "Economy",
+		items: [
+			{
+				id: "token-bank",
+				label: "Token Bank",
+				path: "/token-bank",
+				iconKey: "coins",
+			},
+		],
+	},
+	{
+		id: "system",
+		title: "Settings",
+		items: [
+			{
+				id: "settings",
+				label: "Security & Keys",
+				path: "/settings",
+				iconKey: "settings",
+			},
+		],
+	},
 ];
 
 /**
@@ -103,8 +191,8 @@ export const NAV_GROUPS: NavGroup[] = [
  *     the router pushes `search?q=...` not just `/search`.
  */
 export function isNavItemActive(itemPath: string, activePath: string): boolean {
-  const cleanActive = activePath.split("?")[0] ?? "/";
-  if (cleanActive === itemPath) return true;
-  if (itemPath === "/") return false;
-  return cleanActive.startsWith(`${itemPath}/`);
+	const cleanActive = activePath.split("?")[0] ?? "/";
+	if (cleanActive === itemPath) return true;
+	if (itemPath === "/") return false;
+	return cleanActive.startsWith(`${itemPath}/`);
 }

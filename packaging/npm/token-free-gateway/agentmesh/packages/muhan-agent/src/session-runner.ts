@@ -16,28 +16,28 @@
  */
 
 export interface SessionRequest {
-  /** Logical tool/capability name (e.g. "personal-context"). */
-  capability: string;
-  /** Capability-specific payload. */
-  args?: Record<string, unknown>;
-  /** Free-form correlation id; echoed in the response. */
-  correlationId?: string;
+	/** Logical tool/capability name (e.g. "personal-context"). */
+	capability: string;
+	/** Capability-specific payload. */
+	args?: Record<string, unknown>;
+	/** Free-form correlation id; echoed in the response. */
+	correlationId?: string;
 }
 
 export interface SessionResponse {
-  correlationId?: string;
-  ok: boolean;
-  result?: unknown;
-  error?: string;
+	correlationId?: string;
+	ok: boolean;
+	result?: unknown;
+	error?: string;
 }
 
 export type SessionHandler = (req: SessionRequest) => Promise<SessionResponse>;
 
 export interface SessionRunner {
-  register(capability: string, handler: SessionHandler): void;
-  handle(req: SessionRequest): Promise<SessionResponse>;
-  teardown(sessionId: string): void;
-  activeSessions(): number;
+	register(capability: string, handler: SessionHandler): void;
+	handle(req: SessionRequest): Promise<SessionResponse>;
+	teardown(sessionId: string): void;
+	activeSessions(): number;
 }
 
 /**
@@ -47,29 +47,29 @@ export interface SessionRunner {
  * exists so streaming sessions can release resources cleanly later.
  */
 export function createSessionRunner(): SessionRunner {
-  const handlers = new Map<string, SessionHandler>();
-  const active = new Set<string>();
+	const handlers = new Map<string, SessionHandler>();
+	const active = new Set<string>();
 
-  return {
-    register(capability, handler) {
-      handlers.set(capability, handler);
-    },
-    async handle(req) {
-      const handler = handlers.get(req.capability);
-      if (!handler) {
-        return {
-          ok: false,
-          correlationId: req.correlationId,
-          error: `unknown capability: ${req.capability}`,
-        };
-      }
-      return handler(req);
-    },
-    teardown(_sessionId) {
-      active.delete(_sessionId);
-    },
-    activeSessions() {
-      return active.size;
-    },
-  };
+	return {
+		register(capability, handler) {
+			handlers.set(capability, handler);
+		},
+		async handle(req) {
+			const handler = handlers.get(req.capability);
+			if (!handler) {
+				return {
+					ok: false,
+					correlationId: req.correlationId,
+					error: `unknown capability: ${req.capability}`,
+				};
+			}
+			return handler(req);
+		},
+		teardown(_sessionId) {
+			active.delete(_sessionId);
+		},
+		activeSessions() {
+			return active.size;
+		},
+	};
 }

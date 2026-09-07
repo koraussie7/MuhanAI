@@ -1,1 +1,5 @@
-export type { FederationNode, FederationSyncResult, SignedRecord } from "@agentmesh/shared";
+export type {
+	FederationNode,
+	FederationSyncResult,
+	SignedRecord,
+} from "@agentmesh/shared";

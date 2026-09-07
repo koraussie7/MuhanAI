@@ -14,9 +14,9 @@
  * This shim will be removed in the next major release.
  */
 export {
-  generateKeyPair,
-  sign,
-  verify,
-  computeFingerprint,
-  type KeyPair,
+	computeFingerprint,
+	generateKeyPair,
+	type KeyPair,
+	sign,
+	verify,
 } from "./ecdsa-p256.js";

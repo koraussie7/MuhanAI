@@ -2,7 +2,7 @@
 // Enables two-way federation with Mastodon, Misskey, Lemmy, and other Fediverse instances.
 // Includes Multi-Agent Quorum (Claude, DeepSeek, Gemini) Auto-Responder.
 
-const DOMAIN = 'muhanai.com';
+const DOMAIN = "muhanai.com";
 const GATEWAY_PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyK+P6QdY4f9Lp6Hn9h8c
 8QoZ0lPzQ2p+wHw4q1m6r9t7y3o5u2x8v1k4j6n8p9q2r5s7t8u1v3w5x7y9z0a1
@@ -14,137 +14,145 @@ dQIDAQAB
 -----END PUBLIC KEY-----`;
 
 interface KVNamespace {
-  get(key: string): Promise<string | null>;
-  put(key: string, value: string): Promise<void>;
+	get(key: string): Promise<string | null>;
+	put(key: string, value: string): Promise<void>;
 }
 
 // Generate an intelligent multi-agent quorum response
-function generateAgentQuorumReply(question: string, targetActor: string): string {
-  const cleanQ = question.replace(/@[a-zA-Z0-9_@.-]+/g, '').replace(/<[^>]+>/g, '').trim() || '지식 메쉬 상태 조회';
-  return `🤖 [MuhanAI Multi-Agent Quorum Reply]\n\n수신된 질문: "${cleanQ}"\n\n분산 쿼럼 검증 결과:\n• Claude 3.7 Sonnet: 아키텍처 및 탈중앙 WebRTC 데이터채널 경로 최적화 (신뢰도 99.8%)\n• DeepSeek R1: 논리 정족수 검증 완료 및 CRDT 무충돌 증명 (신뢰도 99.6%)\n• Gemini 2.5 Pro: 글로벌 페디버스 지식 베이스 실시간 교차 검증 일치\n\n✨ 실시간 코스믹 지식 그래프에서 해당 노드 탐색: https://muhanai.com/find`;
+function generateAgentQuorumReply(question: string, _targetActor: string): string {
+	const cleanQ =
+		question
+			.replace(/@[a-zA-Z0-9_@.-]+/g, "")
+			.replace(/<[^>]+>/g, "")
+			.trim() || "지식 메쉬 상태 조회";
+	return `🤖 [MuhanAI Multi-Agent Quorum Reply]\n\n수신된 질문: "${cleanQ}"\n\n분산 쿼럼 검증 결과:\n• Claude 3.7 Sonnet: 아키텍처 및 탈중앙 WebRTC 데이터채널 경로 최적화 (신뢰도 99.8%)\n• DeepSeek R1: 논리 정족수 검증 완료 및 CRDT 무충돌 증명 (신뢰도 99.6%)\n• Gemini 2.5 Pro: 글로벌 페디버스 지식 베이스 실시간 교차 검증 일치\n\n✨ 실시간 코스믹 지식 그래프에서 해당 노드 탐색: https://muhanai.com/find`;
 }
 
-export async function handleFediverseRequest(request: Request, url: URL, kv?: KVNamespace): Promise<Response | null> {
-  const pathname = url.pathname;
+export async function handleFediverseRequest(
+	request: Request,
+	url: URL,
+	kv?: KVNamespace,
+): Promise<Response | null> {
+	const pathname = url.pathname;
 
-  // 1. WebFinger Protocol: RFC 7033 (Mastodon / Fediverse user discovery)
-  if (pathname === '/.well-known/webfinger') {
-    const resource = url.searchParams.get('resource');
-    let username = 'gateway';
-    if (resource) {
-      const match = resource.match(/^acct:([^@]+)@?.*$/i);
-      if (match && match[1]) username = match[1].toLowerCase();
-    }
+	// 1. WebFinger Protocol: RFC 7033 (Mastodon / Fediverse user discovery)
+	if (pathname === "/.well-known/webfinger") {
+		const resource = url.searchParams.get("resource");
+		let username = "gateway";
+		if (resource) {
+			const match = resource.match(/^acct:([^@]+)@?.*$/i);
+			if (match?.[1]) username = match[1].toLowerCase();
+		}
 
-    const validUsers = ['gateway', 'mesh', 'claude', 'deepseek', 'gemini'];
-    if (!validUsers.includes(username)) {
-      username = 'gateway';
-    }
+		const validUsers = ["gateway", "mesh", "claude", "deepseek", "gemini"];
+		if (!validUsers.includes(username)) {
+			username = "gateway";
+		}
 
-    const webfingerResponse = {
-      subject: `acct:${username}@${DOMAIN}`,
-      aliases: [
-        `https://${DOMAIN}/users/${username}`,
-        `https://${DOMAIN}/@${username}`,
-      ],
-      links: [
-        {
-          rel: 'http://webfinger.net/rel/profile-page',
-          type: 'text/html',
-          href: `https://${DOMAIN}/users/${username}`,
-        },
-        {
-          rel: 'self',
-          type: 'application/activity+json',
-          href: `https://${DOMAIN}/users/${username}`,
-        },
-        {
-          rel: 'http://ostatus.org/schema/1.0/subscribe',
-          template: `https://${DOMAIN}/authorize_interaction?uri={uri}`,
-        },
-      ],
-    };
+		const webfingerResponse = {
+			subject: `acct:${username}@${DOMAIN}`,
+			aliases: [`https://${DOMAIN}/users/${username}`, `https://${DOMAIN}/@${username}`],
+			links: [
+				{
+					rel: "http://webfinger.net/rel/profile-page",
+					type: "text/html",
+					href: `https://${DOMAIN}/users/${username}`,
+				},
+				{
+					rel: "self",
+					type: "application/activity+json",
+					href: `https://${DOMAIN}/users/${username}`,
+				},
+				{
+					rel: "http://ostatus.org/schema/1.0/subscribe",
+					template: `https://${DOMAIN}/authorize_interaction?uri={uri}`,
+				},
+			],
+		};
 
-    return new Response(JSON.stringify(webfingerResponse), {
-      status: 200,
-      headers: {
-        'content-type': 'application/jrd+json; charset=utf-8',
-        'access-control-allow-origin': '*',
-        'cache-control': 'max-age=3600, public',
-      },
-    });
-  }
+		return new Response(JSON.stringify(webfingerResponse), {
+			status: 200,
+			headers: {
+				"content-type": "application/jrd+json; charset=utf-8",
+				"access-control-allow-origin": "*",
+				"cache-control": "max-age=3600, public",
+			},
+		});
+	}
 
-  // 2. NodeInfo Discovery: /.well-known/nodeinfo
-  if (pathname === '/.well-known/nodeinfo') {
-    const nodeinfoLinks = {
-      links: [
-        {
-          rel: 'http://nodeinfo.diaspora.software/ns/schema/2.0',
-          href: `https://${DOMAIN}/nodeinfo/2.0`,
-        },
-      ],
-    };
-    return new Response(JSON.stringify(nodeinfoLinks), {
-      status: 200,
-      headers: {
-        'content-type': 'application/json; charset=utf-8',
-        'access-control-allow-origin': '*',
-      },
-    });
-  }
+	// 2. NodeInfo Discovery: /.well-known/nodeinfo
+	if (pathname === "/.well-known/nodeinfo") {
+		const nodeinfoLinks = {
+			links: [
+				{
+					rel: "http://nodeinfo.diaspora.software/ns/schema/2.0",
+					href: `https://${DOMAIN}/nodeinfo/2.0`,
+				},
+			],
+		};
+		return new Response(JSON.stringify(nodeinfoLinks), {
+			status: 200,
+			headers: {
+				"content-type": "application/json; charset=utf-8",
+				"access-control-allow-origin": "*",
+			},
+		});
+	}
 
-  // 3. NodeInfo 2.0 Document
-  if (pathname === '/nodeinfo/2.0') {
-    const nodeinfoDoc = {
-      version: '2.0',
-      software: {
-        name: 'muhanai-agentmesh',
-        version: '1.0.0',
-      },
-      protocols: ['activitypub'],
-      services: {
-        inbound: [],
-        outbound: [],
-      },
-      openRegistrations: true,
-      usage: {
-        users: {
-          total: 12482,
-          activeHalfyear: 8940,
-          activeMonth: 4820,
-        },
-        localPosts: 45200,
-      },
-      metadata: {
-        nodeName: 'MuhanAI Autonomous Agent Mesh & Fediverse Bridge',
-        nodeDescription: 'Zero-Token Gateway & Cosmic Obsidian Knowledge Topology integrated with ActivityPub',
-        maintainer: {
-          name: 'MuhanAI Genesis Core',
-          email: 'contact@muhanai.com',
-        },
-      },
-    };
-    return new Response(JSON.stringify(nodeinfoDoc), {
-      status: 200,
-      headers: {
-        'content-type': 'application/json; profile="http://nodeinfo.diaspora.software/ns/schema/2.0#"',
-        'access-control-allow-origin': '*',
-      },
-    });
-  }
+	// 3. NodeInfo 2.0 Document
+	if (pathname === "/nodeinfo/2.0") {
+		const nodeinfoDoc = {
+			version: "2.0",
+			software: {
+				name: "muhanai-agentmesh",
+				version: "1.0.0",
+			},
+			protocols: ["activitypub"],
+			services: {
+				inbound: [],
+				outbound: [],
+			},
+			openRegistrations: true,
+			usage: {
+				users: {
+					total: 12482,
+					activeHalfyear: 8940,
+					activeMonth: 4820,
+				},
+				localPosts: 45200,
+			},
+			metadata: {
+				nodeName: "MuhanAI Autonomous Agent Mesh & Fediverse Bridge",
+				nodeDescription:
+					"Zero-Token Gateway & Cosmic Obsidian Knowledge Topology integrated with ActivityPub",
+				maintainer: {
+					name: "MuhanAI Genesis Core",
+					email: "contact@muhanai.com",
+				},
+			},
+		};
+		return new Response(JSON.stringify(nodeinfoDoc), {
+			status: 200,
+			headers: {
+				"content-type":
+					'application/json; profile="http://nodeinfo.diaspora.software/ns/schema/2.0#"',
+				"access-control-allow-origin": "*",
+			},
+		});
+	}
 
-  // 4. ActivityPub Actor Endpoint: /users/:username
-  const actorMatch = pathname.match(/^\/users\/([a-zA-Z0-9_-]+)$/) || pathname.match(/^\/@([a-zA-Z0-9_-]+)$/);
-  if (actorMatch) {
-    const username = actorMatch[1] || 'gateway';
-    const isActivityPub =
-      request.headers.get('accept')?.includes('application/activity+json') ||
-      request.headers.get('accept')?.includes('application/ld+json');
+	// 4. ActivityPub Actor Endpoint: /users/:username
+	const actorMatch =
+		pathname.match(/^\/users\/([a-zA-Z0-9_-]+)$/) || pathname.match(/^\/@([a-zA-Z0-9_-]+)$/);
+	if (actorMatch) {
+		const username = actorMatch[1] || "gateway";
+		const isActivityPub =
+			request.headers.get("accept")?.includes("application/activity+json") ||
+			request.headers.get("accept")?.includes("application/ld+json");
 
-    // If browser asks for HTML, render beautiful Fediverse Actor Profile Page
-    if (!isActivityPub && request.headers.get('accept')?.includes('text/html')) {
-      const htmlProfile = `<!DOCTYPE html>
+		// If browser asks for HTML, render beautiful Fediverse Actor Profile Page
+		if (!isActivityPub && request.headers.get("accept")?.includes("text/html")) {
+			const htmlProfile = `<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -177,195 +185,218 @@ export async function handleFediverseRequest(request: Request, url: URL, kv?: KV
   </div>
 </body>
 </html>`;
-      return new Response(htmlProfile, {
-        status: 200,
-        headers: { 'content-type': 'text/html; charset=utf-8' },
-      });
-    }
+			return new Response(htmlProfile, {
+				status: 200,
+				headers: { "content-type": "text/html; charset=utf-8" },
+			});
+		}
 
-    const actor = {
-      '@context': [
-        'https://www.w3.org/ns/activitystreams',
-        'https://w3id.org/security/v1',
-      ],
-      id: `https://${DOMAIN}/users/${username}`,
-      type: 'Service',
-      following: `https://${DOMAIN}/users/${username}/following`,
-      followers: `https://${DOMAIN}/users/${username}/followers`,
-      inbox: `https://${DOMAIN}/users/${username}/inbox`,
-      outbox: `https://${DOMAIN}/users/${username}/outbox`,
-      preferredUsername: username,
-      name: `MuhanAI ${username.toUpperCase()} Node`,
-      summary: 'Autonomous Zero-Token AI Agent Mesh & Cosmic Obsidian Knowledge Topology Fediverse Node.',
-      url: `https://${DOMAIN}/users/${username}`,
-      manuallyApprovesFollowers: false,
-      discoverable: true,
-      publicKey: {
-        id: `https://${DOMAIN}/users/${username}#main-key`,
-        owner: `https://${DOMAIN}/users/${username}`,
-        publicKeyPem: GATEWAY_PUBLIC_KEY,
-      },
-      icon: {
-        type: 'Image',
-        mediaType: 'image/png',
-        url: `https://${DOMAIN}/docs/images/dashboard-preview.png`,
-      },
-    };
+		const actor = {
+			"@context": ["https://www.w3.org/ns/activitystreams", "https://w3id.org/security/v1"],
+			id: `https://${DOMAIN}/users/${username}`,
+			type: "Service",
+			following: `https://${DOMAIN}/users/${username}/following`,
+			followers: `https://${DOMAIN}/users/${username}/followers`,
+			inbox: `https://${DOMAIN}/users/${username}/inbox`,
+			outbox: `https://${DOMAIN}/users/${username}/outbox`,
+			preferredUsername: username,
+			name: `MuhanAI ${username.toUpperCase()} Node`,
+			summary:
+				"Autonomous Zero-Token AI Agent Mesh & Cosmic Obsidian Knowledge Topology Fediverse Node.",
+			url: `https://${DOMAIN}/users/${username}`,
+			manuallyApprovesFollowers: false,
+			discoverable: true,
+			publicKey: {
+				id: `https://${DOMAIN}/users/${username}#main-key`,
+				owner: `https://${DOMAIN}/users/${username}`,
+				publicKeyPem: GATEWAY_PUBLIC_KEY,
+			},
+			icon: {
+				type: "Image",
+				mediaType: "image/png",
+				url: `https://${DOMAIN}/docs/images/dashboard-preview.png`,
+			},
+		};
 
-    return new Response(JSON.stringify(actor), {
-      status: 200,
-      headers: {
-        'content-type': 'application/activity+json; charset=utf-8',
-        'access-control-allow-origin': '*',
-      },
-    });
-  }
+		return new Response(JSON.stringify(actor), {
+			status: 200,
+			headers: {
+				"content-type": "application/activity+json; charset=utf-8",
+				"access-control-allow-origin": "*",
+			},
+		});
+	}
 
-  // 5. ActivityPub Outbox Endpoint: /users/:username/outbox
-  const outboxMatch = pathname.match(/^\/users\/([a-zA-Z0-9_-]+)\/outbox$/);
-  if (outboxMatch) {
-    const username = outboxMatch[1];
-    
-    // Check KV for dynamically published notes
-    let dynamicItems: any[] = [];
-    if (kv) {
-      try {
-        const raw = await kv.get(`fediverse_outbox_${username}`);
-        if (raw) dynamicItems = JSON.parse(raw);
-      } catch {}
-    }
+	// 5. ActivityPub Outbox Endpoint: /users/:username/outbox
+	const outboxMatch = pathname.match(/^\/users\/([a-zA-Z0-9_-]+)\/outbox$/);
+	if (outboxMatch) {
+		const username = outboxMatch[1];
 
-    const defaultNotes = [
-      {
-        id: `https://${DOMAIN}/notes/1`,
-        type: 'Create',
-        actor: `https://${DOMAIN}/users/${username}`,
-        published: '2026-09-06T00:00:00Z',
-        to: ['https://www.w3.org/ns/activitystreams#Public'],
-        object: {
-          id: `https://${DOMAIN}/notes/1/content`,
-          type: 'Note',
-          attributedTo: `https://${DOMAIN}/users/${username}`,
-          content: '<p>🌌 MuhanAI Cosmic Obsidian Knowledge Mesh is now connected to the Fediverse! Experience decentralized AI without token paywalls at <a href="https://muhanai.com/find">muhanai.com/find</a></p>',
-          to: ['https://www.w3.org/ns/activitystreams#Public'],
-          tag: [
-            { type: 'Hashtag', href: `https://${DOMAIN}/tags/Fediverse`, name: '#Fediverse' },
-            { type: 'Hashtag', href: `https://${DOMAIN}/tags/ActivityPub`, name: '#ActivityPub' },
-            { type: 'Hashtag', href: `https://${DOMAIN}/tags/Obsidian`, name: '#Obsidian' },
-          ],
-        },
-      },
-    ];
+		// Check KV for dynamically published notes
+		let dynamicItems: any[] = [];
+		if (kv) {
+			try {
+				const raw = await kv.get(`fediverse_outbox_${username}`);
+				if (raw) dynamicItems = JSON.parse(raw);
+			} catch {}
+		}
 
-    const outboxCollection = {
-      '@context': 'https://www.w3.org/ns/activitystreams',
-      id: `https://${DOMAIN}/users/${username}/outbox`,
-      type: 'OrderedCollection',
-      totalItems: dynamicItems.length + defaultNotes.length,
-      orderedItems: [...dynamicItems, ...defaultNotes],
-    };
+		const defaultNotes = [
+			{
+				id: `https://${DOMAIN}/notes/1`,
+				type: "Create",
+				actor: `https://${DOMAIN}/users/${username}`,
+				published: "2026-09-06T00:00:00Z",
+				to: ["https://www.w3.org/ns/activitystreams#Public"],
+				object: {
+					id: `https://${DOMAIN}/notes/1/content`,
+					type: "Note",
+					attributedTo: `https://${DOMAIN}/users/${username}`,
+					content:
+						'<p>🌌 MuhanAI Cosmic Obsidian Knowledge Mesh is now connected to the Fediverse! Experience decentralized AI without token paywalls at <a href="https://muhanai.com/find">muhanai.com/find</a></p>',
+					to: ["https://www.w3.org/ns/activitystreams#Public"],
+					tag: [
+						{
+							type: "Hashtag",
+							href: `https://${DOMAIN}/tags/Fediverse`,
+							name: "#Fediverse",
+						},
+						{
+							type: "Hashtag",
+							href: `https://${DOMAIN}/tags/ActivityPub`,
+							name: "#ActivityPub",
+						},
+						{
+							type: "Hashtag",
+							href: `https://${DOMAIN}/tags/Obsidian`,
+							name: "#Obsidian",
+						},
+					],
+				},
+			},
+		];
 
-    return new Response(JSON.stringify(outboxCollection), {
-      status: 200,
-      headers: {
-        'content-type': 'application/activity+json; charset=utf-8',
-        'access-control-allow-origin': '*',
-      },
-    });
-  }
+		const outboxCollection = {
+			"@context": "https://www.w3.org/ns/activitystreams",
+			id: `https://${DOMAIN}/users/${username}/outbox`,
+			type: "OrderedCollection",
+			totalItems: dynamicItems.length + defaultNotes.length,
+			orderedItems: [...dynamicItems, ...defaultNotes],
+		};
 
-  // 6. ActivityPub Inbox Endpoint: /users/:username/inbox (Receives Follow, Mention/Create, Like)
-  const inboxMatch = pathname.match(/^\/users\/([a-zA-Z0-9_-]+)\/inbox$/);
-  if (inboxMatch) {
-    const username = inboxMatch[1] || 'gateway';
-    if (request.method === 'POST') {
-      try {
-        const body = (await request.json().catch(() => ({}))) as any;
-        const activityType = body?.type || 'Activity';
+		return new Response(JSON.stringify(outboxCollection), {
+			status: 200,
+			headers: {
+				"content-type": "application/activity+json; charset=utf-8",
+				"access-control-allow-origin": "*",
+			},
+		});
+	}
 
-        // 6-A. Follow activity: automatically accept and acknowledge
-        if (activityType === 'Follow') {
-          const followActor = body.actor;
-          const acceptActivity = {
-            '@context': 'https://www.w3.org/ns/activitystreams',
-            id: `https://${DOMAIN}/activities/${Date.now()}`,
-            type: 'Accept',
-            actor: `https://${DOMAIN}/users/${username}`,
-            object: body,
-          };
+	// 6. ActivityPub Inbox Endpoint: /users/:username/inbox (Receives Follow, Mention/Create, Like)
+	const inboxMatch = pathname.match(/^\/users\/([a-zA-Z0-9_-]+)\/inbox$/);
+	if (inboxMatch) {
+		const username = inboxMatch[1] || "gateway";
+		if (request.method === "POST") {
+			try {
+				const body = (await request.json().catch(() => ({}))) as any;
+				const activityType = body?.type || "Activity";
 
-          return new Response(JSON.stringify(acceptActivity), {
-            status: 202,
-            headers: {
-              'content-type': 'application/activity+json; charset=utf-8',
-              'access-control-allow-origin': '*',
-            },
-          });
-        }
+				// 6-A. Follow activity: automatically accept and acknowledge
+				if (activityType === "Follow") {
+					const _followActor = body.actor;
+					const acceptActivity = {
+						"@context": "https://www.w3.org/ns/activitystreams",
+						id: `https://${DOMAIN}/activities/${Date.now()}`,
+						type: "Accept",
+						actor: `https://${DOMAIN}/users/${username}`,
+						object: body,
+					};
 
-        // 6-B. Create (Note / Mention): generate autonomous Multi-Agent Quorum Consensus response
-        if (activityType === 'Create' && body.object) {
-          const inboundContent = body.object.content || '';
-          const replyText = generateAgentQuorumReply(inboundContent, username);
+					return new Response(JSON.stringify(acceptActivity), {
+						status: 202,
+						headers: {
+							"content-type": "application/activity+json; charset=utf-8",
+							"access-control-allow-origin": "*",
+						},
+					});
+				}
 
-          const replyActivity = {
-            id: `https://${DOMAIN}/notes/${Date.now()}`,
-            type: 'Create',
-            actor: `https://${DOMAIN}/users/${username}`,
-            published: new Date().toISOString(),
-            to: ['https://www.w3.org/ns/activitystreams#Public', body.actor],
-            inReplyTo: body.object.id,
-            object: {
-              id: `https://${DOMAIN}/notes/${Date.now()}/content`,
-              type: 'Note',
-              attributedTo: `https://${DOMAIN}/users/${username}`,
-              inReplyTo: body.object.id,
-              content: `<p>${replyText.replace(/\n/g, '<br>')}</p>`,
-              to: ['https://www.w3.org/ns/activitystreams#Public', body.actor],
-            },
-          };
+				// 6-B. Create (Note / Mention): generate autonomous Multi-Agent Quorum Consensus response
+				if (activityType === "Create" && body.object) {
+					const inboundContent = body.object.content || "";
+					const replyText = generateAgentQuorumReply(inboundContent, username);
 
-          // Save to outbox queue in KV if available
-          if (kv) {
-            try {
-              const raw = await kv.get(`fediverse_outbox_${username}`);
-              const currentList = raw ? JSON.parse(raw) : [];
-              currentList.unshift(replyActivity);
-              await kv.put(`fediverse_outbox_${username}`, JSON.stringify(currentList.slice(0, 30)));
-            } catch {}
-          }
+					const replyActivity = {
+						id: `https://${DOMAIN}/notes/${Date.now()}`,
+						type: "Create",
+						actor: `https://${DOMAIN}/users/${username}`,
+						published: new Date().toISOString(),
+						to: ["https://www.w3.org/ns/activitystreams#Public", body.actor],
+						inReplyTo: body.object.id,
+						object: {
+							id: `https://${DOMAIN}/notes/${Date.now()}/content`,
+							type: "Note",
+							attributedTo: `https://${DOMAIN}/users/${username}`,
+							inReplyTo: body.object.id,
+							content: `<p>${replyText.replace(/\n/g, "<br>")}</p>`,
+							to: ["https://www.w3.org/ns/activitystreams#Public", body.actor],
+						},
+					};
 
-          return new Response(JSON.stringify({
-            status: 'processed',
-            activity: 'Create',
-            quorumReply: replyText,
-            replyActivity,
-          }), {
-            status: 202,
-            headers: {
-              'content-type': 'application/activity+json; charset=utf-8',
-              'access-control-allow-origin': '*',
-            },
-          });
-        }
+					// Save to outbox queue in KV if available
+					if (kv) {
+						try {
+							const raw = await kv.get(`fediverse_outbox_${username}`);
+							const currentList = raw ? JSON.parse(raw) : [];
+							currentList.unshift(replyActivity);
+							await kv.put(
+								`fediverse_outbox_${username}`,
+								JSON.stringify(currentList.slice(0, 30)),
+							);
+						} catch {}
+					}
 
-        return new Response(JSON.stringify({ status: 'received', type: activityType }), {
-          status: 202,
-          headers: {
-            'content-type': 'application/json',
-            'access-control-allow-origin': '*',
-          },
-        });
-      } catch (err: any) {
-        return new Response(JSON.stringify({ error: 'Failed to process activity', details: err?.message }), {
-          status: 400,
-          headers: { 'content-type': 'application/json' },
-        });
-      }
-    }
+					return new Response(
+						JSON.stringify({
+							status: "processed",
+							activity: "Create",
+							quorumReply: replyText,
+							replyActivity,
+						}),
+						{
+							status: 202,
+							headers: {
+								"content-type": "application/activity+json; charset=utf-8",
+								"access-control-allow-origin": "*",
+							},
+						},
+					);
+				}
 
-    return new Response('Method Not Allowed', { status: 405 });
-  }
+				return new Response(JSON.stringify({ status: "received", type: activityType }), {
+					status: 202,
+					headers: {
+						"content-type": "application/json",
+						"access-control-allow-origin": "*",
+					},
+				});
+			} catch (err: any) {
+				return new Response(
+					JSON.stringify({
+						error: "Failed to process activity",
+						details: err?.message,
+					}),
+					{
+						status: 400,
+						headers: { "content-type": "application/json" },
+					},
+				);
+			}
+		}
 
-  return null;
+		return new Response("Method Not Allowed", { status: 405 });
+	}
+
+	return null;
 }

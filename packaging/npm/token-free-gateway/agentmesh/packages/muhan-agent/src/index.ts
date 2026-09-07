@@ -6,48 +6,42 @@
  * gateway and answers SessionRoute messages for its user.
  */
 
-export { createDaemon } from "./daemon.js";
-export { loadMachineIdentity } from "./machine-identity.js";
-
 export {
-  encryptSessionPayload,
-  decryptSessionRoute,
-  type SessionKey,
-  type DecryptedSession,
-  type SessionEnvelope,
-} from "./session-decrypt.js";
-
-export {
-  createSessionRunner,
-  type SessionRunner,
-  type SessionRequest,
-  type SessionResponse,
-  type SessionHandler,
-} from "./session-runner.js";
-
-export {
-  buildMcpHandler,
-  defaultCapabilityMap,
-  buildBrowserHandler,
-  browserCapabilityMap,
-  type CapabilityMap,
-  type BrowserAdapter,
-} from "./mcp-router.js";
-
-export {
-  createVault,
-  unlockVault,
-  VaultAuthError,
-  VaultTamperedError,
-  type VaultBlob,
-  type VaultEntry,
-  type VaultHandle,
+	createVault,
+	unlockVault,
+	VaultAuthError,
+	type VaultBlob,
+	type VaultEntry,
+	type VaultHandle,
+	VaultTamperedError,
 } from "./credentials-vault.js";
-
 export type {
-  DaemonConfig,
-  DaemonHandle,
-  MessageTransport,
+	DaemonConfig,
+	DaemonHandle,
+	MessageTransport,
 } from "./daemon.js";
-
+export { createDaemon } from "./daemon.js";
 export type { MachineIdentity } from "./machine-identity.js";
+export { loadMachineIdentity } from "./machine-identity.js";
+export {
+	type BrowserAdapter,
+	browserCapabilityMap,
+	buildBrowserHandler,
+	buildMcpHandler,
+	type CapabilityMap,
+	defaultCapabilityMap,
+} from "./mcp-router.js";
+export {
+	type DecryptedSession,
+	decryptSessionRoute,
+	encryptSessionPayload,
+	type SessionEnvelope,
+	type SessionKey,
+} from "./session-decrypt.js";
+export {
+	createSessionRunner,
+	type SessionHandler,
+	type SessionRequest,
+	type SessionResponse,
+	type SessionRunner,
+} from "./session-runner.js";
