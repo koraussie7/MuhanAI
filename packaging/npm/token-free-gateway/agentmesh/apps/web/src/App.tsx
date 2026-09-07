@@ -39,8 +39,6 @@ import { type SupportedLanguage, useI18n } from "./i18n";
 
 const SECTIONS = [
 	{ id: "find", path: "/", label: "Cosmic Mesh", category: "Core" },
-	{ id: "find-alt", path: "/find", label: "Cosmic Mesh", category: "Core" },
-	{ id: "dashboard", path: "/dashboard", label: "Dashboard", category: "Core" },
 	{
 		id: "agent-cast",
 		path: "/agent-cast",
@@ -203,9 +201,6 @@ function sectionIdFromPath(path: string) {
 	if (cleanPath === "/" || cleanPath === "/find" || cleanPath === "") {
 		return "find";
 	}
-	if (cleanPath === "/dashboard") {
-		return "dashboard";
-	}
 	if (typeof window !== "undefined") {
 		const host = window.location.hostname;
 		if (host === "find.muhanai.com" || host.startsWith("find.")) {
@@ -267,12 +262,12 @@ export function App() {
 		return () => window.removeEventListener("popstate", onPopState);
 	}, []);
 
-	// 1. Fullscreen Standalone View for find.muhanai.com or /find
-	if (activeSection === "find" || activeSection === "find-alt") {
+	// 1. Fullscreen Standalone View for find.muhanai.com or /
+	if (activeSection === "find") {
 		return (
 			<FindPage
 				onNavigateHome={() => {
-					navigate("/dashboard");
+					navigate("/");
 				}}
 			/>
 		);
@@ -353,7 +348,7 @@ export function App() {
 								borderColor: "rgba(56, 189, 248, 0.4)",
 								color: "#38bdf8",
 							}}
-							onClick={() => navigate("/find")}
+							onClick={() => navigate("/")}
 							title="Launch find.muhanai.com Cosmic Knowledge Mesh"
 						>
 							<Sparkles size={13} />
