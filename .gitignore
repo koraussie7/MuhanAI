@@ -42,3 +42,8 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .vscode
 .cursor
 .cursorrulestsc.log
+
+# libp2p peer identity (private key material — NEVER commit)
+.agentmesh/
+**/.agentmesh/
+agentmesh-identity.json
