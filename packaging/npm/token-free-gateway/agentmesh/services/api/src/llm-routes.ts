@@ -9,8 +9,12 @@
  * Falls back to a local simulation if all providers fail.
  */
 
+import {
+	callKeylessProviders,
+	getKeylessProviderNames,
+	type KeylessRequest,
+} from "@agentmesh/llm-router/src/keyless-providers.js";
 import type { FastifyInstance } from "fastify";
-import { callKeylessProviders, getKeylessProviderNames, type KeylessRequest } from "@agentmesh/llm-router/src/keyless-providers.js";
 import { z } from "zod";
 import { clientError, formatZodError } from "./error-shapes.js";
 

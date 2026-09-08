@@ -154,7 +154,7 @@ export function LlmMeshPage({ adapter }: LlmMeshPageProps = {}) {
 		void refresh();
 		const timer = setInterval(() => void refresh(), 30_000);
 		return () => clearInterval(timer);
-	}, []);
+	}, [refresh]);
 
 	const activePolicy = POLICIES.find((p) => p.id === policyId) ?? POLICIES[6];
 

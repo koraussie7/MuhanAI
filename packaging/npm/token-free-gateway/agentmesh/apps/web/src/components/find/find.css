@@ -546,16 +546,16 @@
 
 /* ---------------- Connect Peer Active State ---------------- */
 .cosmic-action-btn.active {
-	background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.35)) !important;
-	border: 1px solid rgba(52, 211, 153, 0.5) !important;
-	color: #34d399 !important;
-	box-shadow: 0 0 14px rgba(16, 185, 129, 0.3) !important;
+	background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.35));
+	border: 1px solid rgba(52, 211, 153, 0.5);
+	color: #34d399;
+	box-shadow: 0 0 14px rgba(16, 185, 129, 0.3);
 }
 
 .cosmic-action-btn.active:hover {
-	background: linear-gradient(135deg, rgba(16, 185, 129, 0.35), rgba(5, 150, 105, 0.45)) !important;
-	border-color: #34d399 !important;
-	box-shadow: 0 0 20px rgba(16, 185, 129, 0.5) !important;
+	background: linear-gradient(135deg, rgba(16, 185, 129, 0.35), rgba(5, 150, 105, 0.45));
+	border-color: #34d399;
+	box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
 }
 
 /* ---------------- Peer Nickname Prompt Modal ---------------- */

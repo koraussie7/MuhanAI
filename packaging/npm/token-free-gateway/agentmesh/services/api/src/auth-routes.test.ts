@@ -30,8 +30,8 @@ describe("auth routes", () => {
 				password: "password-123",
 			},
 		});
-		expect(res!.statusCode).toBe(201);
-		const body = res!.json();
+		expect(res?.statusCode).toBe(201);
+		const body = res?.json();
 		expect(body.token).toBeDefined();
 		expect(body.user.email).toBe("test@example.com");
 	});
@@ -47,7 +47,7 @@ describe("auth routes", () => {
 			url: "/api/auth/register",
 			payload: { email: "dup@example.com", password: "password-456" },
 		});
-		expect(second!.statusCode).toBe(409);
+		expect(second?.statusCode).toBe(409);
 	});
 
 	it("rejects invalid register payloads", async () => {
@@ -56,8 +56,8 @@ describe("auth routes", () => {
 			url: "/api/auth/register",
 			payload: { email: "not-an-email", password: "short" },
 		});
-		expect(res!.statusCode).toBe(400);
-		expect(res!.json().error).toContain("email");
+		expect(res?.statusCode).toBe(400);
+		expect(res?.json().error).toContain("email");
 	});
 
 	it("logs in and validates /me", async () => {
@@ -72,7 +72,7 @@ describe("auth routes", () => {
 			url: "/api/auth/login",
 			payload: { email: "login@example.com", password: "password-123" },
 		});
-		expect(loginRes!.statusCode).toBe(200);
+		expect(loginRes?.statusCode).toBe(200);
 		const { token } = loginRes!.json();
 
 		const meRes = await app?.inject({
@@ -80,13 +80,13 @@ describe("auth routes", () => {
 			url: "/api/auth/me",
 			headers: { authorization: `Bearer ${token}` },
 		});
-		expect(meRes!.statusCode).toBe(200);
-		expect(meRes!.json().user.email).toBe("login@example.com");
+		expect(meRes?.statusCode).toBe(200);
+		expect(meRes?.json().user.email).toBe("login@example.com");
 	});
 
 	it("rejects /me without a token", async () => {
 		const res = await app?.inject({ method: "GET", url: "/api/auth/me" });
-		expect(res!.statusCode).toBe(401);
+		expect(res?.statusCode).toBe(401);
 	});
 
 	it("rejects /me with a tampered token", async () => {
@@ -95,6 +95,6 @@ describe("auth routes", () => {
 			url: "/api/auth/me",
 			headers: { authorization: "Bearer abcdef.ghijkl" },
 		});
-		expect(res!.statusCode).toBe(401);
+		expect(res?.statusCode).toBe(401);
 	});
 });

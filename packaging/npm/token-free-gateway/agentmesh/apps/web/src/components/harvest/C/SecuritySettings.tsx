@@ -219,7 +219,7 @@ export function SecuritySettings({ adapter }: SecuritySettingsProps = {}) {
 
 	useEffect(() => {
 		void refresh();
-	}, []);
+	}, [refresh]);
 
 	if (!snap) {
 		return (
