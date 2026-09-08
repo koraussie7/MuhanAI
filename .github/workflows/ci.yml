@@ -14,31 +14,65 @@ defaults:
   run:
     working-directory: packaging/npm/token-free-gateway/agentmesh
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  check:
-    name: Lint & Typecheck & Test
+  typecheck:
+    name: TypeScript type check
     runs-on: ubuntu-latest
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
         with:
           version: 9
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: 'pnpm'
           cache-dependency-path: 'packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+  test:
+    name: Unit & integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: 'packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test --reporter=junit --outputFile=junit.xml
+      - uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Tests
+          path: junit.xml
+          reporter: jest-junit
+          fail-on-error: true
 
-      - name: Biome lint check
-        run: pnpm biome lint .
-
-      - name: TypeScript type check
-        run: pnpm typecheck
-
-      - name: Run tests
-        run: pnpm test
+  biome:
+    name: Biome lint check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: 'packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm biome ci .
