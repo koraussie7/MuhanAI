@@ -30,7 +30,7 @@ jobs:
           version: 9
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: 'pnpm'
           cache-dependency-path: 'packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml'
       - run: pnpm install --frozen-lockfile
@@ -47,11 +47,14 @@ jobs:
           version: 9
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: 'pnpm'
           cache-dependency-path: 'packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml'
       - run: pnpm install --frozen-lockfile
-      - run: pnpm test --reporter=junit --outputFile=junit.xml
+      - name: Run vitest with junit reporter
+        run: pnpm test -- --reporter=junit --outputFile=junit.xml
+        env:
+          JEST_JUNIT_OUTPUT_NAME: junit.xml
       - uses: dorny/test-reporter@v1
         if: always()
         with:
@@ -71,7 +74,7 @@ jobs:
           version: 9
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: 'pnpm'
           cache-dependency-path: 'packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml'
       - run: pnpm install --frozen-lockfile
