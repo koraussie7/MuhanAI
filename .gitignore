@@ -47,3 +47,9 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .agentmesh/
 **/.agentmesh/
 agentmesh-identity.json
+
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+database.db

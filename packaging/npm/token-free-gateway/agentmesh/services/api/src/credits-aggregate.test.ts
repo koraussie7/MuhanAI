@@ -26,8 +26,8 @@ describe("GET /api/credits (aggregate)", () => {
 
 	it("returns the full aggregate snapshot", async () => {
 		const res = await app?.inject({ method: "GET", url: "/api/credits" });
-		expect(res.statusCode).toBe(200);
-		const body = res.json() as {
+		expect(res?.statusCode).toBe(200);
+		const body = res?.json() as {
 			balance: string;
 			userId: string;
 			dailyLimitCredits: number;
@@ -47,8 +47,8 @@ describe("GET /api/credits (aggregate)", () => {
 			method: "GET",
 			url: "/api/credits?userId=demo-user",
 		});
-		expect(res.statusCode).toBe(200);
-		const body = res.json() as { userId: string };
+		expect(res?.statusCode).toBe(200);
+		const body = res?.json() as { userId: string };
 		expect(body.userId).toBe("demo-user");
 	});
 
@@ -59,8 +59,8 @@ describe("GET /api/credits (aggregate)", () => {
 			method: "GET",
 			url: "/api/credits?userId=brand-new-user-with-no-wallet",
 		});
-		expect(res.statusCode).toBe(200);
-		const body = res.json() as { balance: string };
+		expect(res?.statusCode).toBe(200);
+		const body = res?.json() as { balance: string };
 		expect(body.balance).toBe("0");
 	});
 });

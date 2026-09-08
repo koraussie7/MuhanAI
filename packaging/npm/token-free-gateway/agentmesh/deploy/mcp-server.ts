@@ -115,7 +115,7 @@ export const MUHANAI_MCP_TOOLS: MCPToolDefinition[] = [
 	},
 ];
 
-export async function handleMcpRequest(request: Request, url: URL): Promise<Response | null> {
+export async function handleMcpRequest(request: Request, url: URL, env?: { API_ORIGIN?: string }): Promise<Response | null> {
 	const pathname = url.pathname;
 
 	// 1. MCP Manifest & Declaration
@@ -442,7 +442,31 @@ export async function handleMcpRequest(request: Request, url: URL): Promise<Resp
 						],
 					});
 				} else if (toolName === "muhanai_ask_quorum") {
-					content = `🤖 [MuhanAI Quorum Consensus]:\nQuestion: "${args.question}"\nConsensus: 99.6% Agreement across Claude 3.7 + DeepSeek R1 + Gemini 2.5.\nResult: Zero-token distributed execution path verified.`;
+				const question = String(args.question || "");
+				const apiOrigin = env?.API_ORIGIN || "https://api.muhanai.com";
+
+				try {
+					const response = await fetch(`${apiOrigin}/api/quorum/ask`, {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({
+							question,
+							consensus_threshold: args.consensus_threshold,
+						}),
+					});
+
+					if (response.ok) {
+						const result = (await response.json()) as Record<string, unknown>;
+						content = JSON.stringify(result);
+					} else {
+						content = JSON.stringify({
+							error: "Quorum service unavailable",
+							status: response.status,
+						});
+					}
+				} catch {
+					content = JSON.stringify({ error: "Failed to reach quorum service" });
+				}
 				} else if (toolName === "muhanai_publish_note") {
 					content = `✨ Successfully published [[${args.title}.md]] to MuhanAI cosmic knowledge topology. Node ID: note-${Date.now()}`;
 				} else {

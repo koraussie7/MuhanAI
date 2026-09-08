@@ -8,6 +8,7 @@ import Fastify from "fastify";
 import { agentsRoutes } from "./agents-routes.js";
 import { authRoutes } from "./auth-routes.js";
 import { computeRoutes } from "./compute-routes.js";
+import { computerUseRoutes } from "./computer-use-routes.js";
 import { creditsRoutes } from "./credits-routes.js";
 import { feedRoutes } from "./feed-routes.js";
 import { PulseBridge } from "./gossip-bridge.js";
@@ -19,10 +20,19 @@ import { llmRoutes } from "./llm-routes.js";
 import { networkRoutes } from "./network-routes.js";
 import { noemaRoutes } from "./noema-routes.js";
 import pulseRoutes from "./pulse-routes.js";
+import { quorumRoutes } from "./quorum-routes.js";
 import { securityRoutes } from "./security-routes.js";
 import { semanticRoutes } from "./semantic-routes.js";
 
-const PUBLIC_PATH_PREFIXES = ["/api/pulse", "/api/network", "/api/agents", "/api/auth"];
+const PUBLIC_PATH_PREFIXES = [
+	"/api/pulse",
+	"/api/network",
+	"/api/agents",
+	"/api/auth",
+	"/api/llm",
+	"/api/computer-use",
+	"/api/quorum",
+];
 const PUBLIC_PATH_EXACT = new Set(["/health"]);
 
 function isPublicPath(rawUrl: string | undefined): boolean {
@@ -159,12 +169,14 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	await app.register(computeRoutes);
 	await app.register(llmMeshRoutes);
 	await app.register(llmRoutes);
+	await app.register(computerUseRoutes);
 	await app.register(happyRoutes);
 	await app.register(creditsRoutes);
 	await app.register(securityRoutes);
 	await app.register(feedRoutes);
 	await app.register(authRoutes);
 	await app.register(pulseRoutes);
+	await app.register(quorumRoutes);
 
 	// Wire the libp2p transport into the bridge. Best-effort: any failure here
 	// (mDNS unavailable on Docker bridge, identity write denied, etc.) keeps
