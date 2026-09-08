@@ -5,6 +5,7 @@ node_modules
 out
 dist
 /npm
+/pnpm-lock.yaml
 *.tgz
 /token-free-gateway
 
