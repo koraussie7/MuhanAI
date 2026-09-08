@@ -102,3 +102,15 @@ When `biome.json` adds a rule, all 344 files are re-checked. Expect ~50 warnings
 ---
 
 _Last updated: 2026-09-08_
+
+## 11. Triggers
+
+The CI workflow (`.github/workflows/ci.yml`) is exercised on every `push` and
+`pull_request` against `main`. It runs three parallel jobs:
+
+- `typecheck` — `pnpm -r typecheck`
+- `test` — `pnpm test` (with junit output + PR comments)
+- `biome` — `pnpm biome ci .` (read-only)
+
+A docs-only change like this one still runs all three jobs because the
+working-directory is the pnpm workspace root, not the file's directory.
