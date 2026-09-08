@@ -151,7 +151,7 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
 
 			playCosmicChime();
 			const angle = Math.random() * Math.PI * 2;
-			const distance = 180 + Math.random() * 340;
+			const distance = 140 + Math.random() * 100;
 			const nx = Math.cos(angle) * distance;
 			const ny = Math.sin(angle) * distance;
 			const newId = `note-user-${Date.now()}`;
@@ -279,6 +279,57 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
 		}
 	}, [nodes, addEvent]);
 
+	const handlePublishGeneratedNote = useCallback(
+		(title: string, markdownContent: string) => {
+			const newNoteId = `note-ai-${Date.now()}`;
+			const colors = ["#38bdf8", "#10b981", "#a855f7", "#ec4899", "#e6ff87"];
+			const color = colors[Math.floor(Math.random() * colors.length)];
+			const angle = Math.random() * Math.PI * 2;
+			const r = 260 + Math.random() * 80;
+			const x = Math.cos(angle) * r;
+			const y = Math.sin(angle) * r;
+
+			const cleanTitle = title.slice(0, 40);
+			const newNode: CosmicNode = {
+				id: newNoteId,
+				label: `[[${cleanTitle}.md]]`,
+				type: "note",
+				x,
+				y,
+				vx: 0,
+				vy: 0,
+				radius: 14,
+				color,
+				connectionsCount: 2,
+				frontmatter: {
+					title: cleanTitle,
+					author: "MuhanAI Multi-Agent Quorum",
+					created: new Date().toISOString().slice(0, 10),
+					tags: ["ai-quorum", "knowledge", "zero-token"],
+					links: ["note-muhanai-core"],
+					summary: `${cleanTitle} - MuhanAI 다중 에이전트 쿼럼 합의 지식 노드`,
+					markdown: markdownContent,
+				},
+			};
+
+			const newEdge: CosmicEdge = {
+				id: `e-ai-${Date.now()}`,
+				source: "note-muhanai-core",
+				target: newNoteId,
+				label: "quorum-consensus",
+				weight: 1.3,
+			};
+
+			setNodes((prev) => [...prev, newNode]);
+			setEdges((prev) => [...prev, newEdge]);
+			setSelectedNode(newNode);
+			spawnShockwave(x, y, color);
+			playCosmicChime();
+			addEvent(`✨ New Knowledge Node published from AI: [[${cleanTitle}.md]]`);
+		},
+		[spawnShockwave, addEvent],
+	);
+
 	const allNodesForInspector = useMemo(() => nodes, [nodes]);
 
 	return (
@@ -324,6 +375,7 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
 				<CosmicPromptBar
 					onSearchOrPublish={handleSearchOrPublish}
 					onFilterChange={setSearchFilter}
+					onPublishNote={handlePublishGeneratedNote}
 				/>
 			</div>
 
