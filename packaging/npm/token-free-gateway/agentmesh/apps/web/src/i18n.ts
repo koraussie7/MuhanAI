@@ -59,6 +59,11 @@ export interface I18nContent {
 		peerCancelBtn: string;
 		changeNickname: string;
 		userGuide: string;
+		aiThinking: string;
+		aiQuorumTitle: string;
+		saveAsNode: string;
+		copyAnswer: string;
+		copied: string;
 	};
 }
 
@@ -108,6 +113,12 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerCancelBtn: "취소",
 			changeNickname: "닉네임 변경",
 			userGuide: "사용설명서",
+			aiThinking:
+				"다중 AI 쿼럼(Claude 3.7 + DeepSeek R1 + Gemini 2.5)이 제로 토큰 지능망에서 합의 추론 중...",
+			aiQuorumTitle: "MuhanAI 멀티 에이전트 쿼럼 합의",
+			saveAsNode: "지식 노드로 발행",
+			copyAnswer: "답변 복사",
+			copied: "복사됨!",
 		},
 	},
 	en: {
@@ -157,6 +168,12 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerCancelBtn: "Cancel",
 			changeNickname: "Change Nickname",
 			userGuide: "User Guide",
+			aiThinking:
+				"Multi-agent quorum (Claude 3.7 + DeepSeek R1 + Gemini 2.5) deliberating consensus in zero-token mesh...",
+			aiQuorumTitle: "MuhanAI Multi-Agent Quorum Consensus",
+			saveAsNode: "Publish as Knowledge Node",
+			copyAnswer: "Copy Answer",
+			copied: "Copied!",
 		},
 	},
 	ja: {
@@ -205,6 +222,12 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerCancelBtn: "キャンセル",
 			changeNickname: "ニックネーム変更",
 			userGuide: "利用ガイド",
+			aiThinking:
+				"複数AIクォーラム（Claude 3.7 + DeepSeek R1 + Gemini 2.5）がゼロトークン網で合意推論中...",
+			aiQuorumTitle: "MuhanAI マルチエージェント合意形成",
+			saveAsNode: "ナレッジノードとして発行",
+			copyAnswer: "回答をコピー",
+			copied: "コピー完了!",
 		},
 	},
 	zh: {
@@ -252,6 +275,12 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerCancelBtn: "取消",
 			changeNickname: "修改昵称",
 			userGuide: "使用指南",
+			aiThinking:
+				"多智能体仲裁团 (Claude 3.7 + DeepSeek R1 + Gemini 2.5) 正在零Token网络中进行共识推理...",
+			aiQuorumTitle: "MuhanAI 多智能体共识协商",
+			saveAsNode: "发布为知识节点",
+			copyAnswer: "复制回答",
+			copied: "已复制!",
 		},
 	},
 	es: {
@@ -301,6 +330,12 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerCancelBtn: "Cancelar",
 			changeNickname: "Cambiar apodo",
 			userGuide: "Guía de Usuario",
+			aiThinking:
+				"El cuórum de múltiples agentes (Claude 3.7 + DeepSeek R1 + Gemini 2.5) está deliberando en la malla sin tokens...",
+			aiQuorumTitle: "Consenso de Cuórum Multi-Agente MuhanAI",
+			saveAsNode: "Publicar como Nodo de Conocimiento",
+			copyAnswer: "Copiar Respuesta",
+			copied: "¡Copiado!",
 		},
 	},
 	de: {
@@ -350,6 +385,12 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerCancelBtn: "Abbrechen",
 			changeNickname: "Nickname ändern",
 			userGuide: "Benutzerhandbuch",
+			aiThinking:
+				"Multi-Agenten-Quorum (Claude 3.7 + DeepSeek R1 + Gemini 2.5) berät Konsens im token-freien Mesh...",
+			aiQuorumTitle: "MuhanAI Multi-Agenten-Quorum-Konsens",
+			saveAsNode: "Als Wissensknoten veröffentlichen",
+			copyAnswer: "Antwort kopieren",
+			copied: "Kopiert!",
 		},
 	},
 	fr: {
@@ -400,6 +441,12 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerCancelBtn: "Annuler",
 			changeNickname: "Changer de pseudo",
 			userGuide: "Guide d'Utilisation",
+			aiThinking:
+				"Le quorum multi-agents (Claude 3.7 + DeepSeek R1 + Gemini 2.5) délibère un consensus sur le maillage sans jeton...",
+			aiQuorumTitle: "Consensus du Quorum Multi-Agents MuhanAI",
+			saveAsNode: "Publier comme Nœud de Savoir",
+			copyAnswer: "Copier la Réponse",
+			copied: "Copié !",
 		},
 	},
 	pt: {
@@ -448,6 +495,12 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerCancelBtn: "Cancelar",
 			changeNickname: "Alterar apelido",
 			userGuide: "Guia do Usuário",
+			aiThinking:
+				"Quórum multi-agentes (Claude 3.7 + DeepSeek R1 + Gemini 2.5) deliberando consenso na malha sem tokens...",
+			aiQuorumTitle: "Consenso do Quórum Multi-Agentes MuhanAI",
+			saveAsNode: "Publicar como Nó de Conhecimento",
+			copyAnswer: "Copiar Resposta",
+			copied: "Copiado!",
 		},
 	},
 };

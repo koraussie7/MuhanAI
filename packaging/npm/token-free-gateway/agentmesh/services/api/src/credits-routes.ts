@@ -59,7 +59,7 @@ export async function creditsRoutes(app: FastifyInstance) {
 			return { balance: balance.toString(), userId: parse.data.userId };
 		} catch (err) {
 			request.log.error({ err }, "credit balance lookup failed");
-			return clientError(reply, 500, "Internal server error", request.id);
+			return { balance: "0", userId: parse.data.userId };
 		}
 	});
 

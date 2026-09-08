@@ -17,6 +17,7 @@ import {
 } from "./components/DashPages";
 import { FederationPanel } from "./components/FederationPanel";
 import { FindPage } from "./components/find/FindPage";
+import { HappyPage } from "./components/HappyPage";
 import { HiveBearPanel } from "./components/HiveBearPanel";
 import { RightPanel } from "./components/RightPanel";
 import { SemanticVote } from "./components/SemanticVote";
@@ -39,8 +40,6 @@ import { type SupportedLanguage, useI18n } from "./i18n";
 
 const SECTIONS = [
 	{ id: "find", path: "/", label: "Cosmic Mesh", category: "Core" },
-	{ id: "find-alt", path: "/find", label: "Cosmic Mesh", category: "Core" },
-	{ id: "dashboard", path: "/dashboard", label: "Dashboard", category: "Core" },
 	{
 		id: "agent-cast",
 		path: "/agent-cast",
@@ -177,6 +176,12 @@ const SECTIONS = [
 	},
 	{ id: "settings", path: "/settings", label: "Settings", category: "System" },
 	{
+		id: "happy",
+		path: "/happy",
+		label: "Happy Coder",
+		category: "System",
+	},
+	{
 		id: "semantic-vote",
 		path: "/semantic-vote",
 		label: "Semantic Vote",
@@ -202,9 +207,6 @@ function sectionIdFromPath(path: string) {
 	const cleanPath = path.split("?")[0] || "/";
 	if (cleanPath === "/" || cleanPath === "/find" || cleanPath === "") {
 		return "find";
-	}
-	if (cleanPath === "/dashboard") {
-		return "dashboard";
 	}
 	if (typeof window !== "undefined") {
 		const host = window.location.hostname;
@@ -267,12 +269,12 @@ export function App() {
 		return () => window.removeEventListener("popstate", onPopState);
 	}, []);
 
-	// 1. Fullscreen Standalone View for find.muhanai.com or /find
-	if (activeSection === "find" || activeSection === "find-alt") {
+	// 1. Fullscreen Standalone View for find.muhanai.com or /
+	if (activeSection === "find") {
 		return (
 			<FindPage
 				onNavigateHome={() => {
-					navigate("/dashboard");
+					navigate("/");
 				}}
 			/>
 		);
@@ -353,7 +355,7 @@ export function App() {
 								borderColor: "rgba(56, 189, 248, 0.4)",
 								color: "#38bdf8",
 							}}
-							onClick={() => navigate("/find")}
+							onClick={() => navigate("/")}
 							title="Launch find.muhanai.com Cosmic Knowledge Mesh"
 						>
 							<Sparkles size={13} />
@@ -494,6 +496,9 @@ export function App() {
 						)}
 						{activeSection === "hivebear" && <HiveBearPanel />}
 						{activeSection === "federation" && <FederationPanel />}
+
+						{/* Happy Coder — Token-Free Gateway for Claude Code & Codex */}
+						{activeSection === "happy" && <HappyPage />}
 
 						{!IMPLEMENTED_SECTIONS.has(activeSection) && (
 							<div className="placeholder-page" style={{ padding: 40, textAlign: "center" }}>
