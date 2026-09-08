@@ -45,6 +45,46 @@ _Last updated: 2026-09-08_
 
 ---
 
+## hard-block zones (require explicit override)
+
+These paths are **outright forbidden** for ordinary agents. Touching them blocks preflight (exit 5)
+unless the agent first runs:
+
+```bash
+ALLOW_HARD_BLOCK=1 ./scripts/preflight.sh
+```
+
+| path | why blocked | who can override | override requirement |
+|---|---|---|---|
+| `tsconfig*.json`, `tsconfig.base.json` | path-mapping ripples to all packages | maintainer | open PR with reviewer tag |
+| `pnpm-workspace.yaml` | workspace scope change | maintainer | same as above |
+| `package.json` (root) | bumps every workspace | maintainer | same as above |
+| `.github/workflows/` | CI gate, breaks everyone if malformed | agent-6 or maintainer | PR + manual CI run before merge |
+| `prisma/schema.prisma` | DB contract | agent-4 or maintainer | REVIEW REQUIRED (dual) |
+| `prisma/migrations/` | irreversible schema change | agent-4 or maintainer | REVIEW REQUIRED + manual `prisma migrate deploy` run |
+| `biome.json` | changes rule set for all 344 files | agent-6 or maintainer | PR + biome check before merge |
+| `.husky/` | hook config: lives or dies the pre-commit pipeline | agent-6 or maintainer | PR + manual run of every hook |
+
+### why these are hard, not advisory
+
+These files define **contracts** across the whole workspace. A change here can:
+
+- silently break typecheck across 22 packages
+- alter the CI gate rule shape without review
+- commit a one-way schema migration to production
+
+`preflight.sh` exit 5 will block any commit that touches these paths
+**unless** the agent is allowed (by role + branch name + override env) to modify them.
+
+Override chain detection (preflight will check):
+1. `AGENT_ROLE` env var matches one of the allow-listed roles above.
+2. Branch name starts with `feat/agent-<number>/...` where agent-N is allow-listed.
+3. `ALLOW_HARD_BLOCK=1` is set explicitly.
+
+If any check fails → exit 5.
+
+---
+
 ## shared hotspots (high contention)
 
 These files are touched by multiple features; coordinate before commits:
