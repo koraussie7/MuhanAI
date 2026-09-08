@@ -7,9 +7,9 @@
  * Inspired by: github.com/slopus/happy (23.7k stars)
  */
 
+import { Brain, Code2, Smartphone, Zap } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { Brain, Code2, Smartphone, Zap } from "lucide-react";
 
 interface HappySession {
 	id: string;
@@ -91,8 +91,8 @@ export const HappyPage: React.FC = () => {
 							Happy Coder — Token-Free Gateway
 						</h1>
 						<p className="dashboard-hero-desc">
-							Claude Code &amp; Codex를 $0로 모바일/ 웹에서 제어.
-							muhanai.com의 Token-Free Gateway를 통해 API 키 없이 동작.
+							Claude Code &amp; Codex를 $0로 모바일/ 웹에서 제어. muhanai.com의 Token-Free Gateway를
+							통해 API 키 없이 동작.
 						</p>
 					</div>
 				</div>
@@ -144,8 +144,7 @@ export const HappyPage: React.FC = () => {
 						onClick={handleRun}
 						disabled={loading || !prompt.trim()}
 					>
-						<Zap size={14} />{" "}
-						{loading ? "Gateway Processing..." : "Run via Token-Free Gateway"}
+						<Zap size={14} /> {loading ? "Gateway Processing..." : "Run via Token-Free Gateway"}
 					</button>
 				</div>
 			</div>

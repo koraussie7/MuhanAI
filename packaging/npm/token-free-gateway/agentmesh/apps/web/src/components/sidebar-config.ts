@@ -101,25 +101,25 @@ export const NAV_GROUPS: NavGroup[] = [
 		id: "knowledge",
 		title: "Knowledge Lake",
 		items: [
-		{
-			id: "knowledge",
-			label: "Knowledge Graph",
-			path: "/knowledge",
-			iconKey: "database",
-		},
+			{
+				id: "knowledge",
+				label: "Knowledge Graph",
+				path: "/knowledge",
+				iconKey: "database",
+			},
 			{
 				id: "verification",
 				label: "Verification",
 				path: "/verification",
 				iconKey: "check-circle",
 			},
-		{
-			id: "find",
-			label: "Cosmic Mesh",
-			path: "/",
-			iconKey: "search",
-			badge: "NEW",
-		},
+			{
+				id: "find",
+				label: "Cosmic Mesh",
+				path: "/",
+				iconKey: "search",
+				badge: "NEW",
+			},
 			{
 				id: "search",
 				label: "Mesh Search",

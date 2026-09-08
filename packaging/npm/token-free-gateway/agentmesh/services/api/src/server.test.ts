@@ -23,17 +23,17 @@ describe("api server hardening", () => {
 
 		it("sets X-Content-Type-Options to nosniff", async () => {
 			const res = await app?.inject({ method: "GET", url: "/health" });
-			expect(res!.headers["x-content-type-options"]).toBe("nosniff");
+			expect(res?.headers["x-content-type-options"]).toBe("nosniff");
 		});
 
 		it("sets X-Frame-Options so clickjacking is blocked", async () => {
 			const res = await app?.inject({ method: "GET", url: "/health" });
-			expect(res!.headers["x-frame-options"]).toBeDefined();
+			expect(res?.headers["x-frame-options"]).toBeDefined();
 		});
 
 		it("sets Referrer-Policy", async () => {
 			const res = await app?.inject({ method: "GET", url: "/health" });
-			expect(res!.headers["referrer-policy"]).toBeDefined();
+			expect(res?.headers["referrer-policy"]).toBeDefined();
 		});
 	});
 
@@ -50,12 +50,12 @@ describe("api server hardening", () => {
 				url: "/health",
 				headers: { "x-request-id": incoming },
 			});
-			expect(res!.headers["x-request-id"] ?? res!.headers["request-id"]).toBe(incoming);
+			expect(res?.headers["x-request-id"] ?? res?.headers["request-id"]).toBe(incoming);
 		});
 
 		it("generates a UUID when no x-request-id is sent", async () => {
 			const res = await app?.inject({ method: "GET", url: "/health" });
-			const id = (res!.headers["x-request-id"] ?? res!.headers["request-id"]) as string | undefined;
+			const id = (res?.headers["x-request-id"] ?? res?.headers["request-id"]) as string | undefined;
 			expect(id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
 		});
 
@@ -66,7 +66,7 @@ describe("api server hardening", () => {
 				url: "/health",
 				headers: { "x-request-id": tooLong },
 			});
-			const id = (res!.headers["x-request-id"] ?? res!.headers["request-id"]) as string | undefined;
+			const id = (res?.headers["x-request-id"] ?? res?.headers["request-id"]) as string | undefined;
 			expect(id).not.toBe(tooLong);
 			expect(id).toMatch(/^[0-9a-f-]{36}$/i);
 		});
@@ -88,7 +88,7 @@ describe("api server hardening", () => {
 					method: "GET",
 					url: "/api/compute/tribute/queue",
 				});
-				responses.push(res!.statusCode);
+				responses.push(res?.statusCode);
 			}
 			expect(responses.slice(0, 3).every((s) => s === 200 || s === 404)).toBe(true);
 			expect(responses[3]).toBe(429);
@@ -97,7 +97,7 @@ describe("api server hardening", () => {
 		it("exempts /health from rate limiting", async () => {
 			for (let i = 0; i < 10; i += 1) {
 				const res = await app?.inject({ method: "GET", url: "/health" });
-				expect(res!.statusCode).not.toBe(429);
+				expect(res?.statusCode).not.toBe(429);
 			}
 		});
 	});
@@ -117,7 +117,7 @@ describe("api server hardening", () => {
 				headers: { "content-type": "application/json" },
 				payload: JSON.stringify({ taskId: "t", payload: huge }),
 			});
-			expect(res!.statusCode).toBe(413);
+			expect(res?.statusCode).toBe(413);
 		});
 	});
 
@@ -132,8 +132,8 @@ describe("api server hardening", () => {
 				method: "GET",
 				url: "/api/compute/tribute/queue",
 			});
-			expect(res!.statusCode).toBe(401);
-			expect(res!.json()).toMatchObject({
+			expect(res?.statusCode).toBe(401);
+			expect(res?.json()).toMatchObject({
 				error: expect.stringMatching(/unauthorized/i),
 			});
 		});
@@ -144,12 +144,12 @@ describe("api server hardening", () => {
 				url: "/api/compute/tribute/queue",
 				headers: { "x-api-key": "secret-test-key" },
 			});
-			expect(res!.statusCode).toBe(200);
+			expect(res?.statusCode).toBe(200);
 		});
 
 		it("still allows public routes without a key", async () => {
 			const res = await app?.inject({ method: "GET", url: "/api/agents" });
-			expect(res!.statusCode).toBe(200);
+			expect(res?.statusCode).toBe(200);
 		});
 	});
 

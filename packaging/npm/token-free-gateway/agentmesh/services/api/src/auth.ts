@@ -17,12 +17,12 @@ const TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 const secret = process.env.AUTH_SECRET;
 
 if (!secret) {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("AUTH_SECRET is required in production");
-  }
-  console.warn(
-    "[auth] AUTH_SECRET is not set. Using ephemeral secret — tokens will not survive restarts.",
-  );
+	if (process.env.NODE_ENV === "production") {
+		throw new Error("AUTH_SECRET is required in production");
+	}
+	console.warn(
+		"[auth] AUTH_SECRET is not set. Using ephemeral secret — tokens will not survive restarts.",
+	);
 }
 
 const resolvedSecret = secret ?? randomUUID();
@@ -32,8 +32,8 @@ function base64url(input: Buffer): string {
 }
 
 function sign(payload: string): Buffer {
- 	return createHmac("sha256", resolvedSecret).update(payload).digest();
- }
+	return createHmac("sha256", resolvedSecret).update(payload).digest();
+}
 
 function safeEqual(a: Buffer, b: Buffer): boolean {
 	return a.length === b.length && timingSafeEqual(a, b);

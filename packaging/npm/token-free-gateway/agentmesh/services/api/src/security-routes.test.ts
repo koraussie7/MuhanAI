@@ -25,7 +25,7 @@ describe("/api/security routes", () => {
 	});
 
 	it("GET /api/security returns the full snapshot", async () => {
-		const res = await app!.inject({ method: "GET", url: "/api/security" });
+		const res = await app?.inject({ method: "GET", url: "/api/security" });
 		expect(res.statusCode).toBe(200);
 		const body = res.json() as {
 			toggles: Record<string, boolean>;
@@ -44,7 +44,7 @@ describe("/api/security routes", () => {
 	});
 
 	it("POST /api/security/toggles updates toggles and appends audit", async () => {
-		const res = await app!.inject({
+		const res = await app?.inject({
 			method: "POST",
 			url: "/api/security/toggles",
 			payload: {
@@ -60,7 +60,7 @@ describe("/api/security routes", () => {
 		expect(body.toggles.apiVaultEnabled).toBe(true);
 
 		// Re-fetch — toggles persisted.
-		const after = await app!.inject({ method: "GET", url: "/api/security" });
+		const after = await app?.inject({ method: "GET", url: "/api/security" });
 		const snap = after.json() as { toggles: Record<string, boolean>; audit: unknown[] };
 		expect(snap.toggles.zeroTrustEnabled).toBe(false);
 		// audit list grew (at least one new entry).
@@ -68,7 +68,7 @@ describe("/api/security routes", () => {
 	});
 
 	it("POST /api/security/toggles rejects malformed payloads", async () => {
-		const res = await app!.inject({
+		const res = await app?.inject({
 			method: "POST",
 			url: "/api/security/toggles",
 			payload: { zeroTrustEnabled: "yes" }, // wrong type
@@ -77,14 +77,14 @@ describe("/api/security routes", () => {
 	});
 
 	it("POST /api/security/daily-limit enforces positive integer", async () => {
-		const ok = await app!.inject({
+		const ok = await app?.inject({
 			method: "POST",
 			url: "/api/security/daily-limit",
 			payload: { limit: 8000 },
 		});
 		expect(ok.statusCode).toBe(200);
 
-		const bad = await app!.inject({
+		const bad = await app?.inject({
 			method: "POST",
 			url: "/api/security/daily-limit",
 			payload: { limit: -5 },
@@ -93,7 +93,7 @@ describe("/api/security routes", () => {
 	});
 
 	it("POST /api/security/keys/:service/revoke removes the key", async () => {
-		const ok = await app!.inject({
+		const ok = await app?.inject({
 			method: "POST",
 			url: "/api/security/keys/groq/revoke",
 		});
@@ -101,7 +101,7 @@ describe("/api/security routes", () => {
 		const body = ok.json() as { revoked: string };
 		expect(body.revoked).toBe("groq");
 
-		const notFound = await app!.inject({
+		const notFound = await app?.inject({
 			method: "POST",
 			url: "/api/security/keys/unknown-svc/revoke",
 		});

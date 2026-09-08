@@ -41,7 +41,7 @@ export function SemanticVote({ onSubmit }: { onSubmit: (route: string, primary: 
 					placeholder="질문을 입력하세요... 자동 라우팅"
 					onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), submit())}
 				/>
-				<button onClick={submit} disabled={loading}>
+				<button type="button" onClick={submit} disabled={loading}>
 					{loading ? "분류 중..." : "Classify"}
 				</button>
 			</div>

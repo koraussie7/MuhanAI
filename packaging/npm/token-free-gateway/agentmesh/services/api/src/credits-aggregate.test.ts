@@ -25,7 +25,7 @@ describe("GET /api/credits (aggregate)", () => {
 	});
 
 	it("returns the full aggregate snapshot", async () => {
-		const res = await app!.inject({ method: "GET", url: "/api/credits" });
+		const res = await app?.inject({ method: "GET", url: "/api/credits" });
 		expect(res.statusCode).toBe(200);
 		const body = res.json() as {
 			balance: string;
@@ -43,7 +43,7 @@ describe("GET /api/credits (aggregate)", () => {
 	});
 
 	it("accepts an explicit userId", async () => {
-		const res = await app!.inject({
+		const res = await app?.inject({
 			method: "GET",
 			url: "/api/credits?userId=demo-user",
 		});
@@ -55,7 +55,7 @@ describe("GET /api/credits (aggregate)", () => {
 	it("returns a zero balance string when no wallet exists (first-run UX)", async () => {
 		// getCreditBalance throws when the wallet row is missing; we catch
 		// it and return 0n so the panel can render "create wallet to start".
-		const res = await app!.inject({
+		const res = await app?.inject({
 			method: "GET",
 			url: "/api/credits?userId=brand-new-user-with-no-wallet",
 		});

@@ -102,7 +102,7 @@ const KEYLESS_PROVIDERS: KeylessProviderConfig[] = [
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: (req) => ({
-			inputs: `${req.system ? req.system + "\n\n" : ""}${req.prompt}`,
+			inputs: `${req.system ? `${req.system}\n\n` : ""}${req.prompt}`,
 			options: { wait_for_model: true },
 		}),
 		parse: (data) => (Array.isArray(data) ? data[0]?.generated_text : data?.generated_text) ?? "",

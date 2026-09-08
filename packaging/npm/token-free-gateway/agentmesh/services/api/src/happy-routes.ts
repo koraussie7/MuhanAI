@@ -18,10 +18,13 @@
  *                              Pollinations / OpenRouter free / Cloudflare / HF
  */
 
-import type { FastifyInstance } from "fastify";
 import { randomUUID } from "node:crypto";
+import {
+	callKeylessProviders,
+	getKeylessProviderNames,
+} from "@agentmesh/llm-router/src/keyless-providers.js";
+import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { callKeylessProviders, getKeylessProviderNames } from "@agentmesh/llm-router/src/keyless-providers.js";
 import { clientError, formatZodError } from "./error-shapes.js";
 
 const CreateSessionSchema = z.object({
@@ -65,11 +68,11 @@ export async function happyRoutes(app: FastifyInstance) {
 		const { agent, prompt, system, userId } = parse.data;
 		const sessionId = `happy_${randomUUID().replace(/-/g, "").slice(0, 12)}`;
 
-		const agentSystem = system ?? (
-			agent === "claude"
+		const agentSystem =
+			system ??
+			(agent === "claude"
 				? "You are Claude Code, an AI coding assistant. Provide clear, actionable code and explanations."
-				: "You are Codex, an AI programming assistant. Provide concise, accurate code solutions."
-		);
+				: "You are Codex, an AI programming assistant. Provide concise, accurate code solutions.");
 
 		try {
 			const result = await callKeylessProviders({

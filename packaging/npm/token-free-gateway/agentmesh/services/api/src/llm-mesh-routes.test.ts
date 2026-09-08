@@ -25,7 +25,7 @@ describe("GET /api/llm-mesh", () => {
 	});
 
 	it("returns a snapshot with gateways, routes, and vault arrays", async () => {
-		const res = await app!.inject({ method: "GET", url: "/api/llm-mesh" });
+		const res = await app?.inject({ method: "GET", url: "/api/llm-mesh" });
 		expect(res.statusCode).toBe(200);
 
 		const body = res.json() as {
@@ -53,7 +53,7 @@ describe("GET /api/llm-mesh", () => {
 		// the expected jitter envelope. We don't assert specific values
 		// because jitter is random — only structural invariants.
 		for (let i = 0; i < 5; i++) {
-			const res = await app!.inject({ method: "GET", url: "/api/llm-mesh" });
+			const res = await app?.inject({ method: "GET", url: "/api/llm-mesh" });
 			const body = res.json() as {
 				gateways: Array<{ latencyMs: number; costTier: string; status: string }>;
 			};

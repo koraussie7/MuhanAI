@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
+import argon2 from "argon2";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import argon2 from "argon2";
 import { createToken, extractBearer, verifyToken } from "./auth.js";
 import { formatZodError } from "./error-shapes.js";
 
@@ -95,7 +95,7 @@ export async function authRoutes(app: FastifyInstance) {
 			const user = await prisma.user.findUnique({
 				where: { email: normalized },
 			});
-			if (!user || !user.passwordHash) {
+			if (!user?.passwordHash) {
 				return reply.code(401).send({ error: "Invalid credentials" });
 			}
 			const valid = await argon2.verify(user.passwordHash, password);
