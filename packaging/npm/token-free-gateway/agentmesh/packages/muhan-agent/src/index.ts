@@ -21,6 +21,11 @@ export type {
 	MessageTransport,
 } from "./daemon.js";
 export { createDaemon } from "./daemon.js";
+export {
+	E2bBrowserAdapter,
+	type E2bBrowserAdapterOptions,
+	type E2bSandboxLike,
+} from "./e2b-adapter.js";
 export type { MachineIdentity } from "./machine-identity.js";
 export { loadMachineIdentity } from "./machine-identity.js";
 export {
