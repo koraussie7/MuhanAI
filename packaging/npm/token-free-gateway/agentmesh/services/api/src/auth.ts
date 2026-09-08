@@ -14,15 +14,26 @@ import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 
 const TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-const secret = process.env.AUTH_SECRET ?? randomUUID();
+const secret = process.env.AUTH_SECRET;
+
+if (!secret) {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("AUTH_SECRET is required in production");
+  }
+  console.warn(
+    "[auth] AUTH_SECRET is not set. Using ephemeral secret — tokens will not survive restarts.",
+  );
+}
+
+const resolvedSecret = secret ?? randomUUID();
 
 function base64url(input: Buffer): string {
 	return input.toString("base64url");
 }
 
 function sign(payload: string): Buffer {
-	return createHmac("sha256", secret).update(payload).digest();
-}
+ 	return createHmac("sha256", resolvedSecret).update(payload).digest();
+ }
 
 function safeEqual(a: Buffer, b: Buffer): boolean {
 	return a.length === b.length && timingSafeEqual(a, b);
