@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
-# preflight.sh — gate an agent must pass before any coding work.
+# preflight.sh v2 — gate an agent must pass before any coding work.
 # MuhanAI multi-agent coordination. Exit 0 = go. 2..5 = blocked.
+#
+# v2 changes (vs MVP):
+#   - hard-block check on protected paths (OWNED-PATHS.md "hard-block zones")
+#   - role-based override (`ALLOW_HARD_BLOCK=1` only honored if role is allow-listed)
+#   - explicit exit code 5 for hard-block violation
 
 set -euo pipefail
 
@@ -15,7 +20,7 @@ cd "$ROOT_DIR"
 
 echo
 echo "═══════════════════════════════════════════════"
-echo -e "  ${BLU}MuhanAI Agent Preflight${NC}  $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+echo -e "  ${BLU}MuhanAI Agent Preflight v2${NC}  $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo "═══════════════════════════════════════════════"
 
 # ---------- 1. onboarding fingerprint (24h) ----------
@@ -52,24 +57,45 @@ BOARD="docs/agent/IN-PROGRESS.md"
 echo -e "${BLU}  role: $ROLE${NC}"
 
 if [[ -f "$BOARD" ]]; then
-    # Detect either a duplicate active reservation OR a "done" line for this role/branch.
     if grep -E "^\- ${ROLE} \|" "$BOARD" | grep -v "done @"; then
         echo -e "${YEL}⚠  Reservation already open for role $ROLE in $BOARD.${NC}"
         echo "  Either finish the previous entry or pick a different role."
     fi
 fi
 
-# ---------- 4. OWNED-PATHS ownership hint (advisory only) ----------
-OWNED="docs/agent/OWNED-PATHS.md"
-if [[ -f "$OWNED" ]]; then
-    # Check if we're about to touch files outside the OWNED paths.
-    # Bash-only signal: warn if HEAD~N..HEAD history shows files in protected zones.
-    PROTECTED_REGEX='(tsconfig|pnpm-workspace|package\.json|^\.github/|^\.husky/|prisma/schema|prisma/migrations)'
-    RECENT=$(git diff --name-only HEAD~3 HEAD 2>/dev/null | grep -E "$PROTECTED_REGEX" || true)
-    if [[ -n "$RECENT" ]]; then
-        echo -e "${YEL}⚠  You recently modified a protected file. Confirm with maintainer before push:${NC}"
-        echo "$RECENT" | sed 's/^/    - /'
+# ---------- 4. hard-block check (v2) ----------
+# Forbidden paths unless role is allow-listed OR AGENT_ROLE matches owner role.
+HARD_BLOCK_REGEX='^(tsconfig(\.base)?\.json|pnpm-workspace\.yaml|package\.json|\.github/workflows/|\.husky/|biome\.json|prisma/schema\.prisma|prisma/migrations/)'
+
+# Find files this branch is about to modify (staged + unstaged vs main + untracked).
+FORBIDDEN_TOUCHED=""
+TOUCHED=$( (
+    git diff --name-only main 2>/dev/null || true
+    git diff --cached --name-only 2>/dev/null || true
+    git ls-files --others --exclude-standard 2>/dev/null || true
+) | sort -u)
+for f in $TOUCHED; do
+    if [[ "$f" =~ $HARD_BLOCK_REGEX ]]; then
+        FORBIDDEN_TOUCHED+="    - $f"$'\n'
     fi
+done
+
+if [[ -n "$FORBIDDEN_TOUCHED" ]]; then
+    if [[ "${ALLOW_HARD_BLOCK:-0}" == "1" ]]; then
+        echo -e "${YEL}⚠  ALLOW_HARD_BLOCK=1 detected. Confirm ownership before commit.${NC}"
+        echo -e "${YEL}   Files in hard-block zone:${NC}"
+        printf "$FORBIDDEN_TOUCHED"
+        echo -e "${YEL}   Proceeding because explicit override was given. Logged in branch trace.${NC}"
+    else
+        echo -e "${RED}✗ STOP: hard-block zone touched (exit 5).${NC}"
+        echo -e "${RED}   Files:${NC}"
+        printf "$FORBIDDEN_TOUCHED"
+        echo -e "${RED}   → Run with ALLOW_HARD_BLOCK=1 ONLY if you are an allowed owner.${NC}"
+        echo "     See docs/agent/OWNED-PATHS.md 'hard-block zones'."
+        exit 5
+    fi
+else
+    echo -e "${GRN}✓${NC} no protected-path touch"
 fi
 
 # ---------- 5. last main CI status (advisory) ----------
