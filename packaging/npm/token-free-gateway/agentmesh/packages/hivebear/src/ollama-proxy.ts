@@ -152,7 +152,6 @@ function isPrivateIPv6(ip: string): boolean {
 export class OllamaProxy {
 	private readonly target: string;
 	private readonly guard: SsrfGuard;
-	private client?: HttpProxyClient;
 
 	constructor(
 		target = "http://127.0.0.1:11434",

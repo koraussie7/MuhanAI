@@ -45,7 +45,7 @@ describe("muhan-agent daemon", () => {
 		await daemon.start();
 		try {
 			expect(transport.published.length).toBeGreaterThan(0);
-			const claim = decodeMessage(transport.published[0]!.bytes);
+			const claim = decodeMessage(transport.published[0]?.bytes);
 			expect(claim).toMatchObject({
 				kind: "machine-claim",
 				userId: "user_1",
