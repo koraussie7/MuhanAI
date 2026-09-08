@@ -126,7 +126,7 @@ async function deriveKey(passphrase: string, salt: Uint8Array): Promise<Uint8Arr
 		["deriveBits"],
 	);
 	const bits = await crypto.subtle.deriveBits(
-		{ name: "PBKDF2", salt, iterations: PBKDF2_ITERATIONS, hash: "SHA-256" },
+		{ name: "PBKDF2", salt: new Uint8Array(salt), iterations: PBKDF2_ITERATIONS, hash: "SHA-256" },
 		baseKey,
 		KEY_BYTES * 8,
 	);
@@ -155,11 +155,11 @@ function decodeEntries(bytes: Uint8Array): Map<string, VaultEntry> {
 }
 
 async function aesGcmEncrypt(key: Uint8Array, iv: Uint8Array, pt: Uint8Array): Promise<Uint8Array> {
-	const ck = await crypto.subtle.importKey("raw", key, "AES-GCM", false, ["encrypt"]);
-	return new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, ck, pt));
+	const ck = await crypto.subtle.importKey("raw", new Uint8Array(key), "AES-GCM", false, ["encrypt"]);
+	return new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: new Uint8Array(iv) }, ck, new Uint8Array(pt)));
 }
 
 async function aesGcmDecrypt(key: Uint8Array, iv: Uint8Array, ct: Uint8Array): Promise<Uint8Array> {
-	const ck = await crypto.subtle.importKey("raw", key, "AES-GCM", false, ["decrypt"]);
-	return new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv }, ck, ct));
+	const ck = await crypto.subtle.importKey("raw", new Uint8Array(key), "AES-GCM", false, ["decrypt"]);
+	return new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: new Uint8Array(iv) }, ck, new Uint8Array(ct)));
 }

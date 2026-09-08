@@ -67,8 +67,8 @@ describe("api server hardening", () => {
 				headers: { "x-request-id": tooLong },
 			});
 			const id = (res?.headers["x-request-id"] ?? res?.headers["request-id"]) as string | undefined;
-			expect(id).not.toBe(tooLong);
-			expect(id).toMatch(/^[0-9a-f-]{36}$/i);
+			expect(id ?? "").not.toBe(tooLong);
+			expect(id ?? "").toMatch(/^[0-9a-f-]{36}$/i);
 		});
 	});
 
@@ -88,7 +88,7 @@ describe("api server hardening", () => {
 					method: "GET",
 					url: "/api/compute/tribute/queue",
 				});
-				responses.push(res?.statusCode);
+				responses.push(res?.statusCode ?? 0);
 			}
 			expect(responses.slice(0, 3).every((s) => s === 200 || s === 404)).toBe(true);
 			expect(responses[3]).toBe(429);
