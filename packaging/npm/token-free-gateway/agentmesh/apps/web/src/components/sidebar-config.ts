@@ -101,25 +101,25 @@ export const NAV_GROUPS: NavGroup[] = [
 		id: "knowledge",
 		title: "Knowledge Lake",
 		items: [
-			{
-				id: "knowledge-lake",
-				label: "Knowledge Graph",
-				path: "/knowledge",
-				iconKey: "database",
-			},
+		{
+			id: "knowledge",
+			label: "Knowledge Graph",
+			path: "/knowledge",
+			iconKey: "database",
+		},
 			{
 				id: "verification",
 				label: "Verification",
 				path: "/verification",
 				iconKey: "check-circle",
 			},
-			{
-				id: "find",
-				label: "Cosmic Mesh",
-				path: "/find",
-				iconKey: "search",
-				badge: "NEW",
-			},
+		{
+			id: "find",
+			label: "Cosmic Mesh",
+			path: "/",
+			iconKey: "search",
+			badge: "NEW",
+		},
 			{
 				id: "search",
 				label: "Mesh Search",
@@ -173,6 +173,13 @@ export const NAV_GROUPS: NavGroup[] = [
 				label: "Security & Keys",
 				path: "/settings",
 				iconKey: "settings",
+			},
+			{
+				id: "happy",
+				label: "Happy Coder",
+				path: "/happy",
+				iconKey: "smartphone",
+				badge: "NEW",
 			},
 		],
 	},
