@@ -102,3 +102,5 @@ When `biome.json` adds a rule, all 344 files are re-checked. Expect ~50 warnings
 ---
 
 _Last updated: 2026-09-08_
+
+<!-- verify/3job-green: CI runs against clean baseline after PR #5 -->
