@@ -11,18 +11,26 @@ import { computeRoutes } from "./compute-routes.js";
 import { creditsRoutes } from "./credits-routes.js";
 import { feedRoutes } from "./feed-routes.js";
 import { PulseBridge } from "./gossip-bridge.js";
+import { happyRoutes } from "./happy-routes.js";
 import { hivebearRoutes } from "./hivebear-routes.js";
 import { knowledgeRoutes } from "./knowledge-routes.js";
-import { happyRoutes } from "./happy-routes.js";
-import { llmRoutes } from "./llm-routes.js";
 import { llmMeshRoutes } from "./llm-mesh-routes.js";
+import { llmRoutes } from "./llm-routes.js";
+import { mcpRoutes } from "./mcp-routes.js";
 import { networkRoutes } from "./network-routes.js";
 import { noemaRoutes } from "./noema-routes.js";
 import pulseRoutes from "./pulse-routes.js";
 import { securityRoutes } from "./security-routes.js";
 import { semanticRoutes } from "./semantic-routes.js";
 
-const PUBLIC_PATH_PREFIXES = ["/api/pulse", "/api/network", "/api/agents", "/api/auth"];
+const PUBLIC_PATH_PREFIXES = [
+	"/api/pulse",
+	"/api/network",
+	"/api/agents",
+	"/api/auth",
+	"/api/mcp",
+	"/.well-known",
+];
 const PUBLIC_PATH_EXACT = new Set(["/health"]);
 
 function isPublicPath(rawUrl: string | undefined): boolean {
@@ -150,7 +158,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
 		return payload;
 	});
 
-await app.register(noemaRoutes);
+	await app.register(noemaRoutes);
 	await app.register(semanticRoutes);
 	await app.register(hivebearRoutes);
 	await app.register(knowledgeRoutes);
@@ -165,6 +173,7 @@ await app.register(noemaRoutes);
 	await app.register(feedRoutes);
 	await app.register(authRoutes);
 	await app.register(pulseRoutes);
+	await app.register(mcpRoutes);
 
 	// Wire the libp2p transport into the bridge. Best-effort: any failure here
 	// (mDNS unavailable on Docker bridge, identity write denied, etc.) keeps
