@@ -41,6 +41,20 @@ export interface E2bSandboxLike {
 	close?(): Promise<unknown>;
 }
 
+/**
+ * Vision provider for selector-based browser_click and browser_snapshot.
+ * The e2b Desktop sandbox has no accessibility tree or DOM, so we ask a
+ * vision model to find elements on a screenshot. Mirrors the role
+ * `open-computer-use` plays for e2b: vision-grounded UI control.
+ */
+export interface VisionClient {
+	/** Return JSON text from a vision model given base64 PNG + prompt. */
+	locate(opts: {
+		imageBase64: string;
+		prompt: string;
+	}): Promise<{ x: number; y: number } | null>;
+}
+
 export interface E2bBrowserAdapterOptions {
 	/** E2B API key. Falls back to E2B_API_KEY env var. Required unless sandbox is provided. */
 	apiKey?: string;
@@ -50,6 +64,18 @@ export interface E2bBrowserAdapterOptions {
 	sandboxId?: string;
 	/** Inject a preloaded sandbox. Skips dynamic e2b import entirely — used by tests. */
 	sandbox?: E2bSandboxLike;
+	/**
+	 * Vision provider used for selector→coordinate mapping (browser_click)
+	 * and element enumeration (browser_snapshot). If omitted, those tools
+	 * throw a clear "vision required" error.
+	 */
+	vision?: VisionClient;
+	/**
+	 * Default viewport size used when computing screenshot-relative click
+	 * coordinates from the vision model. The e2b Desktop sandbox
+	 * streams at 1280x720 by default.
+	 */
+	viewport?: { width: number; height: number };
 }
 
 export class E2bBrowserAdapter implements BrowserAdapter {
@@ -57,6 +83,8 @@ export class E2bBrowserAdapter implements BrowserAdapter {
 	private readonly template: string;
 	private readonly sandboxId: string | undefined;
 	private readonly injectedSandbox: E2bSandboxLike | undefined;
+	private readonly vision: VisionClient | undefined;
+	private readonly viewport: { width: number; height: number };
 	private resolvedSandbox: E2bSandboxLike | undefined;
 
 	constructor(options: E2bBrowserAdapterOptions = {}) {
@@ -66,6 +94,8 @@ export class E2bBrowserAdapter implements BrowserAdapter {
 		this.template = options.template ?? envTemplate ?? "desktop";
 		this.sandboxId = options.sandboxId;
 		this.injectedSandbox = options.sandbox;
+		this.vision = options.vision;
+		this.viewport = options.viewport ?? { width: 1280, height: 720 };
 	}
 
 	async callBrowserTool(toolName: string, args: Record<string, unknown>): Promise<unknown> {
@@ -74,7 +104,7 @@ export class E2bBrowserAdapter implements BrowserAdapter {
 		}
 		const sandbox = await this.resolveSandbox();
 		try {
-			return await dispatch(sandbox, toolName, args);
+			return await dispatch(this, sandbox, toolName, args);
 		} catch (err) {
 			const reason = err instanceof Error ? err.message : String(err);
 			throw new Error(`E2bBrowserAdapter: ${toolName} failed: ${reason}`);
@@ -104,6 +134,25 @@ export class E2bBrowserAdapter implements BrowserAdapter {
 		this.resolvedSandbox = sandbox;
 		return sandbox;
 	}
+
+	/** Internal accessor for vision-grounded tools. Exported via instance only. */
+	getVision(): VisionClient | undefined {
+		return this.vision;
+	}
+
+	getViewport(): { width: number; height: number } {
+		return this.viewport;
+	}
+
+	/**
+	 * Resolve and return the underlying sandbox. Public so the
+	 * computer-use router can hand it to `runComputerUseLoop` directly
+	 * (the loop calls screenshot/click/press without going through
+	 * the dispatch switch). Lazy-initialized on first call.
+	 */
+	async getSandbox(): Promise<E2bSandboxLike> {
+		return this.resolveSandbox();
+	}
 }
 
 function isSupportedTool(toolName: string): boolean {
@@ -112,6 +161,7 @@ function isSupportedTool(toolName: string): boolean {
 }
 
 function dispatch(
+	adapter: E2bBrowserAdapter,
 	sandbox: E2bSandboxLike,
 	toolName: string,
 	args: Record<string, unknown>,
@@ -138,22 +188,93 @@ function dispatch(
 			return sandbox.screenshot();
 		}
 		case "browser_click":
-			throw new Error(
-				"E2bBrowserAdapter: browser_click requires selector→coordinate mapping; Phase 2 (vision grounding).",
-			);
+			return runSelectorClick(adapter, sandbox, args);
 		case "browser_select_option":
 			throw new Error("E2bBrowserAdapter: browser_select_option has no e2b Desktop equivalent.");
 		case "browser_snapshot":
-			throw new Error(
-				"E2bBrowserAdapter: browser_snapshot requires accessibility-tree extraction; Phase 2.",
-			);
+			return runSnapshot(adapter, sandbox);
 		case "browser_evaluate":
 			throw new Error(
-				"E2bBrowserAdapter: browser_evaluate requires an embedded JS runtime; Phase 2.",
+				"E2bBrowserAdapter: browser_evaluate has no equivalent in e2b Desktop (no embedded JS runtime). Use browser_type + browser_press_key for synthetic input.",
 			);
 		default:
 			throw new Error(`E2bBrowserAdapter: tool "${toolName}" reached default branch`);
 	}
+}
+
+/**
+ * Vision-grounded selector click. Take a screenshot, ask the vision
+ * model to locate the element matching `selector`, click at the
+ * returned coordinates. Mirrors the role `open-computer-use` plays
+ * for e2b: the AI looks at the screen and grounds a UI description
+ * in pixel coordinates.
+ */
+async function runSelectorClick(
+	adapter: E2bBrowserAdapter,
+	sandbox: E2bSandboxLike,
+	args: Record<string, unknown>,
+): Promise<{ x: number; y: number; fromVision: boolean }> {
+	const selector = stringArg(args, "selector");
+	const vision = adapter.getVision();
+	if (!vision) {
+		throw new Error(
+			"E2bBrowserAdapter: browser_click requires a VisionClient (selector→coordinate grounding). " +
+				"Provide one via `vision` option, or use browser_click_at with explicit coordinates.",
+		);
+	}
+	const shot = await sandbox.screenshot();
+	const imageBase64 = toBase64String(shot);
+	const prompt =
+		`Look at this screenshot (${adapter.getViewport().width}x${adapter.getViewport().height}). ` +
+		`Find the UI element matching this description: "${selector}". ` +
+		`Reply with JSON only: {"x": <int>, "y": <int>} where (x, y) is the center of that element in pixel coordinates. ` +
+		`If the element is not visible, reply with {"x": -1, "y": -1}.`;
+	const located = await vision.locate({ imageBase64, prompt });
+	if (!located || located.x < 0 || located.y < 0) {
+		throw new Error(`E2bBrowserAdapter: vision could not locate "${selector}"`);
+	}
+	await sandbox.click(located.x, located.y);
+	return { x: located.x, y: located.y, fromVision: true };
+}
+
+/**
+ * Snapshot returns the current screenshot plus the viewport size so
+ * callers (and downstream vision models) can reason about layout. The
+ * e2b Desktop sandbox has no accessibility tree, so we cannot produce
+ * a structured element list without paying for another vision call —
+ * that's exposed as `browser_snapshot_with_elements` when the caller
+ * needs it.
+ */
+async function runSnapshot(
+	adapter: E2bBrowserAdapter,
+	sandbox: E2bSandboxLike,
+): Promise<{ screenshot: unknown; viewport: { width: number; height: number }; format: "png" }> {
+	const shot = await sandbox.screenshot();
+	return {
+		screenshot: shot,
+		viewport: adapter.getViewport(),
+		format: "png",
+	};
+}
+
+function toBase64String(shot: unknown): string {
+	if (typeof shot === "string") return shot;
+	if (shot instanceof Uint8Array) {
+		let bin = "";
+		for (let i = 0; i < shot.byteLength; i += 1) {
+			bin += String.fromCharCode(shot[i] ?? 0);
+		}
+		// btoa exists in Node 18+ and modern browsers
+		if (typeof btoa === "function") return btoa(bin);
+		return Buffer.from(shot).toString("base64");
+	}
+	if (shot && typeof shot === "object" && "base64" in (shot as Record<string, unknown>)) {
+		const b64 = (shot as { base64: unknown }).base64;
+		if (typeof b64 === "string") return b64;
+	}
+	throw new Error(
+		"E2bBrowserAdapter: sandbox.screenshot() returned unrecognized shape; cannot encode for vision model.",
+	);
 }
 
 function stringArg(args: Record<string, unknown>, key: string): string {

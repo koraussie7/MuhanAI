@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { E2bBrowserAdapter, type E2bSandboxLike } from "../e2b-adapter.js";
+import { E2bBrowserAdapter, type E2bSandboxLike, type VisionClient } from "../e2b-adapter.js";
 import { browserCapabilityMap } from "../mcp-router.js";
 
 function makeSandbox(): E2bSandboxLike & { [key: string]: ReturnType<typeof vi.fn> } {
@@ -10,6 +10,12 @@ function makeSandbox(): E2bSandboxLike & { [key: string]: ReturnType<typeof vi.f
 		write: vi.fn(async () => ({ ok: true })),
 		open: vi.fn(async () => ({ ok: true })),
 		close: vi.fn(async () => undefined),
+	};
+}
+
+function makeVision(): VisionClient & { locate: ReturnType<typeof vi.fn> } {
+	return {
+		locate: vi.fn(async () => ({ x: 100, y: 200 })),
 	};
 }
 
@@ -60,13 +66,56 @@ describe("E2bBrowserAdapter — Phase 1 shape", () => {
 		expect(sandbox.open).not.toHaveBeenCalled();
 	});
 
-	it("throws Phase-2-marker for capabilities lacking a 1:1 e2b mapping", async () => {
+	it("throws when browser_click is called without a VisionClient", async () => {
 		const sandbox = makeSandbox();
 		const adapter = new E2bBrowserAdapter({ sandbox });
-		for (const toolName of ["browser_click", "browser_snapshot", "browser_evaluate"]) {
-			await expect(adapter.callBrowserTool(toolName, {})).rejects.toThrow(/Phase 2/);
-			await expect(adapter.callBrowserTool(toolName, {})).rejects.toThrow(toolName);
-		}
+		await expect(
+			adapter.callBrowserTool("browser_click", { selector: "Submit button" }),
+		).rejects.toThrow(/VisionClient/);
+	});
+
+	it("browser_click uses vision to ground selector in coordinates", async () => {
+		const sandbox = makeSandbox();
+		const vision = makeVision();
+		const adapter = new E2bBrowserAdapter({ sandbox, vision });
+		const result = await adapter.callBrowserTool("browser_click", {
+			selector: "Submit button",
+		});
+		expect(vision.locate).toHaveBeenCalledOnce();
+		expect(sandbox.screenshot).toHaveBeenCalled();
+		expect(sandbox.click).toHaveBeenCalledWith(100, 200);
+		expect(result).toEqual({ x: 100, y: 200, fromVision: true });
+	});
+
+	it("browser_click fails when vision cannot locate the element", async () => {
+		const sandbox = makeSandbox();
+		const vision = makeVision();
+		vision.locate.mockResolvedValueOnce(null);
+		const adapter = new E2bBrowserAdapter({ sandbox, vision });
+		await expect(
+			adapter.callBrowserTool("browser_click", { selector: "Invisible thing" }),
+		).rejects.toThrow(/could not locate/);
+		expect(sandbox.click).not.toHaveBeenCalled();
+	});
+
+	it("browser_snapshot returns screenshot + viewport metadata", async () => {
+		const sandbox = makeSandbox();
+		const adapter = new E2bBrowserAdapter({ sandbox, viewport: { width: 1440, height: 900 } });
+		const result = (await adapter.callBrowserTool("browser_snapshot", {})) as {
+			format: string;
+			viewport: { width: number; height: number };
+		};
+		expect(result.format).toBe("png");
+		expect(result.viewport).toEqual({ width: 1440, height: 900 });
+		expect(sandbox.screenshot).toHaveBeenCalled();
+	});
+
+	it("browser_evaluate throws — no JS runtime in e2b Desktop", async () => {
+		const sandbox = makeSandbox();
+		const adapter = new E2bBrowserAdapter({ sandbox });
+		await expect(
+			adapter.callBrowserTool("browser_evaluate", { expression: "1+1" }),
+		).rejects.toThrow(/no embedded JS runtime|browser_type/);
 	});
 
 	it("throws for browser_select_option (no e2b Desktop equivalent)", async () => {
@@ -142,7 +191,8 @@ describe("E2bBrowserAdapter — Phase 1 shape", () => {
 	it("covers every capability declared in browserCapabilityMap", async () => {
 		const map = browserCapabilityMap();
 		const sandbox = makeSandbox();
-		const adapter = new E2bBrowserAdapter({ sandbox });
+		const vision = makeVision();
+		const adapter = new E2bBrowserAdapter({ sandbox, vision });
 		const oneToOne: Array<{ capability: string; args: Record<string, unknown> }> = [
 			{ capability: "browser_navigate", args: { url: "https://x.test" } },
 			{ capability: "browser_click_at", args: { x: 0, y: 0 } },
@@ -154,13 +204,16 @@ describe("E2bBrowserAdapter — Phase 1 shape", () => {
 			expect(map[capability]).toBeDefined();
 			await expect(adapter.callBrowserTool(capability, args)).resolves.toBeDefined();
 		}
-		const phase2Only = [
-			"browser_click",
-			"browser_select_option",
-			"browser_snapshot",
-			"browser_evaluate",
-		];
-		for (const capability of phase2Only) {
+		const visionRequired = ["browser_click"];
+		for (const capability of visionRequired) {
+			expect(map[capability]).toBeDefined();
+			const noVision = new E2bBrowserAdapter({ sandbox });
+			await expect(
+				noVision.callBrowserTool(capability, { selector: "x" }),
+			).rejects.toThrow();
+		}
+		const noMapping = ["browser_select_option", "browser_evaluate"];
+		for (const capability of noMapping) {
 			expect(map[capability]).toBeDefined();
 			await expect(adapter.callBrowserTool(capability, {})).rejects.toThrow();
 		}
