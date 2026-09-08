@@ -21,6 +21,32 @@ export type {
 	MessageTransport,
 } from "./daemon.js";
 export { createDaemon } from "./daemon.js";
+export {
+	E2bBrowserAdapter,
+	type E2bBrowserAdapterOptions,
+	type E2bSandboxLike,
+	type VisionClient,
+} from "./e2b-adapter.js";
+export {
+	type ByokProviderId,
+	type ByokVisionProvider,
+	type CreateByokVisionProviderOptions,
+	createByokVisionProvider,
+	type PlanActionFn,
+} from "./e2b-byok-vision.js";
+export {
+	type ComputerUseAction,
+	type ComputerUseLoopOptions,
+	type ComputerUseLoopResult,
+	type ComputerUseStep,
+	E2bStreamSession,
+	runComputerUseLoop,
+} from "./e2b-computer-use.js";
+export {
+	buildComputerUseRunHandler,
+	type ComputerUseRunArgs,
+	COMPUTER_USE_RUN_CAPABILITY,
+} from "./computer-use-router.js";
 export type { MachineIdentity } from "./machine-identity.js";
 export { loadMachineIdentity } from "./machine-identity.js";
 export {

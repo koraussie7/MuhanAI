@@ -42,8 +42,10 @@ const KEYLESS_PROVIDERS: KeylessProviderConfig[] = [
 		name: "pollinations",
 		endpoint: "https://text.pollinations.ai/prompt/",
 		method: "GET",
+		// GET providers URL-encode the prompt directly into the endpoint;
+		// config.body is intentionally unused here (see callProvider's GET branch).
 		headers: { "Content-Type": "application/json" },
-		body: (req) => ({ prompt: req.prompt, system: req.system }),
+		body: () => ({}),
 		parse: (data) => (typeof data === "string" ? data : JSON.stringify(data)),
 	},
 	{
@@ -102,12 +104,28 @@ const KEYLESS_PROVIDERS: KeylessProviderConfig[] = [
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: (req) => ({
-			inputs: `${req.system ? `${req.system}\n\n` : ""}${req.prompt}`,
+			// Qwen2.5-Instruct requires the chat-template markers; without them the
+			// model treats system + user as one input and ignores the system message.
+			inputs: formatQwenChat(req.system, req.prompt),
 			options: { wait_for_model: true },
 		}),
 		parse: (data) => (Array.isArray(data) ? data[0]?.generated_text : data?.generated_text) ?? "",
 	},
 ];
+
+/**
+ * Format a prompt using the Qwen2.5-Instruct chat template.
+ *
+ * The HF Inference API's `inputs` field is a single string, so chat role markers
+ * must be inlined. Without these markers Qwen ignores system instructions and
+ * treats the whole string as a single user turn.
+ */
+export function formatQwenChat(system: string | undefined, prompt: string): string {
+	const IM = "<|im_start|>";
+	const END = "<|im_end|>";
+	const sysBlock = system ? `${IM}system\n${system}${END}\n` : "";
+	return `${sysBlock}${IM}user\n${prompt}${END}\n${IM}assistant\n`;
+}
 
 /**
  * Call a single keyless provider with a timeout.

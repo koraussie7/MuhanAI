@@ -17,6 +17,7 @@
 		"@google/generative-ai": "^0.21.0"
 	},
 	"devDependencies": {
+		"@types/bun": "^1.2.0",
 		"@types/node": "^22.0.0",
 		"typescript": "^5.7.2",
 		"vitest": "^2.1.8"

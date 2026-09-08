@@ -720,3 +720,425 @@
 	color: #ffffff;
 	box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
 }
+
+/* ---- BYOK (Bring Your Own Key) toggle button in the prompt bar ---- */
+.prompt-byok-toggle {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border-radius: 8px;
+	background: rgba(15, 23, 42, 0.5);
+	border: 1px solid rgba(148, 163, 184, 0.18);
+	color: #cbd5e1;
+	cursor: pointer;
+	transition: all 0.18s ease;
+	margin-right: 6px;
+}
+
+.prompt-byok-toggle:hover {
+	background: rgba(15, 23, 42, 0.85);
+	border-color: rgba(251, 191, 36, 0.45);
+	color: #fbbf24;
+}
+
+.prompt-byok-toggle.active {
+	background: rgba(251, 191, 36, 0.12);
+	border-color: rgba(251, 191, 36, 0.55);
+}
+
+.prompt-byok-toggle.open {
+	background: rgba(251, 191, 36, 0.2);
+	border-color: rgba(251, 191, 36, 0.7);
+}
+
+.prompt-byok-dot {
+	position: absolute;
+	top: 4px;
+	right: 4px;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: #fbbf24;
+	box-shadow: 0 0 6px rgba(251, 191, 36, 0.8);
+}
+
+/* ---- BYOK Settings Panel (slide-down below the prompt bar) ---- */
+.cosmic-byok-panel {
+	margin-top: 6px;
+	border-radius: 12px;
+	background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 0.92));
+	border: 1px solid rgba(251, 191, 36, 0.25);
+	box-shadow:
+		0 12px 32px -8px rgba(0, 0, 0, 0.6),
+		0 0 0 1px rgba(251, 191, 36, 0.08) inset,
+		0 0 24px -8px rgba(251, 191, 36, 0.18);
+	backdrop-filter: blur(14px);
+	-webkit-backdrop-filter: blur(14px);
+	overflow: hidden;
+	animation: cosmic-byok-slide-in 0.22s ease-out;
+}
+
+@keyframes cosmic-byok-slide-in {
+	from {
+		opacity: 0;
+		transform: translateY(-6px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.cosmic-byok-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 10px 14px;
+	border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+	background: rgba(251, 191, 36, 0.04);
+}
+
+.cosmic-byok-title {
+	font-size: 12px;
+	font-weight: 600;
+	color: #fbbf24;
+	letter-spacing: 0.02em;
+}
+
+.cosmic-byok-status-pill {
+	font-size: 9px;
+	font-weight: 600;
+	padding: 2px 7px;
+	border-radius: 999px;
+	background: rgba(34, 197, 94, 0.18);
+	border: 1px solid rgba(34, 197, 94, 0.4);
+	color: #4ade80;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.cosmic-byok-body {
+	padding: 12px 14px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.cosmic-byok-warning {
+	display: flex;
+	gap: 8px;
+	padding: 8px 10px;
+	border-radius: 8px;
+	background: rgba(251, 191, 36, 0.06);
+	border: 1px solid rgba(251, 191, 36, 0.2);
+	font-size: 11px;
+	line-height: 1.45;
+	color: #fcd34d;
+}
+
+.cosmic-byok-warning code {
+	font-size: 10px;
+	padding: 1px 5px;
+	border-radius: 4px;
+	background: rgba(15, 23, 42, 0.7);
+	color: #fde68a;
+	font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+.cosmic-byok-row {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.cosmic-byok-label {
+	font-size: 10px;
+	font-weight: 600;
+	color: #94a3b8;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+}
+
+.cosmic-byok-select,
+.cosmic-byok-input {
+	width: 100%;
+	padding: 7px 10px;
+	border-radius: 7px;
+	background: rgba(15, 23, 42, 0.7);
+	border: 1px solid rgba(148, 163, 184, 0.2);
+	color: #e2e8f0;
+	font-size: 12px;
+	font-family: ui-monospace, SFMono-Regular, monospace;
+	transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cosmic-byok-select:focus,
+.cosmic-byok-input:focus {
+	outline: none;
+	border-color: rgba(251, 191, 36, 0.55);
+	box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.15);
+}
+
+.cosmic-byok-select option {
+	background: #0f172a;
+	color: #e2e8f0;
+}
+
+.cosmic-byok-key-row {
+	display: flex;
+	gap: 6px;
+	align-items: stretch;
+}
+
+.cosmic-byok-key-row .cosmic-byok-input {
+	flex: 1;
+}
+
+.cosmic-byok-icon-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	border-radius: 7px;
+	background: rgba(15, 23, 42, 0.7);
+	border: 1px solid rgba(148, 163, 184, 0.2);
+	color: #94a3b8;
+	cursor: pointer;
+	transition: all 0.18s ease;
+}
+
+.cosmic-byok-icon-btn:hover {
+	background: rgba(15, 23, 42, 0.95);
+	border-color: rgba(251, 191, 36, 0.4);
+	color: #fbbf24;
+}
+
+.cosmic-byok-error {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 10px;
+	border-radius: 6px;
+	background: rgba(239, 68, 68, 0.1);
+	border: 1px solid rgba(239, 68, 68, 0.3);
+	font-size: 11px;
+	color: #fca5a5;
+}
+
+.cosmic-byok-actions {
+	display: flex;
+	gap: 8px;
+	margin-top: 4px;
+}
+
+.cosmic-byok-save-btn,
+.cosmic-byok-forget-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 7px 12px;
+	border-radius: 7px;
+	font-size: 11px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.18s ease;
+	border: 1px solid;
+}
+
+.cosmic-byok-save-btn {
+	background: linear-gradient(135deg, rgba(251, 191, 36, 0.22), rgba(245, 158, 11, 0.22));
+	border-color: rgba(251, 191, 36, 0.5);
+	color: #fbbf24;
+}
+
+.cosmic-byok-save-btn:hover:not(:disabled) {
+	background: linear-gradient(135deg, rgba(251, 191, 36, 0.35), rgba(245, 158, 11, 0.35));
+	border-color: #fbbf24;
+	color: #fef3c7;
+	box-shadow: 0 0 12px rgba(251, 191, 36, 0.3);
+}
+
+.cosmic-byok-save-btn:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+.cosmic-byok-forget-btn {
+	background: rgba(15, 23, 42, 0.7);
+	border-color: rgba(239, 68, 68, 0.4);
+	color: #f87171;
+}
+
+.cosmic-byok-forget-btn:hover {
+	background: rgba(239, 68, 68, 0.15);
+	border-color: rgba(239, 68, 68, 0.7);
+	color: #fecaca;
+}
+
+.cosmic-byok-current {
+	font-size: 10.5px;
+	padding-top: 6px;
+	border-top: 1px dashed rgba(148, 163, 184, 0.15);
+}
+
+/* BYOK tier pill in the AI response header */
+.cosmic-byok-tier-pill {
+	background: rgba(251, 191, 36, 0.18) !important;
+	border-color: rgba(251, 191, 36, 0.5) !important;
+	color: #fbbf24 !important;
+}
+
+/* "No LLM Available" tier pill — amber/red to communicate urgency */
+.cosmic-offline-tier-pill {
+	background: rgba(245, 158, 11, 0.16);
+	border-color: rgba(245, 158, 11, 0.55);
+	color: #fbbf24 !important;
+	animation: cosmic-offline-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes cosmic-offline-pulse {
+	0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.0); }
+	50%      { box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.18); }
+}
+
+/* ---- Computer Use Panel ---- */
+.cosmic-byok-close {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: transparent;
+	border: none;
+	color: #94a3b8;
+	cursor: pointer;
+	padding: 2px;
+	border-radius: 4px;
+	transition: all 0.15s ease;
+}
+
+.cosmic-byok-close:hover {
+	background: rgba(248, 113, 113, 0.12);
+	color: #fca5a5;
+}
+
+.cosmic-byok-primary,
+.cosmic-byok-secondary {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 7px 12px;
+	border-radius: 7px;
+	font-size: 11px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.18s ease;
+	border: 1px solid;
+}
+
+.cosmic-byok-primary {
+	background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(14, 165, 233, 0.22));
+	border-color: rgba(56, 189, 248, 0.5);
+	color: #7dd3fc;
+}
+
+.cosmic-byok-primary:hover:not(:disabled) {
+	background: linear-gradient(135deg, rgba(56, 189, 248, 0.35), rgba(14, 165, 233, 0.35));
+	border-color: #38bdf8;
+	color: #e0f2fe;
+	box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+}
+
+.cosmic-byok-primary:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+.cosmic-byok-secondary {
+	background: rgba(15, 23, 42, 0.7);
+	border-color: rgba(148, 163, 184, 0.3);
+	color: #cbd5e1;
+}
+
+.cosmic-byok-secondary:hover {
+	background: rgba(15, 23, 42, 0.95);
+	border-color: rgba(148, 163, 184, 0.55);
+	color: #e2e8f0;
+}
+
+.cosmic-byok-result {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 10px;
+	border-radius: 8px;
+	background: rgba(15, 23, 42, 0.55);
+	border: 1px solid rgba(56, 189, 248, 0.22);
+}
+
+.cosmic-byok-result-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	font-size: 11px;
+	font-weight: 600;
+	color: #7dd3fc;
+	letter-spacing: 0.02em;
+}
+
+.cosmic-byok-result-count {
+	font-size: 10px;
+	color: #94a3b8;
+	font-weight: 500;
+}
+
+.cosmic-cu-screenshot {
+	max-height: 240px;
+	overflow: hidden;
+	border-radius: 6px;
+	border: 1px solid rgba(56, 189, 248, 0.18);
+	background: #000;
+}
+
+.cosmic-cu-screenshot img {
+	display: block;
+	width: 100%;
+	height: auto;
+	image-rendering: pixelated;
+}
+
+.cosmic-cu-step-log {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	max-height: 180px;
+	overflow-y: auto;
+	font-size: 10.5px;
+	font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+.cosmic-cu-step-log li {
+	display: flex;
+	justify-content: space-between;
+	gap: 8px;
+	padding: 4px 8px;
+	border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+	color: #cbd5e1;
+}
+
+.cosmic-cu-step-log li:last-child {
+	border-bottom: none;
+}
+
+.cosmic-cu-step-log code {
+	font-size: 10px;
+	color: #e2e8f0;
+	word-break: break-all;
+}
+
+.cosmic-cu-step-duration {
+	color: #64748b;
+	font-size: 10px;
+	flex-shrink: 0;
+}

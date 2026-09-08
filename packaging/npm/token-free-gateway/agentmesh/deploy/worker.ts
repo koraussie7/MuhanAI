@@ -26,7 +26,7 @@ export default {
 		if (fediverseResponse) return fediverseResponse;
 
 		// Model Context Protocol (MCP) server endpoints (/api/mcp/*, /.well-known/mcp.json)
-		const mcpResponse = await handleMcpRequest(request, url);
+		const mcpResponse = await handleMcpRequest(request, url, env);
 		if (mcpResponse) return mcpResponse;
 
 		if (url.pathname === "/test-worker") {

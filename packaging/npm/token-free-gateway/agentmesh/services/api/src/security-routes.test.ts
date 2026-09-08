@@ -26,8 +26,8 @@ describe("/api/security routes", () => {
 
 	it("GET /api/security returns the full snapshot", async () => {
 		const res = await app?.inject({ method: "GET", url: "/api/security" });
-		expect(res.statusCode).toBe(200);
-		const body = res.json() as {
+		expect(res?.statusCode).toBe(200);
+		const body = res?.json() as {
 			toggles: Record<string, boolean>;
 			dailyLimitCredits: number;
 			dailyUsedCredits: number;
@@ -54,14 +54,14 @@ describe("/api/security routes", () => {
 				apiVaultEnabled: true,
 			},
 		});
-		expect(res.statusCode).toBe(200);
-		const body = res.json() as { toggles: Record<string, boolean> };
+		expect(res?.statusCode).toBe(200);
+		const body = res?.json() as { toggles: Record<string, boolean> };
 		expect(body.toggles.zeroTrustEnabled).toBe(false);
 		expect(body.toggles.apiVaultEnabled).toBe(true);
 
 		// Re-fetch — toggles persisted.
 		const after = await app?.inject({ method: "GET", url: "/api/security" });
-		const snap = after.json() as { toggles: Record<string, boolean>; audit: unknown[] };
+		const snap = after?.json() as { toggles: Record<string, boolean>; audit: unknown[] };
 		expect(snap.toggles.zeroTrustEnabled).toBe(false);
 		// audit list grew (at least one new entry).
 		expect(snap.audit.length).toBeGreaterThan(3);
@@ -73,7 +73,7 @@ describe("/api/security routes", () => {
 			url: "/api/security/toggles",
 			payload: { zeroTrustEnabled: "yes" }, // wrong type
 		});
-		expect(res.statusCode).toBe(400);
+		expect(res?.statusCode).toBe(400);
 	});
 
 	it("POST /api/security/daily-limit enforces positive integer", async () => {
@@ -82,14 +82,14 @@ describe("/api/security routes", () => {
 			url: "/api/security/daily-limit",
 			payload: { limit: 8000 },
 		});
-		expect(ok.statusCode).toBe(200);
+		expect(ok?.statusCode).toBe(200);
 
 		const bad = await app?.inject({
 			method: "POST",
 			url: "/api/security/daily-limit",
 			payload: { limit: -5 },
 		});
-		expect(bad.statusCode).toBe(400);
+		expect(bad?.statusCode).toBe(400);
 	});
 
 	it("POST /api/security/keys/:service/revoke removes the key", async () => {
@@ -97,14 +97,14 @@ describe("/api/security routes", () => {
 			method: "POST",
 			url: "/api/security/keys/groq/revoke",
 		});
-		expect(ok.statusCode).toBe(200);
-		const body = ok.json() as { revoked: string };
+		expect(ok?.statusCode).toBe(200);
+		const body = ok?.json() as { revoked: string };
 		expect(body.revoked).toBe("groq");
 
 		const notFound = await app?.inject({
 			method: "POST",
 			url: "/api/security/keys/unknown-svc/revoke",
 		});
-		expect(notFound.statusCode).toBe(404);
+		expect(notFound?.statusCode).toBe(404);
 	});
 });
