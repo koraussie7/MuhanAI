@@ -1,0 +1,48 @@
+#!/usr/bin/env sh
+# Husky pre-commit hook for MuhanAI agents
+# Runs biome --write on staged files matching TypeScript / JavaScript / CSS.
+# If biome reports a remaining error, the commit is blocked.
+
+set -e
+
+# 1. Print banner so devs see this ran.
+echo "═══════════════════════════════════════════════"
+echo "  MuhanAI pre-commit (husky)"
+echo "═══════════════════════════════════════════════"
+
+# 2. Resolve staged file list (extension filter)
+STAGED=$(git diff --cached --name-only --diff-filter=ACMR \
+  | grep -E '\.(ts|tsx|js|mjs|cjs|json|css)$' || true)
+
+if [[ -z "$STAGED" ]]; then
+    echo "  no staged code files; skipping biome"
+    exit 0
+fi
+
+echo "  biome targets:"
+echo "$STAGED" | sed 's/^/    - /'
+
+# 3. Run biome --write on staged files only.
+#    --no-errors-on-unmatched so files ignored by biome.json don't block us.
+if command -v pnpm >/dev/null 2>&1; then
+    pnpm biome check --write --no-errors-on-unmatched $STAGED
+else
+    echo "  ⚠ pnpm not on PATH; skipping biome"
+    exit 0
+fi
+
+# 4. Re-stage anything biome rewrote.
+git add -u
+
+# 5. Validate nothing remains broken.
+if ! pnpm biome check --no-errors-on-unmatched $STAGED >/dev/null 2>&1; then
+    echo "═══════════════════════════════════════════════"
+    echo "  ✗ biome reports residual errors. Run:"
+    echo "    pnpm biome check --write $STAGED"
+    echo "  and amend the commit."
+    echo "═══════════════════════════════════════════════"
+    exit 1
+fi
+
+echo "  ✓ biome pass"
+exit 0
