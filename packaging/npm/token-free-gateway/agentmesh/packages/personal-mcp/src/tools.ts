@@ -2,6 +2,7 @@ import type { Tool } from "../../shared/types";
 import { getHoundMcpClient, HoundUnavailableError } from "./hound-mcp-client";
 import { personalKnowledgeService } from "./knowledge";
 import { personalMemoryService } from "./memory";
+import { getOmniRouteMcpClient, OmniRouteUnavailableError } from "./omniroute-mcp-client";
 import {
 	type AnswerWithCitations,
 	type KnowledgeBase,
@@ -160,6 +161,109 @@ export const PERSONAL_MCP_TOOLS: Tool[] = [
 			required: ["url"],
 		},
 	},
+	{
+		id: "omniroute_completion",
+		name: "omnirouteCompletion",
+		description:
+			"Chat completion routed through OmniRoute's intelligent provider mesh (356 providers, 1,312+ models). Use model=`auto` for combo-driven routing, or pass a specific model id.",
+		inputSchema: {
+			type: "object",
+			properties: {
+				model: { type: "string", description: "Model id (e.g. `claude-opus-4`) or `auto`" },
+				messages: {
+					type: "array",
+					items: {
+						type: "object",
+						properties: {
+							role: { type: "string", enum: ["system", "user", "assistant", "tool"] },
+							content: { type: "string" },
+						},
+						required: ["role", "content"],
+					},
+				},
+				combo: { type: "string", description: "Optional combo id from omnirouteListCombos" },
+				budget: { type: "number", description: "Optional max dollar budget for this request" },
+				role: {
+					type: "string",
+					description: "Optional routing role hint (e.g. `coding`, `summarize`)",
+				},
+			},
+			required: ["model", "messages"],
+		},
+	},
+	{
+		id: "omniroute_list_models",
+		name: "omnirouteListModels",
+		description:
+			"List available AI models across all 356 OmniRoute providers with capabilities and pricing. Filter by provider or capability (e.g. `vision`, `tools`, `json`).",
+		inputSchema: {
+			type: "object",
+			properties: {
+				provider: { type: "string" },
+				capability: { type: "string" },
+			},
+			required: [],
+		},
+	},
+	{
+		id: "omniroute_check_quota",
+		name: "omnirouteCheckQuota",
+		description:
+			"Check remaining free-tier quota for a specific provider (or all providers when omitted). Returns used / limit / remaining / resetAt.",
+		inputSchema: {
+			type: "object",
+			properties: {
+				provider: { type: "string" },
+				connectionId: { type: "string" },
+			},
+			required: [],
+		},
+	},
+	{
+		id: "omniroute_web_search",
+		name: "omnirouteWebSearch",
+		description:
+			"Web search via OmniRoute's multi-provider gateway (Serper, Brave, Perplexity, Exa, Tavily) with automatic failover. Returns titles, URLs, snippets, and provider used.",
+		inputSchema: {
+			type: "object",
+			properties: {
+				query: { type: "string" },
+				maxResults: { type: "number" },
+				provider: { type: "string" },
+				searchType: { type: "string", enum: ["web", "news"] },
+			},
+			required: ["query"],
+		},
+	},
+	{
+		id: "omniroute_web_fetch",
+		name: "omnirouteWebFetch",
+		description:
+			"Fetch and extract content from a URL via OmniRoute's web fetch gateway (Firecrawl, Jina Reader, Tavily, Tinyfish, Context7, Nimble, AnySearch). Returns markdown/html/links/screenshot with metadata.",
+		inputSchema: {
+			type: "object",
+			properties: {
+				url: { type: "string" },
+				provider: { type: "string" },
+				format: { type: "string", enum: ["markdown", "html", "links", "screenshot"] },
+				includeMetadata: { type: "boolean" },
+				depth: { type: "number" },
+				waitForSelector: { type: "string" },
+			},
+			required: ["url"],
+		},
+	},
+	{
+		id: "omniroute_get_health",
+		name: "omnirouteGetHealth",
+		description:
+			"OmniRoute server health: uptime, version, memory usage, circuit breakers, rate limits, cache hit rate, and any degraded upstream sources.",
+		inputSchema: {
+			type: "object",
+			properties: {},
+			required: [],
+		},
+	},
 ];
 
 export async function executePersonalTool(
@@ -220,10 +324,7 @@ export async function executePersonalTool(
 		case "weknora_read_document": {
 			const client = getWeKnoraClient();
 			if (!client) return { error: "weknora_unconfigured" };
-			return client.readDocument(
-				String(args.kbId ?? ""),
-				String(args.docId ?? ""),
-			);
+			return client.readDocument(String(args.kbId ?? ""), String(args.docId ?? ""));
 		}
 
 		case "weknora_list_knowledge_bases": {
@@ -272,6 +373,95 @@ export async function executePersonalTool(
 			});
 		}
 
+		case "omnirouteCompletion": {
+			const client = getOmniRouteClient();
+			if (!client) {
+				return {
+					content: "",
+					model: String(args.model ?? ""),
+					tokens: { prompt: 0, completion: 0 },
+					routing: {
+						provider: "omniroute_unavailable",
+						combo: null,
+						fallbacksTriggered: 0,
+						cost: 0,
+						latencyMs: 0,
+						routingExplanation: "OmniRoute MCP server not configured or binary missing",
+					},
+					fallback: "omniroute_unavailable",
+				};
+			}
+			const messages = Array.isArray(args.messages)
+				? (args.messages as Array<Record<string, unknown>>).map((m) => ({
+						role: String(m.role ?? "user") as "system" | "user" | "assistant" | "tool",
+						content: String(m.content ?? ""),
+					}))
+				: [{ role: "user" as const, content: "" }];
+			return client.completion({
+				model: String(args.model ?? "auto"),
+				messages,
+				combo: typeof args.combo === "string" ? args.combo : undefined,
+				budget: typeof args.budget === "number" ? args.budget : undefined,
+				role: typeof args.role === "string" ? args.role : undefined,
+			});
+		}
+
+		case "omnirouteListModels": {
+			const client = getOmniRouteClient();
+			if (!client) return { models: [], providers: [], fallback: "omniroute_unavailable" };
+			return client.listModels({
+				provider: typeof args.provider === "string" ? args.provider : undefined,
+				capability: typeof args.capability === "string" ? args.capability : undefined,
+			});
+		}
+
+		case "omnirouteCheckQuota": {
+			const client = getOmniRouteClient();
+			if (!client) return { quotas: [], fallback: "omniroute_unavailable" };
+			return client.checkQuota({
+				provider: typeof args.provider === "string" ? args.provider : undefined,
+				connectionId: typeof args.connectionId === "string" ? args.connectionId : undefined,
+			});
+		}
+
+		case "omnirouteWebSearch": {
+			const client = getOmniRouteClient();
+			if (!client)
+				return { results: [], query: String(args.query ?? ""), fallback: "omniroute_unavailable" };
+			return client.webSearch(String(args.query ?? ""), {
+				maxResults: typeof args.maxResults === "number" ? args.maxResults : undefined,
+				provider: typeof args.provider === "string" ? args.provider : undefined,
+				searchType:
+					args.searchType === "web" || args.searchType === "news" ? args.searchType : undefined,
+			});
+		}
+
+		case "omnirouteWebFetch": {
+			const client = getOmniRouteClient();
+			if (!client) return { url: String(args.url ?? ""), fallback: "omniroute_unavailable" };
+			return client.webFetch(String(args.url ?? ""), {
+				provider: typeof args.provider === "string" ? args.provider : undefined,
+				format:
+					args.format === "markdown" ||
+					args.format === "html" ||
+					args.format === "links" ||
+					args.format === "screenshot"
+						? args.format
+						: undefined,
+				includeMetadata:
+					typeof args.includeMetadata === "boolean" ? args.includeMetadata : undefined,
+				depth: typeof args.depth === "number" ? args.depth : undefined,
+				waitForSelector:
+					typeof args.waitForSelector === "string" ? args.waitForSelector : undefined,
+			});
+		}
+
+		case "omnirouteGetHealth": {
+			const client = getOmniRouteClient();
+			if (!client) return { fallback: "omniroute_unavailable" };
+			return client.getHealth();
+		}
+
 		default:
 			throw new Error(`Unknown personal tool: ${toolName}`);
 	}
@@ -303,5 +493,20 @@ function getHoundClient(): ReturnType<typeof getHoundMcpClient> | null {
 
 function isHoundDisabled(): boolean {
 	const flag = globalThis.process?.env?.HOUND_DISABLED;
+	return typeof flag === "string" && flag !== "" && flag !== "0" && flag !== "false";
+}
+
+function getOmniRouteClient(): ReturnType<typeof getOmniRouteMcpClient> | null {
+	if (isOmniRouteDisabled()) return null;
+	try {
+		return getOmniRouteMcpClient();
+	} catch (err) {
+		if (err instanceof OmniRouteUnavailableError) return null;
+		throw err;
+	}
+}
+
+function isOmniRouteDisabled(): boolean {
+	const flag = globalThis.process?.env?.OMNIROUTE_DISABLED;
 	return typeof flag === "string" && flag !== "" && flag !== "0" && flag !== "false";
 }
