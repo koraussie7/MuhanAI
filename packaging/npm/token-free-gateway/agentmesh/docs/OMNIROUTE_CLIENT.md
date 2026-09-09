@@ -157,6 +157,32 @@ pnpm test -- omniroute-mcp-client      # OmniRoute-only
 The test suite uses an in-process `FakeSpawn` (EventEmitter-backed) to simulate the
 OmniRoute subprocess without actually spawning it — every test runs in <50 ms.
 
+## Free-Tier Mesh widget (Dashboard)
+
+`apps/web/src/components/FreeTierQuota.tsx` — bundled with the OmniRoute client —
+exposes the per-provider free-tier quota that powers MuhanAI's token-free routing.
+The widget polls `GET /api/omniroute/free-tiers` (served by `services/api`) every 60 s
+and renders the 8 most-exhausted providers as a progress bar list.
+
+![Free-tier widget layout](https://placeholder.invalid/freetier-widget.png)
+
+```
+┌───────────────────────────────────────────────────────────────┐
+│ 💰 FREE-TIER MESH    ~1.47B tokens / mo     [LIVE] [CACHED]   │
+├───────────────────────────────────────────────────────────────┤
+│ groq            ██████░░░░░░░░░░░░ 32% remaining   reset 18:00│
+│ gemini          ███████░░░░░░░░░░ 41% remaining   reset 18:00│
+│ openrouter:free ██████████░░░░░░░ 55% remaining   reset 18:00│
+│ …                                                              │
+└───────────────────────────────────────────────────────────────┘
+```
+
+When the OmniRoute MCP is unreachable the widget falls back to the deterministic
+stub from `services/api/src/omniroute-routes.ts` and shows the **CACHED** badge.
+The API also exposes `/api/omniroute/health` for upstream reachability checks.
+
+## Related
+
 ## Risks & mitigations
 
 - **Large dependency surface** — next 16, react 19, ~80 deps. **Mitigation**: we embed

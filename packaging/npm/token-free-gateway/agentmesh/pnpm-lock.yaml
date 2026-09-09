@@ -408,6 +408,9 @@ importers:
       '@agentmesh/p2p':
         specifier: workspace:*
         version: link:../../packages/p2p
+      '@agentmesh/personal-mcp':
+        specifier: workspace:*
+        version: link:../../packages/personal-mcp
       '@agentmesh/semantic-vote':
         specifier: workspace:*
         version: link:../../packages/semantic-vote

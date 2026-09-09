@@ -1454,3 +1454,144 @@ footer {
 	font-size: 16px;
 	line-height: 1;
 }
+
+/* ---------------------------------------------------------------------------
+ * Free-Tier Mesh Quota (OmniRoute widget)
+ * ------------------------------------------------------------------------- */
+
+.freetier-quota-card {
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	background: linear-gradient(135deg, rgba(16, 185, 129, 0.06), rgba(14, 165, 233, 0.04));
+	border-radius: 12px;
+	padding: 18px 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.freetier-header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.freetier-title {
+	font-weight: 700;
+	font-size: 12px;
+	letter-spacing: 1px;
+	color: var(--cline-text);
+}
+
+.freetier-subtitle {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 11.5px;
+	color: var(--cline-cyan);
+	font-family: "DM Mono", monospace;
+}
+
+.freetier-source-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	margin-left: auto;
+	padding: 2px 8px;
+	border-radius: 999px;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.8px;
+}
+
+.freetier-desc {
+	font-size: 12.5px;
+	color: var(--cline-text-dim, #94a3b8);
+	line-height: 1.55;
+	margin: 0;
+}
+
+.freetier-rows {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.freetier-row {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 10px 12px;
+	background: rgba(0, 0, 0, 0.25);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+	border-radius: 8px;
+	transition:
+		transform 120ms ease,
+		border-color 120ms ease;
+}
+
+.freetier-row:hover {
+	transform: translateX(2px);
+	border-color: rgba(16, 185, 129, 0.3);
+}
+
+.freetier-row-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 12px;
+}
+
+.freetier-provider {
+	font-family: "DM Mono", monospace;
+	font-weight: 600;
+	color: var(--cline-text);
+}
+
+.freetier-remaining {
+	font-size: 11.5px;
+	font-weight: 700;
+	letter-spacing: 0.4px;
+}
+
+.freetier-bar {
+	height: 6px;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.06);
+	overflow: hidden;
+}
+
+.freetier-bar-fill {
+	height: 100%;
+	border-radius: 999px;
+	transition:
+		width 400ms cubic-bezier(0.22, 1, 0.36, 1),
+		background 200ms ease;
+}
+
+.freetier-row-foot {
+	display: flex;
+	justify-content: space-between;
+	font-size: 10.5px;
+	color: var(--cline-text-dim, #94a3b8);
+	font-family: "DM Mono", monospace;
+}
+
+.freetier-reset {
+	color: var(--cline-text-dim, #6b7280);
+}
+
+.freetier-empty {
+	font-size: 12.5px;
+	color: var(--cline-text-dim, #94a3b8);
+	margin: 4px 0 0 0;
+}
+
+@media (max-width: 768px) {
+	.freetier-quota-card {
+		padding: 14px;
+	}
+	.freetier-row {
+		padding: 8px 10px;
+	}
+}
