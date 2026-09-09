@@ -17,6 +17,7 @@
 	"dependencies": {
 		"@agentmesh/gateway": "workspace:*",
 		"@agentmesh/p2p": "workspace:*",
+		"@agentmesh/llm-router": "workspace:*",
 		"@agentmesh/credits": "workspace:*",
 		"@agentmesh/shared": "workspace:*",
 		"@agentmesh/personal-mcp": "workspace:*"

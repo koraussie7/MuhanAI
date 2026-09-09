@@ -1,4 +1,6 @@
-export type LLMProvider = "openai" | "anthropic" | "google" | "local";
+import { p2pNodeRegistry } from "./p2p-node-registry.js";
+
+export type LLMProvider = "openai" | "anthropic" | "google" | "local" | "p2p";
 
 export interface LLMRequest {
 	system?: string;
@@ -7,6 +9,7 @@ export interface LLMRequest {
 	temperature?: number;
 	maxTokens?: number;
 	provider?: LLMProvider;
+	stream?: boolean;
 }
 
 export interface LLMResponse {
@@ -63,6 +66,7 @@ export class LLMRouter {
 		if (process.env.ANTHROPIC_API_KEY) providers.push("anthropic");
 		if (process.env.GOOGLE_API_KEY) providers.push("google");
 		if (process.env.LLM_LOCAL_ENDPOINT) providers.push("local");
+		if (p2pNodeRegistry.getHealthyNodes().length > 0) providers.push("p2p");
 		return providers.length > 0 ? providers : ["local"];
 	}
 
@@ -93,6 +97,8 @@ export class LLMRouter {
 				return this.generateGoogle(req);
 			case "local":
 				return this.generateLocal(req);
+			case "p2p":
+				return this.generateP2P(req);
 			default:
 				throw new Error(`Unknown provider: ${provider}`);
 		}
@@ -205,6 +211,67 @@ export class LLMRouter {
 		}
 	}
 
+	private async generateP2P(req: LLMRequest): Promise<LLMResponse> {
+		const { p2pLoadBalancer } = await import("./p2p-load-balancer.js");
+		const node = p2pLoadBalancer.selectNode({
+			id: `req_${Date.now()}`,
+			model: req.model ?? "default",
+			messages: [
+				...(req.system ? [{ role: "system" as const, content: req.system }] : []),
+				{ role: "user" as const, content: req.prompt },
+			],
+			temperature: req.temperature,
+			maxTokens: req.maxTokens,
+			stream: req.stream,
+		});
+
+		if (!node) {
+			throw new Error("No healthy P2P nodes available for model: " + req.model);
+		}
+
+		const start = Date.now();
+		try {
+			const res = await fetch(`http://${node.host}:${node.port}/inference`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					model: req.model,
+					messages: [
+						...(req.system ? [{ role: "system", content: req.system }] : []),
+						{ role: "user", content: req.prompt },
+					],
+					temperature: req.temperature ?? 0.3,
+					max_tokens: req.maxTokens ?? 4096,
+					stream: false,
+				}),
+			});
+
+			if (!res.ok) {
+				throw new Error(`P2P node ${node.id} returned ${res.status}`);
+			}
+
+			const data = (await res.json()) as {
+				text?: string;
+				usage?: { prompt_tokens?: number; completion_tokens?: number };
+			};
+
+			return {
+				text: data.text ?? "",
+				provider: "p2p",
+				model: req.model ?? "p2p-model",
+				usage: {
+					inputTokens: data.usage?.prompt_tokens ?? 0,
+					outputTokens: data.usage?.completion_tokens ?? 0,
+				},
+				latencyMs: Date.now() - start,
+			};
+		} catch (err) {
+			const nodeErr = err instanceof Error ? err : new Error(String(err));
+			p2pNodeRegistry.updateNode(node.id, { status: "degraded" });
+			throw nodeErr;
+		}
+	}
+
 	private generateMock(provider: LLMProvider, req: LLMRequest): LLMResponse {
 		const keyVar = `${provider.toUpperCase()}_API_KEY`;
 		const lines = [
@@ -264,3 +331,14 @@ export class LLMRouter {
 }
 
 export const llmRouter = new LLMRouter();
+
+export { p2pNodeRegistry, P2pNodeRegistry, type P2pNodesChangeCallback } from "./p2p-node-registry.js";
+export { p2pLoadBalancer, P2pLoadBalancer } from "./p2p-load-balancer.js";
+export type {
+	DeviceNodeInfo,
+	DeviceCapabilities,
+	DeviceMetrics,
+	ClusterConfig,
+	LoadBalancingStrategy,
+	InferenceResult,
+} from "@agentmesh/p2p";

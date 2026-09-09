@@ -14,3 +14,4 @@ export * from "./peer-reputation.js";
 export * from "./pubsub.js";
 export * from "./transport.js";
 export * from "./trust-verifier.js";
+export * from "./device-capabilities.js";

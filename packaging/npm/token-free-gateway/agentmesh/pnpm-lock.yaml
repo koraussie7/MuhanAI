@@ -191,6 +191,9 @@ importers:
 
   packages/llm-router:
     dependencies:
+      '@agentmesh/p2p':
+        specifier: workspace:*
+        version: link:../p2p
       '@anthropic-ai/sdk':
         specifier: ^0.32.0
         version: 0.32.1
@@ -222,6 +225,9 @@ importers:
       '@agentmesh/gateway':
         specifier: workspace:*
         version: link:../gateway
+      '@agentmesh/llm-router':
+        specifier: workspace:*
+        version: link:../llm-router
       '@agentmesh/p2p':
         specifier: workspace:*
         version: link:../p2p
