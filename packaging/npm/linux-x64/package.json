@@ -1,7 +1,7 @@
 {
 	"name": "@muhanai/token-free-gateway-linux-x64",
 	"version": "0.5.2",
-	"description": "Prebuilt token-free-gateway binary for Linux (x64)",
+	"description": "Stub package: prebuilt token-free-gateway binary for Linux (x64) — binary not yet published",
 	"author": "Brian Y <koraussie@gmail.com>",
 	"license": "MIT",
 	"repository": {
@@ -23,11 +23,7 @@
 	"cpu": [
 		"x64"
 	],
-	"bin": {
-		"token-free-gateway": "bin/token-free-gateway"
-	},
 	"files": [
-		"bin",
 		"README.md"
 	],
 	"publishConfig": {
