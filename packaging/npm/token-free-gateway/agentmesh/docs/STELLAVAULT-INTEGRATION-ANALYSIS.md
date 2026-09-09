@@ -304,7 +304,7 @@ async push(peerId: string, records: SignedRecord[]) {
 | Phase | 내용 | 검증 |
 |---|---|---|
 | **P1** (1일) | `fsrs.ts` → `knowledge-base/src/decay/fsrs.ts` + `engine.ts` port | `computeRetrievability(7, 1)` ≈ 0.984 (= 63/64), `computeRetrievability(7, 30)` ≈ 0.677, `updateStability(7, 5, 0.95)` > 7, 365-day cap 유지 — 31개 단위 테스트 |
-| **P2** (1일) | `rrf.ts` → `search/rrf.ts`, `entity-extractor.ts` → `search/entity.ts` port, `hybrid-search.ts` 결합 | 기존 search 테스트 회귀 없음 + NDCG 샘플 |
+| **P2** (1일) | `rrf.ts` → `search/rrf.ts`, `entity-extractor.ts` → `search/entity.ts` port, `hybrid-search.ts` 결합 (`fuseHybridResults` 추출), `decayEngine.getRetrievabilityScores()` 소비 | `rrfFusionN([kw, vec, entity], 60, limit, {weights, recencyScores, recencyWeight:0.2})` 동작 — 53개 단위 테스트 (RRF 15 + entity 27 + hybrid-search 11) |
 | **P3** (2~3일) | `file-extractors.ts` → `ingest/extractors.ts` port (lazy import), `sources.ts` 확장 | PDF/DOCX/XLSX/CSV 스모크 테스트 |
 | **P4** (0.5일) | federation level adapt: `sharing.ts` levels → `folklore-federation.ts` SignedRecord.visibility | level 0/1/2 push/query 테스트 |
 | **P5** (상시) | stellavault 지속 조사: 신규 발표(0.9.0+) 중 필요한 것 재선별 | docs 갱신
