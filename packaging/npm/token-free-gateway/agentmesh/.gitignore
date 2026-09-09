@@ -6,3 +6,9 @@ dist/
 !.env.example
 coverage/
 .DS_Store
+.wrangler/
+
+# Build artifacts (recursive: types/ subdirectories like types/crypto/, types/protocols/)
+packages/*/types/**/*.js
+packages/*/types/**/*.js.map
+apps/web/package-lock.json
