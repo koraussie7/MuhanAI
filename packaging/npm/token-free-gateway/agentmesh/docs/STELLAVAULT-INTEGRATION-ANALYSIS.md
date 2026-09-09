@@ -24,42 +24,43 @@
 ## 2. 모듈 매트릭스: port / adapt / reference / ignore
 
 ```
-┌──────────────────────┬─────────────┬──────────────────────────────────────────┐
-│ Stellavault 모듈      │ 처리        │ 이유                                      │
-├──────────────────────┼─────────────┼──────────────────────────────────────────┤
-│ FSRS decay engine    │ port (HIGH) │ knowledge-base에 없음. 순수 함수          │
-│ (fsrs.ts, decay-     │             │ (computeRetrievability/updateStability).  │
-│  engine.ts)          │             │ MIT. 60줄 정도.                           │
-├──────────────────────┼─────────────┼──────────────────────────────────────────┤
-│ 검색: weighted RRF +  │ port (MED)  │ hybrid-search.ts가 단순 가중합            │
-│ entity-linking +     │             │ (0.55/0.2/0.5/0.15, RRF 아님).            │
-│ recency multiplier   │             │ rrf.ts(rrfFusionN) + entity-extractor.ts가 │
-│                      │             │ 깔끔한 순수 함수.                         │
-├──────────────────────┼─────────────┼──────────────────────────────────────────┤
-│ 파일 형식 인제스트    │ port (HIGH) │ muhanai sources.ts는 registry만,           │
-│ (file-extractors.ts, │             │ ingestion.ts는 naive 텍스트 추출.          │
-│  ingest-pipeline.ts) │             │ stellavault는 PDF/DOCX/PPTX/XLSX/JSON/CSV/ │
-│                      │             │ XML/YAML/HTML/RTF/YouTube/URL/text/folder  │
-│                      │             │ 14종 파서 어댑터.                          │
-├──────────────────────┼─────────────┼──────────────────────────────────────────┤
-│ federation 공유 레벨  │ adapt (MED) │ muhanai SignedRecord는 권한이 있으나       │
-│ (node.ts myNodeLevel │             │ 레벨 개념(0=수신전용, 1+=공유)이 없음.      │
-│  0/1/2)              │             │ level 개념만 우리 퍼미션에 결합.            │
-├──────────────────────┼─────────────┼──────────────────────────────────────────┤
-│ 캡처 파이프라인       │ reference   │ raw/ → _wiki/ compile 패턴.                │
-│ (raw/→_wiki/ compile)│ (MED)       │ muhanai index-pipeline.ts 개념과 유사.     │
-│                      │             │ 형식 어댑터만 port하고 파이프는 참고.       │
-├──────────────────────┼─────────────┼──────────────────────────────────────────┤
-│ R3F 3D 그래프 viz     │ reference   │ 우리는 apps/web (Cosmic Canvas) 보유.       │
-├──────────────────────┼─────────────┼──────────────────────────────────────────┤
-│ MCP 서버 (21 tools)   │ reference   │ 우리는 personal-mcp 보유 (서버/클라 기능).  │
-│                      │             │ tool 목록만 벤치마크.                      │
-├──────────────────────┼─────────────┼──────────────────────────────────────────┤
-│ Hyperswarm federation│ ignore      │ 우리는 libp2p + floodsub (ADR-0002) 보유.   │
-│                      │             │ 프로토콜 비호환.                           │
-├──────────────────────┼─────────────┼──────────────────────────────────────────┤
-│ Electron 데스크톱 앱  │ ignore      │ 우리는 apps/web. 빌드/배포 책임 없음.       │
-└──────────────────────┴─────────────┴──────────────────────────────────────────┘
+┌────────────────────────────────┬─────────────┬──────────────────────────────────────────┐
+│ Stellavault 모듈                │ 처리        │ 이유                                      │
+├────────────────────────────────┼─────────────┼──────────────────────────────────────────┤
+│ FSRS decay engine              │ port (HIGH) │ knowledge-base에 없음. 순수 함수          │
+│ src/intelligence/fsrs.ts       │             │ computeRetrievability/updateStability)    │
+│ (60 lines)                     │             │ MIT. 60줄 정도.                           │
+├────────────────────────────────┼─────────────┼──────────────────────────────────────────┤
+│ Weighted RRF + recency         │ port (MED)  │ hybrid-search.ts가 단순 가중합            │
+│ src/search/rrf.ts (70 lines)   │             │ (0.55/0.2/0.5/0.15, RRF 아님).            │
+│                                │             │ rrf.ts(rrfFusionN) 깔끔한 순수 함수.       │
+├────────────────────────────────┼─────────────┼──────────────────────────────────────────┤
+│ entity-linking (extract)       │ port (MED)  │ wikilink/tag/heading 추출.               │
+│ src/indexer/entity-extractor.ts│             │ 언어 무관 (한글/중국어/일어 모두 동작).    │
+│ (196 lines)                    │             │                                        │
+├────────────────────────────────┼─────────────┼──────────────────────────────────────────┤
+│ 파일 형식 파서 (14종)          │ port (HIGH) │ muhanai sources.ts는 registry만,         │
+│ src/intelligence/file-        │             │ ingestion.ts는 naive 텍스트 추출.          │
+│ extractors.ts (270 lines)      │             │ PDF/DOCX/PPTX/XLSX/JSON/CSV/XML/YAML/    │
+│                                │             │ HTML/RTF/YouTube/URL/text/folder         │
+├────────────────────────────────┼─────────────┼──────────────────────────────────────────┤
+│ federation 공유 레벨            │ adapt (MED) │ SignedRecord에 visibility 필드 있음.      │
+│ src/federation/sharing.ts      │             │ level 개념(0/1/2/3/4) 추가.              │
+│ (321 lines)                    │             │                                        │
+├────────────────────────────────┼─────────────┼──────────────────────────────────────────┤
+│ 캡처 파이프라인 (raw→_wiki)    │ reference   │ muhanai index-pipeline.ts 개념과 유사.    │
+│ (ingest-pipeline)              │ (MED)       │ 형식 어댑터만 port하고 파이프는 참고.       │
+├────────────────────────────────┼─────────────┼──────────────────────────────────────────┤
+│ R3F 3D 그래프 viz              │ reference   │ 우리는 apps/web (Cosmic Canvas) 보유.     │
+├────────────────────────────────┼─────────────┼──────────────────────────────────────────┤
+│ MCP 서버 (21 tools)            │ reference   │ 우리는 personal-mcp 보유.                 │
+│ src/mcp/tools/*.ts (21 files)  │             │ tool 목록만 벤치마크.                     │
+├────────────────────────────────┼─────────────┼──────────────────────────────────────────┤
+│ Hyperswarm federation          │ ignore      │ 우리는 libp2p + floodsub (ADR-0002) 보유.  │
+│ src/federation/node.ts (536 l) │             │ 프로토콜 비호환.                         │
+├────────────────────────────────┼─────────────┼──────────────────────────────────────────┤
+│ Electron 데스크톱 앱           │ ignore      │ 우리는 apps/web. 빌드/배포 책임 없음.       │
+└────────────────────────────────┴─────────────┴──────────────────────────────────────────┘
 ```
 
 라이선스: **전체 MIT (LICENSE 확인됨)** — port 시 attribution 주석 + README 기여 표기만 준수.
@@ -105,70 +106,208 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**Port할 파일 (5)**: `fsrs.ts`→`decay/fsrs.ts`, `rrf.ts`→`search/rrf.ts`, `entity-extractor.ts`→`search/entity.ts`, `file-extractors.ts`→`ingest/extractors.ts`, `node.ts(myNodeLevel)`→`federation/levels.ts`. **전부 순수 TS, 무거운 의존성은 선택형 lazy import**.
+**Port할 파일 (5)**: `intelligence/fsrs.ts`→`knowledge-base/src/decay/fsrs.ts`, `search/rrf.ts`→`knowledge-base/src/search/rrf.ts`, `indexer/entity-extractor.ts`→`knowledge-base/src/search/entity.ts`, `intelligence/file-extractors.ts`→`knowledge-base/src/ingest/extractors.ts`, `federation/sharing.ts`→`knowledge-base/src/federation/levels.ts`. **전부 순수 TS, 무거운 의존성은 선택형 lazy import**.
+
+### Source-to-target mapping
+
+| Stellavault source (v0.9.0) | MuhanAI target | Lines |
+|---|---|---|
+| `packages/core/src/intelligence/fsrs.ts` | `knowledge-base/src/decay/fsrs.ts` | 114 |
+| `packages/core/src/search/rrf.ts` | `knowledge-base/src/search/rrf.ts` | 70 |
+| `packages/core/src/indexer/entity-extractor.ts` | `knowledge-base/src/search/entity.ts` | 196 |
+| `packages/core/src/intelligence/file-extractors.ts` | `knowledge-base/src/ingest/extractors.ts` | 270 |
+| `packages/core/src/federation/sharing.ts` | `knowledge-base/src/federation/levels.ts` (adapt) | 321 |
+| `packages/core/src/intelligence/decay-engine.ts` | `knowledge-base/src/decay/engine.ts` (new, wraps FSRS) | 276 |
+| `packages/core/src/store/types.ts` (VectorStore) | `shared/types` (KnowledgeNode) | 129 |
+| `packages/core/src/types/search.ts` | `knowledge-base/src/retrieval.ts` (ScoredKnowledge) | 40 |
 
 ---
 
-## 5. Port 상세
+## 5. 포트 상세 (코드 예시 포함)
 
-### 5.1 FSRS decay — `@stellavault/core/src/intelligence/fsrs.ts` (port: HIGH)
+### 5.1 FSRS decay — `packages/core/src/intelligence/fsrs.ts` (port: HIGH)
 
-```ts
-// stellavault (MIT) → muhanai packages/knowledge-base/src/decay/fsrs.ts
-export const FSRS_PARAMS = { initialStability: 7.0, difficulty: 5.0, a: 0.4, b: 0.6, c: 0.2, d: 1.0, ... };
-export function computeRetrievability(stabilityDays, elapsedDays) // R = (1 + t/(9S))^-1
-export function updateStability(currentS, difficulty, currentR)   // S' 증가, cap 365
-```
-
-- **왜 HIGH**: muhanai에 기억 감쇠 개념이 없음. 순수 함수 60줄, MIT, 1,200+ tests로 검증됨.
-- **적용 지점**: `knowledge-base`에 `decay/` 신설 → `retrieval.ts`에 `accessRecency` 훅 → hybrid search score에 multiplier.
-
-### 5.2 Weighted RRF + recency — `rrf.ts` (port: MEDIUM)
+**Source file**: `@stellavault/core/src/intelligence/fsrs.ts` (114 lines, pure functions)
+**Target**: `packages/knowledge-base/src/decay/fsrs.ts`
 
 ```ts
-// stellavault → packages/knowledge-base/src/search/rrf.ts
-export function rrfFusionN(lists, k = 60, limit = 10, opts: { weights?, recencyScores?, recencyWeight? })
-export function rrfFusion(listA, listB, k = 60, limit = 10)
+// Ported from stellavault (MIT) — github.com/Evanciel/stellavault
+export const FSRS_PARAMS = {
+  initialStability: 7.0, difficulty: 5.0,
+  a: 0.4, b: 0.6, c: 0.2, d: 1.0,
+  sizeFactor: 0.5, connectionFactor: 1.0,
+} as const;
+
+// R(t) = (1 + t/(9S))^(-1) — FSRS power forgetting curve
+export function computeRetrievability(stabilityDays: number, elapsedDays: number): number {
+  if (elapsedDays <= 0) return 1.0;
+  if (stabilityDays <= 0) return 0.0;
+  return Math.pow(1 + elapsedDays / (9 * stabilityDays), -1);
+}
+
+// S' = S * (1 + a * D^(-b) * S^(-c) * (e^(d*(1-R)) - 1)), capped at 365 days
+export function updateStability(currentS: number, difficulty: number, currentR: number): number {
+  const { a, b, c, d } = FSRS_PARAMS;
+  const growth = a * Math.pow(difficulty, -b) * Math.pow(currentS, -c)
+    * (Math.exp(d * (1 - currentR)) - 1);
+  return Math.min(currentS * (1 + Math.max(0, growth)), 365);
+}
 ```
 
-- **왜 MEDIUM**: 기존 hybrid-search.ts가 keyword/vector 2신호로 이미 동작하나 단순 가중합. RRF로 바꾸면 순위 품질(NDCG) 향상. entity 신호는 별도 port 필요.
-- **호환**: 기존 콜러는 `rrfFusion(listA, listB)`로 동일 시그니처 유지 (`ScoredChunk` 타입만 어댑트).
+**MuhanAI integration**: Create `decay/engine.ts` wrapping FSRS in the existing store (mirrors `decay-engine.ts:30-56` table schema). Hook into `retrieval.ts` access logging — after each search, call `decayEngine.recordAccess({ documentId, type: 'search' })`, then build `recencyScores = Map(chunkId → R)` for use in RRF.
 
-### 5.3 Entity-linking — `entity-extractor.ts` (port: MEDIUM)
+**Existing pattern to follow**: `knowledge-base/src/hybrid-search.ts:22-87` (search flow) + `knowledge-base/src/retrieval.ts` (access logging).
+
+### 5.2 Weighted RRF — `packages/core/src/search/rrf.ts` (port: MEDIUM)
+
+**Source file**: `@stellavault/core/src/search/rrf.ts` (70 lines, pure function)
+**Target**: `packages/knowledge-base/src/search/rrf.ts`
 
 ```ts
-// hallucination-free: wikilink [[…]] / #tags / headings 우선, Latin은 Title-Case 폴백
-// cap 30/chunk, CJK 대응 내장 (한글 볼트도 동작)
+// Ported from stellavault (MIT). Backward-compatible: rrfFusion(listA, listB)
+// preserves the 2-list API while rrfFusionN adds recency + weights.
+export function rrfFusionN(
+  lists: Array<Array<{ node: KnowledgeNode; score: number }>>,
+  k: number = 60,
+  limit: number = 10,
+  opts: { weights?: number[]; recencyScores?: Map<string, number>; recencyWeight?: number } = {},
+): Array<{ node: KnowledgeNode; score: number }> {
+  // score(d) = Σ w_i · 1/(k + rank_i)
+  // recency: multiply by (1 + recencyWeight * (R - 0.5)), centered at R=0.5
+  const { weights, recencyScores, recencyWeight = 0 } = opts;
+  const scores = new Map<string, number>();
+  for (let li = 0; li < lists.length; li++) {
+    const w = weights?.[li] ?? 1;
+    for (let i = 0; i < lists[li].length; i++) {
+      const id = lists[li][i].node.id;
+      scores.set(id, (scores.get(id) ?? 0) + w * (1 / (k + i + 1)));
+    }
+  }
+  if (recencyWeight > 0 && recencyScores) {
+    for (const [id, s] of scores) {
+      const r = recencyScores.get(id) ?? 0.5;
+      scores.set(id, s * (1 + recencyWeight * (r - 0.5)));
+    }
+  }
+  return [...scores.entries()].sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([id]) => lists.flat().find(h => h.node.id === id)!);
+}
 ```
 
-- **왜 MEDIUM**: muhanai `KnowledgeNode`에 이미 tags 있음 (`shared/types`). tags를 entity 신호로 승격 → 검색 리랭킹. NER 모델 불필요 (결정적, 오프라인).
+**Replace** the simple weighted sum in `hybrid-search.ts:61-87`:
+```ts
+// OLD (hybrid-search.ts:61-67): score = 0.55 * confidence + 0.2 (linear merge)
+// NEW: rrfFusionN([vectorHits, keywordHits], 60, limit, {
+//   weights: [1.0, 1.0],  // semantic, bm25
+//   recencyScores,       // from FSRS decay engine
+//   recencyWeight: 0.2,   // ±10% bound
+// });
+```
 
-### 5.4 형식 파서 — `file-extractors.ts` + `ingest-pipeline.ts` (port: HIGH)
+### 5.3 Entity-linking — `packages/core/src/indexer/entity-extractor.ts` (port: MEDIUM)
 
-- **왜 HIGH**: 격차가 가장 큼. stellavault는 PDF(pdfjs-dist)/DOCX(mammoth)/PPTX/XLSX(xlsx)/JSON/CSV/XML/YAML/HTML/RTF/YouTube/URL/text/folder 14종. muhanai는 텍스트만.
-- **전략**: 어댑터를 `knowledge-base/src/ingest/extractors.ts`로 port하되, **pdfjs/mammoth 등 무거운 의존성은 선택형 dynamic import** (설치 비용·스캔 부담 완화).
-- **보안**: stellavault `6a29805` PDF-ingest RCE 수정 이력 반영 (external 실행 파일 금지, minimal extractor).
+**Source file**: `@stellavault/core/src/indexer/entity-extractor.ts` (196 lines, pure functions)
+**Target**: `packages/knowledge-base/src/search/entity.ts`
 
-### 5.5 federation 공유 레벨 — `node.ts` myNodeLevel (adapt: MEDIUM)
+```ts
+// Ported from stellavault (MIT). Language-agnostic: wikilinks/tags work
+// for Korean/CJK vaults; Title-Case heuristics only fire on Latin script.
+import { parseWikilinks } from '../links/wikilink';
 
-| Level | Stellavault 의미 | muhanai 매핑 |
-|---|---|---|
-| 0 | 수신 전용 (기본) | SignedRecord: query 응답 허용, push 불가 |
-| 1 | 제목+50자 스니펫 공유 | `visibility:"peer-summary"` 퍼미션 |
-| 2 | 추가 메타데이터 공유 | `visibility:"peer"` |
+export function extractEntities(content: string, heading?: string, tags?: string[]): string[] {
+  const entities = new Set<string>();
+  // 1. #tags — directly from KnowledgeNode.tags (shared/types already has string[])
+  if (tags) for (const tag of tags) entities.add(tag.toLowerCase());
+  // 2. [[wikilinks]] — parsed from content (hallucination-free, deterministic)
+  for (const link of parseWikilinks(content)) entities.add(link.target.trim().toLowerCase());
+  // 3. Headings — Title-Case + acronym extraction (Latin only, fallback)
+  if (heading) {
+    const tc = /\b([A-Z][a-z0-9]+(?:\s+[A-Z][a-z0-9]+){1,4})\b/g;
+    let m;
+    while ((m = tc.exec(heading)) !== null) entities.add(m[1].toLowerCase());
+  }
+  // Cap: 30/chunk (prevents entity table bloat, keeps signal precise)
+  return Array.from(entities).slice(0, 30);
+}
+```
 
-- `folklore-federation.ts`의 `SignedRecord.push`/`query`에 level 파라미터 1개 추가. **원문 전송 금지** 원칙 유지.
+**MuhanAI integration**: `KnowledgeNode.tags` (string[]) in `shared/types` → promote to entity signal. When query term matches a tag, boost via RRF weight (default entity weight = 1.5× as in stellavault `DEFAULT_SIGNAL_WEIGHTS`).
+
+### 5.4 파일 형식 파서 — `packages/core/src/intelligence/file-extractors.ts` (port: HIGH)
+
+**Source file**: `@stellavault/core/src/intelligence/file-extractors.ts` (270 lines, lazy dynamic imports)
+**Target**: `packages/knowledge-base/src/ingest/extractors.ts`
+
+```ts
+// Ported from stellavault (MIT). Dependencies lazy-imported to avoid
+// bloating the core bundle. Security: isEvalSupported=false on pdfjs
+// (mitigates GHSA-hq66-cqwq-w95j PDF → JS RCE).
+import { readFileSync, statSync } from 'node:fs';
+import { extname, basename } from 'node:path';
+
+const BINARY_EXTS = new Set(['.pdf', '.docx', '.pptx', '.xlsx', '.xls']);
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
+
+export async function extractFileContent(filePath: string): Promise<ExtractedContent> {
+  const ext = extname(filePath).toLowerCase();
+  const buffer = readFileSync(filePath);
+  switch (ext) {
+    case '.pdf': return extractPdf(buffer, filePath);    // unpdf + pdfjs-dist
+    case '.docx': return extractDocx(buffer, filePath);   // mammoth
+    case '.pptx': return extractPptx(buffer, filePath);
+    case '.xlsx': case '.xls': return extractXlsx(buffer, filePath);  // xlsx
+    case '.json': return { text: JSON.stringify(JSON.parse(readFileSync(filePath, 'utf-8')), null, 2), metadata: { wordCount: 0 }, sourceFormat: 'text' };
+    case '.csv': return { text: readFileSync(filePath, 'utf-8'), metadata: { wordCount: 0 }, sourceFormat: 'text' };
+    // ... XML, YAML, HTML, RTF, YouTube, URL, text, folder (14 formats total)
+    default: return extractText(filePath);
+  }
+}
+```
+
+**MuhanAI integration**: Extend `sources.ts` to dispatch binary formats to these extractors. Current `sources.ts` only handles text — this adds 14 format support. The `ingestion.ts` file needs to call `extractFileContent` before chunking.
+
+### 5.5 Federation 공유 레벨 — `packages/core/src/federation/sharing.ts` (adapt: MEDIUM)
+
+**Source files**: `@stellavault/core/src/federation/sharing.ts` (321 lines), `types.ts` (57 lines)
+**Target**: Extend `knowledge-base/src/folklore-federation.ts`
+
+```ts
+// Stellavault sharing levels (from sharing.ts:14):
+//   0 = Blocked (not searchable)
+//   1 = Title + similarity only
+//   2 = Title + 50-char snippet (DP-noised)
+//   3 = Full text on request (approval needed)
+//   4 = Full text auto-shared
+// Default: myNodeLevel=0 (receive-only), defaultLevel=1 (no snippets)
+
+// In folklore-federation.ts, add level parameter:
+// Transport.query (line 6): add opts.sharingLevel
+async query(peerId: string, query: string, embedding?: number[], opts?: { sharingLevel?: SharingLevel }) {
+  // Only return records with matching or lower visibility level
+  // Never transmit content/snippet unless level >= 2 AND DP-masked
+}
+
+// Transport.push (line 7): tag records with level-based visibility
+async push(peerId: string, records: SignedRecord[]) {
+  // Tag each record with visibility based on sharing rules
+  // Level 0: push nothing. Level 1: title+sim only. Level 2+: snippet (DP-masked).
+}
+```
+
+**MuhanAI integration**: The `SignedRecord` interface in `shared/types` already has `visibility: 'local' | 'peer-summary' | 'peer'`. Add `sharingLevel?: SharingLevel` (0-4) and modify `Transport.query/push` to respect the level boundary. The `privacy.ts` `maskSnippet()` function provides DP masking for snippets at level 2.
+
 ---
 
 ## 6. 마이그레이션 단계
 
 | Phase | 내용 | 검증 |
 |---|---|---|
-| **P1** (1일) | `decay/fsrs.ts` + 테스트 port | `computeRetrievability` 단위 테스트 |
-| **P2** (1일) | `search/rrf.ts` + `search/entity.ts` port, hybrid-search 결합 | 기존 search 테스트 회귀 없음 + NDCG 샘플 |
-| **P3** (2~3일) | `ingest/extractors.ts` port (lazy import), personal-mcp `/ingest` 확장 | PDF/DOCX/XLSX/CSV 스모크 테스트 |
-| **P4** (0.5일) | federation level adapt (SignedRecord 레벨 파라미터) | level 0/1/2 push/query 테스트 |
-| **P5** (상시) | stellavault 지속 조사: 신규 발표(0.9.0+) 중 필요한 것 재선별 | docs 갱신 |
+| **P1** (1일) | `fsrs.ts` → `knowledge-base/src/decay/fsrs.ts` + `engine.ts` port | `computeRetrievability(7, 1)` = 0.674 단위 테스트 |
+| **P2** (1일) | `rrf.ts` → `search/rrf.ts`, `entity-extractor.ts` → `search/entity.ts` port, `hybrid-search.ts` 결합 | 기존 search 테스트 회귀 없음 + NDCG 샘플 |
+| **P3** (2~3일) | `file-extractors.ts` → `ingest/extractors.ts` port (lazy import), `sources.ts` 확장 | PDF/DOCX/XLSX/CSV 스모크 테스트 |
+| **P4** (0.5일) | federation level adapt: `sharing.ts` levels → `folklore-federation.ts` SignedRecord.visibility | level 0/1/2 push/query 테스트 |
+| **P5** (상시) | stellavault 지속 조사: 신규 발표(0.9.0+) 중 필요한 것 재선별 | docs 갱신
 
 ---
 
