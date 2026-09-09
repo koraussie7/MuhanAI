@@ -29,7 +29,10 @@ export class LLMRouter {
 		if (!process.env.OPENAI_API_KEY) return null;
 		try {
 			const OpenAI = require("openai").default;
-			this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+			const baseURL = process.env.OPENAI_BASE_URL ?? process.env.OMNIROUTE_BASE_URL;
+			const config: Record<string, string> = { apiKey: process.env.OPENAI_API_KEY };
+			if (baseURL) config.baseURL = baseURL;
+			this.openai = new OpenAI(config);
 			return this.openai;
 		} catch {
 			return null;
@@ -110,8 +113,9 @@ export class LLMRouter {
 		const messages: Array<{ role: string; content: string }> = [];
 		if (req.system) messages.push({ role: "system", content: req.system });
 		messages.push({ role: "user", content: req.prompt });
+		const defaultModel = process.env.OPENAI_DEFAULT_MODEL ?? "gpt-4-turbo-preview";
 		const response = await client.chat.completions.create({
-			model: req.model ?? "gpt-4-turbo-preview",
+			model: req.model ?? defaultModel,
 			messages: messages as any,
 			temperature: req.temperature ?? 0.3,
 			max_tokens: req.maxTokens ?? 4096,

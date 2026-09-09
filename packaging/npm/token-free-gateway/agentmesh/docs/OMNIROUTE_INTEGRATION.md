@@ -82,6 +82,36 @@
 - **리스크**: agent-cast 기존 통합 테스트 다수 영향
 - **이점**: Claude 외 모든 모델 호출이 quota-aware + 자동 fallback
 
+**구현 상태 (2026-09-09)**: ✅ **완료**
+
+- `packages/llm-router/src/index.ts`:
+  - `getOpenAI()`: `OPENAI_BASE_URL ?? OMNIROUTE_BASE_URL` 환경변수가 설정되어 있으면 OpenAI SDK의 `baseURL`로 주입. 미설정 시 기존 동작 유지(SDK 기본 endpoint).
+  - `generateOpenAI()`: `OPENAI_DEFAULT_MODEL` 환경변수로 default model 오버라이드(미설정 시 기존 `gpt-4-turbo-preview`).
+  - `anthropic` / `google` / `p2p` / `local` provider 경로는 무변경. OmniRoute는 OpenAI 호환 surface만 사용.
+- `packages/llm-router/src/llm-router.test.ts`: 11개 신규 테스트 추가.
+  - `OPENAI_BASE_URL` 적용 확인
+  - `OMNIROUTE_BASE_URL` alias 동작 + precedence
+  - 둘 다 미설정 시 baseURL 미전달
+  - `OPENAI_DEFAULT_MODEL` 적용 + `req.model` 우선순위
+  - `OPENAI_API_KEY` 없을 때 mock 폴백 유지 (회귀 안전)
+  - `getAvailableProviders()` 동작 유지
+  - temperature/max_tokens/usage 회귀 없음
+- `agentmesh/.env.example`: `OPENAI_BASE_URL`, `OMNIROUTE_BASE_URL`, `OPENAI_DEFAULT_MODEL` 문서화.
+
+**검증 결과**:
+- `pnpm typecheck`: 0 errors
+- `pnpm test`: 307 passed, 1 skipped (기존 DATABASE_URL prisma warning 무관, 신규 회귀 0)
+- llm-router 패키지 단독: 18/18 passed (keyless 7 + 신규 11)
+
+**운영 가이드**:
+```bash
+# .env에 추가만 하면 끝
+OPENAI_BASE_URL=http://localhost:20128/v1
+OPENAI_DEFAULT_MODEL=auto   # 또는 "claude-opus-4" 등
+```
+- OmniRoute MCP 서버(20128 포트)가 죽어 있어도 OpenAI SDK는 `getOpenAI()`가 `null`을 반환 → `generateMock()` 폴백 (기존 회귀 안전).
+- `getAvailableProviders()`는 `OPENAI_API_KEY` 존재 여부만 보므로, OmniRoute 라우팅 활성/비활성에 따라 provider 리스트가 바뀌지 않음.
+
 #### 시나리오 (3) Skills 시스템 차용 — ★★ 학습 가치
 
 **목표**: 49개 OmniRoute skills 중 3-5개 로직 차용 → MuhanAI 자체 skills 강화.
@@ -136,3 +166,4 @@
 | --- | --- | --- |
 | 2026-09-09 | Claude | 초안 작성 (v3.8.51 기반) |
 | 2026-09-09 | Claude | 시나리오 1 보강: `omniroute_compress_prompt` (RTK+Caveman) + `omniroute_list_combos` 추가, 도구 카운트 6→8 |
+| 2026-09-09 | Claude | 시나리오 2 구현: `llm-router`에 `OPENAI_BASE_URL` / `OMNIROUTE_BASE_URL` / `OPENAI_DEFAULT_MODEL` 환경변수 와이어업 + 11개 단위 테스트 추가 (총 llm-router 테스트 7→18) |
