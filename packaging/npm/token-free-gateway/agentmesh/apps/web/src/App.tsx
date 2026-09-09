@@ -278,7 +278,15 @@ export function App() {
 		return (
 			<FindPage
 				onNavigateHome={() => {
-					navigate("/dashboard");
+					if (
+						typeof window !== "undefined" &&
+						(window.location.hostname === "find.muhanai.com" ||
+							window.location.hostname.startsWith("find."))
+					) {
+						window.location.href = "https://muhanai.com/dashboard";
+					} else {
+						navigate("/dashboard");
+					}
 				}}
 			/>
 		);

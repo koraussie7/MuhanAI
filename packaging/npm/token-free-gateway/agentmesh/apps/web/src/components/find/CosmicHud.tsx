@@ -41,6 +41,7 @@ interface CosmicHudProps {
 	eventsLog: string[];
 	onNavigateHome: () => void;
 	onOpenUserGuide?: () => void;
+	onOpenPeerNameModal?: (mode: "user" | "simulated") => void;
 }
 
 export const CosmicHud: React.FC<CosmicHudProps> = ({
@@ -64,6 +65,7 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 	eventsLog,
 	onNavigateHome,
 	onOpenUserGuide,
+	onOpenPeerNameModal,
 }) => {
 	const { lang, setLanguage, t, supportedLanguages } = useI18n();
 	const [showSettings, setShowSettings] = useState(false);
@@ -89,21 +91,25 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 			{/* Top Header Bar */}
 			<header className="cosmic-top-bar pointer-events-auto">
 				<div className="flex items-center gap-4">
-					<button
-						type="button"
+					<a
+						href="/dashboard"
 						className="cosmic-back-btn"
-						onClick={onNavigateHome}
+						onClick={(e) => {
+							e.preventDefault();
+							onNavigateHome();
+						}}
 						title="Open Developer Console & Knowledge IN Feed"
 						style={{
 							display: "flex",
 							alignItems: "center",
 							gap: 6,
 							fontWeight: 600,
+							textDecoration: "none",
 						}}
 					>
 						<LayoutDashboard size={14} className="text-sky-400" />
 						<span>Developer Console</span>
-					</button>
+					</a>
 					<button
 						type="button"
 						className="cosmic-back-btn"
@@ -170,8 +176,14 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 					<button
 						type="button"
 						className="cosmic-action-btn primary"
-						onClick={() => onConnectSimulatedPeer()}
-						title="Simulate a remote peer joining the network with shockwave & notes"
+						onClick={() => {
+							if (onOpenPeerNameModal) {
+								onOpenPeerNameModal("simulated");
+							} else {
+								onConnectSimulatedPeer();
+							}
+						}}
+						title="새로운 P2P 피어 노드 이름을 지정하고 연결합니다"
 					>
 						<Sparkles size={13} className="text-sky-300" />
 						<span>Connect Peer</span>
@@ -180,13 +192,23 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 					<button
 						type="button"
 						className={`cosmic-action-btn ${userPeerConnected ? "active" : "secondary"}`}
-						onClick={onConnectUserPeer}
-						title="Mount your browser device into the P2P Obsidian network"
+						onClick={() => {
+							if (onOpenPeerNameModal) {
+								onOpenPeerNameModal("user");
+							} else {
+								onConnectUserPeer();
+							}
+						}}
+						title={
+							userPeerConnected
+								? "내 디바이스 피어 이름 변경 또는 관리"
+								: "내 디바이스 피어 이름을 지정하고 P2P 메쉬에 마운트합니다"
+						}
 					>
 						<Zap size={13} className={userPeerConnected ? "text-emerald-400" : "text-amber-400"} />
 						<span>
 							{userPeerConnected
-								? `${connectedPeerName || "User"} Connected`
+								? `${connectedPeerName || "User"} (연결됨)`
 								: connectedPeerName
 									? `Connect ${connectedPeerName}`
 									: "Connect My Device"}
