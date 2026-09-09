@@ -1,5 +1,7 @@
+export * from "./hound-mcp-client";
 export * from "./knowledge";
 export * from "./memory";
+export * from "./omniroute-mcp-client";
 export * from "./permissions";
 export { PrismaUserKnowledgeStore } from "./prisma-store";
 export * from "./server";
@@ -10,4 +12,3 @@ export * from "./store-types";
 export * from "./tools";
 export * from "./user-object";
 export * from "./weknora-mcp-client";
-export * from "./hound-mcp-client";
