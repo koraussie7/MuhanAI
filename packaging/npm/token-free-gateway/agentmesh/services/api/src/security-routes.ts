@@ -57,6 +57,7 @@ interface SecuritySnapshot {
 	}>;
 	keys: VaultKeyEntry[];
 	audit: SecurityAuditEvent[];
+	_demo?: boolean;
 }
 
 const store: SecuritySnapshot = {
@@ -132,6 +133,7 @@ const store: SecuritySnapshot = {
 			detail: "groq → rotated",
 		},
 	],
+	_demo: true,
 };
 
 const TogglesSchema = z.object({

@@ -423,6 +423,7 @@ export async function handleMcpRequest(request: Request, url: URL, env?: { API_O
 						latencyMs: 14,
 						activeModels: ["Claude 3.7 Sonnet", "DeepSeek R1", "Gemini 2.5 Pro"],
 						crdtMesh: "synced",
+						_demo: true,
 					});
 				} else if (toolName === "muhanai_search_knowledge") {
 					content = JSON.stringify({
@@ -443,29 +444,36 @@ export async function handleMcpRequest(request: Request, url: URL, env?: { API_O
 					});
 				} else if (toolName === "muhanai_ask_quorum") {
 				const question = String(args.question || "");
-				const apiOrigin = env?.API_ORIGIN || "https://api.muhanai.com";
+				const apiOrigin = env?.API_ORIGIN;
 
-				try {
-					const response = await fetch(`${apiOrigin}/api/quorum/ask`, {
-						method: "POST",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify({
-							question,
-							consensus_threshold: args.consensus_threshold,
-						}),
+				if (!apiOrigin) {
+					content = JSON.stringify({
+						error: "Quorum service is not configured. Deploy api.muhanai.com to enable live consensus.",
+						status: "unavailable",
 					});
-
-					if (response.ok) {
-						const result = (await response.json()) as Record<string, unknown>;
-						content = JSON.stringify(result);
-					} else {
-						content = JSON.stringify({
-							error: "Quorum service unavailable",
-							status: response.status,
+				} else {
+					try {
+						const response = await fetch(`${apiOrigin}/api/quorum/ask`, {
+							method: "POST",
+							headers: { "Content-Type": "application/json" },
+							body: JSON.stringify({
+								question,
+								consensus_threshold: args.consensus_threshold,
+							}),
 						});
+
+						if (response.ok) {
+							const result = (await response.json()) as Record<string, unknown>;
+							content = JSON.stringify(result);
+						} else {
+							content = JSON.stringify({
+								error: "Quorum service unavailable",
+								status: response.status,
+							});
+						}
+					} catch {
+						content = JSON.stringify({ error: "Failed to reach quorum service" });
 					}
-				} catch {
-					content = JSON.stringify({ error: "Failed to reach quorum service" });
 				}
 				} else if (toolName === "muhanai_publish_note") {
 					content = `✨ Successfully published [[${args.title}.md]] to MuhanAI cosmic knowledge topology. Node ID: note-${Date.now()}`;
