@@ -53,6 +53,7 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 	onSearchChange,
 	onConnectSimulatedPeer,
 	onConnectUserPeer,
+	connectedPeerName,
 	userPeerConnected,
 	activeTypeFilters,
 	onToggleTypeFilter,

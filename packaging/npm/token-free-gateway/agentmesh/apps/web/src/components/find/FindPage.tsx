@@ -56,7 +56,7 @@ function playCosmicChime() {
 	} catch {}
 }
 
-export function generateRandomPeerUsername(role: "user" | "peer" = "user"): string {
+export function generateRandomPeerUsername(role: "user" | "peer" | "simulated" = "user"): string {
 	const cosmicAdjectives = [
 		"Cosmic", "Quantum", "Stellar", "Nebula", "Nova", "Cyber",
 		"Astro", "Solar", "Lunar", "Flux", "Vector", "Hyper", "Synapse",
