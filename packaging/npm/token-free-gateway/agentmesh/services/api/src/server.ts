@@ -24,14 +24,22 @@ import { quorumRoutes } from "./quorum-routes.js";
 import { securityRoutes } from "./security-routes.js";
 import { semanticRoutes } from "./semantic-routes.js";
 
+function timingSafeEqual(a: string | undefined, b: string | undefined): boolean {
+	if (typeof a !== "string" || typeof b !== "string") return false;
+	if (a.length !== b.length) return false;
+	let result = 0;
+	for (let i = 0; i < a.length; i++) {
+		result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+	}
+	return result === 0;
+}
+
 const PUBLIC_PATH_PREFIXES = [
 	"/api/pulse",
 	"/api/network",
 	"/api/agents",
 	"/api/auth",
-	"/api/llm",
-	"/api/computer-use",
-	"/api/quorum",
+	"/api/health",
 ];
 const PUBLIC_PATH_EXACT = new Set(["/health"]);
 
@@ -145,10 +153,11 @@ export async function buildApp(options: BuildAppOptions = {}) {
 		if (!isProduction && process.env.DISABLE_AUTH === "true") return;
 
 		const validApiKey = process.env.API_KEY;
-		const apiKey = request.headers["x-api-key"];
+		const rawApiKey = request.headers["x-api-key"];
+		const apiKey = Array.isArray(rawApiKey) ? rawApiKey[0] : rawApiKey;
 
-		if (!validApiKey || apiKey !== validApiKey) {
-			reply.code(401).send({ error: "Unauthorized: invalid or missing API key" });
+		if (!timingSafeEqual(apiKey, validApiKey)) {
+			return reply.code(401).send({ error: "Unauthorized: invalid or missing API key" });
 		}
 	});
 
