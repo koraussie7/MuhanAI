@@ -71,3 +71,9 @@ export {
 	type SessionResponse,
 	type SessionRunner,
 } from "./session-runner.js";
+export {
+	DeviceNodeDaemon,
+	DEVICE_HEARTBEAT_INTERVAL_MS,
+	DEVICE_NODE_TIMEOUT_MS,
+	type DeviceNodeDaemonOptions,
+} from "./device-node-daemon.js";
