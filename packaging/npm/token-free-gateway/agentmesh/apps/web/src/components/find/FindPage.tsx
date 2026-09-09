@@ -1,5 +1,6 @@
 import type React from "react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Sparkles, X, Zap } from "lucide-react";
 import { CosmicCanvas } from "./CosmicCanvas";
 import { CosmicHud } from "./CosmicHud";
 import { CosmicPromptBar } from "./CosmicPromptBar";
@@ -72,6 +73,158 @@ export function generateRandomPeerUsername(role: "user" | "peer" = "user"): stri
 	return role === "user" ? `${adj}_${noun}_${num}` : `Peer_${adj}_${num}`;
 }
 
+interface PeerNameModalProps {
+	isOpen: boolean;
+	mode: "user" | "simulated";
+	initialName: string;
+	isConnected: boolean;
+	onConfirm: (name: string) => void;
+	onDisconnect?: () => void;
+	onClose: () => void;
+}
+
+const PeerNameModal: React.FC<PeerNameModalProps> = ({
+	isOpen,
+	mode,
+	initialName,
+	isConnected,
+	onConfirm,
+	onDisconnect,
+	onClose,
+}) => {
+	const [name, setName] = useState(initialName || generateRandomPeerUsername(mode));
+	const inputRef = useRef<HTMLInputElement>(null);
+
+	useEffect(() => {
+		if (isOpen) {
+			setName(initialName || generateRandomPeerUsername(mode));
+			setTimeout(() => {
+				inputRef.current?.focus();
+				inputRef.current?.select();
+			}, 50);
+		}
+	}, [isOpen, initialName, mode]);
+
+	if (!isOpen) return null;
+
+	const handleRollRandom = () => {
+		setName(generateRandomPeerUsername(mode));
+	};
+
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+		const finalName = name.trim() || generateRandomPeerUsername(mode);
+		onConfirm(finalName);
+		onClose();
+	};
+
+	const isUserMode = mode === "user";
+
+	return (
+		<div
+			className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm pointer-events-auto"
+			onClick={onClose}
+		>
+			<div
+				className="relative w-full max-w-md p-6 rounded-2xl bg-slate-900 border border-sky-500/30 shadow-2xl text-slate-100 font-sans"
+				onClick={(e) => e.stopPropagation()}
+				style={{
+					background: "linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.98))",
+					boxShadow: "0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(56, 189, 248, 0.15)",
+				}}
+			>
+				{/* Header */}
+				<div className="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
+					<div className="flex items-center gap-2">
+						{isUserMode ? (
+							<Zap size={18} className="text-emerald-400" />
+						) : (
+							<Sparkles size={18} className="text-sky-400" />
+						)}
+						<h3 className="text-base font-bold tracking-tight text-white">
+							{isUserMode ? "내 디바이스 피어 이름 지정" : "P2P 피어 노드 연결 및 이름 지정"}
+						</h3>
+					</div>
+					<button
+						type="button"
+						className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+						onClick={onClose}
+						aria-label="닫기"
+					>
+						<X size={16} />
+					</button>
+				</div>
+
+				<form onSubmit={handleSubmit} className="space-y-4">
+					<div>
+						<label className="block text-xs font-semibold text-slate-300 mb-1.5">
+							{isUserMode ? "디바이스 피어 닉네임" : "원격 피어 노드 이름"}
+						</label>
+						<div className="flex items-center gap-2">
+							<input
+								ref={inputRef}
+								type="text"
+								value={name}
+								onChange={(e) => setName(e.target.value)}
+								placeholder={isUserMode ? "예: Brian-MacBook, CosmicCoder..." : "예: Peer-Tokyo-Node..."}
+								maxLength={36}
+								className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-950/80 border border-white/15 focus:border-sky-400 focus:ring-1 focus:ring-sky-400 text-sm text-white outline-none font-mono placeholder:text-slate-500"
+							/>
+							<button
+								type="button"
+								onClick={handleRollRandom}
+								title="랜덤 코스믹 이름 생성"
+								className="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 text-xs font-medium border border-sky-400/20 hover:border-sky-400/40 transition-all flex items-center gap-1.5"
+							>
+								<span>🎲 랜덤</span>
+							</button>
+						</div>
+						<p className="mt-1.5 text-[11px] text-slate-400">
+							{isUserMode
+								? "P2P 분산 지식 메쉬 및 WebRTC 볼트에 표시될 디바이스 이름입니다."
+								: "새로운 피어 노드로 지식 그래프에 마운트할 고유 이름입니다."}
+						</p>
+					</div>
+
+					<div className="flex items-center justify-between pt-2">
+						{isUserMode && isConnected && onDisconnect ? (
+							<button
+								type="button"
+								onClick={() => {
+									onDisconnect();
+									onClose();
+								}}
+								className="px-3.5 py-2 rounded-xl text-xs font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 border border-rose-500/20 transition-all"
+							>
+								연결 해제
+							</button>
+						) : (
+							<div />
+						)}
+
+						<div className="flex items-center gap-2">
+							<button
+								type="button"
+								onClick={onClose}
+								className="px-4 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+							>
+								취소
+							</button>
+							<button
+								type="submit"
+								className="px-5 py-2 rounded-xl text-xs font-bold text-slate-950 bg-gradient-to-r from-sky-400 to-indigo-400 hover:from-sky-300 hover:to-indigo-300 shadow-md shadow-sky-500/20 transition-all flex items-center gap-1.5"
+							>
+								<Sparkles size={13} />
+								<span>{isUserMode && isConnected ? "이름 변경 적용" : "이름 지정 및 연결"}</span>
+							</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	);
+};
+
 export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
 	const [nodes, setNodes] = useState<CosmicNode[]>(INITIAL_NODES);
 	const [edges, setEdges] = useState<CosmicEdge[]>(INITIAL_EDGES);
@@ -106,6 +259,15 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
 		"[init] CRDT knowledge lake subscribed — WebRTC shard #89 linked",
 		"[prompt] Cosmic Omnibar active: type to search or publish new Obsidian nodes",
 	]);
+
+	// Peer Name Specification Modal state
+	const [peerModalOpen, setPeerModalOpen] = useState(false);
+	const [peerModalMode, setPeerModalMode] = useState<"user" | "simulated">("user");
+
+	const handleOpenPeerModal = useCallback((mode: "user" | "simulated") => {
+		setPeerModalMode(mode);
+		setPeerModalOpen(true);
+	}, []);
 
 	const shockwaveTimers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
 
@@ -266,37 +428,27 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
 
 	const handleConnectUserPeer = useCallback(
 		(nameInput?: string) => {
-			let currentName = connectedPeerName;
-			if (!userPeerConnected || !currentName) {
-				const generatedName =
-					nameInput?.trim() || currentName || generateRandomPeerUsername("user");
-				currentName = generatedName;
-				setConnectedPeerName(generatedName);
-				try {
-					localStorage.setItem("muhanai_connected_peer_name", generatedName);
-				} catch {}
-			} else if (nameInput) {
-				currentName = nameInput.trim();
-				setConnectedPeerName(currentName);
-				try {
-					localStorage.setItem("muhanai_connected_peer_name", currentName);
-				} catch {}
-			}
-			setUserPeerConnected((prev) => {
-				const next = !prev;
-				const displayName = currentName || "User Device";
-				addEvent(
-					next
-						? `🚀 [${displayName}] mounted into P2P mesh (WebRTC CRDT Lake active)`
-						: `🔌 [${displayName}] disconnected from P2P mesh`,
-				);
-				return next;
-			});
+			const finalName =
+				nameInput?.trim() || connectedPeerName || generateRandomPeerUsername("user");
+			setConnectedPeerName(finalName);
+			try {
+				localStorage.setItem("muhanai_connected_peer_name", finalName);
+			} catch {}
+
+			setUserPeerConnected(true);
+			addEvent(`🚀 [${finalName}] mounted into P2P mesh (WebRTC CRDT Lake active)`);
 			setLatencyMs((prev) => Math.max(1, Math.round(prev + (Math.random() - 0.5) * 12)));
 			playCosmicChime();
 		},
-		[connectedPeerName, userPeerConnected, addEvent],
+		[connectedPeerName, addEvent],
 	);
+
+	const handleDisconnectUserPeer = useCallback(() => {
+		setUserPeerConnected(false);
+		const displayName = connectedPeerName || "User Device";
+		addEvent(`🔌 [${displayName}] disconnected from P2P mesh`);
+		playCosmicChime();
+	}, [connectedPeerName, addEvent]);
 
 	const handleOpenUserGuide = useCallback(() => {
 		const guideNode = nodes.find((n) => n.id === "note-user-guide");
@@ -397,6 +549,7 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
 					eventsLog={eventsLog}
 					onNavigateHome={onNavigateHome}
 					onOpenUserGuide={handleOpenUserGuide}
+					onOpenPeerNameModal={handleOpenPeerModal}
 				/>
 
 				<CosmicPromptBar
@@ -414,6 +567,22 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
 					onSelectNode={handleSelectNode}
 				/>
 			)}
+
+			<PeerNameModal
+				isOpen={peerModalOpen}
+				mode={peerModalMode}
+				initialName={peerModalMode === "user" ? connectedPeerName : ""}
+				isConnected={userPeerConnected}
+				onConfirm={(name) => {
+					if (peerModalMode === "user") {
+						handleConnectUserPeer(name);
+					} else {
+						handleConnectSimulatedPeer(name);
+					}
+				}}
+				onDisconnect={handleDisconnectUserPeer}
+				onClose={() => setPeerModalOpen(false)}
+			/>
 		</div>
 	);
 };

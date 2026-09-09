@@ -11,4 +11,6 @@ coverage/
 # Build artifacts (recursive: types/ subdirectories like types/crypto/, types/protocols/)
 packages/*/types/**/*.js
 packages/*/types/**/*.js.map
+packages/*/types/**/*.d.ts
+packages/*/types/**/*.d.ts.map
 apps/web/package-lock.json
