@@ -25,6 +25,7 @@
 		"@agentmesh/db": "workspace:*",
 		"@agentmesh/llm-router": "workspace:*",
 		"@agentmesh/muhan-agent": "workspace:*",
+		"@agentmesh/personal-mcp": "workspace:*",
 		"@prisma/client": "^5.22.0",
 		"argon2": "^0.40.0",
 		"fastify": "^5.12.1",

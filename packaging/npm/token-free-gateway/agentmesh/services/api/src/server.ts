@@ -19,6 +19,7 @@ import { llmMeshRoutes } from "./llm-mesh-routes.js";
 import { llmRoutes } from "./llm-routes.js";
 import { networkRoutes } from "./network-routes.js";
 import { noemaRoutes } from "./noema-routes.js";
+import { omniRouteRoutes } from "./omniroute-routes.js";
 import pulseRoutes from "./pulse-routes.js";
 import { quorumRoutes } from "./quorum-routes.js";
 import { securityRoutes } from "./security-routes.js";
@@ -186,6 +187,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	await app.register(authRoutes);
 	await app.register(pulseRoutes);
 	await app.register(quorumRoutes);
+	await app.register(omniRouteRoutes);
 
 	// Wire the libp2p transport into the bridge. Best-effort: any failure here
 	// (mDNS unavailable on Docker bridge, identity write denied, etc.) keeps
