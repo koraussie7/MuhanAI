@@ -264,6 +264,22 @@ export const P2PConnectionGraph: React.FC = () => {
 	const [packetOffset, setPacketOffset] = useState<number>(0);
 	const [pingPulse, setPingPulse] = useState<boolean>(false);
 
+	// Sync generated peer name from localStorage
+	useEffect(() => {
+		if (typeof window !== "undefined") {
+			try {
+				const peerName = localStorage.getItem("muhanai_connected_peer_name");
+				if (peerName) {
+					setNodes((prev) =>
+						prev.map((n) =>
+							n.id === "peer-edge-4" ? { ...n, name: `${peerName} (You)` } : n,
+						),
+					);
+				}
+			} catch {}
+		}
+	}, []);
+
 	// Animated packet flow
 	useEffect(() => {
 		let animId: number;

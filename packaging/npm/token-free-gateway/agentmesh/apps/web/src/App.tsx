@@ -39,6 +39,7 @@ import {
 import { type SupportedLanguage, useI18n } from "./i18n";
 
 const SECTIONS = [
+	{ id: "dashboard", path: "/dashboard", label: "Dashboard", category: "Core" },
 	{ id: "find", path: "/", label: "Cosmic Mesh", category: "Core" },
 	{
 		id: "agent-cast",
@@ -205,6 +206,9 @@ const IMPLEMENTED_SECTIONS = new Set(SECTIONS.map((s) => s.id));
 
 function sectionIdFromPath(path: string) {
 	const cleanPath = path.split("?")[0] || "/";
+	if (cleanPath === "/dashboard") {
+		return "dashboard";
+	}
 	if (cleanPath === "/" || cleanPath === "/find" || cleanPath === "") {
 		return "find";
 	}
@@ -274,7 +278,7 @@ export function App() {
 		return (
 			<FindPage
 				onNavigateHome={() => {
-					navigate("/");
+					navigate("/dashboard");
 				}}
 			/>
 		);

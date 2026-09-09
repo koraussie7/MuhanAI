@@ -184,7 +184,13 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 						title="Mount your browser device into the P2P Obsidian network"
 					>
 						<Zap size={13} className={userPeerConnected ? "text-emerald-400" : "text-amber-400"} />
-						<span>{userPeerConnected ? "My Peer Connected" : "Connect My Device"}</span>
+						<span>
+							{userPeerConnected
+								? `${connectedPeerName || "User"} Connected`
+								: connectedPeerName
+									? `Connect ${connectedPeerName}`
+									: "Connect My Device"}
+						</span>
 					</button>
 
 					{/* Physics Settings Button */}

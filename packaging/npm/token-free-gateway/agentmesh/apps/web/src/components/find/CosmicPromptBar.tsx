@@ -41,7 +41,14 @@ interface ResolvedAnswer {
  * If the user later wants to remove the key, they hit "Forget" and the entry
  * is wiped from localStorage immediately.
  */
-type ByokProviderId = "openai" | "google" | "openrouter" | "groq" | "mistral";
+type ByokProviderId =
+	| "oauth_gateway"
+	| "openai"
+	| "deepseek"
+	| "google"
+	| "openrouter"
+	| "groq"
+	| "mistral";
 // Anthropic intentionally omitted: api.anthropic.com CORS allowlist is
 // limited to console.anthropic.com, so browser-direct BYOK is impossible.
 // When a server-side BYOK proxy ships, Anthropic will go behind that.
@@ -69,6 +76,56 @@ const SYSTEM_PROMPT =
 	"You are MuhanAI, a helpful multilingual assistant. Answer concisely and accurately in the same language as the user's question.";
 
 const BYOK_PROVIDERS: Record<ByokProviderId, ByokProviderDef> = {
+	oauth_gateway: {
+		label: "OAuth / Token-Free Gateway (WebAuth)",
+		hint: "http://127.0.0.1:3456/v1 또는 Bearer 토큰 (선택)",
+		models: [
+			"claude-3-7-sonnet",
+			"deepseek-r1",
+			"gpt-4o",
+			"gemini-2.5-pro",
+			"qwen-2.5",
+		],
+		defaultModel: "claude-3-7-sonnet",
+		build: (model, sys, user, key) => {
+			const trimmed = (key || "").trim();
+			const isUrl = trimmed.startsWith("http");
+			const baseUrl = isUrl ? trimmed.replace(/\/+$/, "") : "http://127.0.0.1:3456/v1";
+			return {
+				url: `${baseUrl}/chat/completions`,
+				headers: {
+					"Content-Type": "application/json",
+					...(trimmed && !isUrl ? { Authorization: `Bearer ${trimmed}` } : {}),
+				},
+				body: {
+					model,
+					messages: [
+						{ role: "system", content: sys },
+						{ role: "user", content: user },
+					],
+				},
+			};
+		},
+		parse: (d) => {
+			const x = d as { choices?: Array<{ message?: { content?: string } }> };
+			return x?.choices?.[0]?.message?.content ?? null;
+		},
+	},
+	deepseek: {
+		label: "DeepSeek",
+		hint: "sk-... (platform.deepseek.com → API Keys)",
+		models: ["deepseek-chat", "deepseek-reasoner"],
+		defaultModel: "deepseek-chat",
+		build: (model, sys, user, key) => ({
+			url: "https://api.deepseek.com/chat/completions",
+			headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+			body: { model, messages: [{ role: "system", content: sys }, { role: "user", content: user }] },
+		}),
+		parse: (d) => {
+			const x = d as { choices?: Array<{ message?: { content?: string } }> };
+			return x?.choices?.[0]?.message?.content ?? null;
+		},
+	},
 	openai: {
 		label: "OpenAI",
 		hint: "sk-... (OpenAI 대시보드 → API keys)",
@@ -168,16 +225,17 @@ function loadByok(): ByokSettings | null {
 		const raw = localStorage.getItem(BYOK_STORAGE_KEY);
 		if (!raw) return null;
 		const parsed = JSON.parse(raw) as Partial<ByokSettings>;
-		if (!parsed || typeof parsed.apiKey !== "string" || parsed.apiKey.length === 0) return null;
-		const provider = (parsed.provider ?? "openai") as ByokProviderId;
+		if (!parsed) return null;
+		const provider = (parsed.provider ?? "oauth_gateway") as ByokProviderId;
 		const def = BYOK_PROVIDERS[provider];
 		if (!def) return null;
+		if (provider !== "oauth_gateway" && (!parsed.apiKey || parsed.apiKey.length === 0)) return null;
 		return {
 			provider,
 			model: typeof parsed.model === "string" && def.models.includes(parsed.model)
 				? parsed.model
 				: def.defaultModel,
-			apiKey: parsed.apiKey,
+			apiKey: parsed.apiKey ?? "",
 		};
 	} catch {
 		return null;
@@ -211,7 +269,8 @@ function clearByok() {
  * error, empty response) so the caller can fall through to the next tier.
  */
 async function resolveAnswerFromByok(query: string, settings: ByokSettings | null): Promise<ResolvedAnswer | null> {
-	if (!settings || !settings.apiKey) return null;
+	if (!settings) return null;
+	if (settings.provider !== "oauth_gateway" && !settings.apiKey) return null;
 	const def = BYOK_PROVIDERS[settings.provider];
 	if (!def) return null;
 	const req = def.build(settings.model, SYSTEM_PROMPT, query, settings.apiKey);
@@ -381,6 +440,59 @@ async function resolveAnswerFromPollinations(query: string): Promise<ResolvedAns
 }
 
 /**
+ * Probe local Token-Free Gateway / WebAuth Chrome sessions.
+ * When the user runs the Token-Free Gateway locally, requests are handled by
+ * their logged-in browser OAuth session (Claude, ChatGPT, Gemini, DeepSeek, etc.)
+ * with zero token cost.
+ */
+async function resolveAnswerFromLocalOAuthGateway(query: string): Promise<ResolvedAnswer | null> {
+	if (typeof window === "undefined") return null;
+	const localEndpoints = [
+		"http://127.0.0.1:3456/v1/chat/completions",
+		"http://localhost:3456/v1/chat/completions",
+		"http://127.0.0.1:8080/v1/chat/completions",
+	];
+	for (const url of localEndpoints) {
+		try {
+			const controller = new AbortController();
+			const timer = setTimeout(() => controller.abort(), 4000);
+			const start = typeof performance !== "undefined" ? performance.now() : Date.now();
+			const res = await fetch(url, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					model: "claude-3-7-sonnet",
+					messages: [
+						{ role: "system", content: SYSTEM_PROMPT },
+						{ role: "user", content: query },
+					],
+				}),
+				signal: controller.signal,
+			});
+			clearTimeout(timer);
+			if (!res.ok) continue;
+			const data = (await res.json()) as {
+				choices?: Array<{ message?: { content?: string } }>;
+				model?: string;
+			};
+			const text = data?.choices?.[0]?.message?.content ?? "";
+			if (!text || text.trim().length === 0) continue;
+			const elapsed = (typeof performance !== "undefined" ? performance.now() : Date.now()) - start;
+			return {
+				text,
+				provider: "oauth-gateway (token-free)",
+				model: data?.model ?? "claude-3-7-sonnet",
+				latencyMs: Math.round(elapsed),
+				tier: "oauth-gateway",
+			};
+		} catch {
+			// Gateway not running on this endpoint
+		}
+	}
+	return null;
+}
+
+/**
  * POST /api/llm/chat — real keyless free-tier LLM pool.
  *
  * The endpoint forwards to the parallel provider chain in
@@ -391,13 +503,23 @@ async function resolveAnswerFromPollinations(query: string): Promise<ResolvedAns
  */
 async function resolveAnswerFromLlm(query: string): Promise<ResolvedAnswer | null> {
 	try {
+		const authToken =
+			typeof localStorage !== "undefined"
+				? localStorage.getItem("muhanai_auth_token") ||
+				  localStorage.getItem("auth_token") ||
+				  localStorage.getItem("token") ||
+				  localStorage.getItem("oauth_token")
+				: null;
+		const headers: Record<string, string> = { "Content-Type": "application/json" };
+		if (authToken) {
+			headers.Authorization = `Bearer ${authToken}`;
+		}
 		const res = await fetch("/api/llm/chat", {
 			method: "POST",
-			headers: { "Content-Type": "application/json" },
+			headers,
 			body: JSON.stringify({
 				prompt: query,
-				system:
-					"You are MuhanAI, a helpful multilingual assistant. Answer concisely and accurately in the same language as the user's question.",
+				system: SYSTEM_PROMPT,
 			}),
 		});
 		if (!res.ok) return null;
@@ -649,12 +771,14 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 		setIsPublished(false);
 
 		// Resolve the answer from the best available source, in order:
-		//   0. BYOK (browser → provider with user's own API key; key never leaves device)
-		//   1. browser → pollinations (CORS, anonymous tier, no centralized quota burned)
-		//   2. /api/llm/chat  → server-proxied keyless pool (pollinations, openrouter-free, hf-inference, …)
-		//   3. /api/mcp/rpc   → MCP quorum RPC
-		//   4. quorum template → offline fallback so the UI never hangs
+		//   0. BYOK / OAuth (user's configured API key or OAuth gateway)
+		//   1. Local OAuth Gateway (Token-Free WebAuth Chrome session if daemon running)
+		//   2. browser → pollinations (CORS, anonymous tier, no centralized quota burned)
+		//   3. /api/llm/chat  → server-proxied keyless pool with user OAuth token if present
+		//   4. /api/mcp/rpc   → MCP quorum RPC
+		//   5. quorum template → offline fallback so the UI never hangs
 		let resolved = await resolveAnswerFromByok(query, byokSettings);
+		if (!resolved) resolved = await resolveAnswerFromLocalOAuthGateway(query);
 		if (!resolved) resolved = await resolveAnswerFromPollinations(query);
 		if (!resolved) resolved = await resolveAnswerFromLlm(query);
 		if (!resolved) resolved = await resolveAnswerFromMcp(query);
