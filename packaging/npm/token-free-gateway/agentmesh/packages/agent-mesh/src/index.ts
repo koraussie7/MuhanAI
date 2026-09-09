@@ -3,6 +3,8 @@ import type { Agent, AgentExecutionContext, MeshExecuteParams } from "../../agen
 import { llmRouter } from "../../llm-router/src";
 import type { AgentRunResult } from "../../shared/types";
 
+export * from "./transports/index.js";
+
 /**
  * Simple domain agent that uses the LLM router.
  */
