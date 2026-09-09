@@ -9,8 +9,9 @@ routes = [
 ]
 workers_dev = false
 
-[vars]
-API_ORIGIN = "https://api.muhanai.com"
+# NOTE: API_ORIGIN is intentionally left unset until api.muhanai.com is deployed.
+# Leaving this empty prevents the worker from proxying /api/* requests to a dead origin,
+# which was causing HTTP 522 Cloudflare origin timeouts.
 
 [[kv_namespaces]]
 binding = "FEED_KV"

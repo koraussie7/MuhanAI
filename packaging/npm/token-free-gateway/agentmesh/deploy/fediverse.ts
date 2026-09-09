@@ -130,6 +130,7 @@ export async function handleFediverseRequest(
 					email: "contact@muhanai.com",
 				},
 			},
+			_demo: true,
 		};
 		return new Response(JSON.stringify(nodeinfoDoc), {
 			status: 200,
