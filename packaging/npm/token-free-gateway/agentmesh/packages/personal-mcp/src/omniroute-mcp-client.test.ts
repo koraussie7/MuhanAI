@@ -446,4 +446,133 @@ describe("OmniRouteMcpClient", () => {
 			else process.env.OMNIROUTE_COMMAND = previous;
 		}
 	});
+
+	it("compressPrompt() forwards level + target_model and parses compression result", async () => {
+		const { client, spawned } = makeClient();
+		const original =
+			"Please carefully review the following long prompt that contains a lot of filler text and try to keep the most important details.";
+		const compressed = "Review: long prompt; keep important details.";
+		const callPromise = client.compressPrompt({
+			text: original,
+			level: "heavy",
+			targetModel: "claude-opus-4",
+		});
+		const handle = await waitForSpawn(spawned);
+		await waitForInitializeAndRespond(handle);
+
+		const callReq = await waitForToolsCallAndRespond(handle, {
+			compressed,
+			originalChars: original.length,
+			compressedChars: compressed.length,
+			ratio: compressed.length / original.length,
+			level: "heavy",
+			strategy: "rtk+caveman",
+		});
+
+		expect(callReq?.["params"]).toMatchObject({
+			name: "omniroute_compress_prompt",
+			arguments: {
+				text: original,
+				level: "heavy",
+				target_model: "claude-opus-4",
+			},
+		});
+
+		const result = await callPromise;
+		expect(result.compressed).toBe(compressed);
+		expect(result.originalChars).toBe(original.length);
+		expect(result.compressedChars).toBe(compressed.length);
+		expect(result.ratio).toBeCloseTo(compressed.length / original.length);
+		expect(result.level).toBe("heavy");
+		expect(result.strategy).toBe("rtk+caveman");
+
+		await client.close();
+	});
+
+	it("compressPrompt() defaults level to medium when omitted", async () => {
+		const { client, spawned } = makeClient();
+		const callPromise = client.compressPrompt({ text: "hello world" });
+		const handle = await waitForSpawn(spawned);
+		await waitForInitializeAndRespond(handle);
+
+		await waitForToolsCallAndRespond(handle, {
+			compressed: "hello world",
+			originalChars: 11,
+			compressedChars: 11,
+			ratio: 1,
+		});
+
+		const result = await callPromise;
+		expect(result.level).toBe("medium");
+		expect(result.ratio).toBe(1);
+
+		await client.close();
+	});
+
+	it("compressPrompt() rejects when text is not a string", async () => {
+		const { client } = makeClient();
+		// @ts-expect-error — intentionally passing a non-string to verify the guard
+		await expect(client.compressPrompt({ text: 42 })).rejects.toBeInstanceOf(TypeError);
+	});
+
+	it("listCombos() parses provider lists and default combo", async () => {
+		const { client, spawned } = makeClient();
+		const callPromise = client.listCombos();
+		const handle = await waitForSpawn(spawned);
+		await waitForInitializeAndRespond(handle);
+
+		const callReq = await waitForToolsCallAndRespond(handle, {
+			defaultCombo: "best-quality",
+			combos: [
+				{
+					id: "best-quality",
+					name: "Best Quality",
+					description: "Anthropic + OpenAI top-tier",
+					strategy: "priority",
+					providers: ["anthropic", "openai", "google"],
+					models: ["claude-opus-4", "gpt-5"],
+				},
+				{
+					// No id — must be filtered out
+					name: "Ghost",
+				},
+				{
+					id: "free-first",
+					name: "Free First",
+					strategy: "quota-aware",
+					providers: ["groq", "gemini", "cerebras"],
+				},
+			],
+		});
+
+		expect(callReq?.["params"]).toMatchObject({
+			name: "omniroute_list_combos",
+			arguments: {},
+		});
+
+		const result = await callPromise;
+		expect(result.defaultCombo).toBe("best-quality");
+		expect(result.combos).toHaveLength(2);
+		expect(result.combos[0]?.id).toBe("best-quality");
+		expect(result.combos[0]?.providers).toEqual(["anthropic", "openai", "google"]);
+		expect(result.combos[0]?.models).toEqual(["claude-opus-4", "gpt-5"]);
+		expect(result.combos[1]?.strategy).toBe("quota-aware");
+
+		await client.close();
+	});
+
+	it("listCombos() returns empty list when upstream has no combos", async () => {
+		const { client, spawned } = makeClient();
+		const callPromise = client.listCombos();
+		const handle = await waitForSpawn(spawned);
+		await waitForInitializeAndRespond(handle);
+
+		await waitForToolsCallAndRespond(handle, { combos: [] });
+
+		const result = await callPromise;
+		expect(result.combos).toEqual([]);
+		expect(result.defaultCombo).toBeUndefined();
+
+		await client.close();
+	});
 });

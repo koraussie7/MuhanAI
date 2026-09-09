@@ -139,6 +139,57 @@ export interface OmniRouteHealthResult {
 	degraded?: Array<{ source: string; error: string }>;
 }
 
+/**
+ * Args for OmniRoute's RTK + Caveman prompt compressor.
+ *
+ * `level` mirrors OmniRoute's compression levels:
+ *   - "light"  — preserve meaning, ~15% reduction
+ *   - "medium" — drop filler, ~45% reduction (default)
+ *   - "heavy"  — keep only load-bearing tokens, ~75% reduction
+ *   - "max"    — lossy but compact, ~89% reduction
+ *
+ * `targetModel` lets the compressor bias the output toward the eventual
+ * decoder's strengths (e.g. shorter JSON-style output for tool-calling models).
+ */
+export interface OmniRouteCompressArgs {
+	text: string;
+	level?: "light" | "medium" | "heavy" | "max";
+	targetModel?: string;
+}
+
+export interface OmniRouteCompressionResult {
+	/** Compressed text — never longer than the input. */
+	compressed: string;
+	/** Original character count, for callers that want to log the delta. */
+	originalChars: number;
+	/** Compressed character count. */
+	compressedChars: number;
+	/** `compressedChars / originalChars` clamped to [0, 1]. */
+	ratio: number;
+	/** Echoed back from args. */
+	level: "light" | "medium" | "heavy" | "max";
+	/** Optional upstream strategy tag (e.g. "rtk+caveman", "rtk-only"). */
+	strategy?: string;
+}
+
+/**
+ * A single routing combo — a named bundle of providers + strategy that
+ * `omniroute_completion` can pin to via the `combo` arg.
+ */
+export interface OmniRouteCombo {
+	id: string;
+	name?: string;
+	description?: string;
+	strategy?: string;
+	providers?: string[];
+	models?: string[];
+}
+
+export interface OmniRouteCombosResult {
+	combos: OmniRouteCombo[];
+	defaultCombo?: string;
+}
+
 /** Loose shape of a MCP tools/call response — content blocks are flattened. */
 interface McpCallResult {
 	content?: Array<{ type: string; text?: string; data?: string }>;
@@ -289,6 +340,22 @@ export class OmniRouteMcpClient {
 	async getHealth(): Promise<OmniRouteHealthResult> {
 		const raw = await this.callTool("omniroute_get_health", {});
 		return parseHealth(raw);
+	}
+
+	async compressPrompt(args: OmniRouteCompressArgs): Promise<OmniRouteCompressionResult> {
+		if (typeof args.text !== "string") {
+			throw new TypeError("compressPrompt: `text` must be a string");
+		}
+		const payload: Record<string, unknown> = { text: args.text };
+		if (args.level) payload.level = args.level;
+		if (args.targetModel) payload.target_model = args.targetModel;
+		const raw = await this.callTool("omniroute_compress_prompt", payload);
+		return parseCompression(raw, args);
+	}
+
+	async listCombos(): Promise<OmniRouteCombosResult> {
+		const raw = await this.callTool("omniroute_list_combos", {});
+		return parseCombos(raw);
 	}
 
 	async close(): Promise<void> {
@@ -727,6 +794,64 @@ function parseHealth(raw: unknown): OmniRouteHealthResult {
 				}
 			: undefined,
 		degraded,
+	};
+}
+
+function parseCompression(raw: unknown, args: OmniRouteCompressArgs): OmniRouteCompressionResult {
+	const obj = unwrapObject(raw);
+	const compressedText = stringOr(obj.compressed ?? obj.compressed_text ?? obj.result, "") ?? "";
+	const originalChars =
+		numberOr(obj.originalChars ?? obj.original_chars, args.text.length) ?? args.text.length;
+	const compressedChars =
+		numberOr(obj.compressedChars ?? obj.compressed_chars, compressedText.length) ??
+		compressedText.length;
+	const ratio = originalChars > 0 ? compressedChars / originalChars : 0;
+	const echoedLevel: OmniRouteCompressionResult["level"] =
+		args.level === "light" ||
+		args.level === "medium" ||
+		args.level === "heavy" ||
+		args.level === "max"
+			? args.level
+			: "medium";
+	return {
+		compressed: compressedText,
+		originalChars,
+		compressedChars,
+		ratio: Math.max(0, Math.min(1, ratio)),
+		level: echoedLevel,
+		strategy: stringOr(obj.strategy ?? obj.method, undefined),
+	};
+}
+
+function parseCombos(raw: unknown): OmniRouteCombosResult {
+	const obj = unwrapObject(raw);
+	const items = Array.isArray(obj.combos)
+		? (obj.combos as Array<Record<string, unknown>>)
+		: Array.isArray(obj)
+			? (obj as Array<Record<string, unknown>>)
+			: [];
+	const combos: OmniRouteCombo[] = items
+		.filter((c) => c && typeof c === "object")
+		.map((c) => {
+			const providers = Array.isArray(c.providers)
+				? (c.providers as unknown[]).filter((p): p is string => typeof p === "string")
+				: undefined;
+			const models = Array.isArray(c.models)
+				? (c.models as unknown[]).filter((m): m is string => typeof m === "string")
+				: undefined;
+			return {
+				id: stringOr(c.id, "") ?? "",
+				name: stringOr(c.name, undefined),
+				description: stringOr(c.description ?? c.desc, undefined),
+				strategy: stringOr(c.strategy ?? c.routing_strategy, undefined),
+				providers,
+				models,
+			};
+		})
+		.filter((c) => c.id.length > 0);
+	return {
+		combos,
+		defaultCombo: stringOr(obj.defaultCombo ?? obj.default_combo, undefined),
 	};
 }
 
