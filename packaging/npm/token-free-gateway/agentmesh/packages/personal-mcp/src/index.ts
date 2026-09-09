@@ -9,3 +9,5 @@ export * from "./store-factory";
 export * from "./store-types";
 export * from "./tools";
 export * from "./user-object";
+export * from "./weknora-mcp-client";
+export * from "./hound-mcp-client";
