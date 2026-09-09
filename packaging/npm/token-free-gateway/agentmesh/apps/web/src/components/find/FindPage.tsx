@@ -55,6 +55,23 @@ function playCosmicChime() {
 	} catch {}
 }
 
+export function generateRandomPeerUsername(role: "user" | "peer" = "user"): string {
+	const cosmicAdjectives = [
+		"Cosmic", "Quantum", "Stellar", "Nebula", "Nova", "Cyber",
+		"Astro", "Solar", "Lunar", "Flux", "Vector", "Hyper", "Synapse",
+		"Zenith", "Apex", "Orbit", "Plasma", "Radiant", "Galactic", "Infinite"
+	];
+	const cosmicNouns = [
+		"Voyager", "Explorer", "Pioneer", "Architect", "Navigator",
+		"Pilot", "Cipher", "Runner", "Guardian", "Scholar", "Weaver",
+		"Coder", "Oracle", "Beacon", "Specter", "Seeker", "Builder"
+	];
+	const adj = cosmicAdjectives[Math.floor(Math.random() * cosmicAdjectives.length)];
+	const noun = cosmicNouns[Math.floor(Math.random() * cosmicNouns.length)];
+	const num = Math.floor(Math.random() * 900 + 100);
+	return role === "user" ? `${adj}_${noun}_${num}` : `Peer_${adj}_${num}`;
+}
+
 export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
 	const [nodes, setNodes] = useState<CosmicNode[]>(INITIAL_NODES);
 	const [edges, setEdges] = useState<CosmicEdge[]>(INITIAL_EDGES);
@@ -203,7 +220,7 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
 	const handleConnectSimulatedPeer = useCallback(
 		(nameInput?: string) => {
 			const finalName =
-				nameInput?.trim() || connectedPeerName || `Peer #${Math.floor(Math.random() * 900 + 100)}`;
+				nameInput?.trim() || generateRandomPeerUsername("peer");
 			setConnectedPeerName(finalName);
 			try {
 				localStorage.setItem("muhanai_connected_peer_name", finalName);
@@ -249,18 +266,28 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
 
 	const handleConnectUserPeer = useCallback(
 		(nameInput?: string) => {
-			if (nameInput) {
-				setConnectedPeerName(nameInput);
+			let currentName = connectedPeerName;
+			if (!userPeerConnected || !currentName) {
+				const generatedName =
+					nameInput?.trim() || currentName || generateRandomPeerUsername("user");
+				currentName = generatedName;
+				setConnectedPeerName(generatedName);
 				try {
-					localStorage.setItem("muhanai_connected_peer_name", nameInput);
+					localStorage.setItem("muhanai_connected_peer_name", generatedName);
+				} catch {}
+			} else if (nameInput) {
+				currentName = nameInput.trim();
+				setConnectedPeerName(currentName);
+				try {
+					localStorage.setItem("muhanai_connected_peer_name", currentName);
 				} catch {}
 			}
 			setUserPeerConnected((prev) => {
 				const next = !prev;
-				const displayName = nameInput || connectedPeerName || "User Device";
+				const displayName = currentName || "User Device";
 				addEvent(
 					next
-						? `🚀 [${displayName}] mounted into P2P mesh`
+						? `🚀 [${displayName}] mounted into P2P mesh (WebRTC CRDT Lake active)`
 						: `🔌 [${displayName}] disconnected from P2P mesh`,
 				);
 				return next;
@@ -268,7 +295,7 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
 			setLatencyMs((prev) => Math.max(1, Math.round(prev + (Math.random() - 0.5) * 12)));
 			playCosmicChime();
 		},
-		[connectedPeerName, addEvent],
+		[connectedPeerName, userPeerConnected, addEvent],
 	);
 
 	const handleOpenUserGuide = useCallback(() => {

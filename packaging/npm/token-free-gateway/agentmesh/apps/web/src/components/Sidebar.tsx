@@ -13,6 +13,7 @@ import {
 	Radio,
 	Search,
 	Settings,
+	Smartphone,
 	Sparkles,
 	Users,
 	X,
@@ -78,6 +79,8 @@ function renderIcon(key: string): React.ReactNode {
 			return <Coins size={18} />;
 		case "settings":
 			return <Settings size={18} />;
+		case "smartphone":
+			return <Smartphone size={18} />;
 		default:
 			return null;
 	}

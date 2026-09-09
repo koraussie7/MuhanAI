@@ -35,9 +35,9 @@ export const NAV_GROUPS: NavGroup[] = [
 		items: [
 			{
 				id: "dashboard",
-				label: "Cosmic Mesh",
-				path: "/",
-				iconKey: "search",
+				label: "Dashboard",
+				path: "/dashboard",
+				iconKey: "layout-dashboard",
 			},
 			{
 				id: "agent-cast",
