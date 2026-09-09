@@ -1,1 +1,0 @@
-{"version":3,"file":"ollama-proxy.d.ts","sourceRoot":"","sources":["../src/ollama-proxy.ts"],"names":[],"mappings":"AAAA,OAAO,IAAI,MAAM,WAAW,CAAC;AAE7B,qBAAa,WAAW;IACtB,OAAO,CAAC,QAAQ,CAAC,MAAM,CAAS;IAChC,OAAO,CAAC,MAAM,CAAa;gBAEf,MAAM,SAA2B;IAI7C,UAAU,CAAC,MAAM,EAAE,GAAG;IAKtB,aAAa,KACG,KAAK,IAAI,CAAC,eAAe,EAAE,KAAK,IAAI,CAAC,cAAc;CA4BpE"}

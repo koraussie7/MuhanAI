@@ -7,6 +7,8 @@ dist
 /npm
 *.tgz
 /token-free-gateway
+pnpm-lock.yaml
+packaging/npm/token-free-gateway/pnpm-lock.yaml
 
 # dev scripts
 generate_git_history.py
