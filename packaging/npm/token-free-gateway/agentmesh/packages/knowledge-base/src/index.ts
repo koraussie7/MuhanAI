@@ -10,4 +10,7 @@ export * from "./ingestion";
 export * from "./pgvector-store";
 export * from "./retrieval";
 export * from "./sources";
+export * from "./weknora-client";
+export * from "./doc-parser";
+export * from "./wiki-sync";
 export * from "./wheel";

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AiVsHuman } from "./AiVsHuman";
 import { AskNetwork } from "./AskNetwork";
 import { CreditBalance } from "./CreditBalance";
+import { DocumentUploadPanel } from "./DocumentUploadPanel";
 import { HelpNeeded } from "./HelpNeeded";
 import { HumanKnowledgeWanted } from "./HumanKnowledgeWanted";
 import { NetworkPulse } from "./NetworkPulse";
@@ -19,7 +20,7 @@ interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
-	const [activeTab, setActiveTab] = useState<"tasks" | "verify" | "knowledge">("tasks");
+	const [activeTab, setActiveTab] = useState<"tasks" | "verify" | "knowledge" | "kb">("tasks");
 
 	const navigate = (path: string) => {
 		if (onNavigate) {
@@ -188,16 +189,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 						<span className="dash-tab-count">3</span>
 					</button>
 
-					<button
-						type="button"
-						className={`dash-tab-btn ${activeTab === "knowledge" ? "active" : ""}`}
-						onClick={() => setActiveTab("knowledge")}
-					>
-						<Flame size={15} />
-						<span>Trending Intelligence & Teach</span>
-						<span className="dash-tab-count">5</span>
-					</button>
-				</div>
+				<button
+					type="button"
+					className={`dash-tab-btn ${activeTab === "knowledge" ? "active" : ""}`}
+					onClick={() => setActiveTab("knowledge")}
+				>
+					<Flame size={15} />
+					<span>Trending Intelligence & Teach</span>
+					<span className="dash-tab-count">5</span>
+				</button>
+				<button
+					type="button"
+					className={`dash-tab-btn ${activeTab === "kb" ? "active" : ""}`}
+					onClick={() => setActiveTab("kb")}
+				>
+					<span>Knowledge Base</span>
+					<span className="dash-tab-count">+</span>
+				</button>
+			</div>
 
 				{/* Tab 1: Help Needed & Unsolved Problems */}
 				{activeTab === "tasks" && (
@@ -221,6 +230,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 						<TrendingQuestions maxItems={5} />
 						<HumanKnowledgeWanted maxItems={3} />
 						<TeachAI />
+					</div>
+				)}
+
+				{/* Tab 4: Knowledge Base Upload */}
+				{activeTab === "kb" && (
+					<div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+						<DocumentUploadPanel
+							onUploaded={(result) => {
+								console.log("[Dashboard] uploaded", result);
+							}}
+						/>
 					</div>
 				)}
 			</section>
