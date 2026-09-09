@@ -16,7 +16,7 @@ as Hound. The dependency is isolated; we never import OmniRoute's source.
 
 ## What MuhanAI exposes
 
-Six curated tools — the ones agents actually use day-to-day. The full 30+ tool surface is
+Eight curated tools — the ones agents actually use day-to-day. The full 30+ tool surface is
 reachable indirectly via `omniroute_completion` (which routes to any provider/model).
 
 | Tool id | MCP upstream | Purpose |
@@ -27,6 +27,8 @@ reachable indirectly via `omniroute_completion` (which routes to any provider/mo
 | `omniroute_web_search` | `omniroute_web_search` | Multi-provider search (Serper, Brave, Perplexity, Exa, Tavily) |
 | `omniroute_web_fetch` | `omniroute_web_fetch` | URL extraction (Firecrawl, Jina Reader, Tavily, ...) |
 | `omniroute_get_health` | `omniroute_get_health` | Server uptime, circuit breakers, rate limits, cache hit rate |
+| `omniroute_compress_prompt` | `omniroute_compress_prompt` | RTK + Caveman prompt compression (15-95% token reduction) |
+| `omniroute_list_combos` | `omniroute_list_combos` | List configured routing combos (named provider+strategy bundles) |
 
 When the OmniRoute binary is missing, every tool returns `{ ..., fallback: "omniroute_unavailable" }` —
 agents never crash because of an optional integration.
@@ -106,6 +108,20 @@ await executePersonalTool(userId, "omnirouteWebFetch", {
 
 // Inspect server health (uptime, circuit breakers, rate limits, cache)
 await executePersonalTool(userId, "omnirouteGetHealth", {});
+
+// Compress a long prompt with RTK + Caveman (15-95% token reduction)
+const compressed = await executePersonalTool(userId, "omnirouteCompressPrompt", {
+  text: "very long prompt ...",
+  level: "medium", // "light" | "medium" | "heavy" | "max"
+});
+
+// Browse configured routing combos before pinning a `combo` arg
+const { combos, defaultCombo } = await executePersonalTool(userId, "omnirouteListCombos", {});
+await executePersonalTool(userId, "omnirouteCompletion", {
+  model: "auto",
+  messages: [...],
+  combo: defaultCombo ?? combos[0]?.id,
+});
 ```
 
 ## Architecture
@@ -150,7 +166,7 @@ public method either returns a `*_unavailable` fallback or throws `OmniRouteUnav
 
 ```bash
 cd packages/personal-mcp
-pnpm test                              # 28 tests total (12 new OmniRoute + Hound + WeKnora)
+pnpm test                              # 33 tests total (17 OmniRoute + 10 Hound + 6 WeKnora)
 pnpm test -- omniroute-mcp-client      # OmniRoute-only
 ```
 
@@ -180,8 +196,6 @@ and renders the 8 most-exhausted providers as a progress bar list.
 When the OmniRoute MCP is unreachable the widget falls back to the deterministic
 stub from `services/api/src/omniroute-routes.ts` and shows the **CACHED** badge.
 The API also exposes `/api/omniroute/health` for upstream reachability checks.
-
-## Related
 
 ## Risks & mitigations
 

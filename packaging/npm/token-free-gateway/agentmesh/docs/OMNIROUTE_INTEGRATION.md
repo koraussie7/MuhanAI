@@ -56,11 +56,15 @@
 
 - 신규 파일 `packages/personal-mcp/src/omniroute-mcp-client.ts` (Hound와 동일 구조: stdio JSON-RPC, lazy spawn, env 설정, graceful fallback)
 - 환경변수: `OMNIROUTE_COMMAND` (default `omniroute-mcp-server`), `OMNIROUTE_ARGS`, `OMNIROUTE_DISABLED`
-- PERSONAL_MCP_TOOLS 추가:
-  - `omniroute_completion` — 단일/배치 모델 호출
-  - `omniroute_auto_route` — `model: "auto"` 자동 라우팅
+- PERSONAL_MCP_TOOLS 추가 (2026-09-09 구현 완료, 8개):
+  - `omniroute_completion` — 단일/배치 모델 호출 (auto/combo 라우팅 통합)
+  - `omniroute_auto_route` — `model: "auto"` 자동 라우팅 (completion에 통합됨)
   - `omniroute_list_models` — 카탈로그 조회
   - `omniroute_compress_prompt` — RTK+Caveman 압축
+  - `omniroute_list_combos` — 콤보 카탈로그 (combo 인자 검증 가능)
+  - `omniroute_check_quota` — 무료 티어 쿼터 조회
+  - `omniroute_web_search` / `omniroute_web_fetch` — 다중 백엔드 검색/추출
+  - `omniroute_get_health` — 서버 헬스/서킷 브레이커/캐시
 - **비용**: 1-2일 (Hound 임베드 패턴 동일, 테스트 코드 4-5개)
 - **이점**:
   - 356 모델 즉시 접근
@@ -131,3 +135,4 @@
 | 날짜 | 작성자 | 내용 |
 | --- | --- | --- |
 | 2026-09-09 | Claude | 초안 작성 (v3.8.51 기반) |
+| 2026-09-09 | Claude | 시나리오 1 보강: `omniroute_compress_prompt` (RTK+Caveman) + `omniroute_list_combos` 추가, 도구 카운트 6→8 |

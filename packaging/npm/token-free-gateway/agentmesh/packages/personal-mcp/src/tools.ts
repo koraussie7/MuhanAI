@@ -264,6 +264,39 @@ export const PERSONAL_MCP_TOOLS: Tool[] = [
 			required: [],
 		},
 	},
+	{
+		id: "omniroute_compress_prompt",
+		name: "omnirouteCompressPrompt",
+		description:
+			"Compress a prompt with OmniRoute's RTK + Caveman strategy (15-95% token reduction; average 89%). Use before sending large context to a model.",
+		inputSchema: {
+			type: "object",
+			properties: {
+				text: { type: "string", description: "Prompt to compress" },
+				level: {
+					type: "string",
+					enum: ["light", "medium", "heavy", "max"],
+					description: "Compression aggressiveness (default: medium)",
+				},
+				targetModel: {
+					type: "string",
+					description: "Optional model id to bias the compression toward",
+				},
+			},
+			required: ["text"],
+		},
+	},
+	{
+		id: "omniroute_list_combos",
+		name: "omnirouteListCombos",
+		description:
+			"List configured routing combos (named bundles of providers + strategy) usable as the `combo` arg of `omniroute_completion`.",
+		inputSchema: {
+			type: "object",
+			properties: {},
+			required: [],
+		},
+	},
 ];
 
 export async function executePersonalTool(
@@ -460,6 +493,37 @@ export async function executePersonalTool(
 			const client = getOmniRouteClient();
 			if (!client) return { fallback: "omniroute_unavailable" };
 			return client.getHealth();
+		}
+
+		case "omnirouteCompressPrompt": {
+			const client = getOmniRouteClient();
+			if (!client) {
+				return {
+					compressed: String(args.text ?? ""),
+					originalChars: String(args.text ?? "").length,
+					compressedChars: String(args.text ?? "").length,
+					ratio: 1,
+					level: "medium",
+					fallback: "omniroute_unavailable",
+				};
+			}
+			return client.compressPrompt({
+				text: String(args.text ?? ""),
+				level:
+					args.level === "light" ||
+					args.level === "medium" ||
+					args.level === "heavy" ||
+					args.level === "max"
+						? args.level
+						: undefined,
+				targetModel: typeof args.targetModel === "string" ? args.targetModel : undefined,
+			});
+		}
+
+		case "omnirouteListCombos": {
+			const client = getOmniRouteClient();
+			if (!client) return { combos: [], fallback: "omniroute_unavailable" };
+			return client.listCombos();
 		}
 
 		default:
