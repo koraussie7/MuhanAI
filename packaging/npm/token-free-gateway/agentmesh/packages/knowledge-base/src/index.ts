@@ -1,4 +1,6 @@
 export * from "./chunking";
+export * from "./decay/engine";
+export * from "./decay/fsrs";
 export * from "./embeddings";
 export * from "./folklore-federation";
 export * from "./folklore-types";

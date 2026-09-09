@@ -1,4 +1,5 @@
 import type { KnowledgeNode } from "../../shared/types";
+import { decayEngine } from "./decay/engine.js";
 import { type EmbeddingService, embeddingService } from "./embeddings";
 
 export interface RetrievalQuery {
@@ -58,7 +59,14 @@ export class VectorStore {
 			score: this.embedder.cosineSimilarity(qVec, item.vector),
 		}));
 
-		return scored.sort((a, b) => b.score - a.score).slice(0, limit);
+		const results = scored.sort((a, b) => b.score - a.score).slice(0, limit);
+
+		// P1 (stellavault port): record each returned hit as an access so
+		// the FSRS decay engine can refresh stability. RRF fusion in P2
+		// will consume getRetrievabilityScores() built from these records.
+		for (const r of results) decayEngine.recordAccess(r.node.id, "search");
+
+		return results;
 	}
 }
 
