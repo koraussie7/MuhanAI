@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { createLibp2pTransport } from "@agentmesh/federation-transport";
-import { getLogger } from "@agentmesh/shared";
+import { createLibp2pTransport } from "@agentmesh/federation";
+import { getLogger } from "@agentmesh/shared-types";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";

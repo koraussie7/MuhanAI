@@ -1,0 +1,17 @@
+{
+	"name": "@agentmesh/shared-types",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"main": "types/index.ts",
+	"types": "types/index.ts",
+	"scripts": {
+		"build": "tsc -p tsconfig.json",
+		"typecheck": "tsc -p tsconfig.json --noEmit",
+		"lint": "tsc -p tsconfig.json --noEmit",
+		"test": "tsx --test runtime.test.ts types/**/*.test.ts"
+	},
+	"dependencies": {
+		"pino": "^10.3.1"
+	}
+}

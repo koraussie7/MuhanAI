@@ -1,4 +1,4 @@
-import type { FederationNode, FederationSyncResult, SignedRecord } from "@agentmesh/shared";
+import type { FederationNode, FederationSyncResult, SignedRecord } from "@agentmesh/shared-types";
 
 export interface Transport {
 	start(): Promise<void>;

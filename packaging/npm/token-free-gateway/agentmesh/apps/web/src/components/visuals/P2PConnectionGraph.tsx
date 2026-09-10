@@ -1,6 +1,7 @@
 import { RefreshCw, Wifi, Zap } from "lucide-react";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
+import { formatPeerCountBare } from "../../lib/mesh-stats.js";
 
 export interface P2PNode {
 	id: string;
@@ -337,7 +338,7 @@ export const P2PConnectionGraph: React.FC = () => {
 						<span>P2P MESH TOPOLOGY</span>
 					</div>
 					<span className="p2p-stats-summary">
-						12,482 Peers Online · WebRTC & libp2p DHT Active
+						{formatPeerCountBare(undefined)} Peers Online · WebRTC & libp2p DHT Active
 					</span>
 				</div>
 

@@ -24,7 +24,7 @@
  *   - The stream is closed when the Fastify request emits 'close'.
  */
 
-import type { PulseMessage } from "@agentmesh/p2p";
+import type { PulseMessage } from "@agentmesh/peer-mesh";
 import type { PulseSink } from "./gossip-bridge.js";
 
 const HEARTBEAT_EVENT = "heartbeat";

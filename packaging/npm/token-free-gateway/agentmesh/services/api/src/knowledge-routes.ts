@@ -1,4 +1,4 @@
-import { TransportManager } from "@agentmesh/federation-transport";
+import { TransportManager } from "@agentmesh/federation";
 import type { FederationNode } from "@agentmesh/knowledge-base";
 import { FederationMesh, identityService, wheelProtocol } from "@agentmesh/knowledge-base";
 import type { FastifyInstance } from "fastify";

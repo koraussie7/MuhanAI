@@ -96,7 +96,7 @@ export class NoemaService {
 	async verifySignature(manifest: Record<string, unknown>, signature: string): Promise<boolean> {
 		try {
 			// Use the federation-transport ed25519/ECDSA verify function
-			const { verify } = await import("@agentmesh/federation-transport");
+			const { verify } = await import("@agentmesh/federation");
 
 			// Create canonical payload from manifest (sorted keys for determinism)
 			const payload = JSON.stringify(manifest, Object.keys(manifest).sort());

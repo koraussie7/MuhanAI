@@ -22,9 +22,9 @@ const DEFAULT_MCP = {
 };
 
 const DEFAULT_HUMAN = {
-	online: 3821,
-	available: 1420,
-	specialties: 42,
+	online: undefined,
+	available: undefined,
+	specialties: undefined,
 };
 
 const DEFAULT_AGENTS = [

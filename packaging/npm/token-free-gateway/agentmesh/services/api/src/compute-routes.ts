@@ -1,4 +1,4 @@
-import { computeTribute } from "@agentmesh/compute";
+import { computeTribute } from "@agentmesh/compute-market";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { clientError, formatZodError } from "./error-shapes.js";

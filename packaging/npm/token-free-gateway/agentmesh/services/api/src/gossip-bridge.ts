@@ -22,7 +22,7 @@
  * fan-out, ported to an in-process pub/sub pattern.
  */
 
-import type { PulseMessage } from "@agentmesh/p2p";
+import type { PulseMessage } from "@agentmesh/peer-mesh";
 
 export type { PulseMessage };
 

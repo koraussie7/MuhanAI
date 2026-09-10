@@ -1,0 +1,70 @@
+version: "3.9"
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: muhanai-postgres
+    environment:
+      POSTGRES_USER: muhanai
+      POSTGRES_PASSWORD: muhanai
+      POSTGRES_DB: muhanai
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U muhanai"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ../
+      dockerfile: deploy/api.Dockerfile
+    container_name: muhanai-api
+    environment:
+      - DATABASE_URL=postgresql://muhanai:muhanai@postgres:5432/muhanai
+      - API_KEY=${API_KEY}
+      - P2P_LISTEN=/ip4/0.0.0.0/tcp/4001
+      - P2P_BOOTSTRAP=/ip4/seed:4001/p2p/12D3KooSEED...
+      - ALLOWED_ORIGINS=https://muhanai.com,https://www.muhanai.com
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  seed:
+    build:
+      context: ../
+      dockerfile: deploy/relay.Dockerfile
+    container_name: muhanai-seed
+    command: ["node", "services/p2p-node/dist/index.js", "--seed"]
+    environment:
+      - P2P_LISTEN=/ip4/0.0.0.0/tcp/4001
+      - P2P_RELAY_SERVER=true
+      - P2P_DHT_SERVER=true
+    ports:
+      - "4001:4001"
+      - "4001:4001/udp"
+    restart: unless-stopped
+
+  relay:
+    build:
+      context: ../
+      dockerfile: deploy/relay.Dockerfile
+    container_name: muhanai-relay
+    command: ["node", "services/p2p-node/dist/index.js", "--relay"]
+    environment:
+      - P2P_LISTEN=/ip4/0.0.0.0/tcp/4002
+      - P2P_BOOTSTRAP=/ip4/seed:4001/p2p/12D3KooSEED...
+      - P2P_RELAY_SERVER=true
+    ports:
+      - "4002:4002"
+    restart: unless-stopped
+
+volumes:
+  pg-data:

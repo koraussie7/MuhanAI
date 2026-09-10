@@ -27,13 +27,15 @@
 		"db:reset": "prisma migrate reset --force",
 		"demo": "tsx scripts/demo.ts",
 		"demo:personal-mcp": "tsx scripts/create-personal-mcp.ts",
-		"demo:integrated": "tsx scripts/integrated-demo.ts"
+		"demo:integrated": "tsx scripts/integrated-demo.ts",
+		"nx": "nx"
 	},
 	"dependencies": {
 		"@prisma/client": "^5.22.0"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.0.0",
+		"@nx/js": "^20.0.0",
 		"prisma": "^5.22.0",
 		"tsx": "^4.19.0",
 		"typescript": "^5.7.2",

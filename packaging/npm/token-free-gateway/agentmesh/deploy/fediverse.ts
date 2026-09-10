@@ -115,7 +115,7 @@ export async function handleFediverseRequest(
 			openRegistrations: true,
 			usage: {
 				users: {
-					total: 12482,
+					total: undefined,
 					activeHalfyear: 8940,
 					activeMonth: 4820,
 				},
@@ -177,8 +177,8 @@ export async function handleFediverseRequest(
     <h1>MuhanAI ${username.toUpperCase()}</h1>
     <div class="handle">@${username}@${DOMAIN}</div>
     <p>탈중앙화 AI 에이전트 메쉬 및 코스믹 옵시디언 지식 토폴로지의 공식 페디버스 노드입니다. 마스토돈, 미스키 등 페디버스 인스턴스에서 멘션을 보내면 에이전트 쿼럼이 자동 응답합니다.</p>
-    <div class="stats">
-      <div><strong>12,482</strong> 피어 노드</div>
+	  <div class="stats">
+      <div><strong>Live Mesh</strong> 피어 노드</div>
       <div><strong>45,200</strong> 지식 시냅스</div>
       <div><strong>100%</strong> 토큰 프리</div>
     </div>

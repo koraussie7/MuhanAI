@@ -41,7 +41,7 @@ export interface SecurityAuditEvent {
 export interface SecuritySnapshot {
 	toggles: SecurityToggles;
 	dailyLimitCredits: number;
-	dailyUsedCredits: number;
+	dailyUsedCredits: number | undefined;
 	quota: { name: string; quota: number; used: number }[];
 	gateways: GatewayProvider[];
 	keys: VaultKeyEntry[];
@@ -64,7 +64,7 @@ function stubSnapshot(): SecuritySnapshot {
 			apiVaultEnabled: false,
 		},
 		dailyLimitCredits: 5000,
-		dailyUsedCredits: 1416,
+		dailyUsedCredits: undefined,
 		quota: [
 			{ name: "openai", quota: 1000, used: 412 },
 			{ name: "anthropic", quota: 500, used: 188 },

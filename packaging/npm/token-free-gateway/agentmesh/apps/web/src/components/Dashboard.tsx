@@ -1,6 +1,7 @@
 import { Flame, ListTodo, Network, Radio, ShieldCheck, Sparkles } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
+import { formatPeerCountBare } from "../lib/mesh-stats.js";
 import { AiVsHuman } from "./AiVsHuman";
 import { AskNetwork } from "./AskNetwork";
 import { CreditBalance } from "./CreditBalance";
@@ -115,7 +116,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 					<div className="telemetry-stat-card">
 						<span className="telemetry-stat-lbl">Active P2P Nodes</span>
 						<span className="telemetry-stat-val" style={{ color: "var(--cline-sky)" }}>
-							12,482 Peers
+							{formatPeerCountBare(pulse?.agentsOnline ?? undefined)} Peers
 						</span>
 					</div>
 					<div className="telemetry-stat-card">

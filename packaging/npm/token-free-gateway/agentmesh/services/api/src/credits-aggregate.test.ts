@@ -37,7 +37,7 @@ describe("GET /api/credits (aggregate)", () => {
 		expect(typeof body.balance).toBe("string");
 		expect(body.userId).toBe("default");
 		expect(body.dailyLimitCredits).toBe(5000);
-		expect(body.dailyUsedCredits).toBe(1416);
+		expect(body.dailyUsedCredits).toBeUndefined();
 		expect(Array.isArray(body.quota)).toBe(true);
 		expect(body.quota.length).toBeGreaterThan(0);
 	});

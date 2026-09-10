@@ -1,7 +1,7 @@
 /**
  * Computer-use HTTP route — `/api/computer-use/run`.
  *
- * Wraps the `@agentmesh/muhan-agent` computer-use router over Fastify.
+ * Wraps the `@agentmesh/agent-daemon` computer-use router over Fastify.
  * Body carries the BYOK vision provider key, the goal, and optional
  * model/step overrides. The server owns the e2b Desktop sandbox so
  * the user's browser stays thin (it just sends goals + receives
@@ -16,7 +16,7 @@ import {
 	buildComputerUseRunHandler,
 	COMPUTER_USE_RUN_CAPABILITY,
 	E2bBrowserAdapter,
-} from "@agentmesh/muhan-agent";
+} from "@agentmesh/agent-daemon";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { clientError, formatZodError } from "./error-shapes.js";

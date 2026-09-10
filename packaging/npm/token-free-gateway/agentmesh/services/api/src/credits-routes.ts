@@ -17,7 +17,7 @@ import {
 	grantWelcomeBonus,
 	spendCredits,
 	WELCOME_CREDITS,
-} from "@agentmesh/credits";
+} from "@agentmesh/credit-system";
 import { Prisma } from "@prisma/client";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
@@ -142,8 +142,9 @@ export async function creditsRoutes(app: FastifyInstance) {
 		userId: z.string().min(1).max(256).optional(),
 	});
 
-	const dailyLimitCredits = 5000;
-	const dailyUsedCredits = 1416;
+  const dailyLimitCredits = 5000;
+	const isDemo = process.env.NODE_ENV === "development" || process.env.DEMO_MODE === "true";
+	const dailyUsedCredits = isDemo ? 1416 : undefined;
 	const quota = [
 		{ name: "openai", quota: 1000, used: 412 },
 		{ name: "anthropic", quota: 500, used: 188 },
