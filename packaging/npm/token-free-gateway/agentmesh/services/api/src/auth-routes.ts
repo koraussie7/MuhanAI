@@ -18,7 +18,7 @@ const LoginSchema = z.object({
 
 export async function authRoutes(app: FastifyInstance) {
 	async function getPrisma() {
-		const { prisma } = await import("@agentmesh/db");
+		const { prisma } = await import("@agentmesh/database");
 		return prisma;
 	}
 

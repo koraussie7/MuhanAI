@@ -194,8 +194,8 @@ async function getPulse(
 			(i) => i.category === "source_gap" || i.category === "experience_gap",
 		).length,
 		mcpTasksWaiting: 4,
-		agentsOnline: 12_482,
-		humansOnline: 3_821,
+		agentsOnline: undefined,
+		humansOnline: undefined,
 		_demo: true,
 	});
 }
@@ -205,7 +205,7 @@ async function getNetwork(_request: Request): Promise<Response> {
 		compute: { cpu: 1284, gpu: 456, webgpu: 892, totalTFLOPS: 18400 },
 		llm: { providers: 13, models: 25, free: 18 },
 		mcp: { servers: 34, tools: 142, categories: 8 },
-		human: { online: 3821, available: 1420, specialties: 42 },
+		human: { online: undefined, available: 1420, specialties: 42 },
 		_demo: true,
 	});
 }

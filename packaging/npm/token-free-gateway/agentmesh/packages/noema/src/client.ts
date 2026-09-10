@@ -1,4 +1,4 @@
-import { spawn } from "@agentmesh/shared";
+import { spawn } from "@agentmesh/shared-types";
 import type { DownloadStatus, ModelSearchResult } from "./types.js";
 
 // All spawn calls below pass args as an array — array-form args are passed

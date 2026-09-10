@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { CreditBalance } from "./CreditBalance.js";
+import { formatPeerCountBare } from "../lib/mesh-stats.js";
 import {
 	isNavItemActive,
 	NAV_GROUPS as NAV_GROUPS_CONFIG,
@@ -190,7 +191,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 			<div className="sidebar-footer">
 				<div className="footer-status-pill">
 					<span className="pulse-dot" />
-					{!isCollapsed ? <span>P2P Mesh: 12,482 Nodes</span> : <span>Live</span>}
+					{!isCollapsed ? <span>P2P Mesh: {formatPeerCountBare(undefined)} Nodes</span> : <span>Live</span>}
 				</div>
 
 				<div className="footer-user-card" onClick={() => onItemClick("/token-bank")}>

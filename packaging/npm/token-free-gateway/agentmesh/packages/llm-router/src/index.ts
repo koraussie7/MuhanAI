@@ -345,4 +345,4 @@ export type {
 	ClusterConfig,
 	LoadBalancingStrategy,
 	InferenceResult,
-} from "@agentmesh/p2p";
+} from "@agentmesh/peer-mesh";

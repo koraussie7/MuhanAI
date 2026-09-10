@@ -3554,21 +3554,6 @@
         const counterEl = document.getElementById("selectedTeamCount");
         if (counterEl) counterEl.textContent = count;
       }
-      function handleWaitlist(e) {
-        e.preventDefault();
-        const email = document.getElementById("emailInput").value;
-        if (email) {
-          try {
-            const list = JSON.parse(
-              localStorage.getItem("kbizhub_waitlist") || "[]",
-            );
-            list.push({ email, date: new Date().toISOString() });
-            localStorage.setItem("kbizhub_waitlist", JSON.stringify(list));
-          } catch {}
-          document.getElementById("emailInput").value = "";
-          document.getElementById("waitlistSuccess").style.display = "block";
-        }
-      }
     </script>
   </body>
 </html>

@@ -4,7 +4,7 @@ import { formatZodError } from "./error-shapes.js";
 
 export async function feedRoutes(app: FastifyInstance) {
 	async function getPrisma() {
-		const { prisma } = await import("@agentmesh/db");
+		const { prisma } = await import("@agentmesh/database");
 		return prisma;
 	}
 

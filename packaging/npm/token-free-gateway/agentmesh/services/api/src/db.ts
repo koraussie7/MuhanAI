@@ -5,7 +5,7 @@
  * global cache to avoid the "too many clients" warning.
  */
 
-import { getLogger } from "@agentmesh/shared";
+import { getLogger } from "@agentmesh/shared-types";
 import { PrismaClient } from "@prisma/client";
 
 const logger = getLogger({ service: "api" });

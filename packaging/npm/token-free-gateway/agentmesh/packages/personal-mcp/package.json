@@ -6,7 +6,7 @@
 	"main": "src/index.ts",
 	"types": "src/index.ts",
 	"dependencies": {
-		"@agentmesh/shared": "workspace:*",
+		"@agentmesh/shared-types": "workspace:*",
 		"@agentmesh/category-engine": "workspace:*",
 		"@agentmesh/knowledge-base": "workspace:*",
 		"@agentmesh/agent-core": "workspace:*",

@@ -1,5 +1,5 @@
-import { computeFingerprint, generateKeyPair, sign, verify } from "@agentmesh/federation-transport";
-import type { SignedRecord } from "@agentmesh/shared";
+import { computeFingerprint, generateKeyPair, sign, verify } from "@agentmesh/federation";
+import type { SignedRecord } from "@agentmesh/shared-types";
 
 export interface Identity {
 	peerId: string;

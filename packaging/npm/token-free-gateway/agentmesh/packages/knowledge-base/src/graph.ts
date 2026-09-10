@@ -4,7 +4,7 @@ import type {
 	FederationSyncResult,
 	KnowledgeNode,
 	SignedRecord,
-} from "@agentmesh/shared";
+} from "@agentmesh/shared-types";
 import type { FederationMesh } from "./folklore-federation.js";
 
 export interface GraphNode {

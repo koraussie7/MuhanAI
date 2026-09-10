@@ -43,7 +43,7 @@ const MCP_TOOLS: McpTool[] = [
 	{
 		id: "muhanai-pulse",
 		name: "muhanai_get_pulse",
-		description: "P2P 메쉬 활성 피어 수(12,482+), 응답 레이턴시 텔레메트리 조회",
+		description: "P2P 메쉬 활성 피어 수 조회 및 응답 레이턴시 텔레메트리",
 		category: "Telemetry",
 		parameters: [],
 	},

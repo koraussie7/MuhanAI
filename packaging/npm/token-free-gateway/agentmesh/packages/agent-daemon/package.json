@@ -1,0 +1,30 @@
+{
+	"name": "@agentmesh/agent-daemon",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"build": "tsc -p tsconfig.json",
+		"typecheck": "tsc -p tsconfig.json --noEmit",
+		"lint": "tsc -p tsconfig.json --noEmit",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@agentmesh/agent-gateway": "workspace:*",
+		"@agentmesh/peer-mesh": "workspace:*",
+		"@agentmesh/llm-router": "workspace:*",
+		"@agentmesh/credit-system": "workspace:*",
+		"@agentmesh/shared-types": "workspace:*",
+		"@agentmesh/personal-mcp": "workspace:*"
+	},
+	"devDependencies": {
+		"@types/node": "^22.10.0",
+		"typescript": "^5.7.2",
+		"vitest": "^2.1.8"
+	}
+}

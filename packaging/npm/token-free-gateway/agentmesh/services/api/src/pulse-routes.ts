@@ -7,7 +7,7 @@
  * Architecture (per docs/WORKTREE-PLAN.md W4):
  *   client → pulse-routes (HTTP/SSE) → pulse-stream (writer) → gossip-bridge (fan-out)
  *                                                       ↑
- *                                              @agentmesh/p2p.PulseSource
+ *                                              @agentmesh/peer-mesh.PulseSource
  *
  * The bridge is held in a per-app singleton via `app.pulseBridge`. server.ts
  * is responsible for attaching the PulseSource once the libp2p node starts.

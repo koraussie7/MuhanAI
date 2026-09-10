@@ -3,7 +3,7 @@ import type {
 	DeviceNodeInfo,
 	InferenceRequest,
 	LoadBalancingStrategy,
-} from "@agentmesh/p2p";
+} from "@agentmesh/peer-mesh";
 
 export class P2pLoadBalancer {
 	private strategy: LoadBalancingStrategy;

@@ -419,7 +419,7 @@ export async function handleMcpRequest(request: Request, url: URL, env?: { API_O
 				if (toolName === "muhanai_get_pulse") {
 					content = JSON.stringify({
 						status: "operational",
-						peers: 12482,
+						peers: undefined,
 						latencyMs: 14,
 						activeModels: ["Claude 3.7 Sonnet", "DeepSeek R1", "Gemini 2.5 Pro"],
 						crdtMesh: "synced",

@@ -38,174 +38,79 @@ import {
 } from "./components/SpecPages";
 import { type SupportedLanguage, useI18n } from "./i18n";
 
+/**
+ * Single Source of Truth for all routes.
+ * Each section has a unique id and path — no duplicates.
+ * Legacy paths are handled by redirects in sectionIdFromPath().
+ */
 const SECTIONS = [
 	{ id: "dashboard", path: "/dashboard", label: "Dashboard", category: "Core" },
 	{ id: "find", path: "/", label: "Cosmic Mesh", category: "Core" },
-	{
-		id: "agent-cast",
-		path: "/agent-cast",
-		label: "Agent Cast",
-		category: "Core",
-	},
-	{
-		id: "agent-mesh",
-		path: "/agent-mesh",
-		label: "Agent Mesh",
-		category: "Core",
-	},
-	{
-		id: "p2p-network",
-		path: "/network",
-		label: "P2P Nodes",
-		category: "Network",
-	},
-	{
-		id: "p2p-network-alt",
-		path: "/p2p-network",
-		label: "P2P Nodes",
-		category: "Network",
-	},
-	{
-		id: "network-monitor",
-		path: "/monitor",
-		label: "Telemetry & Pulse",
-		category: "Network",
-	},
-	{
-		id: "network-monitor-alt",
-		path: "/network-monitor",
-		label: "Telemetry & Pulse",
-		category: "Network",
-	},
+	{ id: "agent-cast", path: "/agent-cast", label: "Agent Cast", category: "Core" },
+	{ id: "agent-mesh", path: "/agent-mesh", label: "Agent Mesh", category: "Core" },
+
+	// Network
+	{ id: "p2p-network", path: "/network", label: "P2P Nodes", category: "Network" },
+	{ id: "network-monitor", path: "/monitor", label: "Telemetry & Pulse", category: "Network" },
+
+	// Resources
 	{ id: "models", path: "/models", label: "LLM Models", category: "Resources" },
-	{
-		id: "compute-mesh",
-		path: "/compute-mesh",
-		label: "Compute Mesh",
-		category: "Resources",
-	},
-	{
-		id: "mcp-skills",
-		path: "/mcp-skills",
-		label: "MCP Tools",
-		category: "Resources",
-	},
-	{
-		id: "knowledge",
-		path: "/knowledge",
-		label: "Knowledge Graph",
-		category: "Intelligence",
-	},
-	{
-		id: "knowledge-graph",
-		path: "/knowledge-graph",
-		label: "Knowledge Graph",
-		category: "Intelligence",
-	},
-	{
-		id: "verification",
-		path: "/verification",
-		label: "Verification",
-		category: "Intelligence",
-	},
-	{
-		id: "search",
-		path: "/search",
-		label: "Mesh Search",
-		category: "Intelligence",
-	},
-	{
-		id: "agents-market",
-		path: "/marketplace/agents",
-		label: "Agent Hub",
-		category: "Marketplace",
-	},
-	{
-		id: "human-experts",
-		path: "/marketplace/human-experts",
-		label: "Human Experts",
-		category: "Marketplace",
-	},
-	{
-		id: "compute-market",
-		path: "/marketplace/compute",
-		label: "Compute Market",
-		category: "Marketplace",
-	},
-	{
-		id: "mcp-market",
-		path: "/marketplace/mcp",
-		label: "MCP Marketplace",
-		category: "Marketplace",
-	},
-	{
-		id: "knowledge-market",
-		path: "/marketplace/knowledge",
-		label: "Knowledge Market",
-		category: "Marketplace",
-	},
-	{
-		id: "token-bank",
-		path: "/token-bank",
-		label: "Token Bank",
-		category: "Economy",
-	},
-	{
-		id: "contributions",
-		path: "/contributions",
-		label: "Contributions",
-		category: "Economy",
-	},
-	{
-		id: "reputation",
-		path: "/reputation",
-		label: "Reputation",
-		category: "Economy",
-	},
-	{
-		id: "projects",
-		path: "/projects",
-		label: "Projects",
-		category: "Workspace",
-	},
+	{ id: "compute-mesh", path: "/compute-mesh", label: "Compute Mesh", category: "Resources" },
+	{ id: "mcp-skills", path: "/mcp-skills", label: "MCP Tools", category: "Resources" },
+	{ id: "hivebear", path: "/hivebear", label: "HiveBear Mesh", category: "Resources" },
+
+	// Intelligence
+	{ id: "knowledge", path: "/knowledge", label: "Knowledge Graph", category: "Intelligence" },
+	{ id: "verification", path: "/verification", label: "Verification", category: "Intelligence" },
+	{ id: "search", path: "/search", label: "Mesh Search", category: "Intelligence" },
+	{ id: "semantic-vote", path: "/semantic-vote", label: "Semantic Vote", category: "Intelligence" },
+	{ id: "federation", path: "/federation", label: "Federation", category: "Intelligence" },
+
+	// Marketplace
+	{ id: "agents-market", path: "/marketplace/agents", label: "Agent Hub", category: "Marketplace" },
+	{ id: "human-experts", path: "/marketplace/human-experts", label: "Human Experts", category: "Marketplace" },
+	{ id: "compute-market", path: "/marketplace/compute", label: "Compute Market", category: "Marketplace" },
+	{ id: "mcp-market", path: "/marketplace/mcp", label: "MCP Marketplace", category: "Marketplace" },
+	{ id: "knowledge-market", path: "/marketplace/knowledge", label: "Knowledge Market", category: "Marketplace" },
+
+	// Economy
+	{ id: "token-bank", path: "/token-bank", label: "Token Bank", category: "Economy" },
+	{ id: "contributions", path: "/contributions", label: "Contributions", category: "Economy" },
+	{ id: "reputation", path: "/reputation", label: "Reputation", category: "Economy" },
+
+	// Workspace
+	{ id: "projects", path: "/projects", label: "Projects", category: "Workspace" },
 	{ id: "tasks", path: "/tasks", label: "Tasks", category: "Workspace" },
-	{
-		id: "workflows",
-		path: "/workflows",
-		label: "Workflows",
-		category: "Workspace",
-	},
+	{ id: "workflows", path: "/workflows", label: "Workflows", category: "Workspace" },
+
+	// System
 	{ id: "settings", path: "/settings", label: "Settings", category: "System" },
-	{
-		id: "happy",
-		path: "/happy",
-		label: "Happy Coder",
-		category: "System",
-	},
-	{
-		id: "semantic-vote",
-		path: "/semantic-vote",
-		label: "Semantic Vote",
-		category: "Intelligence",
-	},
-	{
-		id: "hivebear",
-		path: "/hivebear",
-		label: "HiveBear Mesh",
-		category: "Resources",
-	},
-	{
-		id: "federation",
-		path: "/federation",
-		label: "Federation",
-		category: "Intelligence",
-	},
+	{ id: "happy", path: "/happy", label: "Happy Coder", category: "System" },
 ];
+
+/**
+ * Legacy path redirects — maps old/duplicate paths to canonical section IDs.
+ * This ensures backward compatibility with bookmarked links.
+ */
+const LEGACY_PATH_REDIRECTS: Record<string, string> = {
+	// P2P Network duplicates
+	"/p2p-network": "p2p-network",
+	// Network Monitor duplicates
+	"/network-monitor": "network-monitor",
+	// Knowledge Graph duplicates
+	"/knowledge-graph": "knowledge",
+};
 
 const IMPLEMENTED_SECTIONS = new Set(SECTIONS.map((s) => s.id));
 
 function sectionIdFromPath(path: string) {
 	const cleanPath = path.split("?")[0] || "/";
+
+	// Check legacy redirects first (backward compatibility)
+	if (cleanPath in LEGACY_PATH_REDIRECTS) {
+		return LEGACY_PATH_REDIRECTS[cleanPath]!;
+	}
+
 	if (cleanPath === "/dashboard") {
 		return "dashboard";
 	}
@@ -447,24 +352,18 @@ export function App() {
 						{activeSection === "agents" && <AgentsPage />}
 						{activeSection === "human-agents" && <HumanAgentsPage />}
 
-						{/* P2P Network */}
-						{(activeSection === "p2p-network" || activeSection === "p2p-network-alt") && (
-							<P2pNetworkPage />
-						)}
-						{(activeSection === "network-monitor" || activeSection === "network-monitor-alt") && (
-							<NetworkMonitorPage />
-						)}
+						{/* Network */}
+						{activeSection === "p2p-network" && <P2pNetworkPage />}
+						{activeSection === "network-monitor" && <NetworkMonitorPage />}
 
-						{/* Compute & Resources */}
+						{/* Resources */}
 						{activeSection === "models" && <ModelsPage />}
 						{activeSection === "compute-mesh" && <ComputeMeshPage />}
 						{activeSection === "mcp-skills" && <McpSkillsPage />}
 						{activeSection === "llm-mesh" && <LlmMeshPage />}
 
-						{/* Knowledge Lake */}
-						{(activeSection === "knowledge" || activeSection === "knowledge-graph") && (
-							<KnowledgePage />
-						)}
+						{/* Intelligence */}
+						{activeSection === "knowledge" && <KnowledgePage />}
 						{activeSection === "verification" && <VerificationPage />}
 						{activeSection === "search" && <SearchPage />}
 

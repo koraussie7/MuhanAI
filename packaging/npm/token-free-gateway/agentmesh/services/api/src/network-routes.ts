@@ -1,4 +1,4 @@
-import { computeTribute } from "@agentmesh/compute";
+import { computeTribute } from "@agentmesh/compute-market";
 import type { FederationNode } from "@agentmesh/knowledge-base";
 import type { FastifyInstance } from "fastify";
 import { federationInstances, transportInstances } from "./knowledge-routes.js";
@@ -34,8 +34,8 @@ export async function networkRoutes(app: FastifyInstance) {
 				categories: 8,
 			},
 			human: {
-				online: 3821,
-				available: 1420,
+				online: undefined,
+				available: undefined,
 				specialties: 42,
 			},
 			peers: transportPeers.map((p) => ({

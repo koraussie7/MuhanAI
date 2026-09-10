@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useGossipPulse } from "../hooks/useGossipPulse.js";
+import { formatPeerCountBare, formatHumanCount } from "../lib/mesh-stats.js";
 
 const API = "";
 
@@ -21,8 +22,8 @@ const DEFAULT_PULSE: PulseData = {
 	aiConflicts: 3,
 	knowledgeGaps: 6,
 	mcpTasksWaiting: 12,
-	agentsOnline: 12_482,
-	humansOnline: 3_821,
+	agentsOnline: undefined,
+	humansOnline: undefined,
 };
 
 /**
@@ -118,8 +119,8 @@ export function NetworkPulse({ live = false }: Props) {
 				<span className="pulse-dot" />
 				<span className="pulse-title">NETWORK PULSE</span>
 				<span className="pulse-subtitle">
-					(agents online: {pulse.agentsOnline?.toLocaleString("ko-KR") ?? "12,482"} · human:{" "}
-					{pulse.humansOnline?.toLocaleString("ko-KR") ?? "3,821"}){live ? " · LIVE" : ""}
+					(agents online: {formatPeerCountBare(pulse.agentsOnline)} · human:{" "}
+					{formatHumanCount(pulse.humansOnline)}){live ? " · LIVE" : ""}
 				</span>
 			</div>
 			<div className="pulse-items">

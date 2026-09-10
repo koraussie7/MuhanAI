@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { Writable } from "node:stream";
 import { describe, test } from "node:test";
-import type { PulseMessage } from "@agentmesh/p2p";
+import type { PulseMessage } from "@agentmesh/peer-mesh";
 import { attachSsePulseSink } from "./pulse-stream.js";
 
 class CollectingWritable extends Writable {
