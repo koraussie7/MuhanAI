@@ -27,6 +27,11 @@ const ChatSchema = z.object({
 	provider: z.string().max(64).optional(),
 });
 
+const OMNIROUTE_BASE_URL = process.env.OMNIROUTE_BASE_URL ?? process.env.OPENAI_BASE_URL ?? null;
+const OMNIROUTE_FALLBACK_MODEL = process.env.OMNIROUTE_FALLBACK_MODEL ?? process.env.OPENAI_DEFAULT_MODEL ?? "gpt-4-turbo-preview";
+
+const OMNIROUTE_CHAT_ROUTE = OMNIROUTE_BASE_URL ? new URL("/chat/completions", OMNIROUTE_BASE_URL) : null;
+
 export async function llmRoutes(app: FastifyInstance) {
 	/**
 	 * POST /api/llm/chat
@@ -56,7 +61,54 @@ export async function llmRoutes(app: FastifyInstance) {
 			};
 		} catch (err) {
 			request.log.error({ err }, "keyless LLM call failed");
+			if (!OMNIROUTE_CHAT_ROUTE) {
+				return clientError(reply, 502, "All keyless providers failed", request.id);
+			}
+		}
+
+		if (!OMNIROUTE_CHAT_ROUTE) {
 			return clientError(reply, 502, "All keyless providers failed", request.id);
+		}
+
+		try {
+			const body = {
+				model: req.model || OMNIROUTE_FALLBACK_MODEL,
+				messages: [
+					...(req.system ? [{ role: "system", content: req.system }] : []),
+					{ role: "user", content: req.prompt },
+				],
+				temperature: req.temperature,
+				max_tokens: req.maxTokens,
+			} as Record<string, unknown>;
+
+			const upstream = await fetch(OMNIROUTE_CHAT_ROUTE.toString(), {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify(body),
+			});
+
+			if (!upstream.ok) {
+				const text = await upstream.text().catch(() => "");
+				request.log.error({ status: upstream.status, text }, "OmniRoute chat failed");
+				return clientError(reply, 502, "OmniRoute chat failed", request.id);
+			}
+
+			const data = (await upstream.json()) as { choices?: Array<{ message?: { content?: string } }> };
+			const text = data?.choices?.[0]?.message?.content?.trim();
+			if (!text) {
+				return clientError(reply, 502, "OmniRoute chat returned empty completion", request.id);
+			}
+
+			return {
+				text,
+				provider: "omniroute",
+				model: req.model || OMNIROUTE_FALLBACK_MODEL,
+				latencyMs: null,
+				tier: "omniroute",
+			};
+		} catch (err) {
+			request.log.error({ err }, "OmniRoute chat call failed");
+			return clientError(reply, 502, "OmniRoute chat call failed", request.id);
 		}
 	});
 
