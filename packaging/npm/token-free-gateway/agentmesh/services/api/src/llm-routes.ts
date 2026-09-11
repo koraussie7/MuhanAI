@@ -54,7 +54,7 @@ async function callOmniRouteFree(req: KeylessRequest) {
 
 	// API 키가 있으면 추가 (OpenRouter 등)
 	if (process.env.OMNIROUTE_API_KEY) {
-		options.headers["Authorization"] = `Bearer ${process.env.OMNIROUTE_API_KEY}`;
+		(options.headers as Record<string, string>)["Authorization"] = `Bearer ${process.env.OMNIROUTE_API_KEY}`;
 	}
 
 	const upstream = await fetch(OMNIROUTE_CHAT_ROUTE.toString(), options);

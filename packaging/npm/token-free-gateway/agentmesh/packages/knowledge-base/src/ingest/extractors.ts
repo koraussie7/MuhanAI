@@ -85,17 +85,19 @@ function ensurePatchedPdfjs(unpdf: {
 			// pdfjs 6.x uses Promise.try (ES2025, Node 23+). We polyfill so
 			// Node 20/22 users don't hang in a worker-message unhandled
 			// rejection that vitest's 30s timeout never sees.
-			type PromiseTry = {
-				try?: <T>(fn: (...a: unknown[]) => T, ...args: unknown[]) => Promise<Awaited<T>>;
-			};
-			const P = Promise as PromiseConstructor & PromiseTry;
-			P.try ??= function <T>(
-				this: unknown,
-				fn: (...a: unknown[]) => T,
-				...args: unknown[]
-			): Promise<Awaited<T>> {
-				return new Promise<Awaited<T>>((resolve) => resolve(fn.apply(this, args) as Awaited<T>));
-			};
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			const P = Promise as any;
+			if (!P.try) {
+				P.try = function (this: unknown, fn: (...args: unknown[]) => unknown, ...args: unknown[]): Promise<unknown> {
+					return new Promise((resolve, reject) => {
+						try {
+							resolve(fn.apply(this, args));
+						} catch (err) {
+							reject(err);
+						}
+					});
+				};
+			}
 			// legacy build: the main build needs Uint8Array.toHex (modern V8 only)
 			// and crashes on Node with "hashOriginal.toHex is not a function".
 			await unpdf.definePDFJSModule?.(() => import("pdfjs-dist/legacy/build/pdf.mjs"));
@@ -159,7 +161,7 @@ async function extractDocx(buffer: Buffer, filePath: string): Promise<ExtractedC
 async function extractPptx(buffer: Buffer, filePath: string): Promise<ExtractedContent> {
 	try {
 		const officeparser = await import("officeparser");
-		const text = String((await officeparser.default.parseOffice(buffer)) ?? "");
+		const text = String((await officeparser.default.parseOfficeAsync(buffer)) ?? "");
 		return {
 			text,
 			metadata: {

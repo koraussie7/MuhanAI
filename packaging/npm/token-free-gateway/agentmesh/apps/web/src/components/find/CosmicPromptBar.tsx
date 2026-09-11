@@ -1,7 +1,7 @@
 import "./cosmic-prompt.css";
 import {
 	AlertTriangle,
-	Browser,
+	Globe,
 	Check,
 	Computer,
 	Copy,

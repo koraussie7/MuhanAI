@@ -150,3 +150,72 @@ async function loadSandbox(
   })) as E2bSandboxLike;
   return created;
 }
+/**
+ * BrowserAdapter for an E2B Desktop Sandbox.
+ *
+ * Implements the MCP-style `browser_*` capability surface (see BrowserAdapter)
+ * by forwarding each tool to the e2b Desktop sandbox. Selector-based tools
+ * (e.g. `browser_click`) use the optional vision provider to locate elements
+ * on a screenshot; everything else maps 1:1 onto sandbox primitives.
+ */
+export class E2bBrowserAdapter implements BrowserAdapter {
+	readonly viewport: { width: number; height: number };
+	private readonly apiKey: string | undefined;
+	private readonly template: string;
+	private readonly sandboxId: string | undefined;
+	private readonly sandbox: E2bSandboxLike | undefined;
+	private readonly vision: VisionClient | undefined;
+
+	constructor(options: E2bBrowserAdapterOptions) {
+		this.apiKey = options.apiKey;
+		this.template = options.template ?? process.env[E2B_TEMPLATE_ENV] ?? 'e2b-desktop';
+		this.sandboxId = options.sandboxId;
+		this.sandbox = options.sandbox;
+		this.vision = options.vision;
+		this.viewport = options.viewport ?? { width: 1280, height: 720 };
+	}
+
+	getViewport(): { width: number; height: number } {
+		return this.viewport;
+	}
+
+	async getSandbox(): Promise<E2bSandboxLike> {
+		return this.ensureSandbox();
+	}
+
+	async callBrowserTool(toolName: string, args: Record<string, unknown>): Promise<unknown> {
+		const sandbox = await this.ensureSandbox();
+
+		switch (toolName) {
+			case 'browser_snapshot':
+				return runSnapshot(this, sandbox);
+			case 'browser_click':
+				return runSelectorClick(this, sandbox, this.vision, stringArg(args, 'selector'));
+			case 'browser_type':
+				await sandbox.write(stringArg(args, 'text'));
+				return { ok: true };
+			case 'browser_press':
+				await sandbox.press(stringArg(args, 'key'));
+				return { ok: true };
+			case 'browser_open':
+				await sandbox.open(stringArg(args, 'url'));
+				return { ok: true };
+			case 'browser_coordinate_click': {
+				const x = numberArg(args, 'x');
+				const y = numberArg(args, 'y');
+				await sandbox.click(x, y);
+				return { x, y };
+			}
+			case 'browser_close':
+				if (sandbox.close) await sandbox.close();
+				return { ok: true };
+			default:
+				throw new Error(`E2bBrowserAdapter: unknown browser tool "${toolName}"`);
+		}
+	}
+
+	private async ensureSandbox(): Promise<E2bSandboxLike> {
+		if (this.sandbox) return this.sandbox;
+		return loadSandbox(this.apiKey ?? '', this.template, this.sandboxId);
+	}
+}

@@ -116,7 +116,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 					<div className="telemetry-stat-card">
 						<span className="telemetry-stat-lbl">Active P2P Nodes</span>
 						<span className="telemetry-stat-val" style={{ color: "var(--cline-sky)" }}>
-							{formatPeerCountBare(pulse?.agentsOnline ?? undefined)} Peers
+							{formatPeerCountBare(undefined)} Peers
 						</span>
 					</div>
 					<div className="telemetry-stat-card">
