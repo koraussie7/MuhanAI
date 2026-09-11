@@ -2314,6 +2314,111 @@
         "implicitDependencies": []
       }
     },
+    "@agentmesh/desktop": {
+      "name": "@agentmesh/desktop",
+      "type": "lib",
+      "data": {
+        "root": "apps/desktop",
+        "name": "@agentmesh/desktop",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "dev",
+              "build",
+              "start",
+              "typecheck",
+              "lint"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/desktop",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "dev": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "dev"
+            },
+            "metadata": {
+              "scriptContent": "next dev",
+              "runCommand": "pnpm run dev"
+            },
+            "configurations": {},
+            "parallelism": true
+          },
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "next build",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "start": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "start"
+            },
+            "metadata": {
+              "scriptContent": "next start",
+              "runCommand": "pnpm run start"
+            },
+            "configurations": {},
+            "parallelism": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "next lint",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
     "@agentmesh/web": {
       "name": "@agentmesh/web",
       "type": "lib",
@@ -2769,6 +2874,18 @@
         "type": "static"
       }
     ],
+    "@agentmesh/desktop": [
+      {
+        "source": "@agentmesh/desktop",
+        "target": "@agentmesh/ai-engine",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/desktop",
+        "target": "@agentmesh/ai-ui",
+        "type": "static"
+      }
+    ],
     "@agentmesh/web": [
       {
         "source": "@agentmesh/web",
@@ -2779,5 +2896,5 @@
   },
   "version": "6.0",
   "errors": [],
-  "computedAt": 1789133457643
+  "computedAt": 1789135856669
 }

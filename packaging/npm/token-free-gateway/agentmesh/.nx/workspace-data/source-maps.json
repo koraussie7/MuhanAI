@@ -1,4 +1,246 @@
 {
+  "apps/desktop": {
+    "root": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "name": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "tags": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:private": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.0": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.1": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.2": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.3": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.4": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.executor": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.options": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.metadata": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.options.script": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.metadata.scriptContent": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.metadata.runCommand": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.executor": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options.script": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.scriptContent": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.runCommand": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.executor": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.options": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.metadata": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.options.script": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.metadata.scriptContent": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.metadata.runCommand": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.typecheck": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.typecheck.executor": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.typecheck.options": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.typecheck.metadata": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.typecheck.options.script": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.typecheck.metadata.scriptContent": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.typecheck.metadata.runCommand": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.executor": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options.script": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.scriptContent": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.runCommand": [
+      "apps/desktop/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.outputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.typecheck.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.typecheck.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  },
   "apps/web": {
     "root": [
       "apps/web/package.json",
