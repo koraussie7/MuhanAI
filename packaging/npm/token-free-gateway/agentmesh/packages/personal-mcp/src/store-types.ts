@@ -12,7 +12,7 @@ import type {
 	UserKnowledgeObject,
 	UserProfile,
 	UserStats,
-} from "../../shared/types/user-knowledge";
+} from "@agentmesh/shared-types";
 
 /**
  * Shared contract for in-memory and Prisma-backed stores.

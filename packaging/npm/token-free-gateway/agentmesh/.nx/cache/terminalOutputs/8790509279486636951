@@ -1,0 +1,19 @@
+
+> @agentmesh/knowledge-base@0.1.0 typecheck /Users/brianyeon/muhanai/muhanai/packaging/npm/token-free-gateway/agentmesh/packages/knowledge-base
+> tsc -p tsconfig.json --noEmit
+
+src/ingest/extractors.pdf-security.test.ts(54,30): error TS2307: Cannot find module 'unpdf' or its corresponding type declarations.
+src/ingest/extractors.ts(92,4): error TS2322: Type '<T>(this: unknown, fn: (...a: unknown[]) => T, ...args: unknown[]) => Promise<Awaited<T>>' is not assignable to type '(<T, A extends any[] = []>(fn: (...args: A) => T | PromiseLike<T>, ...args: A) => Promise<T>) & (<T>(fn: (...a: unknown[]) => T, ...args: unknown[]) => Promise<Awaited<T>>)'.
+  Type '<T>(this: unknown, fn: (...a: unknown[]) => T, ...args: unknown[]) => Promise<Awaited<T>>' is not assignable to type '<T, A extends any[] = []>(fn: (...args: A) => T | PromiseLike<T>, ...args: A) => Promise<T>'.
+    Types of parameters 'fn' and 'fn' are incompatible.
+      Types of parameters 'args' and 'a' are incompatible.
+        Type 'unknown[]' is not assignable to type 'A'.
+          'unknown[]' is assignable to the constraint of type 'A', but 'A' could be instantiated with a different subtype of constraint 'any[]'.
+src/ingest/extractors.ts(101,49): error TS2307: Cannot find module 'pdfjs-dist/legacy/build/pdf.mjs' or its corresponding type declarations.
+src/ingest/extractors.ts(112,30): error TS2307: Cannot find module 'unpdf' or its corresponding type declarations.
+src/ingest/extractors.ts(140,32): error TS2307: Cannot find module 'mammoth' or its corresponding type declarations.
+src/ingest/extractors.ts(161,37): error TS2307: Cannot find module 'officeparser' or its corresponding type declarations.
+src/ingest/extractors.ts(183,29): error TS2307: Cannot find module 'xlsx' or its corresponding type declarations.
+src/pgvector-store.ts(18,35): error TS2307: Cannot find module '@agentmesh/database' or its corresponding type declarations.
+src/pgvector-store.ts(95,22): error TS2347: Untyped function calls may not accept type arguments.
+[41m[30m ELIFECYCLE [39m[49m [31mCommand failed with exit code 2.[39m

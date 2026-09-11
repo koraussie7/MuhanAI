@@ -1,4 +1,4 @@
-import type { Tool } from "../../shared/types";
+import type { Tool } from "@agentmesh/shared-types";
 import { getHoundMcpClient, HoundUnavailableError } from "./hound-mcp-client";
 import { personalKnowledgeService } from "./knowledge";
 import { personalMemoryService } from "./memory";

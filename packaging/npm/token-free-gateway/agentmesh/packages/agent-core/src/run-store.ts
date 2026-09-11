@@ -4,7 +4,7 @@
  */
 
 import type { PrismaClient } from "@prisma/client";
-import type { AgentRunResult } from "../../shared/types";
+import type { AgentRunResult } from "@agentmesh/shared-types";
 import type { AgentDefinition } from "./types";
 
 export interface PersistAgentRunInput {
@@ -33,7 +33,7 @@ function usePrisma(): boolean {
 }
 
 async function getDb(): Promise<PrismaClient> {
-	const { prisma } = await import("../../db/src/client");
+	const { prisma } = await import("@agentmesh/database");
 	return prisma;
 }
 

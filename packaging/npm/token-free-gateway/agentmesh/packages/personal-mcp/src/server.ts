@@ -1,4 +1,4 @@
-import type { Tool } from "../../shared/types";
+import type { Tool } from "@agentmesh/shared-types";
 import { personalKnowledgeService } from "./knowledge";
 import { personalMemoryService } from "./memory";
 import { getKnowledgeStore } from "./store-factory";
@@ -49,10 +49,10 @@ export interface PersonalMCP {
 	callTool: (name: string, args: Record<string, unknown>) => Promise<unknown>;
 	ensure: (profile?: { name?: string; languages?: string[] }) => Promise<void>;
 	snapshot: () => Promise<{
-		profile: import("../../shared/types/user-knowledge").UserProfile;
-		expertise: import("../../shared/types/user-knowledge").Expertise[];
-		stats: import("../../shared/types/user-knowledge").UserStats;
-		topSkills: import("../../shared/types/user-knowledge").Skill[];
+		profile: import("@agentmesh/shared-types").UserProfile;
+		expertise: import("@agentmesh/shared-types").Expertise[];
+		stats: import("@agentmesh/shared-types").UserStats;
+		topSkills: import("@agentmesh/shared-types").Skill[];
 		knowledgeCount: number;
 		memoryCount: number;
 	} | null>;
@@ -158,7 +158,7 @@ export function createPersonalMCP(userId: string): PersonalMCP {
 					`Expertise: ${topExpertise || "none yet"}`,
 					`Stats: knowledge=${obj.stats.knowledgeCount}, memories=${obj.stats.memoryCount}, contributions=${obj.stats.contributions}`,
 					memories.length
-						? `Relevant memories:\n${memories.map((m) => `- ${m.content.slice(0, 140)}`).join("\n")}`
+						? `Relevant memories:\n${memories.map((m: { content: string }) => `- ${m.content.slice(0, 140)}`).join("\n")}`
 						: null,
 				]
 					.filter(Boolean)

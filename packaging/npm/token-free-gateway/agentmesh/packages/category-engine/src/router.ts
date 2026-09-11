@@ -1,4 +1,4 @@
-import type { CategoryContext } from "../../shared/types";
+import type { CategoryContext } from "@agentmesh/shared-types";
 import { CategoryClassifier, type ClassificationResult } from "./classifier";
 import { globalTaxonomy } from "./taxonomy";
 

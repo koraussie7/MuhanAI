@@ -9,7 +9,7 @@
  */
 
 import type { Prisma, PrismaClient } from "@prisma/client";
-import type { CategoryContext, SourceType, Visibility } from "../../shared/types";
+import type { CategoryContext, SourceType, Visibility } from "@agentmesh/shared-types";
 import type {
 	AddExpertiseInput,
 	AddMemoryInput,
@@ -25,7 +25,7 @@ import type {
 	UserKnowledgeObject,
 	UserProfile,
 	UserStats,
-} from "../../shared/types/user-knowledge";
+} from "@agentmesh/shared-types";
 
 type SourceTypeT = SourceType;
 type VisibilityT = Visibility;

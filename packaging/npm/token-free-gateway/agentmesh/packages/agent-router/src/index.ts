@@ -5,7 +5,7 @@ import { agentMesh, DomainAgent } from "../../agent-mesh/src";
 import { categoryRouter } from "../../category-engine/src/router";
 import { hybridSearch } from "../../knowledge-base/src/hybrid-search";
 import { personalMcpRegistry } from "../../personal-mcp/src/server";
-import type { CastResult, CategoryContext } from "../../shared/types";
+import type { CastResult, CategoryContext } from "@agentmesh/shared-types";
 
 export interface RouteResult {
 	category: CategoryContext & { confidence?: number };
@@ -56,7 +56,7 @@ export async function routeQuestion(question: string, userId: string): Promise<R
 		context: classification,
 		agents,
 		knowledge,
-		personalMcp,
+		personalMcp: personalMcp ? { id: personalMcp.userId, userId: personalMcp.userId } : undefined,
 		userId,
 	});
 

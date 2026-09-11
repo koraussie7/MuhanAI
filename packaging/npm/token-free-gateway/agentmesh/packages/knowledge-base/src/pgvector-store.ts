@@ -7,7 +7,7 @@
  *   - PERSONAL_MCP_STORE=prisma (or any setup with DATABASE_URL)
  */
 
-import type { KnowledgeNode } from "../../shared/types";
+import type { KnowledgeNode } from "@agentmesh/shared-types";
 import { type EmbeddingService, embeddingService } from "./embeddings";
 import type { RetrievalQuery, ScoredKnowledge } from "./retrieval";
 
@@ -15,7 +15,7 @@ export class PgVectorStore {
 	constructor(private embedder: EmbeddingService = embeddingService) {}
 
 	private async prisma() {
-		const { prisma } = await import("../../db/src/client");
+		const { prisma } = await import("@agentmesh/database");
 		return prisma;
 	}
 

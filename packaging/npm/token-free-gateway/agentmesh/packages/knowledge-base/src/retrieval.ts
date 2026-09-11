@@ -1,4 +1,4 @@
-import type { KnowledgeNode } from "../../shared/types";
+import type { KnowledgeNode } from "@agentmesh/shared-types";
 import { decayEngine } from "./decay/engine.js";
 import { type EmbeddingService, embeddingService } from "./embeddings";
 

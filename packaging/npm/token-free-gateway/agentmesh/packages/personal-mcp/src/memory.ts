@@ -1,4 +1,4 @@
-import type { CategoryContext, MemoryNode } from "../../shared/types";
+import type { CategoryContext, MemoryNode } from "@agentmesh/shared-types";
 import { getKnowledgeStore } from "./store-factory";
 import type { WeKnoraMemoryFact, WeKnoraMemoryFactType } from "./weknora-memory-sync";
 import { createWeKnoraMemorySync } from "./weknora-memory-sync";
@@ -23,7 +23,7 @@ export class PersonalMemoryService {
 		if (!obj) return [];
 
 		const q = query.toLowerCase();
-		let memories = obj.memories.filter((m) => {
+		let memories = obj.memories.filter((m: MemoryNode) => {
 			const textMatch = m.content.toLowerCase().includes(q);
 			const contextMatch =
 				!context ||
@@ -33,7 +33,7 @@ export class PersonalMemoryService {
 			return textMatch || contextMatch;
 		});
 
-		memories = memories.sort((a, b) => b.importance - a.importance);
+		memories = memories.sort((a: MemoryNode, b: MemoryNode) => b.importance - a.importance);
 		return memories.slice(0, limit);
 	}
 

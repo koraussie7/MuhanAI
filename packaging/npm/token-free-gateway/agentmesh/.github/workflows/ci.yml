@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Typecheck affected
+        run: pnpm nx affected --target=typecheck --base=origin/main --parallel=4
+
+      - name: Lint affected
+        run: pnpm nx affected --target=lint --base=origin/main --parallel=4
+
+      - name: Test affected
+        run: pnpm nx affected --target=test --base=origin/main --parallel=4

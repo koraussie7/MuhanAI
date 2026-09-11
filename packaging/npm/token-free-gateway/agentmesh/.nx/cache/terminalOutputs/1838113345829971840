@@ -1,0 +1,16 @@
+
+> @agentmesh/computer-use@0.1.0 typecheck /Users/brianyeon/muhanai/muhanai/packaging/npm/token-free-gateway/agentmesh/packages/computer-use
+> tsc --noEmit
+
+src/computer-use-router.ts(13,15): error TS2305: Module '"./e2b-adapter.js"' has no exported member 'E2bBrowserAdapter'.
+src/computer-use-routes.ts(13,38): error TS2307: Cannot find module 'fastify' or its corresponding type declarations.
+src/computer-use-routes.ts(14,19): error TS2307: Cannot find module 'zod' or its corresponding type declarations.
+src/computer-use-routes.ts(45,44): error TS7006: Parameter 'request' implicitly has an 'any' type.
+src/computer-use-routes.ts(45,53): error TS7006: Parameter 'reply' implicitly has an 'any' type.
+src/computer-use-routes.ts(88,46): error TS7006: Parameter '_request' implicitly has an 'any' type.
+src/computer-use-routes.ts(88,56): error TS7006: Parameter 'reply' implicitly has an 'any' type.
+src/e2b-adapter.ts(51,12): error TS2552: Cannot find name 'E2bBrowserAdapter'. Did you mean 'BrowserAdapter'?
+src/e2b-adapter.ts(79,12): error TS2552: Cannot find name 'E2bBrowserAdapter'. Did you mean 'BrowserAdapter'?
+src/e2b-computer-use.ts(10,3): error TS2305: Module '"./e2b-adapter.js"' has no exported member 'E2bBrowserAdapter'.
+src/index.ts(17,10): error TS2305: Module '"./e2b-adapter.js"' has no exported member 'E2bBrowserAdapter'.
+[41m[30m ELIFECYCLE [39m[49m [31mCommand failed with exit code 1.[39m

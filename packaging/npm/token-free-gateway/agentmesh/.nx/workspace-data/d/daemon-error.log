@@ -1,0 +1,26 @@
+Failed to start or connect to the Nx Daemon process.
+
+Messages from the log:
+[NX v20.8.4 Daemon Server] - 2026-09-11T08:01:42.709Z - [WATCHER]: Subscribed to changes within: /Users/brianyeon/muhanai/muhanai/packaging/npm/token-free-gateway/agentmesh (native)
+The plugin worker is exiting as it was not connected to within 5 seconds.
+The plugin worker is exiting as it was not connected to within 5 seconds.
+The plugin worker is exiting as it was not connected to within 5 seconds.
+The plugin worker is exiting as it was not connected to within 5 seconds.
+The plugin worker is exiting as it was not connected to within 5 seconds.
+The plugin worker is exiting as it was not connected to within 5 seconds.
+[NX v20.8.4 Daemon Server] - 2026-09-11T08:01:52.513Z - [WATCHER]: Stopping the watcher for /Users/brianyeon/muhanai/muhanai/packaging/npm/token-free-gateway/agentmesh (sources)
+[NX v20.8.4 Daemon Server] - 2026-09-11T08:01:52.515Z - Started listening on: /private/var/folders/ct/427421xx0hbg56vc_17g1lxc0000gn/T/kilo/b0bc43d35cf1302f89b3/d.sock
+[NX v20.8.4 Daemon Server] - 2026-09-11T08:01:52.517Z - [WATCHER]: Subscribed to changes within: /Users/brianyeon/muhanai/muhanai/packaging/npm/token-free-gateway/agentmesh (native)
+[NX v20.8.4 Daemon Server] - 2026-09-11T08:01:54.952Z - [WATCHER]: Stopping the watcher for /Users/brianyeon/muhanai/muhanai/packaging/npm/token-free-gateway/agentmesh (sources)
+[NX v20.8.4 Daemon Server] - 2026-09-11T08:01:54.954Z - Started listening on: /private/var/folders/ct/427421xx0hbg56vc_17g1lxc0000gn/T/kilo/b0bc43d35cf1302f89b3/d.sock
+[NX v20.8.4 Daemon Server] - 2026-09-11T08:01:54.958Z - [WATCHER]: Subscribed to changes within: /Users/brianyeon/muhanai/muhanai/packaging/npm/token-free-gateway/agentmesh (native)
+The plugin worker is exiting as it was not connected to within 5 seconds.
+The plugin worker is exiting as it was not connected to within 5 seconds.
+The plugin worker is exiting as it was not connected to within 5 seconds.
+The plugin worker is exiting as it was not connected to within 5 seconds.
+The plugin worker is exiting as it was not connected to within 5 seconds.
+The plugin worker is exiting as it was not connected to within 5 seconds.
+
+
+
+More information: /Users/brianyeon/muhanai/muhanai/packaging/npm/token-free-gateway/agentmesh/.nx/workspace-data/d/daemon.log

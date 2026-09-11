@@ -1,4 +1,4 @@
-import type { KnowledgeNode, Visibility } from "../../shared/types";
+import type { KnowledgeNode, Visibility } from "@agentmesh/shared-types";
 import { getKnowledgeStore } from "./store-factory";
 
 export interface KnowledgeQuery {
@@ -16,7 +16,7 @@ export class PersonalKnowledgeService {
 		if (!obj) return [];
 
 		const q = params.query.toLowerCase();
-		let results = obj.knowledge.filter((k) => {
+		let results = obj.knowledge.filter((k: KnowledgeNode) => {
 			const matchesText = k.title.toLowerCase().includes(q) || k.content.toLowerCase().includes(q);
 			const matchesCategory =
 				!params.categoryId ||
@@ -26,7 +26,7 @@ export class PersonalKnowledgeService {
 			return matchesText && matchesCategory && matchesVisibility;
 		});
 
-		results = results.sort((a, b) => {
+		results = results.sort((a: KnowledgeNode, b: KnowledgeNode) => {
 			const scoreA = a.confidence * 0.7 + a.updatedAt.getTime() / 1e13;
 			const scoreB = b.confidence * 0.7 + b.updatedAt.getTime() / 1e13;
 			return scoreB - scoreA;

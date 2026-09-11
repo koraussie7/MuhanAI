@@ -1,6 +1,7 @@
 import "./cosmic-prompt.css";
 import {
 	AlertTriangle,
+	Browser,
 	Check,
 	Computer,
 	Copy,
@@ -43,6 +44,7 @@ interface ResolvedAnswer {
  */
 type ByokProviderId =
 	| "oauth_gateway"
+	| "omniroute"
 	| "openai"
 	| "deepseek"
 	| "google"
@@ -91,6 +93,42 @@ const BYOK_PROVIDERS: Record<ByokProviderId, ByokProviderDef> = {
 			const trimmed = (key || "").trim();
 			const isUrl = trimmed.startsWith("http");
 			const baseUrl = isUrl ? trimmed.replace(/\/+$/, "") : "http://127.0.0.1:3456/v1";
+			return {
+				url: `${baseUrl}/chat/completions`,
+				headers: {
+					"Content-Type": "application/json",
+					...(trimmed && !isUrl ? { Authorization: `Bearer ${trimmed}` } : {}),
+				},
+				body: {
+					model,
+					messages: [
+						{ role: "system", content: sys },
+						{ role: "user", content: user },
+					],
+				},
+			};
+		},
+		parse: (d) => {
+			const x = d as { choices?: Array<{ message?: { content?: string } }> };
+			return x?.choices?.[0]?.message?.content ?? null;
+		},
+	},
+	omniroute: {
+		label: "OmniRoute Mesh (Port 20128)",
+		hint: "http://127.0.0.1:20128/v1 또는 OMNIROUTE_API_KEY (선택)",
+		models: [
+			"auto",
+			"openai/gpt-4o-mini",
+			"claude-3-7-sonnet",
+			"deepseek-r1",
+			"gemini-2.5-pro",
+			"meta-llama/llama-3.3-70b-instruct:free",
+		],
+		defaultModel: "auto",
+		build: (model, sys, user, key) => {
+			const trimmed = (key || "").trim();
+			const isUrl = trimmed.startsWith("http");
+			const baseUrl = isUrl ? trimmed.replace(/\/+$/, "") : "http://127.0.0.1:20128/v1";
 			return {
 				url: `${baseUrl}/chat/completions`,
 				headers: {
@@ -229,7 +267,7 @@ function loadByok(): ByokSettings | null {
 		const provider = (parsed.provider ?? "oauth_gateway") as ByokProviderId;
 		const def = BYOK_PROVIDERS[provider];
 		if (!def) return null;
-		if (provider !== "oauth_gateway" && (!parsed.apiKey || parsed.apiKey.length === 0)) return null;
+		if ((provider !== "oauth_gateway" && provider !== "omniroute") && (!parsed.apiKey || parsed.apiKey.length === 0)) return null;
 		return {
 			provider,
 			model: typeof parsed.model === "string" && def.models.includes(parsed.model)
@@ -270,7 +308,7 @@ function clearByok() {
  */
 async function resolveAnswerFromByok(query: string, settings: ByokSettings | null): Promise<ResolvedAnswer | null> {
 	if (!settings) return null;
-	if (settings.provider !== "oauth_gateway" && !settings.apiKey) return null;
+	if (settings.provider !== "oauth_gateway" && settings.provider !== "omniroute" && !settings.apiKey) return null;
 	const def = BYOK_PROVIDERS[settings.provider];
 	if (!def) return null;
 	const req = def.build(settings.model, SYSTEM_PROMPT, query, settings.apiKey);
@@ -447,6 +485,12 @@ async function resolveAnswerFromPollinations(query: string): Promise<ResolvedAns
  */
 async function resolveAnswerFromLocalOAuthGateway(query: string): Promise<ResolvedAnswer | null> {
 	if (typeof window === "undefined") return null;
+	const authToken =
+		localStorage.getItem("muhanai_auth_token") ||
+		localStorage.getItem("auth_token") ||
+		localStorage.getItem("token") ||
+		localStorage.getItem("oauth_token") ||
+		null;
 	const localEndpoints = [
 		"http://127.0.0.1:3456/v1/chat/completions",
 		"http://localhost:3456/v1/chat/completions",
@@ -457,9 +501,11 @@ async function resolveAnswerFromLocalOAuthGateway(query: string): Promise<Resolv
 			const controller = new AbortController();
 			const timer = setTimeout(() => controller.abort(), 4000);
 			const start = typeof performance !== "undefined" ? performance.now() : Date.now();
+			const headers: Record<string, string> = { "Content-Type": "application/json" };
+			if (authToken) headers.Authorization = `Bearer ${authToken}`;
 			const res = await fetch(url, {
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
+				headers,
 				body: JSON.stringify({
 					model: "claude-3-7-sonnet",
 					messages: [
@@ -487,6 +533,57 @@ async function resolveAnswerFromLocalOAuthGateway(query: string): Promise<Resolv
 			};
 		} catch {
 			// Gateway not running on this endpoint
+		}
+	}
+	return null;
+}
+
+/**
+ * Probe local OmniRoute Mesh (356 Providers / 1,312+ models, port 20128).
+ * Enables prompt to directly leverage local OmniRoute routing daemon with zero token cost.
+ */
+async function resolveAnswerFromLocalOmniRoute(query: string): Promise<ResolvedAnswer | null> {
+	if (typeof window === "undefined") return null;
+	const omniEndpoints = [
+		"http://127.0.0.1:20128/v1/chat/completions",
+		"http://localhost:20128/v1/chat/completions",
+	];
+	for (const url of omniEndpoints) {
+		try {
+			const controller = new AbortController();
+			const timer = setTimeout(() => controller.abort(), 4000);
+			const start = typeof performance !== "undefined" ? performance.now() : Date.now();
+			const res = await fetch(url, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					model: "auto",
+					messages: [
+						{ role: "system", content: SYSTEM_PROMPT },
+						{ role: "user", content: query },
+					],
+					temperature: 0.7,
+				}),
+				signal: controller.signal,
+			});
+			clearTimeout(timer);
+			if (!res.ok) continue;
+			const data = (await res.json()) as {
+				choices?: Array<{ message?: { content?: string } }>;
+				model?: string;
+			};
+			const text = data?.choices?.[0]?.message?.content ?? "";
+			if (!text || text.trim().length === 0) continue;
+			const elapsed = (typeof performance !== "undefined" ? performance.now() : Date.now()) - start;
+			return {
+				text,
+				provider: "omniroute",
+				model: data?.model ?? "auto",
+				latencyMs: Math.round(elapsed),
+				tier: "omniroute",
+			};
+		} catch {
+			// OmniRoute daemon not running on this endpoint
 		}
 	}
 	return null;
@@ -566,6 +663,19 @@ async function resolveAnswerFromMcp(query: string): Promise<ResolvedAnswer | nul
 		const data = (await res.json()) as any;
 		const text = data?.result?.content?.[0]?.text;
 		if (typeof text !== "string" || text.trim().length === 0) return null;
+
+		// If MCP returned an error payload disguised as string, do not treat as valid LLM answer
+		if (text.includes('"error":') || text.includes('"status":"unavailable"') || text.includes("Quorum service is not configured")) {
+			try {
+				const parsed = JSON.parse(text);
+				if (parsed.error || parsed.status === "unavailable") {
+					return null;
+				}
+			} catch {
+				if (text.includes("Quorum service is not configured")) return null;
+			}
+		}
+
 		return {
 			text,
 			provider: "mcp-quorum",
@@ -771,14 +881,16 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 		setIsPublished(false);
 
 		// Resolve the answer from the best available source, in order:
-		//   0. BYOK / OAuth (user's configured API key or OAuth gateway)
-		//   1. Local OAuth Gateway (Token-Free WebAuth Chrome session if daemon running)
-		//   2. browser → pollinations (CORS, anonymous tier, no centralized quota burned)
-		//   3. /api/llm/chat  → server-proxied keyless pool with user OAuth token if present
-		//   4. /api/mcp/rpc   → MCP quorum RPC
-		//   5. quorum template → offline fallback so the UI never hangs
+		//   0. BYOK / Configured Provider (user's configured API key or OmniRoute/OAuth gateway)
+		//   1. Local OAuth Gateway (Token-Free WebAuth Chrome session if daemon running on :3456)
+		//   2. Local OmniRoute Mesh (356 Providers routing daemon if running on :20128)
+		//   3. browser → pollinations (CORS, anonymous tier, no centralized quota burned)
+		//   4. /api/llm/chat  → server-proxied OmniRoute / TierMux keyless pool with user OAuth token
+		//   5. /api/mcp/rpc   → MCP quorum RPC
+		//   6. quorum template → offline fallback so the UI never hangs
 		let resolved = await resolveAnswerFromByok(query, byokSettings);
 		if (!resolved) resolved = await resolveAnswerFromLocalOAuthGateway(query);
+		if (!resolved) resolved = await resolveAnswerFromLocalOmniRoute(query);
 		if (!resolved) resolved = await resolveAnswerFromPollinations(query);
 		if (!resolved) resolved = await resolveAnswerFromLlm(query);
 		if (!resolved) resolved = await resolveAnswerFromMcp(query);
@@ -881,6 +993,12 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 				return "Local KB";
 			case "mcp-quorum":
 				return "MCP Quorum";
+			case "omniroute":
+				return "OmniRoute Mesh";
+			case "byok-omniroute":
+				return "BYOK · OmniRoute";
+			case "byok-oauth_gateway":
+				return "Token-Free Gateway";
 			case "byok-openai":
 				return "BYOK · OpenAI";
 			case "byok-google":
@@ -1129,6 +1247,12 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 							{answerMeta.tier === "keyless" && (
 								<span className="cosmic-ai-model-pill">Zero-Token</span>
 							)}
+							{answerMeta.tier === "omniroute" && (
+								<span className="cosmic-ai-model-pill bg-cyan-900/60 text-cyan-300 border border-cyan-500/40">OmniRoute Mesh</span>
+							)}
+							{answerMeta.tier === "oauth-gateway" && (
+								<span className="cosmic-ai-model-pill bg-sky-900/60 text-sky-300 border border-sky-500/40">OAuth WebAuth</span>
+							)}
 							{answerMeta.tier === "browser-direct" && (
 								<span className="cosmic-ai-model-pill">Browser-Direct</span>
 							)}
@@ -1174,6 +1298,16 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 								<span className="flex items-center gap-1 text-emerald-400">
 									<Zap size={11} />
 									Zero-Token
+								</span>
+							) : answerMeta.tier === "omniroute" ? (
+								<span className="flex items-center gap-1 text-cyan-300">
+									<Zap size={11} />
+									OmniRoute (356 Providers)
+								</span>
+							) : answerMeta.tier === "oauth-gateway" ? (
+								<span className="flex items-center gap-1 text-sky-300">
+									<Zap size={11} />
+									OAuth / Token-Free Gateway
 								</span>
 							) : answerMeta.tier === "browser-direct" ? (
 								<span className="flex items-center gap-1 text-emerald-300">

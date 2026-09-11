@@ -1,7 +1,7 @@
 import { persistAgentRun } from "../../agent-core/src/run-store";
 import type { Agent, AgentExecutionContext, MeshExecuteParams } from "../../agent-core/src/types";
 import { llmRouter } from "../../llm-router/src";
-import type { AgentRunResult } from "../../shared/types";
+import type { AgentRunResult } from "@agentmesh/shared-types";
 
 export * from "./transports/index.js";
 
@@ -16,8 +16,8 @@ export class DomainAgent implements Agent {
 			.map((k) => `- [${k.title}]: ${k.content.slice(0, 300)}`)
 			.join("\n");
 
-		const personalCtx = ctx.personalMcp
-			? await ctx.personalMcp.prompts.personalContext.render({
+		const personalCtx = typeof ctx.personalMcp === "object" && ctx.personalMcp !== null && "prompts" in ctx.personalMcp
+			? await (ctx.personalMcp as { prompts: { personalContext: { render: (args: { query: string }) => Promise<string> } } }).prompts.personalContext.render({
 					query: ctx.question,
 				})
 			: "";

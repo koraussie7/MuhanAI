@@ -1,0 +1,45 @@
+
+> @agentmesh/api@0.1.0 typecheck /Users/brianyeon/muhanai/muhanai/packaging/npm/token-free-gateway/agentmesh/services/api
+> tsc -p tsconfig.json --noEmit
+
+../../packages/agent-cast/src/hierarchy.ts(2,49): error TS2307: Cannot find module '@agentmesh/shared-types' or its corresponding type declarations.
+../../packages/agent-cast/src/index.ts(2,49): error TS2307: Cannot find module '@agentmesh/shared-types' or its corresponding type declarations.
+../../packages/knowledge-base/src/pgvector-store.ts(18,35): error TS2307: Cannot find module '@agentmesh/database' or its corresponding type declarations.
+../../packages/knowledge-base/src/pgvector-store.ts(95,22): error TS2347: Untyped function calls may not accept type arguments.
+../../packages/personal-mcp/src/knowledge.ts(19,39): error TS7006: Parameter 'k' implicitly has an 'any' type.
+../../packages/personal-mcp/src/knowledge.ts(29,27): error TS7006: Parameter 'a' implicitly has an 'any' type.
+../../packages/personal-mcp/src/knowledge.ts(29,30): error TS7006: Parameter 'b' implicitly has an 'any' type.
+../../packages/personal-mcp/src/memory.ts(26,39): error TS7006: Parameter 'm' implicitly has an 'any' type.
+../../packages/personal-mcp/src/memory.ts(36,29): error TS7006: Parameter 'a' implicitly has an 'any' type.
+../../packages/personal-mcp/src/memory.ts(36,32): error TS7006: Parameter 'b' implicitly has an 'any' type.
+../../packages/personal-mcp/src/prisma-store.ts(28,8): error TS2307: Cannot find module '../../shared/types/user-knowledge' or its corresponding type declarations.
+../../packages/personal-mcp/src/server.ts(52,19): error TS2307: Cannot find module '../../shared/types/user-knowledge' or its corresponding type declarations.
+../../packages/personal-mcp/src/server.ts(53,21): error TS2307: Cannot find module '../../shared/types/user-knowledge' or its corresponding type declarations.
+../../packages/personal-mcp/src/server.ts(54,17): error TS2307: Cannot find module '../../shared/types/user-knowledge' or its corresponding type declarations.
+../../packages/personal-mcp/src/server.ts(55,21): error TS2307: Cannot find module '../../shared/types/user-knowledge' or its corresponding type declarations.
+../../packages/personal-mcp/src/server.ts(161,46): error TS7006: Parameter 'm' implicitly has an 'any' type.
+../../packages/personal-mcp/src/service.ts(15,8): error TS2307: Cannot find module '../../shared/types/user-knowledge' or its corresponding type declarations.
+../../packages/personal-mcp/src/store-factory.ts(20,35): error TS2307: Cannot find module '@agentmesh/database' or its corresponding type declarations.
+../../packages/personal-mcp/src/store-types.ts(15,8): error TS2307: Cannot find module '../../shared/types/user-knowledge' or its corresponding type declarations.
+../../packages/personal-mcp/src/user-object.ts(16,8): error TS2307: Cannot find module '../../shared/types/user-knowledge' or its corresponding type declarations.
+../../packages/personal-mcp/src/user-object.ts(80,48): error TS7006: Parameter 'e' implicitly has an 'any' type.
+../../packages/personal-mcp/src/user-object.ts(152,41): error TS7006: Parameter 'k' implicitly has an 'any' type.
+../../packages/personal-mcp/src/user-object.ts(196,41): error TS7006: Parameter 'k' implicitly has an 'any' type.
+../../packages/personal-mcp/src/user-object.ts(208,32): error TS7006: Parameter 'k' implicitly has an 'any' type.
+../../packages/personal-mcp/src/user-object.ts(230,38): error TS7006: Parameter 'a' implicitly has an 'any' type.
+../../packages/personal-mcp/src/user-object.ts(230,41): error TS7006: Parameter 'b' implicitly has an 'any' type.
+../../packages/personal-mcp/src/user-object.ts(250,5): error TS7006: Parameter 'e' implicitly has an 'any' type.
+../../packages/personal-mcp/src/user-object.ts(291,37): error TS7006: Parameter 's' implicitly has an 'any' type.
+../../packages/personal-mcp/src/user-object.ts(299,36): error TS7006: Parameter 't' implicitly has an 'any' type.
+../../packages/personal-mcp/src/user-object.ts(307,25): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/llm-routes.ts(57,3): error TS18048: 'options.headers' is possibly 'undefined'.
+src/llm-routes.ts(57,3): error TS7053: Element implicitly has an 'any' type because expression of type '"Authorization"' can't be used to index type 'HeadersInit'.
+  Property 'Authorization' does not exist on type 'HeadersInit'.
+src/payment-routes.ts(3,32): error TS2307: Cannot find module '@agentmesh/payment/src/payment-service' or its corresponding type declarations.
+src/payment-routes.ts(31,44): error TS18046: 'error' is of type 'unknown'.
+src/payment-routes.ts(42,44): error TS18046: 'error' is of type 'unknown'.
+src/payment-routes.ts(49,48): error TS2698: Spread types may only be created from object types.
+src/payment-routes.ts(53,44): error TS18046: 'error' is of type 'unknown'.
+src/quorum-routes.ts(57,11): error TS2698: Spread types may only be created from object types.
+src/quorum-routes.ts(141,44): error TS7006: Parameter 'r' implicitly has an 'any' type.
+[41m[30m ELIFECYCLE [39m[49m [31mCommand failed with exit code 2.[39m

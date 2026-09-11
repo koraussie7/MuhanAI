@@ -4,7 +4,7 @@
  * otherwise falls back to in-memory VectorStore.
  */
 
-import type { KnowledgeNode } from "../../shared/types";
+import type { KnowledgeNode } from "@agentmesh/shared-types";
 import { chunkText } from "./chunking";
 import { vectorStore } from "./retrieval";
 

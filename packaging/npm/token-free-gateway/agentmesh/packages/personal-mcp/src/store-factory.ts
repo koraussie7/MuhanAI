@@ -17,7 +17,7 @@ export async function getKnowledgeStore(): Promise<KnowledgeStore> {
 	if (cached && cachedMode === mode) return cached;
 
 	if (mode === "prisma") {
-		const { prisma } = await import("../../db/src/client");
+		const { prisma } = await import("@agentmesh/database");
 		const { PrismaUserKnowledgeStore } = await import("./prisma-store");
 		cached = new PrismaUserKnowledgeStore(prisma);
 		cachedMode = mode;

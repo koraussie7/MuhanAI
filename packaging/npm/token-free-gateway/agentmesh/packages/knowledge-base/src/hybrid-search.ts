@@ -7,12 +7,28 @@
  * `decayEngine.getRetrievabilityScores()` for the recency signal.
  */
 
-import type { KnowledgeNode } from "../../shared/types";
-import { personalKnowledgeService } from "../../personal-mcp/src/knowledge";
+import type { KnowledgeNode } from "@agentmesh/shared-types";
 import { decayEngine } from "./decay/engine.js";
 import { type RankedItem, rrfFusionN } from "./search/rrf.js";
 import { extractEntities, extractQueryTerms } from "./search/entity.js";
 import { type ScoredKnowledge, vectorStore } from "./retrieval";
+
+/** Injectable keyword-search provider. Defaults to an empty result when no
+ *  provider is registered — personal-mcp registers its own service at
+ *  startup via `registerKeywordProvider`, so knowledge-base never imports
+ *  personal-mcp directly (avoids a build-graph cycle). */
+export type KeywordSearchProvider = (params: {
+	userId: string;
+	query: string;
+	categoryId?: string;
+	limit: number;
+}) => Promise<KnowledgeNode[]>;
+
+let keywordProvider: KeywordSearchProvider | null = null;
+
+export function registerKeywordProvider(provider: KeywordSearchProvider): void {
+	keywordProvider = provider;
+}
 
 export interface HybridSearchParams {
 	userId: string;
@@ -44,12 +60,14 @@ const RRF_K = 60;
 export async function hybridSearch(params: HybridSearchParams): Promise<HybridSearchHit[]> {
 	const limit = params.limit ?? 8;
 
-	const keywordHits = await personalKnowledgeService.search({
-		userId: params.userId,
-		query: params.query,
-		categoryId: params.categoryId,
-		limit,
-	});
+	const keywordHits: KnowledgeNode[] = keywordProvider
+		? await keywordProvider({
+				userId: params.userId,
+				query: params.query,
+				categoryId: params.categoryId,
+				limit,
+			})
+		: [];
 
 	let vectorHits: ScoredKnowledge[] = [];
 	const mode = (process.env.PERSONAL_MCP_STORE ?? "memory").toLowerCase();

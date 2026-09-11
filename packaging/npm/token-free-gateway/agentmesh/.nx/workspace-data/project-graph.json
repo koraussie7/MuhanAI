@@ -1,0 +1,2600 @@
+{
+  "nodes": {
+    "@agentmesh/category-engine": {
+      "name": "@agentmesh/category-engine",
+      "type": "lib",
+      "data": {
+        "root": "packages/category-engine",
+        "name": "@agentmesh/category-engine",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "lint"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/category-engine",
+            "packageMain": "src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/compute-market": {
+      "name": "@agentmesh/compute-market",
+      "type": "lib",
+      "data": {
+        "root": "packages/compute-market",
+        "name": "@agentmesh/compute-market",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "lint",
+              "test"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/compute-market",
+            "packageMain": "src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          },
+          "test": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test"
+            },
+            "metadata": {
+              "scriptContent": "vitest run",
+              "runCommand": "pnpm run test"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default",
+              "^production"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/knowledge-base": {
+      "name": "@agentmesh/knowledge-base",
+      "type": "lib",
+      "data": {
+        "root": "packages/knowledge-base",
+        "name": "@agentmesh/knowledge-base",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "lint",
+              "test"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/knowledge-base",
+            "packageMain": "src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          },
+          "test": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test"
+            },
+            "metadata": {
+              "scriptContent": "vitest run",
+              "runCommand": "pnpm run test"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default",
+              "^production"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/agent-gateway": {
+      "name": "@agentmesh/agent-gateway",
+      "type": "lib",
+      "data": {
+        "root": "packages/agent-gateway",
+        "name": "@agentmesh/agent-gateway",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "lint",
+              "test"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/agent-gateway",
+            "packageExports": {
+              ".": "./src/index.ts"
+            },
+            "packageMain": "./src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          },
+          "test": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test"
+            },
+            "metadata": {
+              "scriptContent": "vitest run",
+              "runCommand": "pnpm run test"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default",
+              "^production"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/credit-system": {
+      "name": "@agentmesh/credit-system",
+      "type": "lib",
+      "data": {
+        "root": "packages/credit-system",
+        "name": "@agentmesh/credit-system",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "test"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/credit-system",
+            "packageExports": {
+              ".": "./src/index.ts"
+            },
+            "packageMain": "./src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "test": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test"
+            },
+            "metadata": {
+              "scriptContent": "tsx --test src/**/*.test.ts",
+              "runCommand": "pnpm run test"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default",
+              "^production"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/semantic-vote": {
+      "name": "@agentmesh/semantic-vote",
+      "type": "lib",
+      "data": {
+        "root": "packages/semantic-vote",
+        "name": "@agentmesh/semantic-vote",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "lint",
+              "test"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/semantic-vote",
+            "packageMain": "src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          },
+          "test": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test"
+            },
+            "metadata": {
+              "scriptContent": "vitest run",
+              "runCommand": "pnpm run test"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default",
+              "^production"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/agent-daemon": {
+      "name": "@agentmesh/agent-daemon",
+      "type": "lib",
+      "data": {
+        "root": "packages/agent-daemon",
+        "name": "@agentmesh/agent-daemon",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "lint",
+              "test"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/agent-daemon",
+            "packageExports": {
+              ".": "./src/index.ts"
+            },
+            "packageMain": "./src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          },
+          "test": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test"
+            },
+            "metadata": {
+              "scriptContent": "vitest run",
+              "runCommand": "pnpm run test"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default",
+              "^production"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/agent-router": {
+      "name": "@agentmesh/agent-router",
+      "type": "lib",
+      "data": {
+        "root": "packages/agent-router",
+        "name": "@agentmesh/agent-router",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "lint"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/agent-router",
+            "packageMain": "src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/computer-use": {
+      "name": "@agentmesh/computer-use",
+      "type": "lib",
+      "data": {
+        "root": "packages/computer-use",
+        "name": "@agentmesh/computer-use",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "test"
+            ]
+          },
+          "description": "Computer Use module for MuhanAI - AI-powered desktop control",
+          "js": {
+            "packageName": "@agentmesh/computer-use",
+            "packageExports": {
+              ".": "./src/index.ts"
+            },
+            "packageMain": "./src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "test": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test"
+            },
+            "metadata": {
+              "scriptContent": "vitest run",
+              "runCommand": "pnpm run test"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default",
+              "^production"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/personal-mcp": {
+      "name": "@agentmesh/personal-mcp",
+      "type": "lib",
+      "data": {
+        "root": "packages/personal-mcp",
+        "name": "@agentmesh/personal-mcp",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "lint",
+              "test"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/personal-mcp",
+            "packageMain": "src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          },
+          "test": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test"
+            },
+            "metadata": {
+              "scriptContent": "vitest run",
+              "runCommand": "pnpm run test"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default",
+              "^production"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/shared-types": {
+      "name": "@agentmesh/shared-types",
+      "type": "lib",
+      "data": {
+        "root": "packages/shared-types",
+        "name": "@agentmesh/shared-types",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "lint",
+              "test"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/shared-types",
+            "packageMain": "types/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          },
+          "test": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test"
+            },
+            "metadata": {
+              "scriptContent": "tsx --test runtime.test.ts types/**/*.test.ts",
+              "runCommand": "pnpm run test"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default",
+              "^production"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/browser-use": {
+      "name": "@agentmesh/browser-use",
+      "type": "lib",
+      "data": {
+        "root": "packages/browser-use",
+        "name": "@agentmesh/browser-use",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "test"
+            ]
+          },
+          "description": "Browser Use module for MuhanAI - AIHawk-compatible browser automation",
+          "js": {
+            "packageName": "@agentmesh/browser-use",
+            "packageExports": {
+              ".": "./src/index.ts"
+            },
+            "packageMain": "./src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "test": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test"
+            },
+            "metadata": {
+              "scriptContent": "vitest run",
+              "runCommand": "pnpm run test"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default",
+              "^production"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/agent-cast": {
+      "name": "@agentmesh/agent-cast",
+      "type": "lib",
+      "data": {
+        "root": "packages/agent-cast",
+        "name": "@agentmesh/agent-cast",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "lint"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/agent-cast",
+            "packageMain": "src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/agent-core": {
+      "name": "@agentmesh/agent-core",
+      "type": "lib",
+      "data": {
+        "root": "packages/agent-core",
+        "name": "@agentmesh/agent-core",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "lint"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/agent-core",
+            "packageMain": "src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/agent-mesh": {
+      "name": "@agentmesh/agent-mesh",
+      "type": "lib",
+      "data": {
+        "root": "packages/agent-mesh",
+        "name": "@agentmesh/agent-mesh",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "lint"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/agent-mesh",
+            "packageMain": "src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/federation": {
+      "name": "@agentmesh/federation",
+      "type": "lib",
+      "data": {
+        "root": "packages/federation",
+        "name": "@agentmesh/federation",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "lint",
+              "test"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/federation",
+            "packageMain": "src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          },
+          "test": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test"
+            },
+            "metadata": {
+              "scriptContent": "vitest run",
+              "runCommand": "pnpm run test"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default",
+              "^production"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/llm-router": {
+      "name": "@agentmesh/llm-router",
+      "type": "lib",
+      "data": {
+        "root": "packages/llm-router",
+        "name": "@agentmesh/llm-router",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "lint",
+              "test"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/llm-router",
+            "packageMain": "src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          },
+          "test": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test"
+            },
+            "metadata": {
+              "scriptContent": "vitest run",
+              "runCommand": "pnpm run test"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default",
+              "^production"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/peer-mesh": {
+      "name": "@agentmesh/peer-mesh",
+      "type": "lib",
+      "data": {
+        "root": "packages/peer-mesh",
+        "name": "@agentmesh/peer-mesh",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "lint",
+              "test"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/peer-mesh",
+            "packageMain": "src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          },
+          "test": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test"
+            },
+            "metadata": {
+              "scriptContent": "vitest run",
+              "runCommand": "pnpm run test"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default",
+              "^production"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/database": {
+      "name": "@agentmesh/database",
+      "type": "lib",
+      "data": {
+        "root": "packages/database",
+        "name": "@agentmesh/database",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "lint",
+              "test"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/database",
+            "packageMain": "./src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          },
+          "test": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test"
+            },
+            "metadata": {
+              "scriptContent": "echo \"no tests\"",
+              "runCommand": "pnpm run test"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default",
+              "^production"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/hivebear": {
+      "name": "@agentmesh/hivebear",
+      "type": "lib",
+      "data": {
+        "root": "packages/hivebear",
+        "name": "@agentmesh/hivebear",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "lint",
+              "test"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/hivebear",
+            "packageMain": "src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          },
+          "test": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test"
+            },
+            "metadata": {
+              "scriptContent": "vitest run",
+              "runCommand": "pnpm run test"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default",
+              "^production"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/payment": {
+      "name": "@agentmesh/payment",
+      "type": "lib",
+      "data": {
+        "root": "packages/payment",
+        "name": "@agentmesh/payment",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "lint",
+              "test"
+            ]
+          },
+          "description": "Payment service for MuhanAI, integrating with Hyperswitch Prism",
+          "js": {
+            "packageName": "@agentmesh/payment",
+            "packageMain": "src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          },
+          "test": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test"
+            },
+            "metadata": {
+              "scriptContent": "vitest run",
+              "runCommand": "pnpm run test"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default",
+              "^production"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/noema": {
+      "name": "@agentmesh/noema",
+      "type": "lib",
+      "data": {
+        "root": "packages/noema",
+        "name": "@agentmesh/noema",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "lint",
+              "test"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/noema",
+            "packageMain": "src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          },
+          "test": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test"
+            },
+            "metadata": {
+              "scriptContent": "tsx --test src/**/*.test.ts",
+              "runCommand": "pnpm run test"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default",
+              "^production"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/api": {
+      "name": "@agentmesh/api",
+      "type": "lib",
+      "data": {
+        "root": "services/api",
+        "name": "@agentmesh/api",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "dev",
+              "build",
+              "typecheck",
+              "lint",
+              "test"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/api",
+            "packageMain": "src/server.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "dev": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "dev"
+            },
+            "metadata": {
+              "scriptContent": "tsx watch src/server.ts",
+              "runCommand": "pnpm run dev"
+            },
+            "configurations": {},
+            "parallelism": true
+          },
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          },
+          "test": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test"
+            },
+            "metadata": {
+              "scriptContent": "vitest run",
+              "runCommand": "pnpm run test"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default",
+              "^production"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/web": {
+      "name": "@agentmesh/web",
+      "type": "lib",
+      "data": {
+        "root": "apps/web",
+        "name": "@agentmesh/web",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "dev",
+              "build",
+              "typecheck",
+              "lint",
+              "test"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/web",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "dev": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "dev"
+            },
+            "metadata": {
+              "scriptContent": "vite",
+              "runCommand": "pnpm run dev"
+            },
+            "configurations": {},
+            "parallelism": true
+          },
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "vite build",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "lint": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "lint"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run lint"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default"
+            ],
+            "cache": true
+          },
+          "test": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test"
+            },
+            "metadata": {
+              "scriptContent": "tsx --test src/**/*.test.ts",
+              "runCommand": "pnpm run test"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default",
+              "^production"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    }
+  },
+  "externalNodes": {},
+  "dependencies": {
+    "@agentmesh/category-engine": [
+      {
+        "source": "@agentmesh/category-engine",
+        "target": "@agentmesh/shared-types",
+        "type": "static"
+      }
+    ],
+    "@agentmesh/compute-market": [],
+    "@agentmesh/knowledge-base": [
+      {
+        "source": "@agentmesh/knowledge-base",
+        "target": "@agentmesh/federation",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/knowledge-base",
+        "target": "@agentmesh/shared-types",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/knowledge-base",
+        "target": "@agentmesh/database",
+        "type": "dynamic"
+      }
+    ],
+    "@agentmesh/agent-gateway": [
+      {
+        "source": "@agentmesh/agent-gateway",
+        "target": "@agentmesh/peer-mesh",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/agent-gateway",
+        "target": "@agentmesh/credit-system",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/agent-gateway",
+        "target": "@agentmesh/shared-types",
+        "type": "static"
+      }
+    ],
+    "@agentmesh/credit-system": [],
+    "@agentmesh/semantic-vote": [],
+    "@agentmesh/agent-daemon": [
+      {
+        "source": "@agentmesh/agent-daemon",
+        "target": "@agentmesh/agent-gateway",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/agent-daemon",
+        "target": "@agentmesh/peer-mesh",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/agent-daemon",
+        "target": "@agentmesh/llm-router",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/agent-daemon",
+        "target": "@agentmesh/credit-system",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/agent-daemon",
+        "target": "@agentmesh/shared-types",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/agent-daemon",
+        "target": "@agentmesh/personal-mcp",
+        "type": "static"
+      }
+    ],
+    "@agentmesh/agent-router": [
+      {
+        "source": "@agentmesh/agent-router",
+        "target": "@agentmesh/agent-cast",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/agent-router",
+        "target": "@agentmesh/agent-core",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/agent-router",
+        "target": "@agentmesh/agent-mesh",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/agent-router",
+        "target": "@agentmesh/category-engine",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/agent-router",
+        "target": "@agentmesh/knowledge-base",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/agent-router",
+        "target": "@agentmesh/personal-mcp",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/agent-router",
+        "target": "@agentmesh/shared-types",
+        "type": "static"
+      }
+    ],
+    "@agentmesh/computer-use": [],
+    "@agentmesh/personal-mcp": [
+      {
+        "source": "@agentmesh/personal-mcp",
+        "target": "@agentmesh/knowledge-base",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/personal-mcp",
+        "target": "@agentmesh/knowledge-base",
+        "type": "dynamic"
+      },
+      {
+        "source": "@agentmesh/personal-mcp",
+        "target": "@agentmesh/shared-types",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/personal-mcp",
+        "target": "@agentmesh/database",
+        "type": "dynamic"
+      }
+    ],
+    "@agentmesh/shared-types": [],
+    "@agentmesh/browser-use": [],
+    "@agentmesh/agent-cast": [
+      {
+        "source": "@agentmesh/agent-cast",
+        "target": "@agentmesh/llm-router",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/agent-cast",
+        "target": "@agentmesh/shared-types",
+        "type": "static"
+      }
+    ],
+    "@agentmesh/agent-core": [
+      {
+        "source": "@agentmesh/agent-core",
+        "target": "@agentmesh/shared-types",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/agent-core",
+        "target": "@agentmesh/database",
+        "type": "dynamic"
+      }
+    ],
+    "@agentmesh/agent-mesh": [
+      {
+        "source": "@agentmesh/agent-mesh",
+        "target": "@agentmesh/agent-core",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/agent-mesh",
+        "target": "@agentmesh/llm-router",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/agent-mesh",
+        "target": "@agentmesh/shared-types",
+        "type": "static"
+      }
+    ],
+    "@agentmesh/federation": [
+      {
+        "source": "@agentmesh/federation",
+        "target": "@agentmesh/peer-mesh",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/federation",
+        "target": "@agentmesh/shared-types",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/federation",
+        "target": "@agentmesh/credit-system",
+        "type": "static"
+      }
+    ],
+    "@agentmesh/llm-router": [
+      {
+        "source": "@agentmesh/llm-router",
+        "target": "@agentmesh/peer-mesh",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/llm-router",
+        "target": "@agentmesh/shared-types",
+        "type": "static"
+      }
+    ],
+    "@agentmesh/peer-mesh": [
+      {
+        "source": "@agentmesh/peer-mesh",
+        "target": "@agentmesh/shared-types",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/peer-mesh",
+        "target": "@agentmesh/credit-system",
+        "type": "static"
+      }
+    ],
+    "@agentmesh/database": [],
+    "@agentmesh/hivebear": [
+      {
+        "source": "@agentmesh/hivebear",
+        "target": "@agentmesh/shared-types",
+        "type": "static"
+      }
+    ],
+    "@agentmesh/payment": [
+      {
+        "source": "@agentmesh/payment",
+        "target": "@agentmesh/shared-types",
+        "type": "static"
+      }
+    ],
+    "@agentmesh/noema": [
+      {
+        "source": "@agentmesh/noema",
+        "target": "@agentmesh/shared-types",
+        "type": "static"
+      }
+    ],
+    "@agentmesh/api": [
+      {
+        "source": "@agentmesh/api",
+        "target": "@agentmesh/noema",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/api",
+        "target": "@agentmesh/semantic-vote",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/api",
+        "target": "@agentmesh/hivebear",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/api",
+        "target": "@agentmesh/knowledge-base",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/api",
+        "target": "@agentmesh/agent-cast",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/api",
+        "target": "@agentmesh/compute-market",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/api",
+        "target": "@agentmesh/federation",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/api",
+        "target": "@agentmesh/federation",
+        "type": "dynamic"
+      },
+      {
+        "source": "@agentmesh/api",
+        "target": "@agentmesh/shared-types",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/api",
+        "target": "@agentmesh/credit-system",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/api",
+        "target": "@agentmesh/peer-mesh",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/api",
+        "target": "@agentmesh/database",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/api",
+        "target": "@agentmesh/database",
+        "type": "dynamic"
+      },
+      {
+        "source": "@agentmesh/api",
+        "target": "@agentmesh/llm-router",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/api",
+        "target": "@agentmesh/agent-daemon",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/api",
+        "target": "@agentmesh/personal-mcp",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/api",
+        "target": "@agentmesh/personal-mcp",
+        "type": "dynamic"
+      }
+    ],
+    "@agentmesh/web": [
+      {
+        "source": "@agentmesh/web",
+        "target": "@agentmesh/knowledge-base",
+        "type": "dynamic"
+      }
+    ]
+  },
+  "version": "6.0",
+  "errors": [],
+  "computedAt": 1789113362572
+}
