@@ -1542,6 +1542,92 @@
         "implicitDependencies": []
       }
     },
+    "@agentmesh/ai-engine": {
+      "name": "@agentmesh/ai-engine",
+      "type": "lib",
+      "data": {
+        "root": "packages/ai-engine",
+        "name": "@agentmesh/ai-engine",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "test"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/ai-engine",
+            "packageExports": {
+              ".": "./src/index.ts",
+              "./factory": "./src/factory.ts",
+              "./types": "./src/types.ts"
+            },
+            "packageMain": "src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "cache": true
+          },
+          "test": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test"
+            },
+            "metadata": {
+              "scriptContent": "vitest run",
+              "runCommand": "pnpm run test"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default",
+              "^production"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
     "@agentmesh/peer-mesh": {
       "name": "@agentmesh/peer-mesh",
       "type": "lib",
@@ -1912,6 +1998,90 @@
             "inputs": [
               "default"
             ],
+            "cache": true
+          },
+          "test": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "test"
+            },
+            "metadata": {
+              "scriptContent": "vitest run",
+              "runCommand": "pnpm run test"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "inputs": [
+              "default",
+              "^production"
+            ],
+            "cache": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
+    "@agentmesh/ai-ui": {
+      "name": "@agentmesh/ai-ui",
+      "type": "lib",
+      "data": {
+        "root": "packages/ai-ui",
+        "name": "@agentmesh/ai-ui",
+        "tags": [
+          "npm:private"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "build",
+              "typecheck",
+              "test"
+            ]
+          },
+          "js": {
+            "packageName": "@agentmesh/ai-ui",
+            "packageExports": {
+              ".": "./src/index.ts"
+            },
+            "packageMain": "src/index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "build": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json",
+              "runCommand": "pnpm run build"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              "^build"
+            ],
+            "inputs": [
+              "production",
+              "^production"
+            ],
+            "outputs": [
+              "{options.outputPath}"
+            ],
+            "cache": true
+          },
+          "typecheck": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "typecheck"
+            },
+            "metadata": {
+              "scriptContent": "tsc -p tsconfig.json --noEmit",
+              "runCommand": "pnpm run typecheck"
+            },
+            "configurations": {},
+            "parallelism": true,
             "cache": true
           },
           "test": {
@@ -2465,6 +2635,7 @@
         "type": "static"
       }
     ],
+    "@agentmesh/ai-engine": [],
     "@agentmesh/peer-mesh": [
       {
         "source": "@agentmesh/peer-mesh",
@@ -2489,6 +2660,13 @@
       {
         "source": "@agentmesh/payment",
         "target": "@agentmesh/shared-types",
+        "type": "static"
+      }
+    ],
+    "@agentmesh/ai-ui": [
+      {
+        "source": "@agentmesh/ai-ui",
+        "target": "@agentmesh/ai-engine",
         "type": "static"
       }
     ],
@@ -2584,6 +2762,11 @@
         "source": "@agentmesh/api",
         "target": "@agentmesh/personal-mcp",
         "type": "dynamic"
+      },
+      {
+        "source": "@agentmesh/api",
+        "target": "@agentmesh/payment",
+        "type": "static"
       }
     ],
     "@agentmesh/web": [
@@ -2596,5 +2779,5 @@
   },
   "version": "6.0",
   "errors": [],
-  "computedAt": 1789113362572
+  "computedAt": 1789133457643
 }

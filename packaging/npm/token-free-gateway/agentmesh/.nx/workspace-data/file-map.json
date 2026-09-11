@@ -2,279 +2,846 @@
   "version": "6.0",
   "nxVersion": "20.8.4",
   "pathMappings": {},
-  "nxJsonPlugins": [
-    {}
-  ],
+  "nxJsonPlugins": [],
   "fileMap": {
-    "nonProjectFiles": [
-      {
-        "file": "docs/PRISMA.md",
-        "hash": "6768337078268218303"
-      },
-      {
-        "file": "docs/HAPPY-INTEGRATION-ANALYSIS.md",
-        "hash": "16893242356571898049"
-      },
-      {
-        "file": "docs/WEKNORA_INTEGRATION.md",
-        "hash": "10183023495736476236"
-      },
-      {
-        "file": "docs/adr/0007-peer-identity-rotation.md",
-        "hash": "7103836862850284494"
-      },
-      {
-        "file": ".github/workflows/deploy.yml",
-        "hash": "785258540526860996"
-      },
-      {
-        "file": "docs/adr/0009-harvest-c-api-contract.md",
-        "hash": "15451766306260550078"
-      },
-      {
-        "file": "docs/USER-GUIDE-CODE-PLAN.md",
-        "hash": "10016798386815296637"
-      },
-      {
-        "file": ".github/workflows/test-reporter.yml",
-        "hash": "5080661879773831856"
-      },
-      {
-        "file": "docs/protocol.md",
-        "hash": "7569686734989110916"
-      },
-      {
-        "file": "docs/adr/0004-pulse-sse-bridge.md",
-        "hash": "7860128779236535033"
-      },
-      {
-        "file": "docs/IMPORTABLE-SOURCE-MAP.md",
-        "hash": "4107346036833949335"
-      },
-      {
-        "file": "vitest.config.ts",
-        "hash": "13104627891363754342"
-      },
-      {
-        "file": "docs/adr/0001-m1-pulse-mesh.md",
-        "hash": "2342775856238732133"
-      },
-      {
-        "file": "docs/INTEGRATED-CODE-PLAN.md",
-        "hash": "11654302309406543140"
-      },
-      {
-        "file": "deploy/feed-api.ts",
-        "hash": "1996004708396589819"
-      },
-      {
-        "file": "deploy/fediverse.ts",
-        "hash": "3586707112131919382"
-      },
-      {
-        "file": ".github/workflows/release.yml",
-        "hash": "5608591464240194373"
-      },
-      {
-        "file": "docs/adr/0006-adaptive-render-loop.md",
-        "hash": "17641957825676811956"
-      },
-      {
-        "file": "docs/OMNIROUTE_CLIENT.md",
-        "hash": "8029109201344220259"
-      },
-      {
-        "file": "docs/architecture.md",
-        "hash": "9262802968529768094"
-      },
-      {
-        "file": ".github/workflows/ci.yml",
-        "hash": "2228746961663418874"
-      },
-      {
-        "file": "deploy/docker-compose.yml",
-        "hash": "17595804256916607616"
-      },
-      {
-        "file": "docs/WORKTREE-PLAN.md",
-        "hash": "6426555705375618502"
-      },
-      {
-        "file": "README.md",
-        "hash": "1955341599445144252"
-      },
-      {
-        "file": "wrangler.toml",
-        "hash": "5872740323857928365"
-      },
-      {
-        "file": "package.json",
-        "hash": "906060636390228024"
-      },
-      {
-        "file": "deploy/mcp-server.ts",
-        "hash": "11121392199842593"
-      },
-      {
-        "file": ".gitignore",
-        "hash": "9918862405810911158"
-      },
-      {
-        "file": "biome.json",
-        "hash": "2108829337605442912"
-      },
-      {
-        "file": "docs/agent-cast.md",
-        "hash": "8462212104273585823"
-      },
-      {
-        "file": "prisma/migrations/20260906000000_init_pgvector/migration.sql",
-        "hash": "2049945614331345715"
-      },
-      {
-        "file": "docs/adr/0002-libp2p-floodsub-swap.md",
-        "hash": "4443381589062914225"
-      },
-      {
-        "file": "scripts/demo.ts",
-        "hash": "15884818378442330222"
-      },
-      {
-        "file": "tests/incident-rotate.test.ts",
-        "hash": "12351464712987130823"
-      },
-      {
-        "file": "pnpm-workspace.yaml",
-        "hash": "17803296953936907715"
-      },
-      {
-        "file": "deploy/worker.ts",
-        "hash": "13689862003388494371"
-      },
-      {
-        "file": "prisma/migrations/20260906110000_welcome_credits/migration.sql",
-        "hash": "6801782292477626996"
-      },
-      {
-        "file": "deploy/feed-store.ts",
-        "hash": "11922449137582064499"
-      },
-      {
-        "file": "docs/knowledge.md",
-        "hash": "14980542522681949882"
-      },
-      {
-        "file": "docs/OMNIROUTE_INTEGRATION.md",
-        "hash": "13969805902620069022"
-      },
-      {
-        "file": ".env.example",
-        "hash": "17675895616245062535"
-      },
-      {
-        "file": "tsconfig.json",
-        "hash": "6973439525669482264"
-      },
-      {
-        "file": "prisma/schema.prisma",
-        "hash": "6407830091536750477"
-      },
-      {
-        "file": "docs/CODE-INTEGRATION-PLAN.md",
-        "hash": "14102288521167426674"
-      },
-      {
-        "file": "scripts/prisma-personal-mcp.ts",
-        "hash": "8110061317098944082"
-      },
-      {
-        "file": "docs/agent-mesh.md",
-        "hash": "7835051127726222688"
-      },
-      {
-        "file": "nx.json",
-        "hash": "17794621023796462404"
-      },
-      {
-        "file": "deploy/muhanai.com.nginx.conf",
-        "hash": "3678583265566720542"
-      },
-      {
-        "file": "docs/adr/0008-ssh-commit-signing.md",
-        "hash": "11015901578914982336"
-      },
-      {
-        "file": "scripts/integrated-demo.ts",
-        "hash": "3895082118662914078"
-      },
-      {
-        "file": "tsconfig.base.json",
-        "hash": "6206507207168413285"
-      },
-      {
-        "file": "docs/STELLAVAULT-INTEGRATION-ANALYSIS.md",
-        "hash": "1792172971733374333"
-      },
-      {
-        "file": "THIRD_PARTY_LICENSES.md",
-        "hash": "7606950875824820275"
-      },
-      {
-        "file": "docs/user-guide.md",
-        "hash": "18262551655037076914"
-      },
-      {
-        "file": "docs/adr/0005-use-gossip-pulse-hook.md",
-        "hash": "16751717760245037016"
-      },
-      {
-        "file": "scripts/create-personal-mcp.ts",
-        "hash": "12555507456616482834"
-      },
-      {
-        "file": "docs/adr/0003-eight-repo-lineage.md",
-        "hash": "7876231328383916665"
-      }
-    ],
     "projectFileMap": {
-      "@agentmesh/hivebear": [
+      "@agentmesh/api": [
         {
-          "file": "packages/hivebear/package.json",
-          "hash": "2196156742658309560",
+          "file": "services/api/openapi.yaml",
+          "hash": "1940822975568725586"
+        },
+        {
+          "file": "services/api/package.json",
+          "hash": "10182429175535575856",
+          "deps": [
+            "@agentmesh/noema",
+            "@agentmesh/semantic-vote",
+            "@agentmesh/hivebear",
+            "@agentmesh/knowledge-base",
+            "@agentmesh/agent-cast",
+            "@agentmesh/compute-market",
+            "@agentmesh/federation",
+            "@agentmesh/shared-types",
+            "@agentmesh/credit-system",
+            "@agentmesh/peer-mesh",
+            "@agentmesh/database",
+            "@agentmesh/llm-router",
+            "@agentmesh/agent-daemon",
+            "@agentmesh/personal-mcp"
+          ]
+        },
+        {
+          "file": "services/api/src/agents-routes.ts",
+          "hash": "4187958506278174052",
+          "deps": [
+            "@agentmesh/knowledge-base"
+          ]
+        },
+        {
+          "file": "services/api/src/auth-routes.test.ts",
+          "hash": "2650092284180813"
+        },
+        {
+          "file": "services/api/src/auth-routes.ts",
+          "hash": "5093014277767076637",
+          "deps": [
+            [
+              "@agentmesh/database",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "services/api/src/auth.ts",
+          "hash": "7324195610103559394"
+        },
+        {
+          "file": "services/api/src/compute-routes.ts",
+          "hash": "17910953985577605545",
+          "deps": [
+            "@agentmesh/compute-market"
+          ]
+        },
+        {
+          "file": "services/api/src/computer-use-routes.test.ts",
+          "hash": "17132463402614710278"
+        },
+        {
+          "file": "services/api/src/computer-use-routes.ts",
+          "hash": "8836740897698623519",
+          "deps": [
+            "@agentmesh/agent-daemon"
+          ]
+        },
+        {
+          "file": "services/api/src/credits-aggregate.test.ts",
+          "hash": "2318406835502573943"
+        },
+        {
+          "file": "services/api/src/credits-routes.ts",
+          "hash": "12122792032966284981",
+          "deps": [
+            "@agentmesh/credit-system"
+          ]
+        },
+        {
+          "file": "services/api/src/db.ts",
+          "hash": "5786808582953682811",
           "deps": [
             "@agentmesh/shared-types"
           ]
         },
         {
-          "file": "packages/hivebear/src/client.ts",
-          "hash": "643837032942049002",
+          "file": "services/api/src/error-shapes.test.ts",
+          "hash": "4905918100451960089"
+        },
+        {
+          "file": "services/api/src/error-shapes.ts",
+          "hash": "1590829834528768142"
+        },
+        {
+          "file": "services/api/src/feed-routes.ts",
+          "hash": "8400024364688141106",
           "deps": [
+            [
+              "@agentmesh/database",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "services/api/src/gossip-bridge.test.ts",
+          "hash": "6440985799180928931"
+        },
+        {
+          "file": "services/api/src/gossip-bridge.ts",
+          "hash": "15341180437890170849",
+          "deps": [
+            "@agentmesh/peer-mesh"
+          ]
+        },
+        {
+          "file": "services/api/src/happy-routes.ts",
+          "hash": "14800128066494242025",
+          "deps": [
+            "@agentmesh/llm-router"
+          ]
+        },
+        {
+          "file": "services/api/src/hivebear-routes.ts",
+          "hash": "15797802045831025621",
+          "deps": [
+            "@agentmesh/hivebear"
+          ]
+        },
+        {
+          "file": "services/api/src/knowledge-routes.ts",
+          "hash": "11338037739945943807",
+          "deps": [
+            "@agentmesh/federation",
+            "@agentmesh/knowledge-base"
+          ]
+        },
+        {
+          "file": "services/api/src/llm-mesh-routes.test.ts",
+          "hash": "4648038056618704196"
+        },
+        {
+          "file": "services/api/src/llm-mesh-routes.ts",
+          "hash": "17162243958100740116"
+        },
+        {
+          "file": "services/api/src/llm-routes.test.ts",
+          "hash": "7193363132685316583"
+        },
+        {
+          "file": "services/api/src/llm-routes.ts",
+          "hash": "9657940725795198456",
+          "deps": [
+            "@agentmesh/llm-router"
+          ]
+        },
+        {
+          "file": "services/api/src/network-routes.ts",
+          "hash": "14015356052546489731",
+          "deps": [
+            "@agentmesh/compute-market",
+            "@agentmesh/knowledge-base"
+          ]
+        },
+        {
+          "file": "services/api/src/noema-routes.ts",
+          "hash": "13452908360333854918"
+        },
+        {
+          "file": "services/api/src/noema-service.ts",
+          "hash": "16843000721829379505",
+          "deps": [
+            "@agentmesh/noema",
+            [
+              "@agentmesh/federation",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "services/api/src/omniroute-routes.test.ts",
+          "hash": "11131302431468312418"
+        },
+        {
+          "file": "services/api/src/omniroute-routes.ts",
+          "hash": "1449890820392517222",
+          "deps": [
+            [
+              "@agentmesh/personal-mcp",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "services/api/src/payment-routes.ts",
+          "hash": "6577060837470328593",
+          "deps": [
+            "@agentmesh/payment"
+          ]
+        },
+        {
+          "file": "services/api/src/pulse-routes.ts",
+          "hash": "3409631186905156866"
+        },
+        {
+          "file": "services/api/src/pulse-stream.test.ts",
+          "hash": "6553043032954846572",
+          "deps": [
+            "@agentmesh/peer-mesh"
+          ]
+        },
+        {
+          "file": "services/api/src/pulse-stream.ts",
+          "hash": "16351136973223229649",
+          "deps": [
+            "@agentmesh/peer-mesh"
+          ]
+        },
+        {
+          "file": "services/api/src/quorum-routes.test.ts",
+          "hash": "2526054720431462424"
+        },
+        {
+          "file": "services/api/src/quorum-routes.ts",
+          "hash": "10782197202070547441",
+          "deps": [
+            "@agentmesh/agent-cast",
             "@agentmesh/shared-types"
           ]
         },
         {
-          "file": "packages/hivebear/src/index.ts",
-          "hash": "13512086369719093405"
+          "file": "services/api/src/security-routes.test.ts",
+          "hash": "5923024565598062173"
         },
         {
-          "file": "packages/hivebear/src/ollama-proxy.test.ts",
-          "hash": "11235818930695393850"
+          "file": "services/api/src/security-routes.ts",
+          "hash": "14854865427518980101"
         },
         {
-          "file": "packages/hivebear/src/ollama-proxy.ts",
-          "hash": "14816342827991338102"
+          "file": "services/api/src/semantic-routes.ts",
+          "hash": "2944290478401006370",
+          "deps": [
+            "@agentmesh/semantic-vote"
+          ]
         },
         {
-          "file": "packages/hivebear/src/types.ts",
-          "hash": "469783189091670121"
+          "file": "services/api/src/server.test.ts",
+          "hash": "12668196175538619406"
         },
         {
-          "file": "packages/hivebear/tsconfig.json",
+          "file": "services/api/src/server.ts",
+          "hash": "10775309008127484128",
+          "deps": [
+            "@agentmesh/federation",
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "services/api/tsconfig.json",
+          "hash": "5702983329602939783"
+        },
+        {
+          "file": "services/api/vitest.config.ts",
+          "hash": "11931585540920739253"
+        }
+      ],
+      "@agentmesh/compute-market": [
+        {
+          "file": "packages/compute-market/package.json",
+          "hash": "6015899689382342489"
+        },
+        {
+          "file": "packages/compute-market/src/index.ts",
+          "hash": "3611662004331312718"
+        },
+        {
+          "file": "packages/compute-market/src/tribute.test.ts",
+          "hash": "3601343880187008726"
+        },
+        {
+          "file": "packages/compute-market/src/tribute.ts",
+          "hash": "12142573711217119858"
+        },
+        {
+          "file": "packages/compute-market/tsconfig.json",
           "hash": "1782639995464554572"
+        }
+      ],
+      "@agentmesh/category-engine": [
+        {
+          "file": "packages/category-engine/index.ts",
+          "hash": "15488727802819661288"
         },
         {
-          "file": "packages/hivebear/vitest.config.ts",
+          "file": "packages/category-engine/package.json",
+          "hash": "13280664426133843316"
+        },
+        {
+          "file": "packages/category-engine/src/category.ts",
+          "hash": "16693966220784135804",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/category-engine/src/classifier.ts",
+          "hash": "2151318359258973828",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/category-engine/src/index.ts",
+          "hash": "1870754052260121760"
+        },
+        {
+          "file": "packages/category-engine/src/jurisdiction.ts",
+          "hash": "14131908878658898360"
+        },
+        {
+          "file": "packages/category-engine/src/router.ts",
+          "hash": "9069906589285376619",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/category-engine/src/taxonomy.ts",
+          "hash": "13444892544205648598"
+        },
+        {
+          "file": "packages/category-engine/tsconfig.json",
+          "hash": "3141464146861082496"
+        }
+      ],
+      "@agentmesh/database": [
+        {
+          "file": "packages/database/package.json",
+          "hash": "10903139636371697777"
+        },
+        {
+          "file": "packages/database/src/client.ts",
+          "hash": "14241800101878818367"
+        },
+        {
+          "file": "packages/database/src/index.ts",
+          "hash": "10426207540916383750"
+        },
+        {
+          "file": "packages/database/tsconfig.json",
+          "hash": "2338884011979130339"
+        }
+      ],
+      "@agentmesh/credit-system": [
+        {
+          "file": "packages/credit-system/package.json",
+          "hash": "14242211096371727116"
+        },
+        {
+          "file": "packages/credit-system/src/co-receipt.test.ts",
+          "hash": "10942212981968932749"
+        },
+        {
+          "file": "packages/credit-system/src/co-receipt.ts",
+          "hash": "16732163860309353762"
+        },
+        {
+          "file": "packages/credit-system/src/constants.test.ts",
+          "hash": "6516506235279302442"
+        },
+        {
+          "file": "packages/credit-system/src/credit-account.test.ts",
+          "hash": "18385919323675095194"
+        },
+        {
+          "file": "packages/credit-system/src/credit-account.ts",
+          "hash": "18314430976739837319"
+        },
+        {
+          "file": "packages/credit-system/src/index.ts",
+          "hash": "17929184176099983705"
+        },
+        {
+          "file": "packages/credit-system/src/reputation.test.ts",
+          "hash": "8367603348951215375"
+        },
+        {
+          "file": "packages/credit-system/src/reputation.ts",
+          "hash": "17905150890297007091"
+        },
+        {
+          "file": "packages/credit-system/tsconfig.json",
+          "hash": "7279253723789414627"
+        }
+      ],
+      "@agentmesh/noema": [
+        {
+          "file": "packages/noema/package.json",
+          "hash": "17794699263708403803",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/noema/src/client.ts",
+          "hash": "3707461181287385602",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/noema/src/index.ts",
+          "hash": "1128720425976141736"
+        },
+        {
+          "file": "packages/noema/src/types.ts",
+          "hash": "6291822701268281966"
+        },
+        {
+          "file": "packages/noema/tsconfig.json",
+          "hash": "18257708711840789333"
+        }
+      ],
+      "@agentmesh/personal-mcp": [
+        {
+          "file": "packages/personal-mcp/index.ts",
+          "hash": "15488727802819661288"
+        },
+        {
+          "file": "packages/personal-mcp/package.json",
+          "hash": "807393235645643222",
+          "deps": [
+            "@agentmesh/knowledge-base",
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/hound-mcp-client.test.ts",
+          "hash": "15825598419457487474"
+        },
+        {
+          "file": "packages/personal-mcp/src/hound-mcp-client.ts",
+          "hash": "8659090733813982594"
+        },
+        {
+          "file": "packages/personal-mcp/src/index.ts",
+          "hash": "2131271509992047933"
+        },
+        {
+          "file": "packages/personal-mcp/src/knowledge.ts",
+          "hash": "12326328483538213621",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/memory.ts",
+          "hash": "1855656455188048722",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/omniroute-mcp-client.test.ts",
+          "hash": "17819976667757634383"
+        },
+        {
+          "file": "packages/personal-mcp/src/omniroute-mcp-client.ts",
+          "hash": "12592386849139688458"
+        },
+        {
+          "file": "packages/personal-mcp/src/permissions.ts",
+          "hash": "10889761289218482440",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/prisma-store.ts",
+          "hash": "15082852847093015531",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/server.ts",
+          "hash": "5961392689280847390",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/service.ts",
+          "hash": "7374241082376801137",
+          "deps": [
+            "@agentmesh/shared-types",
+            [
+              "@agentmesh/knowledge-base",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/skills.ts",
+          "hash": "10127950347608469222",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/store-factory.ts",
+          "hash": "3826115807078267822",
+          "deps": [
+            [
+              "@agentmesh/database",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/store-types.ts",
+          "hash": "2772830246088757914",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/tools.ts",
+          "hash": "8094910933538514414",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/user-object.ts",
+          "hash": "2467710581198995758",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/weknora-mcp-client.test.ts",
+          "hash": "7487629456449954574"
+        },
+        {
+          "file": "packages/personal-mcp/src/weknora-mcp-client.ts",
+          "hash": "10024932492375173530"
+        },
+        {
+          "file": "packages/personal-mcp/src/weknora-memory-sync.ts",
+          "hash": "3677389114788071973"
+        },
+        {
+          "file": "packages/personal-mcp/tsconfig.json",
+          "hash": "3141464146861082496"
+        },
+        {
+          "file": "packages/personal-mcp/vitest.config.ts",
+          "hash": "4108539707509630207"
+        }
+      ],
+      "@agentmesh/peer-mesh": [
+        {
+          "file": "packages/peer-mesh/README.md",
+          "hash": "12467073700761811855"
+        },
+        {
+          "file": "packages/peer-mesh/package.json",
+          "hash": "12640679546370034198",
+          "deps": [
+            "@agentmesh/shared-types",
+            "@agentmesh/credit-system"
+          ]
+        },
+        {
+          "file": "packages/peer-mesh/src/bandwidth.ts",
+          "hash": "4361556170059578477"
+        },
+        {
+          "file": "packages/peer-mesh/src/device-capabilities.ts",
+          "hash": "15558872407046259368"
+        },
+        {
+          "file": "packages/peer-mesh/src/error.ts",
+          "hash": "11322570445963259864"
+        },
+        {
+          "file": "packages/peer-mesh/src/identity.ts",
+          "hash": "18289950049274827489"
+        },
+        {
+          "file": "packages/peer-mesh/src/index.ts",
+          "hash": "8714960127883553505"
+        },
+        {
+          "file": "packages/peer-mesh/src/peer-catalog.ts",
+          "hash": "8663108660998122214"
+        },
+        {
+          "file": "packages/peer-mesh/src/peer-reputation.ts",
+          "hash": "15586173873811606348",
+          "deps": [
+            "@agentmesh/credit-system"
+          ]
+        },
+        {
+          "file": "packages/peer-mesh/src/pubsub.ts",
+          "hash": "9477162607514023520"
+        },
+        {
+          "file": "packages/peer-mesh/src/tests/bandwidth.test.ts",
+          "hash": "8172813404647851519"
+        },
+        {
+          "file": "packages/peer-mesh/src/tests/error.test.ts",
+          "hash": "538759501141745784"
+        },
+        {
+          "file": "packages/peer-mesh/src/tests/identity.test.ts",
+          "hash": "11629434921634973161"
+        },
+        {
+          "file": "packages/peer-mesh/src/tests/peer-catalog.test.ts",
+          "hash": "11784936898501347054"
+        },
+        {
+          "file": "packages/peer-mesh/src/tests/peer-reputation.test.ts",
+          "hash": "4782867454535301456"
+        },
+        {
+          "file": "packages/peer-mesh/src/tests/pubsub.test.ts",
+          "hash": "13306666465719082707"
+        },
+        {
+          "file": "packages/peer-mesh/src/tests/trust-verifier.test.ts",
+          "hash": "11435406834584527499"
+        },
+        {
+          "file": "packages/peer-mesh/src/transport.ts",
+          "hash": "12537458628825218846"
+        },
+        {
+          "file": "packages/peer-mesh/src/trust-verifier.ts",
+          "hash": "4532482108152302442"
+        },
+        {
+          "file": "packages/peer-mesh/tsconfig.json",
+          "hash": "12734214144056352426"
+        },
+        {
+          "file": "packages/peer-mesh/vitest.config.ts",
           "hash": "1858845835356223462"
+        }
+      ],
+      "@agentmesh/ai-engine": [
+        {
+          "file": "packages/ai-engine/package.json",
+          "hash": "1650285784674282301"
+        },
+        {
+          "file": "packages/ai-engine/src/cloud/cloud-engine.ts",
+          "hash": "7134834622094178358"
+        },
+        {
+          "file": "packages/ai-engine/src/factory.ts",
+          "hash": "12786429797777815605"
+        },
+        {
+          "file": "packages/ai-engine/src/index.ts",
+          "hash": "9962151880665892903"
+        },
+        {
+          "file": "packages/ai-engine/src/ollama/ollama-engine.ts",
+          "hash": "13371587130932968151"
+        },
+        {
+          "file": "packages/ai-engine/src/sipp/model-manager.ts",
+          "hash": "5035235821482131164"
+        },
+        {
+          "file": "packages/ai-engine/src/sipp/sipp-engine.ts",
+          "hash": "4550169733577740451"
+        },
+        {
+          "file": "packages/ai-engine/src/sipp/sipp-worker-impl.ts",
+          "hash": "755774459281473889"
+        },
+        {
+          "file": "packages/ai-engine/src/sipp/sipp-worker.ts",
+          "hash": "9025673873200284518"
+        },
+        {
+          "file": "packages/ai-engine/src/types.ts",
+          "hash": "17248831572509126444"
+        },
+        {
+          "file": "packages/ai-engine/src/utils/events.ts",
+          "hash": "6671447345058167022"
+        },
+        {
+          "file": "packages/ai-engine/src/utils/logger.ts",
+          "hash": "15925275528183640336"
+        },
+        {
+          "file": "packages/ai-engine/tests/sipp.test.ts",
+          "hash": "15924173541347611666"
+        },
+        {
+          "file": "packages/ai-engine/tsconfig.json",
+          "hash": "16568283178550900376"
+        }
+      ],
+      "@agentmesh/payment": [
+        {
+          "file": "packages/payment/package.json",
+          "hash": "15573836523856923727",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/payment/src/hyperswitch-prism.ts",
+          "hash": "17896383330017159574"
+        },
+        {
+          "file": "packages/payment/src/index.ts",
+          "hash": "4787882619750548410"
+        },
+        {
+          "file": "packages/payment/src/payment-service.ts",
+          "hash": "10369144682753504037"
+        },
+        {
+          "file": "packages/payment/src/prisma.ts",
+          "hash": "16655852128778072731"
+        },
+        {
+          "file": "packages/payment/src/types.ts",
+          "hash": "4417109320012303486"
+        },
+        {
+          "file": "packages/payment/tsconfig.json",
+          "hash": "16568283178550900376"
+        }
+      ],
+      "@agentmesh/agent-mesh": [
+        {
+          "file": "packages/agent-mesh/package.json",
+          "hash": "8240880426463580799"
+        },
+        {
+          "file": "packages/agent-mesh/src/index.ts",
+          "hash": "6697183430973331665",
+          "deps": [
+            "@agentmesh/agent-core",
+            "@agentmesh/llm-router",
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/agent-mesh/src/transports/axl-client.test.ts",
+          "hash": "11691456360150053711"
+        },
+        {
+          "file": "packages/agent-mesh/src/transports/axl-client.ts",
+          "hash": "12383593511823012320"
+        },
+        {
+          "file": "packages/agent-mesh/src/transports/hybrid-transport.test.ts",
+          "hash": "4508352664620801490"
+        },
+        {
+          "file": "packages/agent-mesh/src/transports/hybrid-transport.ts",
+          "hash": "17082014411544289063"
+        },
+        {
+          "file": "packages/agent-mesh/src/transports/identity-bridge.test.ts",
+          "hash": "4828344131490527144"
+        },
+        {
+          "file": "packages/agent-mesh/src/transports/identity-bridge.ts",
+          "hash": "338032861328185132"
+        },
+        {
+          "file": "packages/agent-mesh/src/transports/index.ts",
+          "hash": "2365681788181418028"
+        },
+        {
+          "file": "packages/agent-mesh/src/transports/types.ts",
+          "hash": "13825097303624138354"
+        },
+        {
+          "file": "packages/agent-mesh/tsconfig.json",
+          "hash": "16568283178550900376"
+        }
+      ],
+      "@agentmesh/agent-gateway": [
+        {
+          "file": "packages/agent-gateway/package.json",
+          "hash": "7117854136691038154",
+          "deps": [
+            "@agentmesh/peer-mesh",
+            "@agentmesh/credit-system",
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/agent-gateway/src/index.ts",
+          "hash": "7617497474440081420"
+        },
+        {
+          "file": "packages/agent-gateway/src/protocol-types.ts",
+          "hash": "17677373261326642798"
+        },
+        {
+          "file": "packages/agent-gateway/src/protocol.ts",
+          "hash": "3975698440911938364"
+        },
+        {
+          "file": "packages/agent-gateway/src/routing.ts",
+          "hash": "796893437020821184"
+        },
+        {
+          "file": "packages/agent-gateway/src/tests/protocol.test.ts",
+          "hash": "8893414093158537573"
+        },
+        {
+          "file": "packages/agent-gateway/src/tests/routing.test.ts",
+          "hash": "1034412256687990084"
+        },
+        {
+          "file": "packages/agent-gateway/tsconfig.json",
+          "hash": "11413894618179116714"
+        },
+        {
+          "file": "packages/agent-gateway/vitest.config.ts",
+          "hash": "4467228811035035091"
         }
       ],
       "@agentmesh/web": [
@@ -693,139 +1260,102 @@
           "hash": "5264487757885972709"
         }
       ],
-      "@agentmesh/database": [
+      "@agentmesh/agent-core": [
         {
-          "file": "packages/database/package.json",
-          "hash": "10903139636371697777"
+          "file": "packages/agent-core/index.ts",
+          "hash": "2930323441049086597"
         },
         {
-          "file": "packages/database/src/client.ts",
-          "hash": "14241800101878818367"
+          "file": "packages/agent-core/package.json",
+          "hash": "4099052421196068028"
         },
         {
-          "file": "packages/database/src/index.ts",
-          "hash": "10426207540916383750"
+          "file": "packages/agent-core/src/registry.ts",
+          "hash": "4775574835521372775"
         },
         {
-          "file": "packages/database/tsconfig.json",
-          "hash": "2338884011979130339"
-        }
-      ],
-      "@agentmesh/credit-system": [
-        {
-          "file": "packages/credit-system/package.json",
-          "hash": "14242211096371727116"
-        },
-        {
-          "file": "packages/credit-system/src/co-receipt.test.ts",
-          "hash": "10942212981968932749"
-        },
-        {
-          "file": "packages/credit-system/src/co-receipt.ts",
-          "hash": "16732163860309353762"
-        },
-        {
-          "file": "packages/credit-system/src/constants.test.ts",
-          "hash": "6516506235279302442"
-        },
-        {
-          "file": "packages/credit-system/src/credit-account.test.ts",
-          "hash": "18385919323675095194"
-        },
-        {
-          "file": "packages/credit-system/src/credit-account.ts",
-          "hash": "18314430976739837319"
-        },
-        {
-          "file": "packages/credit-system/src/index.ts",
-          "hash": "17929184176099983705"
-        },
-        {
-          "file": "packages/credit-system/src/reputation.test.ts",
-          "hash": "8367603348951215375"
-        },
-        {
-          "file": "packages/credit-system/src/reputation.ts",
-          "hash": "17905150890297007091"
-        },
-        {
-          "file": "packages/credit-system/tsconfig.json",
-          "hash": "7279253723789414627"
-        }
-      ],
-      "@agentmesh/federation": [
-        {
-          "file": "packages/federation/package.json",
-          "hash": "3859096720198264186",
+          "file": "packages/agent-core/src/run-store.ts",
+          "hash": "8773519912543115394",
           "deps": [
-            "@agentmesh/peer-mesh",
             "@agentmesh/shared-types",
-            "@agentmesh/credit-system"
+            [
+              "@agentmesh/database",
+              "dynamic"
+            ]
           ]
         },
         {
-          "file": "packages/federation/src/crypto/ecdsa-p256.test.ts",
-          "hash": "8973269421712992037"
-        },
-        {
-          "file": "packages/federation/src/crypto/ecdsa-p256.ts",
-          "hash": "10767001439164712161"
-        },
-        {
-          "file": "packages/federation/src/crypto/ed25519.ts",
-          "hash": "10620310634292065982"
-        },
-        {
-          "file": "packages/federation/src/handlers.ts",
-          "hash": "11300077293213526963",
+          "file": "packages/agent-core/src/types.ts",
+          "hash": "7626268958282486310",
           "deps": [
             "@agentmesh/shared-types"
           ]
         },
         {
-          "file": "packages/federation/src/http-transport.ts",
-          "hash": "1437782697082168789",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
+          "file": "packages/agent-core/tsconfig.json",
+          "hash": "3141464146861082496"
+        }
+      ],
+      "@agentmesh/semantic-vote": [
+        {
+          "file": "packages/semantic-vote/package.json",
+          "hash": "5566980399096221148"
         },
         {
-          "file": "packages/federation/src/index.ts",
-          "hash": "11641690120371907411"
+          "file": "packages/semantic-vote/src/index.test.ts",
+          "hash": "12879869235617061232"
         },
         {
-          "file": "packages/federation/src/libp2p-transport.ts",
-          "hash": "6572517389575731813",
-          "deps": [
-            "@agentmesh/peer-mesh",
-            "@agentmesh/shared-types"
-          ]
+          "file": "packages/semantic-vote/src/index.ts",
+          "hash": "15133475190386470363"
         },
         {
-          "file": "packages/federation/src/loopback-transport.ts",
-          "hash": "4850298533201361970",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
+          "file": "packages/semantic-vote/src/types.ts",
+          "hash": "8170480487995096936"
         },
         {
-          "file": "packages/federation/src/protocols/folklore.ts",
-          "hash": "15010665666819868692"
-        },
-        {
-          "file": "packages/federation/src/transport-manager.ts",
-          "hash": "5325715125283714589"
-        },
-        {
-          "file": "packages/federation/src/types.ts",
-          "hash": "11146330730345757102",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/federation/tsconfig.json",
+          "file": "packages/semantic-vote/tsconfig.json",
           "hash": "1782639995464554572"
+        }
+      ],
+      "@agentmesh/hivebear": [
+        {
+          "file": "packages/hivebear/package.json",
+          "hash": "2196156742658309560",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/hivebear/src/client.ts",
+          "hash": "643837032942049002",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/hivebear/src/index.ts",
+          "hash": "13512086369719093405"
+        },
+        {
+          "file": "packages/hivebear/src/ollama-proxy.test.ts",
+          "hash": "11235818930695393850"
+        },
+        {
+          "file": "packages/hivebear/src/ollama-proxy.ts",
+          "hash": "14816342827991338102"
+        },
+        {
+          "file": "packages/hivebear/src/types.ts",
+          "hash": "469783189091670121"
+        },
+        {
+          "file": "packages/hivebear/tsconfig.json",
+          "hash": "1782639995464554572"
+        },
+        {
+          "file": "packages/hivebear/vitest.config.ts",
+          "hash": "1858845835356223462"
         }
       ],
       "@agentmesh/shared-types": [
@@ -858,789 +1388,32 @@
           "hash": "16802635377724458127"
         }
       ],
-      "@agentmesh/personal-mcp": [
+      "@agentmesh/ai-ui": [
         {
-          "file": "packages/personal-mcp/index.ts",
-          "hash": "15488727802819661288"
-        },
-        {
-          "file": "packages/personal-mcp/package.json",
-          "hash": "807393235645643222",
+          "file": "packages/ai-ui/package.json",
+          "hash": "17013411292107791536",
           "deps": [
-            "@agentmesh/knowledge-base",
-            "@agentmesh/shared-types"
+            "@agentmesh/ai-engine"
           ]
         },
         {
-          "file": "packages/personal-mcp/src/hound-mcp-client.test.ts",
-          "hash": "15825598419457487474"
+          "file": "packages/ai-ui/src/ChatWidget.tsx",
+          "hash": "8497342584694367161"
         },
         {
-          "file": "packages/personal-mcp/src/hound-mcp-client.ts",
-          "hash": "8659090733813982594"
-        },
-        {
-          "file": "packages/personal-mcp/src/index.ts",
-          "hash": "2131271509992047933"
-        },
-        {
-          "file": "packages/personal-mcp/src/knowledge.ts",
-          "hash": "18310679958268115192",
+          "file": "packages/ai-ui/src/hooks/useAIEngine.ts",
+          "hash": "817233740392243970",
           "deps": [
-            "@agentmesh/shared-types"
+            "@agentmesh/ai-engine"
           ]
         },
         {
-          "file": "packages/personal-mcp/src/memory.ts",
-          "hash": "6382899303932402263",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
+          "file": "packages/ai-ui/src/index.ts",
+          "hash": "3265134009521550093"
         },
         {
-          "file": "packages/personal-mcp/src/omniroute-mcp-client.test.ts",
-          "hash": "17819976667757634383"
-        },
-        {
-          "file": "packages/personal-mcp/src/omniroute-mcp-client.ts",
-          "hash": "12592386849139688458"
-        },
-        {
-          "file": "packages/personal-mcp/src/permissions.ts",
-          "hash": "10889761289218482440",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/personal-mcp/src/prisma-store.ts",
-          "hash": "10846952064181787302",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/personal-mcp/src/server.ts",
-          "hash": "1352845844197033728",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/personal-mcp/src/service.ts",
-          "hash": "5654411917964738225",
-          "deps": [
-            [
-              "@agentmesh/knowledge-base",
-              "dynamic"
-            ]
-          ]
-        },
-        {
-          "file": "packages/personal-mcp/src/skills.ts",
-          "hash": "10127950347608469222",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/personal-mcp/src/store-factory.ts",
-          "hash": "3826115807078267822",
-          "deps": [
-            [
-              "@agentmesh/database",
-              "dynamic"
-            ]
-          ]
-        },
-        {
-          "file": "packages/personal-mcp/src/store-types.ts",
-          "hash": "5040451608934116384"
-        },
-        {
-          "file": "packages/personal-mcp/src/tools.ts",
-          "hash": "8094910933538514414",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/personal-mcp/src/user-object.ts",
-          "hash": "6594473671939049643"
-        },
-        {
-          "file": "packages/personal-mcp/src/weknora-mcp-client.test.ts",
-          "hash": "7487629456449954574"
-        },
-        {
-          "file": "packages/personal-mcp/src/weknora-mcp-client.ts",
-          "hash": "10024932492375173530"
-        },
-        {
-          "file": "packages/personal-mcp/src/weknora-memory-sync.ts",
-          "hash": "3677389114788071973"
-        },
-        {
-          "file": "packages/personal-mcp/tsconfig.json",
-          "hash": "3141464146861082496"
-        },
-        {
-          "file": "packages/personal-mcp/vitest.config.ts",
-          "hash": "4108539707509630207"
-        }
-      ],
-      "@agentmesh/computer-use": [
-        {
-          "file": "packages/computer-use/package.json",
-          "hash": "12651948012879450546"
-        },
-        {
-          "file": "packages/computer-use/src/computer-use-router.ts",
-          "hash": "6644954068001786730"
-        },
-        {
-          "file": "packages/computer-use/src/computer-use-routes.ts",
-          "hash": "2686775816922329833"
-        },
-        {
-          "file": "packages/computer-use/src/e2b-adapter.ts",
-          "hash": "925177630159485444"
-        },
-        {
-          "file": "packages/computer-use/src/e2b-byok-vision.ts",
-          "hash": "9694840559615998844"
-        },
-        {
-          "file": "packages/computer-use/src/e2b-computer-use.ts",
-          "hash": "3523069000292925339"
-        },
-        {
-          "file": "packages/computer-use/src/index.ts",
-          "hash": "10796584520087236310"
-        },
-        {
-          "file": "packages/computer-use/src/mcp-router.ts",
-          "hash": "9752379312018635870"
-        },
-        {
-          "file": "packages/computer-use/src/session-runner.ts",
-          "hash": "11700212798147279765"
-        },
-        {
-          "file": "packages/computer-use/tsconfig.json",
-          "hash": "9516585843114805170"
-        }
-      ],
-      "@agentmesh/agent-mesh": [
-        {
-          "file": "packages/agent-mesh/package.json",
-          "hash": "8240880426463580799"
-        },
-        {
-          "file": "packages/agent-mesh/src/index.ts",
-          "hash": "6697183430973331665",
-          "deps": [
-            "@agentmesh/agent-core",
-            "@agentmesh/llm-router",
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/agent-mesh/src/transports/axl-client.test.ts",
-          "hash": "11691456360150053711"
-        },
-        {
-          "file": "packages/agent-mesh/src/transports/axl-client.ts",
-          "hash": "12383593511823012320"
-        },
-        {
-          "file": "packages/agent-mesh/src/transports/hybrid-transport.test.ts",
-          "hash": "4508352664620801490"
-        },
-        {
-          "file": "packages/agent-mesh/src/transports/hybrid-transport.ts",
-          "hash": "17082014411544289063"
-        },
-        {
-          "file": "packages/agent-mesh/src/transports/identity-bridge.test.ts",
-          "hash": "4828344131490527144"
-        },
-        {
-          "file": "packages/agent-mesh/src/transports/identity-bridge.ts",
-          "hash": "338032861328185132"
-        },
-        {
-          "file": "packages/agent-mesh/src/transports/index.ts",
-          "hash": "2365681788181418028"
-        },
-        {
-          "file": "packages/agent-mesh/src/transports/types.ts",
-          "hash": "13825097303624138354"
-        },
-        {
-          "file": "packages/agent-mesh/tsconfig.json",
-          "hash": "16568283178550900376"
-        }
-      ],
-      "@agentmesh/llm-router": [
-        {
-          "file": "packages/llm-router/package.json",
-          "hash": "5552820445688754782",
-          "deps": [
-            "@agentmesh/peer-mesh",
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/llm-router/src/index.ts",
-          "hash": "16107149592364810868",
-          "deps": [
-            "@agentmesh/peer-mesh"
-          ]
-        },
-        {
-          "file": "packages/llm-router/src/keyless-providers.test.ts",
-          "hash": "10288906251284920669"
-        },
-        {
-          "file": "packages/llm-router/src/keyless-providers.ts",
-          "hash": "18236322586649001332"
-        },
-        {
-          "file": "packages/llm-router/src/llm-router.test.ts",
-          "hash": "3746056010090548946"
-        },
-        {
-          "file": "packages/llm-router/src/p2p-load-balancer.ts",
-          "hash": "14053481203083216364",
-          "deps": [
-            "@agentmesh/peer-mesh"
-          ]
-        },
-        {
-          "file": "packages/llm-router/src/p2p-node-registry.ts",
-          "hash": "961856808241823630",
-          "deps": [
-            "@agentmesh/peer-mesh"
-          ]
-        },
-        {
-          "file": "packages/llm-router/tsconfig.json",
-          "hash": "9691421123385178322"
-        }
-      ],
-      "@agentmesh/browser-use": [
-        {
-          "file": "packages/browser-use/package.json",
-          "hash": "8906554509945566121"
-        },
-        {
-          "file": "packages/browser-use/src/browser-adapter.ts",
-          "hash": "9406363263785826493"
-        },
-        {
-          "file": "packages/browser-use/src/browser-capabilities.ts",
-          "hash": "11305455068651656664"
-        },
-        {
-          "file": "packages/browser-use/src/browser-profile.ts",
-          "hash": "14049627335339155536"
-        },
-        {
-          "file": "packages/browser-use/src/index.ts",
-          "hash": "16844631183882471321"
-        },
-        {
-          "file": "packages/browser-use/src/playwright-adapter.ts",
-          "hash": "10352691007055930340"
-        },
-        {
-          "file": "packages/browser-use/tsconfig.json",
-          "hash": "9516585843114805170"
-        }
-      ],
-      "@agentmesh/agent-daemon": [
-        {
-          "file": "packages/agent-daemon/package.json",
-          "hash": "7598096131570622309",
-          "deps": [
-            "@agentmesh/agent-gateway",
-            "@agentmesh/peer-mesh",
-            "@agentmesh/llm-router",
-            "@agentmesh/credit-system",
-            "@agentmesh/shared-types",
-            "@agentmesh/personal-mcp"
-          ]
-        },
-        {
-          "file": "packages/agent-daemon/src/computer-use-router.ts",
-          "hash": "7752922648165879501"
-        },
-        {
-          "file": "packages/agent-daemon/src/credentials-vault.ts",
-          "hash": "6923116839103414972"
-        },
-        {
-          "file": "packages/agent-daemon/src/daemon.ts",
-          "hash": "5830530229773290326",
-          "deps": [
-            "@agentmesh/agent-gateway",
-            "@agentmesh/personal-mcp"
-          ]
-        },
-        {
-          "file": "packages/agent-daemon/src/device-node-daemon.ts",
-          "hash": "8491717956422903971",
-          "deps": [
-            "@agentmesh/peer-mesh",
-            "@agentmesh/llm-router"
-          ]
-        },
-        {
-          "file": "packages/agent-daemon/src/e2b-adapter.ts",
-          "hash": "3202368623366954956"
-        },
-        {
-          "file": "packages/agent-daemon/src/e2b-byok-vision.ts",
-          "hash": "714159948838024705"
-        },
-        {
-          "file": "packages/agent-daemon/src/e2b-computer-use.ts",
-          "hash": "8533017482988416991"
-        },
-        {
-          "file": "packages/agent-daemon/src/index.ts",
-          "hash": "7684738805905225342"
-        },
-        {
-          "file": "packages/agent-daemon/src/machine-identity.ts",
-          "hash": "13334366126513775995",
-          "deps": [
-            "@agentmesh/peer-mesh"
-          ]
-        },
-        {
-          "file": "packages/agent-daemon/src/mcp-router.ts",
-          "hash": "13351037573587056391",
-          "deps": [
-            "@agentmesh/personal-mcp"
-          ]
-        },
-        {
-          "file": "packages/agent-daemon/src/session-decrypt.ts",
-          "hash": "7977732847455737817",
-          "deps": [
-            "@agentmesh/agent-gateway"
-          ]
-        },
-        {
-          "file": "packages/agent-daemon/src/session-runner.ts",
-          "hash": "474220599762970287"
-        },
-        {
-          "file": "packages/agent-daemon/src/tests/computer-use-router.test.ts",
-          "hash": "8555902264259210961"
-        },
-        {
-          "file": "packages/agent-daemon/src/tests/daemon.test.ts",
-          "hash": "15889533326953081896",
-          "deps": [
-            "@agentmesh/agent-gateway"
-          ]
-        },
-        {
-          "file": "packages/agent-daemon/src/tests/e2b-adapter.test.ts",
-          "hash": "14527085172809431107"
-        },
-        {
-          "file": "packages/agent-daemon/src/tests/e2b-byok-vision.test.ts",
-          "hash": "7960129795249032460"
-        },
-        {
-          "file": "packages/agent-daemon/src/tests/e2b-computer-use.test.ts",
-          "hash": "11178775471772837916"
-        },
-        {
-          "file": "packages/agent-daemon/src/tests/e2e.test.ts",
-          "hash": "13801204617636249044",
-          "deps": [
-            "@agentmesh/agent-gateway"
-          ]
-        },
-        {
-          "file": "packages/agent-daemon/src/tests/muhan-agent.test.ts",
-          "hash": "6324343832036365386",
-          "deps": [
-            "@agentmesh/agent-gateway"
-          ]
-        },
-        {
-          "file": "packages/agent-daemon/tsconfig.json",
-          "hash": "11413894618179116714"
-        },
-        {
-          "file": "packages/agent-daemon/vitest.config.ts",
-          "hash": "4467228811035035091"
-        }
-      ],
-      "@agentmesh/api": [
-        {
-          "file": "services/api/openapi.yaml",
-          "hash": "1940822975568725586"
-        },
-        {
-          "file": "services/api/package.json",
-          "hash": "10182429175535575856",
-          "deps": [
-            "@agentmesh/noema",
-            "@agentmesh/semantic-vote",
-            "@agentmesh/hivebear",
-            "@agentmesh/knowledge-base",
-            "@agentmesh/agent-cast",
-            "@agentmesh/compute-market",
-            "@agentmesh/federation",
-            "@agentmesh/shared-types",
-            "@agentmesh/credit-system",
-            "@agentmesh/peer-mesh",
-            "@agentmesh/database",
-            "@agentmesh/llm-router",
-            "@agentmesh/agent-daemon",
-            "@agentmesh/personal-mcp"
-          ]
-        },
-        {
-          "file": "services/api/src/agents-routes.ts",
-          "hash": "4187958506278174052",
-          "deps": [
-            "@agentmesh/knowledge-base"
-          ]
-        },
-        {
-          "file": "services/api/src/auth-routes.test.ts",
-          "hash": "2650092284180813"
-        },
-        {
-          "file": "services/api/src/auth-routes.ts",
-          "hash": "5093014277767076637",
-          "deps": [
-            [
-              "@agentmesh/database",
-              "dynamic"
-            ]
-          ]
-        },
-        {
-          "file": "services/api/src/auth.ts",
-          "hash": "7324195610103559394"
-        },
-        {
-          "file": "services/api/src/compute-routes.ts",
-          "hash": "17910953985577605545",
-          "deps": [
-            "@agentmesh/compute-market"
-          ]
-        },
-        {
-          "file": "services/api/src/computer-use-routes.test.ts",
-          "hash": "17132463402614710278"
-        },
-        {
-          "file": "services/api/src/computer-use-routes.ts",
-          "hash": "8836740897698623519",
-          "deps": [
-            "@agentmesh/agent-daemon"
-          ]
-        },
-        {
-          "file": "services/api/src/credits-aggregate.test.ts",
-          "hash": "2318406835502573943"
-        },
-        {
-          "file": "services/api/src/credits-routes.ts",
-          "hash": "12122792032966284981",
-          "deps": [
-            "@agentmesh/credit-system"
-          ]
-        },
-        {
-          "file": "services/api/src/db.ts",
-          "hash": "5786808582953682811",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "services/api/src/error-shapes.test.ts",
-          "hash": "4905918100451960089"
-        },
-        {
-          "file": "services/api/src/error-shapes.ts",
-          "hash": "1590829834528768142"
-        },
-        {
-          "file": "services/api/src/feed-routes.ts",
-          "hash": "8400024364688141106",
-          "deps": [
-            [
-              "@agentmesh/database",
-              "dynamic"
-            ]
-          ]
-        },
-        {
-          "file": "services/api/src/gossip-bridge.test.ts",
-          "hash": "6440985799180928931"
-        },
-        {
-          "file": "services/api/src/gossip-bridge.ts",
-          "hash": "15341180437890170849",
-          "deps": [
-            "@agentmesh/peer-mesh"
-          ]
-        },
-        {
-          "file": "services/api/src/happy-routes.ts",
-          "hash": "14800128066494242025",
-          "deps": [
-            "@agentmesh/llm-router"
-          ]
-        },
-        {
-          "file": "services/api/src/hivebear-routes.ts",
-          "hash": "15797802045831025621",
-          "deps": [
-            "@agentmesh/hivebear"
-          ]
-        },
-        {
-          "file": "services/api/src/knowledge-routes.ts",
-          "hash": "11338037739945943807",
-          "deps": [
-            "@agentmesh/federation",
-            "@agentmesh/knowledge-base"
-          ]
-        },
-        {
-          "file": "services/api/src/llm-mesh-routes.test.ts",
-          "hash": "4648038056618704196"
-        },
-        {
-          "file": "services/api/src/llm-mesh-routes.ts",
-          "hash": "17162243958100740116"
-        },
-        {
-          "file": "services/api/src/llm-routes.test.ts",
-          "hash": "7193363132685316583"
-        },
-        {
-          "file": "services/api/src/llm-routes.ts",
-          "hash": "9657940725795198456",
-          "deps": [
-            "@agentmesh/llm-router"
-          ]
-        },
-        {
-          "file": "services/api/src/network-routes.ts",
-          "hash": "14015356052546489731",
-          "deps": [
-            "@agentmesh/compute-market",
-            "@agentmesh/knowledge-base"
-          ]
-        },
-        {
-          "file": "services/api/src/noema-routes.ts",
-          "hash": "13452908360333854918"
-        },
-        {
-          "file": "services/api/src/noema-service.ts",
-          "hash": "16843000721829379505",
-          "deps": [
-            "@agentmesh/noema",
-            [
-              "@agentmesh/federation",
-              "dynamic"
-            ]
-          ]
-        },
-        {
-          "file": "services/api/src/omniroute-routes.test.ts",
-          "hash": "11131302431468312418"
-        },
-        {
-          "file": "services/api/src/omniroute-routes.ts",
-          "hash": "1449890820392517222",
-          "deps": [
-            [
-              "@agentmesh/personal-mcp",
-              "dynamic"
-            ]
-          ]
-        },
-        {
-          "file": "services/api/src/payment-routes.ts",
-          "hash": "6577060837470328593"
-        },
-        {
-          "file": "services/api/src/pulse-routes.ts",
-          "hash": "3409631186905156866"
-        },
-        {
-          "file": "services/api/src/pulse-stream.test.ts",
-          "hash": "6553043032954846572",
-          "deps": [
-            "@agentmesh/peer-mesh"
-          ]
-        },
-        {
-          "file": "services/api/src/pulse-stream.ts",
-          "hash": "16351136973223229649",
-          "deps": [
-            "@agentmesh/peer-mesh"
-          ]
-        },
-        {
-          "file": "services/api/src/quorum-routes.test.ts",
-          "hash": "2526054720431462424"
-        },
-        {
-          "file": "services/api/src/quorum-routes.ts",
-          "hash": "10782197202070547441",
-          "deps": [
-            "@agentmesh/agent-cast",
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "services/api/src/security-routes.test.ts",
-          "hash": "5923024565598062173"
-        },
-        {
-          "file": "services/api/src/security-routes.ts",
-          "hash": "14854865427518980101"
-        },
-        {
-          "file": "services/api/src/semantic-routes.ts",
-          "hash": "2944290478401006370",
-          "deps": [
-            "@agentmesh/semantic-vote"
-          ]
-        },
-        {
-          "file": "services/api/src/server.test.ts",
-          "hash": "12668196175538619406"
-        },
-        {
-          "file": "services/api/src/server.ts",
-          "hash": "10775309008127484128",
-          "deps": [
-            "@agentmesh/federation",
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "services/api/tsconfig.json",
-          "hash": "5702983329602939783"
-        },
-        {
-          "file": "services/api/vitest.config.ts",
-          "hash": "11931585540920739253"
-        }
-      ],
-      "@agentmesh/noema": [
-        {
-          "file": "packages/noema/package.json",
-          "hash": "17794699263708403803",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/noema/src/client.ts",
-          "hash": "3707461181287385602",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/noema/src/index.ts",
-          "hash": "1128720425976141736"
-        },
-        {
-          "file": "packages/noema/src/types.ts",
-          "hash": "6291822701268281966"
-        },
-        {
-          "file": "packages/noema/tsconfig.json",
-          "hash": "18257708711840789333"
-        }
-      ],
-      "@agentmesh/agent-gateway": [
-        {
-          "file": "packages/agent-gateway/package.json",
-          "hash": "7117854136691038154",
-          "deps": [
-            "@agentmesh/peer-mesh",
-            "@agentmesh/credit-system",
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/agent-gateway/src/index.ts",
-          "hash": "7617497474440081420"
-        },
-        {
-          "file": "packages/agent-gateway/src/protocol-types.ts",
-          "hash": "17677373261326642798"
-        },
-        {
-          "file": "packages/agent-gateway/src/protocol.ts",
-          "hash": "3975698440911938364"
-        },
-        {
-          "file": "packages/agent-gateway/src/routing.ts",
-          "hash": "796893437020821184"
-        },
-        {
-          "file": "packages/agent-gateway/src/tests/protocol.test.ts",
-          "hash": "8893414093158537573"
-        },
-        {
-          "file": "packages/agent-gateway/src/tests/routing.test.ts",
-          "hash": "1034412256687990084"
-        },
-        {
-          "file": "packages/agent-gateway/tsconfig.json",
-          "hash": "11413894618179116714"
-        },
-        {
-          "file": "packages/agent-gateway/vitest.config.ts",
-          "hash": "4467228811035035091"
-        }
-      ],
-      "@agentmesh/agent-cast": [
-        {
-          "file": "packages/agent-cast/package.json",
-          "hash": "12506696236521877"
-        },
-        {
-          "file": "packages/agent-cast/src/hierarchy.ts",
-          "hash": "16851776931606557064",
-          "deps": [
-            "@agentmesh/llm-router",
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/agent-cast/src/index.ts",
-          "hash": "1968287580726996802",
-          "deps": [
-            "@agentmesh/llm-router",
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/agent-cast/tsconfig.json",
-          "hash": "16568283178550900376"
+          "file": "packages/ai-ui/tsconfig.json",
+          "hash": "8475525656297923533"
         }
       ],
       "@agentmesh/agent-router": [
@@ -1650,7 +1423,7 @@
         },
         {
           "file": "packages/agent-router/src/index.ts",
-          "hash": "1423864005864603822",
+          "hash": "6782027925708102659",
           "deps": [
             "@agentmesh/agent-cast",
             "@agentmesh/agent-core",
@@ -1663,39 +1436,6 @@
         },
         {
           "file": "packages/agent-router/tsconfig.json",
-          "hash": "16568283178550900376"
-        }
-      ],
-      "@agentmesh/payment": [
-        {
-          "file": "packages/payment/package.json",
-          "hash": "15573836523856923727",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/payment/src/hyperswitch-prism.ts",
-          "hash": "17896383330017159574"
-        },
-        {
-          "file": "packages/payment/src/index.ts",
-          "hash": "4787882619750548410"
-        },
-        {
-          "file": "packages/payment/src/payment-service.ts",
-          "hash": "10369144682753504037"
-        },
-        {
-          "file": "packages/payment/src/prisma.ts",
-          "hash": "16655852128778072731"
-        },
-        {
-          "file": "packages/payment/src/types.ts",
-          "hash": "4417109320012303486"
-        },
-        {
-          "file": "packages/payment/tsconfig.json",
           "hash": "16568283178550900376"
         }
       ],
@@ -1878,226 +1618,584 @@
           "hash": "3141464146861082496"
         }
       ],
-      "@agentmesh/category-engine": [
+      "@agentmesh/browser-use": [
         {
-          "file": "packages/category-engine/index.ts",
-          "hash": "15488727802819661288"
+          "file": "packages/browser-use/package.json",
+          "hash": "8906554509945566121"
         },
         {
-          "file": "packages/category-engine/package.json",
-          "hash": "13280664426133843316"
+          "file": "packages/browser-use/src/browser-adapter.ts",
+          "hash": "9406363263785826493"
         },
         {
-          "file": "packages/category-engine/src/category.ts",
-          "hash": "16693966220784135804",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
+          "file": "packages/browser-use/src/browser-capabilities.ts",
+          "hash": "11305455068651656664"
         },
         {
-          "file": "packages/category-engine/src/classifier.ts",
-          "hash": "2151318359258973828",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
+          "file": "packages/browser-use/src/browser-profile.ts",
+          "hash": "14049627335339155536"
         },
         {
-          "file": "packages/category-engine/src/index.ts",
-          "hash": "1870754052260121760"
+          "file": "packages/browser-use/src/index.ts",
+          "hash": "16844631183882471321"
         },
         {
-          "file": "packages/category-engine/src/jurisdiction.ts",
-          "hash": "14131908878658898360"
+          "file": "packages/browser-use/src/playwright-adapter.ts",
+          "hash": "10352691007055930340"
         },
         {
-          "file": "packages/category-engine/src/router.ts",
-          "hash": "9069906589285376619",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/category-engine/src/taxonomy.ts",
-          "hash": "13444892544205648598"
-        },
-        {
-          "file": "packages/category-engine/tsconfig.json",
-          "hash": "3141464146861082496"
+          "file": "packages/browser-use/tsconfig.json",
+          "hash": "9516585843114805170"
         }
       ],
-      "@agentmesh/compute-market": [
+      "@agentmesh/agent-cast": [
         {
-          "file": "packages/compute-market/package.json",
-          "hash": "6015899689382342489"
+          "file": "packages/agent-cast/package.json",
+          "hash": "12506696236521877"
         },
         {
-          "file": "packages/compute-market/src/index.ts",
-          "hash": "3611662004331312718"
+          "file": "packages/agent-cast/src/hierarchy.ts",
+          "hash": "16851776931606557064",
+          "deps": [
+            "@agentmesh/llm-router",
+            "@agentmesh/shared-types"
+          ]
         },
         {
-          "file": "packages/compute-market/src/tribute.test.ts",
-          "hash": "3601343880187008726"
+          "file": "packages/agent-cast/src/index.ts",
+          "hash": "1968287580726996802",
+          "deps": [
+            "@agentmesh/llm-router",
+            "@agentmesh/shared-types"
+          ]
         },
         {
-          "file": "packages/compute-market/src/tribute.ts",
-          "hash": "12142573711217119858"
-        },
-        {
-          "file": "packages/compute-market/tsconfig.json",
-          "hash": "1782639995464554572"
+          "file": "packages/agent-cast/tsconfig.json",
+          "hash": "16568283178550900376"
         }
       ],
-      "@agentmesh/agent-core": [
+      "@agentmesh/agent-daemon": [
         {
-          "file": "packages/agent-core/index.ts",
-          "hash": "2930323441049086597"
-        },
-        {
-          "file": "packages/agent-core/package.json",
-          "hash": "4099052421196068028"
-        },
-        {
-          "file": "packages/agent-core/src/registry.ts",
-          "hash": "4775574835521372775"
-        },
-        {
-          "file": "packages/agent-core/src/run-store.ts",
-          "hash": "8773519912543115394",
+          "file": "packages/agent-daemon/package.json",
+          "hash": "7598096131570622309",
           "deps": [
+            "@agentmesh/agent-gateway",
+            "@agentmesh/peer-mesh",
+            "@agentmesh/llm-router",
+            "@agentmesh/credit-system",
             "@agentmesh/shared-types",
-            [
-              "@agentmesh/database",
-              "dynamic"
-            ]
+            "@agentmesh/personal-mcp"
           ]
         },
         {
-          "file": "packages/agent-core/src/types.ts",
-          "hash": "7626268958282486310",
+          "file": "packages/agent-daemon/src/computer-use-router.ts",
+          "hash": "7752922648165879501"
+        },
+        {
+          "file": "packages/agent-daemon/src/credentials-vault.ts",
+          "hash": "6923116839103414972"
+        },
+        {
+          "file": "packages/agent-daemon/src/daemon.ts",
+          "hash": "5830530229773290326",
           "deps": [
+            "@agentmesh/agent-gateway",
+            "@agentmesh/personal-mcp"
+          ]
+        },
+        {
+          "file": "packages/agent-daemon/src/device-node-daemon.ts",
+          "hash": "8491717956422903971",
+          "deps": [
+            "@agentmesh/peer-mesh",
+            "@agentmesh/llm-router"
+          ]
+        },
+        {
+          "file": "packages/agent-daemon/src/e2b-adapter.ts",
+          "hash": "3202368623366954956"
+        },
+        {
+          "file": "packages/agent-daemon/src/e2b-byok-vision.ts",
+          "hash": "714159948838024705"
+        },
+        {
+          "file": "packages/agent-daemon/src/e2b-computer-use.ts",
+          "hash": "8533017482988416991"
+        },
+        {
+          "file": "packages/agent-daemon/src/index.ts",
+          "hash": "7684738805905225342"
+        },
+        {
+          "file": "packages/agent-daemon/src/machine-identity.ts",
+          "hash": "13334366126513775995",
+          "deps": [
+            "@agentmesh/peer-mesh"
+          ]
+        },
+        {
+          "file": "packages/agent-daemon/src/mcp-router.ts",
+          "hash": "13351037573587056391",
+          "deps": [
+            "@agentmesh/personal-mcp"
+          ]
+        },
+        {
+          "file": "packages/agent-daemon/src/session-decrypt.ts",
+          "hash": "7977732847455737817",
+          "deps": [
+            "@agentmesh/agent-gateway"
+          ]
+        },
+        {
+          "file": "packages/agent-daemon/src/session-runner.ts",
+          "hash": "474220599762970287"
+        },
+        {
+          "file": "packages/agent-daemon/src/tests/computer-use-router.test.ts",
+          "hash": "8555902264259210961"
+        },
+        {
+          "file": "packages/agent-daemon/src/tests/daemon.test.ts",
+          "hash": "15889533326953081896",
+          "deps": [
+            "@agentmesh/agent-gateway"
+          ]
+        },
+        {
+          "file": "packages/agent-daemon/src/tests/e2b-adapter.test.ts",
+          "hash": "14527085172809431107"
+        },
+        {
+          "file": "packages/agent-daemon/src/tests/e2b-byok-vision.test.ts",
+          "hash": "7960129795249032460"
+        },
+        {
+          "file": "packages/agent-daemon/src/tests/e2b-computer-use.test.ts",
+          "hash": "11178775471772837916"
+        },
+        {
+          "file": "packages/agent-daemon/src/tests/e2e.test.ts",
+          "hash": "13801204617636249044",
+          "deps": [
+            "@agentmesh/agent-gateway"
+          ]
+        },
+        {
+          "file": "packages/agent-daemon/src/tests/muhan-agent.test.ts",
+          "hash": "6324343832036365386",
+          "deps": [
+            "@agentmesh/agent-gateway"
+          ]
+        },
+        {
+          "file": "packages/agent-daemon/tsconfig.json",
+          "hash": "11413894618179116714"
+        },
+        {
+          "file": "packages/agent-daemon/vitest.config.ts",
+          "hash": "4467228811035035091"
+        }
+      ],
+      "@agentmesh/computer-use": [
+        {
+          "file": "packages/computer-use/package.json",
+          "hash": "12651948012879450546"
+        },
+        {
+          "file": "packages/computer-use/src/computer-use-router.ts",
+          "hash": "6644954068001786730"
+        },
+        {
+          "file": "packages/computer-use/src/computer-use-routes.ts",
+          "hash": "2686775816922329833"
+        },
+        {
+          "file": "packages/computer-use/src/e2b-adapter.ts",
+          "hash": "925177630159485444"
+        },
+        {
+          "file": "packages/computer-use/src/e2b-byok-vision.ts",
+          "hash": "9694840559615998844"
+        },
+        {
+          "file": "packages/computer-use/src/e2b-computer-use.ts",
+          "hash": "3523069000292925339"
+        },
+        {
+          "file": "packages/computer-use/src/index.ts",
+          "hash": "10796584520087236310"
+        },
+        {
+          "file": "packages/computer-use/src/mcp-router.ts",
+          "hash": "9752379312018635870"
+        },
+        {
+          "file": "packages/computer-use/src/session-runner.ts",
+          "hash": "11700212798147279765"
+        },
+        {
+          "file": "packages/computer-use/tsconfig.json",
+          "hash": "9516585843114805170"
+        }
+      ],
+      "@agentmesh/llm-router": [
+        {
+          "file": "packages/llm-router/package.json",
+          "hash": "5552820445688754782",
+          "deps": [
+            "@agentmesh/peer-mesh",
             "@agentmesh/shared-types"
           ]
         },
         {
-          "file": "packages/agent-core/tsconfig.json",
-          "hash": "3141464146861082496"
-        }
-      ],
-      "@agentmesh/peer-mesh": [
-        {
-          "file": "packages/peer-mesh/README.md",
-          "hash": "12467073700761811855"
+          "file": "packages/llm-router/src/index.ts",
+          "hash": "16107149592364810868",
+          "deps": [
+            "@agentmesh/peer-mesh"
+          ]
         },
         {
-          "file": "packages/peer-mesh/package.json",
-          "hash": "12640679546370034198",
+          "file": "packages/llm-router/src/keyless-providers.test.ts",
+          "hash": "10288906251284920669"
+        },
+        {
+          "file": "packages/llm-router/src/keyless-providers.ts",
+          "hash": "18236322586649001332"
+        },
+        {
+          "file": "packages/llm-router/src/llm-router.test.ts",
+          "hash": "3746056010090548946"
+        },
+        {
+          "file": "packages/llm-router/src/p2p-load-balancer.ts",
+          "hash": "14053481203083216364",
           "deps": [
+            "@agentmesh/peer-mesh"
+          ]
+        },
+        {
+          "file": "packages/llm-router/src/p2p-node-registry.ts",
+          "hash": "961856808241823630",
+          "deps": [
+            "@agentmesh/peer-mesh"
+          ]
+        },
+        {
+          "file": "packages/llm-router/tsconfig.json",
+          "hash": "9691421123385178322"
+        }
+      ],
+      "@agentmesh/federation": [
+        {
+          "file": "packages/federation/package.json",
+          "hash": "3859096720198264186",
+          "deps": [
+            "@agentmesh/peer-mesh",
             "@agentmesh/shared-types",
             "@agentmesh/credit-system"
           ]
         },
         {
-          "file": "packages/peer-mesh/src/bandwidth.ts",
-          "hash": "4361556170059578477"
+          "file": "packages/federation/src/crypto/ecdsa-p256.test.ts",
+          "hash": "8973269421712992037"
         },
         {
-          "file": "packages/peer-mesh/src/device-capabilities.ts",
-          "hash": "15558872407046259368"
+          "file": "packages/federation/src/crypto/ecdsa-p256.ts",
+          "hash": "10767001439164712161"
         },
         {
-          "file": "packages/peer-mesh/src/error.ts",
-          "hash": "11322570445963259864"
+          "file": "packages/federation/src/crypto/ed25519.ts",
+          "hash": "10620310634292065982"
         },
         {
-          "file": "packages/peer-mesh/src/identity.ts",
-          "hash": "18289950049274827489"
-        },
-        {
-          "file": "packages/peer-mesh/src/index.ts",
-          "hash": "8714960127883553505"
-        },
-        {
-          "file": "packages/peer-mesh/src/peer-catalog.ts",
-          "hash": "8663108660998122214"
-        },
-        {
-          "file": "packages/peer-mesh/src/peer-reputation.ts",
-          "hash": "15586173873811606348",
+          "file": "packages/federation/src/handlers.ts",
+          "hash": "11300077293213526963",
           "deps": [
-            "@agentmesh/credit-system"
+            "@agentmesh/shared-types"
           ]
         },
         {
-          "file": "packages/peer-mesh/src/pubsub.ts",
-          "hash": "9477162607514023520"
+          "file": "packages/federation/src/http-transport.ts",
+          "hash": "1437782697082168789",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
         },
         {
-          "file": "packages/peer-mesh/src/tests/bandwidth.test.ts",
-          "hash": "8172813404647851519"
+          "file": "packages/federation/src/index.ts",
+          "hash": "11641690120371907411"
         },
         {
-          "file": "packages/peer-mesh/src/tests/error.test.ts",
-          "hash": "538759501141745784"
+          "file": "packages/federation/src/libp2p-transport.ts",
+          "hash": "6572517389575731813",
+          "deps": [
+            "@agentmesh/peer-mesh",
+            "@agentmesh/shared-types"
+          ]
         },
         {
-          "file": "packages/peer-mesh/src/tests/identity.test.ts",
-          "hash": "11629434921634973161"
+          "file": "packages/federation/src/loopback-transport.ts",
+          "hash": "4850298533201361970",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
         },
         {
-          "file": "packages/peer-mesh/src/tests/peer-catalog.test.ts",
-          "hash": "11784936898501347054"
+          "file": "packages/federation/src/protocols/folklore.ts",
+          "hash": "15010665666819868692"
         },
         {
-          "file": "packages/peer-mesh/src/tests/peer-reputation.test.ts",
-          "hash": "4782867454535301456"
+          "file": "packages/federation/src/transport-manager.ts",
+          "hash": "5325715125283714589"
         },
         {
-          "file": "packages/peer-mesh/src/tests/pubsub.test.ts",
-          "hash": "13306666465719082707"
+          "file": "packages/federation/src/types.ts",
+          "hash": "11146330730345757102",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
         },
         {
-          "file": "packages/peer-mesh/src/tests/trust-verifier.test.ts",
-          "hash": "11435406834584527499"
-        },
-        {
-          "file": "packages/peer-mesh/src/transport.ts",
-          "hash": "12537458628825218846"
-        },
-        {
-          "file": "packages/peer-mesh/src/trust-verifier.ts",
-          "hash": "4532482108152302442"
-        },
-        {
-          "file": "packages/peer-mesh/tsconfig.json",
-          "hash": "12734214144056352426"
-        },
-        {
-          "file": "packages/peer-mesh/vitest.config.ts",
-          "hash": "1858845835356223462"
-        }
-      ],
-      "@agentmesh/semantic-vote": [
-        {
-          "file": "packages/semantic-vote/package.json",
-          "hash": "5566980399096221148"
-        },
-        {
-          "file": "packages/semantic-vote/src/index.test.ts",
-          "hash": "12879869235617061232"
-        },
-        {
-          "file": "packages/semantic-vote/src/index.ts",
-          "hash": "15133475190386470363"
-        },
-        {
-          "file": "packages/semantic-vote/src/types.ts",
-          "hash": "8170480487995096936"
-        },
-        {
-          "file": "packages/semantic-vote/tsconfig.json",
+          "file": "packages/federation/tsconfig.json",
           "hash": "1782639995464554572"
         }
       ]
-    }
+    },
+    "nonProjectFiles": [
+      {
+        "file": ".env.example",
+        "hash": "17675895616245062535"
+      },
+      {
+        "file": ".github/workflows/ci.yml",
+        "hash": "2228746961663418874"
+      },
+      {
+        "file": ".github/workflows/deploy.yml",
+        "hash": "785258540526860996"
+      },
+      {
+        "file": ".github/workflows/pr-check.yml",
+        "hash": "12410264182277020585"
+      },
+      {
+        "file": ".github/workflows/release.yml",
+        "hash": "5608591464240194373"
+      },
+      {
+        "file": ".github/workflows/test-reporter.yml",
+        "hash": "5080661879773831856"
+      },
+      {
+        "file": ".gitignore",
+        "hash": "12569615504931048931"
+      },
+      {
+        "file": "README.md",
+        "hash": "1955341599445144252"
+      },
+      {
+        "file": "THIRD_PARTY_LICENSES.md",
+        "hash": "7606950875824820275"
+      },
+      {
+        "file": "biome.json",
+        "hash": "2108829337605442912"
+      },
+      {
+        "file": "deploy/docker-compose.yml",
+        "hash": "17595804256916607616"
+      },
+      {
+        "file": "deploy/fediverse.ts",
+        "hash": "3586707112131919382"
+      },
+      {
+        "file": "deploy/feed-api.ts",
+        "hash": "1996004708396589819"
+      },
+      {
+        "file": "deploy/feed-store.ts",
+        "hash": "11922449137582064499"
+      },
+      {
+        "file": "deploy/mcp-server.ts",
+        "hash": "11121392199842593"
+      },
+      {
+        "file": "deploy/muhanai.com.nginx.conf",
+        "hash": "3678583265566720542"
+      },
+      {
+        "file": "deploy/worker.ts",
+        "hash": "13689862003388494371"
+      },
+      {
+        "file": "docs/CODE-INTEGRATION-PLAN.md",
+        "hash": "14102288521167426674"
+      },
+      {
+        "file": "docs/HAPPY-INTEGRATION-ANALYSIS.md",
+        "hash": "16893242356571898049"
+      },
+      {
+        "file": "docs/IMPORTABLE-SOURCE-MAP.md",
+        "hash": "4107346036833949335"
+      },
+      {
+        "file": "docs/INTEGRATED-CODE-PLAN.md",
+        "hash": "11654302309406543140"
+      },
+      {
+        "file": "docs/OMNIROUTE_CLIENT.md",
+        "hash": "8029109201344220259"
+      },
+      {
+        "file": "docs/OMNIROUTE_INTEGRATION.md",
+        "hash": "13969805902620069022"
+      },
+      {
+        "file": "docs/PRISMA.md",
+        "hash": "6768337078268218303"
+      },
+      {
+        "file": "docs/STELLAVAULT-INTEGRATION-ANALYSIS.md",
+        "hash": "1792172971733374333"
+      },
+      {
+        "file": "docs/USER-GUIDE-CODE-PLAN.md",
+        "hash": "10016798386815296637"
+      },
+      {
+        "file": "docs/WEKNORA_INTEGRATION.md",
+        "hash": "10183023495736476236"
+      },
+      {
+        "file": "docs/WORKTREE-PLAN.md",
+        "hash": "6426555705375618502"
+      },
+      {
+        "file": "docs/adr/0001-m1-pulse-mesh.md",
+        "hash": "2342775856238732133"
+      },
+      {
+        "file": "docs/adr/0002-libp2p-floodsub-swap.md",
+        "hash": "4443381589062914225"
+      },
+      {
+        "file": "docs/adr/0003-eight-repo-lineage.md",
+        "hash": "7876231328383916665"
+      },
+      {
+        "file": "docs/adr/0004-pulse-sse-bridge.md",
+        "hash": "7860128779236535033"
+      },
+      {
+        "file": "docs/adr/0005-use-gossip-pulse-hook.md",
+        "hash": "16751717760245037016"
+      },
+      {
+        "file": "docs/adr/0006-adaptive-render-loop.md",
+        "hash": "17641957825676811956"
+      },
+      {
+        "file": "docs/adr/0007-peer-identity-rotation.md",
+        "hash": "7103836862850284494"
+      },
+      {
+        "file": "docs/adr/0008-ssh-commit-signing.md",
+        "hash": "11015901578914982336"
+      },
+      {
+        "file": "docs/adr/0009-harvest-c-api-contract.md",
+        "hash": "15451766306260550078"
+      },
+      {
+        "file": "docs/agent-cast.md",
+        "hash": "8462212104273585823"
+      },
+      {
+        "file": "docs/agent-mesh.md",
+        "hash": "7835051127726222688"
+      },
+      {
+        "file": "docs/architecture.md",
+        "hash": "9262802968529768094"
+      },
+      {
+        "file": "docs/knowledge.md",
+        "hash": "14980542522681949882"
+      },
+      {
+        "file": "docs/protocol.md",
+        "hash": "7569686734989110916"
+      },
+      {
+        "file": "docs/user-guide.md",
+        "hash": "18262551655037076914"
+      },
+      {
+        "file": "nx.json",
+        "hash": "15455327992307815373"
+      },
+      {
+        "file": "package.json",
+        "hash": "906060636390228024"
+      },
+      {
+        "file": "pnpm-workspace.yaml",
+        "hash": "17803296953936907715"
+      },
+      {
+        "file": "prisma/migrations/20260906000000_init_pgvector/migration.sql",
+        "hash": "2049945614331345715"
+      },
+      {
+        "file": "prisma/migrations/20260906110000_welcome_credits/migration.sql",
+        "hash": "6801782292477626996"
+      },
+      {
+        "file": "prisma/schema.prisma",
+        "hash": "6407830091536750477"
+      },
+      {
+        "file": "scripts/create-personal-mcp.ts",
+        "hash": "12555507456616482834"
+      },
+      {
+        "file": "scripts/demo.ts",
+        "hash": "15884818378442330222"
+      },
+      {
+        "file": "scripts/integrated-demo.ts",
+        "hash": "3895082118662914078"
+      },
+      {
+        "file": "scripts/prisma-personal-mcp.ts",
+        "hash": "8110061317098944082"
+      },
+      {
+        "file": "tests/incident-rotate.test.ts",
+        "hash": "12351464712987130823"
+      },
+      {
+        "file": "tsconfig.base.json",
+        "hash": "6206507207168413285"
+      },
+      {
+        "file": "tsconfig.json",
+        "hash": "6973439525669482264"
+      },
+      {
+        "file": "vitest.config.ts",
+        "hash": "13104627891363754342"
+      },
+      {
+        "file": "wrangler.toml",
+        "hash": "5872740323857928365"
+      }
+    ]
   }
 }
