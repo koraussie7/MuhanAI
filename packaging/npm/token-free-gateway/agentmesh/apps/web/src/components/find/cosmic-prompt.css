@@ -765,6 +765,60 @@
 	box-shadow: 0 0 6px rgba(251, 191, 36, 0.8);
 }
 
+/* ---- Browse Use button (Browser 아이콘) ---- */
+.prompt-browse-use-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 10px;
+	border-radius: 8px;
+	background: rgba(15, 23, 42, 0.5);
+	border: 1px solid rgba(148, 163, 184, 0.18);
+	color: #cbd5e1;
+	cursor: pointer;
+	transition: all 0.18s ease;
+	margin-right: 6px;
+	font-size: 12px;
+	font-weight: 500;
+}
+
+.prompt-browse-use-btn:hover {
+	background: rgba(15, 23, 42, 0.85);
+	border-color: rgba(140, 203, 255, 0.45);
+	color: #87ceeb;
+}
+
+.prompt-browse-use-btn .prompt-action-label {
+	user-select: none;
+}
+
+/* ---- Free LLM Use button (Zap/번개 아이콘) ---- */
+.prompt-free-llm-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 10px;
+	border-radius: 8px;
+	background: rgba(15, 23, 42, 0.5);
+	border: 1px solid rgba(148, 163, 184, 0.18);
+	color: #cbd5e1;
+	cursor: pointer;
+	transition: all 0.18s ease;
+	margin-right: 6px;
+	font-size: 12px;
+	font-weight: 500;
+}
+
+.prompt-free-llm-btn:hover {
+	background: rgba(15, 23, 42, 0.85);
+	border-color: rgba(52, 211, 153, 0.45);
+	color: #34d399;
+}
+
+.prompt-free-llm-btn .prompt-action-label {
+	user-select: none;
+}
+
 /* ---- BYOK Settings Panel (slide-down below the prompt bar) ---- */
 .cosmic-byok-panel {
 	margin-top: 6px;

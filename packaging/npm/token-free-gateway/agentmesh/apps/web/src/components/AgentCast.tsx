@@ -14,6 +14,15 @@ interface AgentOption {
 
 const DEFAULT_AGENTS: AgentOption[] = [
 	{
+		id: "omniroute",
+		name: "OmniRoute Mesh",
+		provider: "OmniRoute",
+		type: "356-Provider Quota Router",
+		confidence: 0.99,
+		isSelected: true,
+		color: "#06b6d4",
+	},
+	{
 		id: "claude",
 		name: "Claude 3.7 Sonnet",
 		provider: "Anthropic",
@@ -58,12 +67,22 @@ export const AgentCast: React.FC = () => {
 	const [loading, setLoading] = useState(false);
 	const [result, setResult] = useState<any>(null);
 
-	// Pre-fill question from URL if navigated from Ask Network
+	// Pre-fill question and selected agents from URL if navigated from Ask Network
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search);
 		const q = params.get("q");
 		if (q) {
 			setQuestion(q);
+		}
+		const targets = params.get("targets");
+		if (targets) {
+			const targetList = targets.split(",");
+			// If omniroute is targeted, select omniroute agent
+			if (targetList.includes("omniroute")) {
+				setAgents((prev) =>
+					prev.map((a) => (a.id === "omniroute" ? { ...a, isSelected: true } : a)),
+				);
+			}
 		}
 	}, []);
 
@@ -83,10 +102,20 @@ export const AgentCast: React.FC = () => {
 		setResult(null);
 
 		try {
-			// Tier 3: Keyless free-tier providers (no API key required)
+			const authToken =
+				typeof localStorage !== "undefined"
+					? localStorage.getItem("muhanai_auth_token") ||
+					  localStorage.getItem("auth_token") ||
+					  localStorage.getItem("token") ||
+					  localStorage.getItem("oauth_token")
+					: null;
+			const headers: Record<string, string> = { "Content-Type": "application/json" };
+			if (authToken) headers.Authorization = `Bearer ${authToken}`;
+
+			// Tier 3: Keyless free-tier providers (OmniRoute / TierMux / Token-Free)
 			const res = await fetch("/api/llm/chat", {
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
+				headers,
 				body: JSON.stringify({
 					prompt: question,
 					system: `You are MuhanAI assistant. Mode: ${mode}. Provide a helpful, accurate response.`,

@@ -1,0 +1,14 @@
+
+> @agentmesh/payment@0.1.0 typecheck /Users/brianyeon/muhanai/muhanai/packaging/npm/token-free-gateway/agentmesh/packages/payment
+> tsc -p tsconfig.json --noEmit
+
+src/index.ts(10,3): error TS2300: Duplicate identifier 'PaymentStatus'.
+src/index.ts(19,10): error TS2300: Duplicate identifier 'PaymentStatus'.
+src/payment-service.ts(11,30): error TS2339: Property 'prisma' does not exist on type 'PaymentService'.
+src/payment-service.ts(21,32): error TS2339: Property 'prisma' does not exist on type 'PaymentService'.
+src/payment-service.ts(37,32): error TS2339: Property 'prisma' does not exist on type 'PaymentService'.
+src/payment-service.ts(47,16): error TS2339: Property 'prisma' does not exist on type 'PaymentService'.
+src/payment-service.ts(61,32): error TS2339: Property 'prisma' does not exist on type 'PaymentService'.
+src/payment-service.ts(71,16): error TS2339: Property 'prisma' does not exist on type 'PaymentService'.
+src/payment-service.ts(81,16): error TS2339: Property 'prisma' does not exist on type 'PaymentService'.
+[41m[30m ELIFECYCLE [39m[49m [31mCommand failed with exit code 2.[39m

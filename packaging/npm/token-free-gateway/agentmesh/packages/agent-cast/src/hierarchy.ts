@@ -1,5 +1,5 @@
-import { llmRouter } from "../../llm-router/src";
-import type { AgentRunResult, CastResult } from "../../shared/types";
+import { llmRouter } from "@agentmesh/llm-router";
+import type { AgentRunResult, CastResult } from "@agentmesh/shared-types";
 
 export interface DirectorPlan {
 	task: string;

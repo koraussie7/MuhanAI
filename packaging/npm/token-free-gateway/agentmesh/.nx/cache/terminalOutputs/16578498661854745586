@@ -1,0 +1,4 @@
+
+> @agentmesh/hivebear@0.1.0 typecheck /Users/brianyeon/muhanai/muhanai/packaging/npm/token-free-gateway/agentmesh/packages/hivebear
+> tsc -p tsconfig.json --noEmit
+

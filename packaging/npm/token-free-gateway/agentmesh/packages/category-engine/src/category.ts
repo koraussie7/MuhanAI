@@ -1,4 +1,4 @@
-import type { CategoryContext, RiskLevel } from "../../shared/types";
+import type { CategoryContext, RiskLevel } from "@agentmesh/shared-types";
 
 export const DOMAIN_CATEGORIES = [
 	"medical",

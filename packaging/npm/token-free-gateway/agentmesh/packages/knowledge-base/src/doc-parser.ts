@@ -5,7 +5,7 @@
  * Falls back to in-memory chunking when WeKnora is unavailable.
  */
 
-import type { KnowledgeNode, SourceType } from "../../shared/types";
+import type { KnowledgeNode, SourceType } from "@agentmesh/shared-types";
 import { WeKnoraClient } from "./weknora-client";
 import { chunkText } from "./chunking";
 

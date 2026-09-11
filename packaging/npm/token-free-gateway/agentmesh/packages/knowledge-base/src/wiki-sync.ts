@@ -10,7 +10,7 @@
  *   - WikiLinks [[...]] → Cosmic Canvas node links
  */
 
-import type { KnowledgeNode } from "../../shared/types";
+import type { KnowledgeNode } from "@agentmesh/shared-types";
 import { WeKnoraClient } from "./weknora-client";
 
 export interface WeKnoraWikiPage {

@@ -1,0 +1,33 @@
+
+> @agentmesh/personal-mcp@0.1.0 typecheck /Users/brianyeon/muhanai/muhanai/packaging/npm/token-free-gateway/agentmesh/packages/personal-mcp
+> tsc -p tsconfig.json --noEmit
+
+../knowledge-base/src/pgvector-store.ts(18,35): error TS2307: Cannot find module '@agentmesh/database' or its corresponding type declarations.
+../knowledge-base/src/pgvector-store.ts(95,22): error TS2347: Untyped function calls may not accept type arguments.
+src/knowledge.ts(19,39): error TS7006: Parameter 'k' implicitly has an 'any' type.
+src/knowledge.ts(29,27): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/knowledge.ts(29,30): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/memory.ts(26,39): error TS7006: Parameter 'm' implicitly has an 'any' type.
+src/memory.ts(36,29): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/memory.ts(36,32): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/prisma-store.ts(28,8): error TS2307: Cannot find module '../../shared/types/user-knowledge' or its corresponding type declarations.
+src/server.ts(52,19): error TS2307: Cannot find module '../../shared/types/user-knowledge' or its corresponding type declarations.
+src/server.ts(53,21): error TS2307: Cannot find module '../../shared/types/user-knowledge' or its corresponding type declarations.
+src/server.ts(54,17): error TS2307: Cannot find module '../../shared/types/user-knowledge' or its corresponding type declarations.
+src/server.ts(55,21): error TS2307: Cannot find module '../../shared/types/user-knowledge' or its corresponding type declarations.
+src/server.ts(161,46): error TS7006: Parameter 'm' implicitly has an 'any' type.
+src/service.ts(15,8): error TS2307: Cannot find module '../../shared/types/user-knowledge' or its corresponding type declarations.
+src/store-factory.ts(20,35): error TS2307: Cannot find module '@agentmesh/database' or its corresponding type declarations.
+src/store-types.ts(15,8): error TS2307: Cannot find module '../../shared/types/user-knowledge' or its corresponding type declarations.
+src/user-object.ts(16,8): error TS2307: Cannot find module '../../shared/types/user-knowledge' or its corresponding type declarations.
+src/user-object.ts(80,48): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/user-object.ts(152,41): error TS7006: Parameter 'k' implicitly has an 'any' type.
+src/user-object.ts(196,41): error TS7006: Parameter 'k' implicitly has an 'any' type.
+src/user-object.ts(208,32): error TS7006: Parameter 'k' implicitly has an 'any' type.
+src/user-object.ts(230,38): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/user-object.ts(230,41): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/user-object.ts(250,5): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/user-object.ts(291,37): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/user-object.ts(299,36): error TS7006: Parameter 't' implicitly has an 'any' type.
+src/user-object.ts(307,25): error TS7006: Parameter 'a' implicitly has an 'any' type.
+[41m[30m ELIFECYCLE [39m[49m [31mCommand failed with exit code 2.[39m

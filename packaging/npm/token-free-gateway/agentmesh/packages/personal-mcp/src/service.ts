@@ -12,7 +12,7 @@ import type {
 	MemoryNode,
 	UpsertKnowledgeInput,
 	UserKnowledgeObject,
-} from "../../shared/types/user-knowledge";
+} from "@agentmesh/shared-types";
 import { createPersonalMCP, type PersonalMCP, personalMcpRegistry } from "./server";
 import { getKnowledgeStore, getKnowledgeStoreMode } from "./store-factory";
 import type { KnowledgeStore } from "./store-types";
@@ -69,7 +69,7 @@ export async function addUserKnowledge(
 
 	// Best-effort: index into vector store (pgvector or memory)
 	try {
-		const { indexKnowledgeNode } = await import("../../knowledge-base/src/index-pipeline");
+		const { indexKnowledgeNode } = await import("@agentmesh/knowledge-base");
 		await indexKnowledgeNode(node);
 	} catch {
 		// indexing is optional during early bootstrap
@@ -103,7 +103,7 @@ export async function searchUserKnowledge(
 	query: string,
 	options?: { limit?: number; categoryId?: string },
 ) {
-	const { hybridSearch } = await import("../../knowledge-base/src/hybrid-search");
+	const { hybridSearch } = await import("@agentmesh/knowledge-base");
 	return hybridSearch({
 		userId,
 		query,

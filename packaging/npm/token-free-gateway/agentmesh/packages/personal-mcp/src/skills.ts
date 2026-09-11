@@ -1,4 +1,4 @@
-import type { Skill } from "../../shared/types";
+import type { Skill } from "@agentmesh/shared-types";
 import { getKnowledgeStore } from "./store-factory";
 
 export class PersonalSkillsService {

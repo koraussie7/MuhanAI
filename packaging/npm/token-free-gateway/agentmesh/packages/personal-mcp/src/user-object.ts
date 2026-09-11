@@ -13,7 +13,7 @@ import type {
 	UserKnowledgeObject,
 	UserProfile,
 	UserStats,
-} from "../../shared/types/user-knowledge";
+} from "@agentmesh/shared-types";
 
 // ---------------------------------------------------------------------------
 // Factory
@@ -77,7 +77,7 @@ function recomputeStats(obj: UserKnowledgeObject): UserStats {
 		helpfulness: obj.stats.helpfulness,
 		knowledgeCount: obj.knowledge.length,
 		memoryCount: obj.memories.length,
-		expertiseDomains: new Set(obj.expertise.map((e) => e.domain)).size,
+		expertiseDomains: new Set(obj.expertise.map((e: Expertise) => e.domain)).size,
 		lastActiveAt: new Date(),
 	};
 }
@@ -149,7 +149,7 @@ export class UserKnowledgeObjectStore {
 		const now = new Date();
 
 		if (input.id) {
-			const idx = obj.knowledge.findIndex((k) => k.id === input.id);
+			const idx = obj.knowledge.findIndex((k: KnowledgeNode) => k.id === input.id);
 			if (idx >= 0) {
 				const existing = obj.knowledge[idx]!;
 				const updated: KnowledgeNode = {

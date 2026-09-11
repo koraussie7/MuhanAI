@@ -1,0 +1,4 @@
+
+> @agentmesh/shared-types@0.1.0 build /Users/brianyeon/muhanai/muhanai/packaging/npm/token-free-gateway/agentmesh/packages/shared-types
+> tsc -p tsconfig.json
+

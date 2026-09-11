@@ -1,4 +1,4 @@
-import type { CategoryContext, RiskLevel } from "../../shared/types";
+import type { CategoryContext, RiskLevel } from "@agentmesh/shared-types";
 import { DOMAIN_CATEGORIES, type DomainCategory } from "./category";
 import { detectJurisdictionFromText, normalizeJurisdiction } from "./jurisdiction";
 import { globalTaxonomy } from "./taxonomy";

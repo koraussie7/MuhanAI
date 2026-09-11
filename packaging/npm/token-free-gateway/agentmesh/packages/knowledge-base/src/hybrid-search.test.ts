@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { KnowledgeNode } from "../../shared/types";
+import type { KnowledgeNode } from "@agentmesh/shared-types";
 import { decayEngine as defaultDecayEngine } from "./decay/engine.js";
 import { fuseHybridResults, type FuseInputs } from "./hybrid-search.js";
 import type { ScoredKnowledge } from "./retrieval.js";

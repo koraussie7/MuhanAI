@@ -164,11 +164,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 			{/* 4. Quick Ask Network Input */}
 			<section aria-label="Ask Network Prompt">
 				<AskNetwork
-					onSubmit={(question, targets) => {
+					onSubmit={(question, targets, model) => {
 						const params = new URLSearchParams();
 						params.set("q", question);
 						params.set("targets", targets.join(","));
-						navigate(`/agent-cast?${params.toString()}`);
+						if (model) {
+						params.set("model-manifest", JSON.stringify(model));
+					}
+					navigate(`/agent-cast?${params.toString()}`);
 					}}
 				/>
 			</section>

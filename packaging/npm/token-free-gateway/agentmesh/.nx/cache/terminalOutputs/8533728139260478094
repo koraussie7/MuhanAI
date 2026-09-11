@@ -1,0 +1,4 @@
+
+> @agentmesh/compute-market@0.1.0 typecheck /Users/brianyeon/muhanai/muhanai/packaging/npm/token-free-gateway/agentmesh/packages/compute-market
+> tsc -p tsconfig.json --noEmit
+

@@ -1,5 +1,9 @@
-import type { PersonalMCP } from "../../personal-mcp/src/server";
-import type { AgentRunResult, CategoryContext, KnowledgeNode } from "../../shared/types";
+import type { AgentRunResult, CategoryContext, KnowledgeNode } from "@agentmesh/shared-types";
+
+export interface PersonalMCPHandle {
+	id: string;
+	userId: string;
+}
 
 export interface AgentDefinition {
 	id: string;
@@ -16,7 +20,7 @@ export interface AgentDefinition {
 export interface AgentExecutionContext {
 	question: string;
 	category: CategoryContext;
-	personalMcp?: PersonalMCP;
+	personalMcp?: PersonalMCPHandle;
 	knowledge: KnowledgeNode[];
 	userId: string;
 	extraContext?: string;
@@ -32,6 +36,6 @@ export interface MeshExecuteParams {
 	context: CategoryContext;
 	agents: Agent[];
 	knowledge: KnowledgeNode[];
-	personalMcp?: PersonalMCP;
+	personalMcp?: PersonalMCPHandle;
 	userId: string;
 }
