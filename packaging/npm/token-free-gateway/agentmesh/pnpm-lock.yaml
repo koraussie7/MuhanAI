@@ -132,6 +132,34 @@ importers:
 
   packages/agent-router: {}
 
+  packages/ai-engine:
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)(lightningcss@1.32.0)
+
+  packages/ai-ui:
+    dependencies:
+      '@agentmesh/ai-engine':
+        specifier: workspace:*
+        version: link:../ai-engine
+    devDependencies:
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.18
+      react:
+        specifier: ^19.0.0
+        version: 19.2.8
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)(lightningcss@1.32.0)
+
   packages/browser-use:
     devDependencies:
       typescript:
