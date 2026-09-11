@@ -7,7 +7,6 @@
 export type {
   Payment,
   PaymentMethod,
-  PaymentStatus,
   CreatePaymentRequest,
   ConfirmPaymentRequest,
   RefundPaymentRequest,

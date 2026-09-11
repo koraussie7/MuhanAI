@@ -234,7 +234,7 @@ export function SecuritySettings({ adapter }: SecuritySettingsProps = {}) {
 	const t = snap.toggles;
 	const usedPct =
 		snap.dailyLimitCredits > 0
-			? Math.round((snap.dailyUsedCredits / snap.dailyLimitCredits) * 100)
+			? Math.round(((snap.dailyUsedCredits ?? 0) / snap.dailyLimitCredits) * 100)
 			: 0;
 
 	const toggle =
@@ -294,7 +294,7 @@ export function SecuritySettings({ adapter }: SecuritySettingsProps = {}) {
 					<div className="hc-llm-stat-item">
 						<span className="hc-llm-stat-label">Budget</span>
 						<span className="hc-llm-stat-value">
-							{snap.dailyUsedCredits.toLocaleString("ko-KR")} /{" "}
+							{(snap.dailyUsedCredits ?? 0).toLocaleString("ko-KR")} /{" "}
 							{snap.dailyLimitCredits.toLocaleString("ko-KR")} ({usedPct}%)
 						</span>
 					</div>

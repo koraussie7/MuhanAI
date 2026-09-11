@@ -1,14 +1,35 @@
 import { PrismaClient } from '@prisma/client';
 import { CreatePaymentRequest, ConfirmPaymentRequest, RefundPaymentRequest } from './types';
 
-export const prisma = new PrismaClient();
+/**
+ * NOTE: `order`/`payment`/`refund` Prisma models will exist once the payment
+ * schema.prisma is generated. Until then we extend the client type so the
+ * server build (services/api) can typecheck against the planned models.
+ * This cast is intentionally narrow — it disappears once `prisma generate`
+ * emits the real models.
+ */
+type PaymentPrismaClient = PrismaClient & {
+	order: {
+		findUnique: (args: { where: { id: string }; select?: Record<string, boolean> }) => Promise<{ id: string } | null>;
+	};
+	payment: {
+		create: (args: Record<string, unknown>) => Promise<Record<string, unknown>>;
+		findUnique: (args: Record<string, unknown>) => Promise<Record<string, unknown> | null>;
+		update: (args: Record<string, unknown>) => Promise<Record<string, unknown>>;
+	};
+	refund: {
+		create: (args: Record<string, unknown>) => Promise<Record<string, unknown>>;
+	};
+};
+
+export const prisma = new PrismaClient() as PaymentPrismaClient;
 
 export class PaymentService {
   async createPayment(data: CreatePaymentRequest) {
     const { orderId, amount, currency, method } = data;
     
     // Verify order exists
-    const order = await this.prisma.order.findUnique({
+    const order = await prisma.order.findUnique({
       where: { id: orderId },
       select: { id: true }
     });
@@ -18,7 +39,7 @@ export class PaymentService {
     }
 
     // Create payment record
-    const payment = await this.prisma.payment.create({
+    const payment = await prisma.payment.create({
       data: {
         orderId,
         amount,
@@ -34,7 +55,7 @@ export class PaymentService {
   async confirmPayment(data: ConfirmPaymentRequest) {
     const { paymentId } = data;
     
-    const payment = await this.prisma.payment.findUnique({
+    const payment = await prisma.payment.findUnique({
       where: { id: paymentId },
       include: { order: true }
     });
@@ -44,7 +65,7 @@ export class PaymentService {
     }
 
     // Update payment status
-    await this.prisma.payment.update({
+    await prisma.payment.update({
       where: { id: paymentId },
       data: {
         status: 'paid',
@@ -58,7 +79,7 @@ export class PaymentService {
   async refundPayment(data: RefundPaymentRequest) {
     const { paymentId, amount, currency, reason } = data;
     
-    const payment = await this.prisma.payment.findUnique({
+    const payment = await prisma.payment.findUnique({
       where: { id: paymentId },
       include: { order: true }
     });
@@ -68,7 +89,7 @@ export class PaymentService {
     }
 
     // Create refund record
-    await this.prisma.refund.create({
+    await prisma.refund.create({
       data: {
         paymentId,
         amount: amount || payment.amount,
@@ -78,7 +99,7 @@ export class PaymentService {
     });
 
     // Update payment status
-    await this.prisma.payment.update({
+    await prisma.payment.update({
       where: { id: paymentId },
       data: {
         status: 'refunded',

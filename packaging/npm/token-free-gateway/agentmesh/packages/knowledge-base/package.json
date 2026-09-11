@@ -11,7 +11,7 @@
 		"lint": "tsc -p tsconfig.json --noEmit",
 		"test": "vitest run"
 	},
-	"dependencies": {
+		"dependencies": {
 		"@agentmesh/federation": "workspace:*",
 		"@agentmesh/shared-types": "workspace:*",
 		"@libp2p/interface": "^3.2.0",
@@ -32,10 +32,17 @@
 		"@libp2p/floodsub": "^11.0.18",
 		"@multiformats/multiaddr": "^13.0.1",
 		"@noble/curves": "^1.9.0",
-		"neverthrow": "^8.2.0"
+		"neverthrow": "^8.2.0",
+		"p-limit": "^7.3.2",
+		"pdfjs-dist": "^4.4.168",
+		"mammoth": "^1.9.1",
+		"officeparser": "^3.0.5",
+		"unpdf": "^1.8.1",
+		"xlsx": "^0.18.5"
 	},
-	"devDependencies": {
-		"vitest": "^2.1.8",
-		"typescript": "^5.7.2"
+		"devDependencies": {
+		"@types/xlsx": "^0.0.36",
+		"typescript": "^5.7.2",
+		"vitest": "^2.1.8"
 	}
 }

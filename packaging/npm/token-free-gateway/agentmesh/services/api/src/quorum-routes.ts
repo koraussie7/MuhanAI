@@ -54,7 +54,7 @@ function getCached(key: string): unknown | null {
 		return null;
 	}
 
-	return { ...cached.result, cached: true };
+	return { ...(cached.result as Record<string, unknown>), cached: true };
 }
 
 /**
@@ -142,7 +142,7 @@ async function executeQuorum(
 					agentId: r.agentId,
 					output: r.output,
 					confidence: r.confidence,
-					latencyMs: r.latencyMs,
+					latencyMs: r.latencyMs ?? 0,
 				})),
 				executionTimeMs,
 			};

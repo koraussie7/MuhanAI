@@ -12,7 +12,7 @@
  * - fauxnix (Windows compatibility)
  */
 
-export { BrowserProfileManager, type BrowserProfile, type BrowserProfileSettings } from './browser-profile.js';
+export { createBrowserProfileManager, type BrowserProfile, type BrowserProfileSettings } from './browser-profile.js';
 export { PlaywrightBrowserAdapter, type PlaywrightAdapterOptions } from './playwright-adapter.js';
 export { browserCapabilityMap, type BrowserCapability } from './browser-capabilities.js';
 
