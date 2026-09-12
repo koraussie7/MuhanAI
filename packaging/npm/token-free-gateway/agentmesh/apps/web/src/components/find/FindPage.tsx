@@ -8,6 +8,7 @@ import { ObsidianInspector } from "./ObsidianInspector";
 import "./find.css";
 import { INITIAL_EDGES, INITIAL_NODES, INITIAL_PEERS } from "./initialData";
 import type { CosmicEdge, CosmicNode, CosmicPeer, NodeType, Shockwave } from "./types";
+import { useI18n } from "../../i18n.js";
 
 interface FindPageProps {
 	onNavigateHome: () => void;
@@ -94,6 +95,7 @@ const PeerNameModal: React.FC<PeerNameModalProps> = ({
 }) => {
 	const [name, setName] = useState(initialName || generateRandomPeerUsername(mode));
 	const inputRef = useRef<HTMLInputElement>(null);
+	const { t } = useI18n();
 
 	useEffect(() => {
 		if (isOpen) {
@@ -142,14 +144,14 @@ const PeerNameModal: React.FC<PeerNameModalProps> = ({
 							<Sparkles size={18} className="text-sky-400" />
 						)}
 						<h3 className="text-base font-bold tracking-tight text-white">
-							{isUserMode ? "내 디바이스 피어 이름 지정" : "P2P 피어 노드 연결 및 이름 지정"}
+							{isUserMode ? t.findPage.peerModalUserTitle : t.findPage.peerModalPeerTitle}
 						</h3>
 					</div>
 					<button
 						type="button"
 						className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
 						onClick={onClose}
-						aria-label="닫기"
+						aria-label={t.findPage.close}
 					>
 						<X size={16} />
 					</button>
@@ -158,7 +160,7 @@ const PeerNameModal: React.FC<PeerNameModalProps> = ({
 				<form onSubmit={handleSubmit} className="space-y-4">
 					<div>
 						<label className="block text-xs font-semibold text-slate-300 mb-1.5">
-							{isUserMode ? "디바이스 피어 닉네임" : "원격 피어 노드 이름"}
+							{isUserMode ? t.findPage.peerModalUserLabel : t.findPage.peerModalPeerLabel}
 						</label>
 						<div className="flex items-center gap-2">
 							<input
@@ -166,23 +168,23 @@ const PeerNameModal: React.FC<PeerNameModalProps> = ({
 								type="text"
 								value={name}
 								onChange={(e) => setName(e.target.value)}
-								placeholder={isUserMode ? "예: Brian-MacBook, CosmicCoder..." : "예: Peer-Tokyo-Node..."}
+								placeholder={isUserMode ? t.findPage.peerModalUserPlaceholder : t.findPage.peerModalPeerPlaceholder}
 								maxLength={36}
 								className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-950/80 border border-white/15 focus:border-sky-400 focus:ring-1 focus:ring-sky-400 text-sm text-white outline-none font-mono placeholder:text-slate-500"
 							/>
 							<button
 								type="button"
 								onClick={handleRollRandom}
-								title="랜덤 코스믹 이름 생성"
+								title={t.findPage.peerModalRandomTitle}
 								className="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 text-xs font-medium border border-sky-400/20 hover:border-sky-400/40 transition-all flex items-center gap-1.5"
 							>
-								<span>🎲 랜덤</span>
+								<span>{t.findPage.peerModalRandom}</span>
 							</button>
 						</div>
 						<p className="mt-1.5 text-[11px] text-slate-400">
 							{isUserMode
-								? "P2P 분산 지식 메쉬 및 WebRTC 볼트에 표시될 디바이스 이름입니다."
-								: "새로운 피어 노드로 지식 그래프에 마운트할 고유 이름입니다."}
+								? t.findPage.peerModalUserHelp
+								: t.findPage.peerModalPeerHelp}
 						</p>
 					</div>
 
@@ -196,7 +198,7 @@ const PeerNameModal: React.FC<PeerNameModalProps> = ({
 								}}
 								className="px-3.5 py-2 rounded-xl text-xs font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 border border-rose-500/20 transition-all"
 							>
-								연결 해제
+								{t.findPage.peerModalDisconnect}
 							</button>
 						) : (
 							<div />
@@ -208,14 +210,14 @@ const PeerNameModal: React.FC<PeerNameModalProps> = ({
 								onClick={onClose}
 								className="px-4 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
 							>
-								취소
+								{t.findPage.peerModalCancel}
 							</button>
 							<button
 								type="submit"
 								className="px-5 py-2 rounded-xl text-xs font-bold text-slate-950 bg-gradient-to-r from-sky-400 to-indigo-400 hover:from-sky-300 hover:to-indigo-300 shadow-md shadow-sky-500/20 transition-all flex items-center gap-1.5"
 							>
 								<Sparkles size={13} />
-								<span>{isUserMode && isConnected ? "이름 변경 적용" : "이름 지정 및 연결"}</span>
+								<span>{isUserMode && isConnected ? t.findPage.peerModalApply : t.findPage.peerModalConnect}</span>
 							</button>
 						</div>
 					</div>
