@@ -65,6 +65,23 @@ export interface I18nContent {
 		copyAnswer: string;
 		copied: string;
 	};
+	dashboard: {
+		meshOperational: string;
+		gatewayActive: string;
+		heroTitle: string;
+		heroDesc: string;
+		cosmicMesh: string;
+		launchAgentCast: string;
+		peerNodes: string;
+		activeP2PNodes: string;
+		consensusQuorum: string;
+		distributedCompute: string;
+		tokenCost: string;
+		tabTasks: string;
+		tabVerify: string;
+		tabKnowledge: string;
+		tabKb: string;
+	};
 }
 
 export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
@@ -119,7 +136,24 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			saveAsNode: "지식 노드로 발행",
 			copyAnswer: "답변 복사",
 			copied: "복사됨!",
+		},		dashboard: {
+			meshOperational: "● P2P 메쉬 가동 중",
+			gatewayActive: "토큰 프리 게이트웨이 활성",
+			heroTitle: "MuhanAI 자율 에이전트 메쉬",
+			heroDesc: "Cline 스타일의 탈중앙화 AI 메쉬 네트워크입니다. 로컬 및 분산 모델이 WebRTC & libp2p P2P 연결을 통해 자율적으로 합의하고 협력합니다.",
+			cosmicMesh: "코스믹 메쉬",
+			launchAgentCast: "에이전트 캐스트 실행",
+			peerNodes: "피어 노드",
+			activeP2PNodes: "활성 P2P 노드",
+			consensusQuorum: "합의 쿼럼",
+			distributedCompute: "분산 컴퓨트",
+			tokenCost: "토큰 비용",
+			tabTasks: "작업 & 도움 요청",
+			tabVerify: "검증 & 쿼럼",
+			tabKnowledge: "인기 인텔리전스 & 가르치기",
+			tabKb: "지식 베이스",
 		},
+
 	},
 	en: {
 		slogans: {
@@ -174,7 +208,24 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			saveAsNode: "Publish as Knowledge Node",
 			copyAnswer: "Copy Answer",
 			copied: "Copied!",
+		},		dashboard: {
+			meshOperational: "● P2P MESH OPERATIONAL",
+			gatewayActive: "TOKEN-FREE GATEWAY ACTIVE",
+			heroTitle: "MuhanAI Autonomous Agent Mesh",
+			heroDesc: "A Cline-style decentralized AI mesh network. Local and distributed models autonomously reach consensus and collaborate over WebRTC & libp2p P2P connections.",
+			cosmicMesh: "Cosmic Mesh",
+			launchAgentCast: "Launch Agent Cast",
+			peerNodes: "Peer Nodes",
+			activeP2PNodes: "Active P2P Nodes",
+			consensusQuorum: "Consensus Quorum",
+			distributedCompute: "Distributed Compute",
+			tokenCost: "Token Cost",
+			tabTasks: "Tasks & Help Needed",
+			tabVerify: "Verification & Quorum",
+			tabKnowledge: "Trending Intelligence & Teach",
+			tabKb: "Knowledge Base",
 		},
+
 	},
 	ja: {
 		slogans: {
@@ -228,7 +279,24 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			saveAsNode: "ナレッジノードとして発行",
 			copyAnswer: "回答をコピー",
 			copied: "コピー完了!",
+		},		dashboard: {
+			meshOperational: "● P2Pメッシュ稼働中",
+			gatewayActive: "トークンフリーゲートウェイ有効",
+			heroTitle: "MuhanAI 自律エージェントメッシュ",
+			heroDesc: "Clineスタイルの分散型AIメッシュネットワーク。ローカルおよび分散モデルがWebRTCとlibp2pのP2P接続を通じて自律的に合意し協調します。",
+			cosmicMesh: "コズミックメッシュ",
+			launchAgentCast: "エージェントキャストを起動",
+			peerNodes: "ピアノード",
+			activeP2PNodes: "アクティブP2Pノード",
+			consensusQuorum: "合意クォーラム",
+			distributedCompute: "分散コンピュート",
+			tokenCost: "トークンコスト",
+			tabTasks: "タスクとヘルプ要請",
+			tabVerify: "検証とクォーラム",
+			tabKnowledge: "トレンド知能と学習",
+			tabKb: "ナレッジベース",
 		},
+
 	},
 	zh: {
 		slogans: {
@@ -281,7 +349,24 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			saveAsNode: "发布为知识节点",
 			copyAnswer: "复制回答",
 			copied: "已复制!",
+		},		dashboard: {
+			meshOperational: "● P2P 网格运行中",
+			gatewayActive: "免代币网关已启用",
+			heroTitle: "MuhanAI 自治智能体网格",
+			heroDesc: "类 Cline 的去中心化 AI 网格网络。本地与分布式模型通过 WebRTC 与 libp2p 的 P2P 连接自主达成共识并协作。",
+			cosmicMesh: "宇宙网格",
+			launchAgentCast: "启动 Agent Cast",
+			peerNodes: "对等节点",
+			activeP2PNodes: "活跃 P2P 节点",
+			consensusQuorum: "共识仲裁",
+			distributedCompute: "分布式算力",
+			tokenCost: "代币成本",
+			tabTasks: "任务与求助",
+			tabVerify: "验证与仲裁",
+			tabKnowledge: "热门智能与教学",
+			tabKb: "知识库",
 		},
+
 	},
 	es: {
 		slogans: {
@@ -336,7 +421,24 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			saveAsNode: "Publicar como Nodo de Conocimiento",
 			copyAnswer: "Copiar Respuesta",
 			copied: "¡Copiado!",
+		},		dashboard: {
+			meshOperational: "● MALLA P2P OPERATIVA",
+			gatewayActive: "PASARELA SIN TOKENS ACTIVA",
+			heroTitle: "Malla de Agentes Autónomos MuhanAI",
+			heroDesc: "Una red mesh de IA descentralizada al estilo de Cline. Los modelos locales y distribuidos alcanzan consenso y colaboran de forma autónoma a través de conexiones P2P WebRTC y libp2p.",
+			cosmicMesh: "Malla Cósmica",
+			launchAgentCast: "Iniciar Agent Cast",
+			peerNodes: "Nodos P2P",
+			activeP2PNodes: "Nodos P2P Activos",
+			consensusQuorum: "Quórum de Consenso",
+			distributedCompute: "Cómputo Distribuido",
+			tokenCost: "Coste de Tokens",
+			tabTasks: "Tareas y Ayuda Necesaria",
+			tabVerify: "Verificación y Quórum",
+			tabKnowledge: "Inteligencia en Tendencia y Enseñanza",
+			tabKb: "Base de Conocimiento",
 		},
+
 	},
 	de: {
 		slogans: {
@@ -391,7 +493,24 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			saveAsNode: "Als Wissensknoten veröffentlichen",
 			copyAnswer: "Antwort kopieren",
 			copied: "Kopiert!",
+		},		dashboard: {
+			meshOperational: "● P2P-MESH AKTIV",
+			gatewayActive: "TOKEN-FREIES GATEWAY AKTIV",
+			heroTitle: "MuhanAI Autonomes Agenten-Mesh",
+			heroDesc: "Ein dezentrales KI-Mesh-Netzwerk im Cline-Stil. Lokale und verteilte Modelle erzielen über WebRTC- und libp2p-P2P-Verbindungen autonom Konsens und arbeiten zusammen.",
+			cosmicMesh: "Cosmic Mesh",
+			launchAgentCast: "Agent Cast starten",
+			peerNodes: "Peer-Knoten",
+			activeP2PNodes: "Aktive P2P-Knoten",
+			consensusQuorum: "Konsens-Quorum",
+			distributedCompute: "Verteiltes Computing",
+			tokenCost: "Token-Kosten",
+			tabTasks: "Aufgaben & Hilfe gesucht",
+			tabVerify: "Verifikation & Quorum",
+			tabKnowledge: "Trend-Intelligenz & Lehren",
+			tabKb: "Wissensdatenbank",
 		},
+
 	},
 	fr: {
 		slogans: {
@@ -447,7 +566,24 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			saveAsNode: "Publier comme Nœud de Savoir",
 			copyAnswer: "Copier la Réponse",
 			copied: "Copié !",
+		},		dashboard: {
+			meshOperational: "● MAILLE P2P OPÉRATIONNELLE",
+			gatewayActive: "PASSERELLE SANS JETON ACTIVE",
+			heroTitle: "Maillage d'Agents Autonomes MuhanAI",
+			heroDesc: "Un réseau maillé d'IA décentralisé de style Cline. Les modèles locaux et distribués parviennent à un consensus et collaborent de manière autonome via des connexions P2P WebRTC et libp2p.",
+			cosmicMesh: "Maillage Cosmique",
+			launchAgentCast: "Lancer Agent Cast",
+			peerNodes: "Nœuds P2P",
+			activeP2PNodes: "Nœuds P2P Actifs",
+			consensusQuorum: "Quorum de Consensus",
+			distributedCompute: "Calcul Distribué",
+			tokenCost: "Coût des Jetons",
+			tabTasks: "Tâches & Aide Requise",
+			tabVerify: "Vérification & Quorum",
+			tabKnowledge: "Intelligence Tendance & Enseignement",
+			tabKb: "Base de Connaissances",
 		},
+
 	},
 	pt: {
 		slogans: {
@@ -501,7 +637,24 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			saveAsNode: "Publicar como Nó de Conhecimento",
 			copyAnswer: "Copiar Resposta",
 			copied: "Copiado!",
+		},		dashboard: {
+			meshOperational: "● MALHA P2P OPERACIONAL",
+			gatewayActive: "GATEWAY SEM TOKENS ATIVA",
+			heroTitle: "Malha de Agentes Autônomos MuhanAI",
+			heroDesc: "Uma rede mesh de IA descentralizada no estilo Cline. Modelos locais e distribuídos alcançam consenso e colaboram autonomamente por meio de conexões P2P WebRTC e libp2p.",
+			cosmicMesh: "Malha Cósmica",
+			launchAgentCast: "Iniciar Agent Cast",
+			peerNodes: "Nós P2P",
+			activeP2PNodes: "Nós P2P Ativos",
+			consensusQuorum: "Quórum de Consenso",
+			distributedCompute: "Computação Distribuída",
+			tokenCost: "Custo de Tokens",
+			tabTasks: "Tarefas & Ajuda Necessária",
+			tabVerify: "Verificação & Quórum",
+			tabKnowledge: "Inteligência em Alta & Ensino",
+			tabKb: "Base de Conhecimento",
 		},
+
 	},
 };
 

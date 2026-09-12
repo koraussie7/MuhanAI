@@ -1,6 +1,7 @@
 import { Flame, ListTodo, Network, Radio, ShieldCheck, Sparkles } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
+import { useI18n } from "../i18n.js";
 import { formatPeerCountBare } from "../lib/mesh-stats.js";
 import { AiVsHuman } from "./AiVsHuman";
 import { AskNetwork } from "./AskNetwork";
@@ -23,6 +24,7 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 	const [activeTab, setActiveTab] = useState<"tasks" | "verify" | "knowledge" | "kb">("tasks");
+	const { t } = useI18n();
 
 	const navigate = (path: string) => {
 		if (onNavigate) {
@@ -63,14 +65,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 									borderColor: "rgba(16, 185, 129, 0.3)",
 								}}
 							>
-								● P2P MESH OPERATIONAL
+								{t.dashboard.meshOperational}
 							</span>
-							<span className="brand-badge">TOKEN-FREE GATEWAY ACTIVE</span>
+							<span className="brand-badge">{t.dashboard.gatewayActive}</span>
 						</div>
-						<h1 className="dashboard-hero-title">MuhanAI Autonomous Agent Mesh</h1>
-						<p className="dashboard-hero-desc">
-							Cline 스타일의 탈중앙화 AI 메쉬 네트워크입니다. 로컬 및 분산 모델이 WebRTC & libp2p
-							P2P 연결을 통해 자율적으로 합의하고 협력합니다.
+						<h1 className="dashboard-hero-title">{t.dashboard.heroTitle}</h1>
+						<p className="dashboard-hero-desc">{t.dashboard.heroDesc}
 						</p>
 					</div>
 
@@ -87,7 +87,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 							onClick={() => navigate("/")}
 						>
 							<Sparkles size={14} />
-							Cosmic Mesh
+							{t.dashboard.cosmicMesh}
 						</button>
 						<button
 							type="button"
@@ -95,11 +95,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 							onClick={() => navigate("/agent-cast")}
 						>
 							<Radio size={14} />
-							Launch Agent Cast
+							{t.dashboard.launchAgentCast}
 						</button>
 						<button type="button" className="p2p-ping-btn" onClick={() => navigate("/network")}>
 							<Network size={14} />
-							Peer Nodes
+							{t.dashboard.peerNodes}
 						</button>
 					</div>
 				</div>
@@ -114,23 +114,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 					}}
 				>
 					<div className="telemetry-stat-card">
-						<span className="telemetry-stat-lbl">Active P2P Nodes</span>
+						<span className="telemetry-stat-lbl">{t.dashboard.activeP2PNodes}</span>
 						<span className="telemetry-stat-val" style={{ color: "var(--cline-sky)" }}>
 							{formatPeerCountBare(undefined)} Peers
 						</span>
 					</div>
 					<div className="telemetry-stat-card">
-						<span className="telemetry-stat-lbl">Consensus Quorum</span>
+						<span className="telemetry-stat-lbl">{t.dashboard.consensusQuorum}</span>
 						<span className="telemetry-stat-val" style={{ color: "var(--cline-green)" }}>
 							98.5% Agreement
 						</span>
 					</div>
 					<div className="telemetry-stat-card">
-						<span className="telemetry-stat-lbl">Distributed Compute</span>
+						<span className="telemetry-stat-lbl">{t.dashboard.distributedCompute}</span>
 						<span className="telemetry-stat-val">18,400 TFLOPS</span>
 					</div>
 					<div className="telemetry-stat-card">
-						<span className="telemetry-stat-lbl">Token Cost</span>
+						<span className="telemetry-stat-lbl">{t.dashboard.tokenCost}</span>
 						<span className="telemetry-stat-val" style={{ color: "var(--cline-amber)" }}>
 							0 MHT (Free Gateway)
 						</span>
@@ -185,7 +185,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 						onClick={() => setActiveTab("tasks")}
 					>
 						<ListTodo size={15} />
-						<span>Tasks & Help Needed</span>
+						<span>{t.dashboard.tabTasks}</span>
 						<span className="dash-tab-count">3</span>
 					</button>
 
@@ -195,7 +195,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 						onClick={() => setActiveTab("verify")}
 					>
 						<ShieldCheck size={15} />
-						<span>Verification & Quorum</span>
+						<span>{t.dashboard.tabVerify}</span>
 						<span className="dash-tab-count">3</span>
 					</button>
 
@@ -205,7 +205,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 						onClick={() => setActiveTab("knowledge")}
 					>
 						<Flame size={15} />
-						<span>Trending Intelligence & Teach</span>
+						<span>{t.dashboard.tabKnowledge}</span>
 						<span className="dash-tab-count">5</span>
 					</button>
 					<button
@@ -213,7 +213,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 						className={`dash-tab-btn ${activeTab === "kb" ? "active" : ""}`}
 						onClick={() => setActiveTab("kb")}
 					>
-						<span>Knowledge Base</span>
+						<span>{t.dashboard.tabKb}</span>
 						<span className="dash-tab-count">+</span>
 					</button>
 				</div>
