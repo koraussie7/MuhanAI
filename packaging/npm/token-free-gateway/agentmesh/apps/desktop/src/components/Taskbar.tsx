@@ -1,17 +1,34 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Bot, Wifi, Battery, Volume2 } from "lucide-react";
+import { useState, useEffect, type ReactNode } from "react";
+import { Bot, Wifi, Battery, Volume2, Folder, Terminal } from "lucide-react";
 
-interface TaskbarProps {
-	engineStatus: "initializing" | "ready" | "loading" | "error";
+export interface ActiveWindowItem {
+	id: string;
+	title: string;
+	icon: ReactNode;
+	isActive?: boolean;
 }
 
-interface TaskbarProps {
-	engineStatus: "initializing" | "ready" | "loading" | "error";
+export interface TaskbarProps {
+	engineStatus?: "initializing" | "ready" | "loading" | "error";
+	isStartMenuOpen?: boolean;
+	onToggleStartMenu?: () => void;
+	activeWindows?: ActiveWindowItem[];
+	activeWindowId?: string | null;
+	onFocusWindow?: (id: string) => void;
+	onQuickLaunch?: (appId: string) => void;
 }
 
-export function Taskbar({ engineStatus = "ready" }: TaskbarProps) {
+export function Taskbar({
+	engineStatus = "ready",
+	isStartMenuOpen = false,
+	onToggleStartMenu,
+	activeWindows = [],
+	activeWindowId,
+	onFocusWindow,
+	onQuickLaunch,
+}: TaskbarProps) {
 	const [time, setTime] = useState(new Date());
 	const [memoryUsage, setMemoryUsage] = useState<{
 		used: number;
@@ -54,7 +71,12 @@ export function Taskbar({ engineStatus = "ready" }: TaskbarProps) {
 	return (
 		<div className="taskbar">
 			<div className="taskbar-left">
-				<button className="start-button flex items-center gap-2">
+				<button
+					type="button"
+					className={`start-button flex items-center gap-2 ${isStartMenuOpen ? "active" : ""}`}
+					onClick={onToggleStartMenu}
+					title="Start Menu (DaedalOS)"
+				>
 					<Bot size={16} />
 					<span>MuhanAI</span>
 				</button>
@@ -63,7 +85,7 @@ export function Taskbar({ engineStatus = "ready" }: TaskbarProps) {
 				<div className={`engine-status flex items-center gap-2 ${getStatusColor()}`}>
 					<div className="w-2 h-2 rounded-full bg-current animate-pulse" />
 					<span className="text-xs">
-						{engineStatus === "ready" ? "AI Ready" : 
+						{engineStatus === "ready" ? "AI Ready" :
 						 engineStatus === "loading" ? "Loading..." :
 						 engineStatus === "error" ? "AI Error" : "Initializing..."}
 					</span>
@@ -71,21 +93,50 @@ export function Taskbar({ engineStatus = "ready" }: TaskbarProps) {
 
 				{/* Quick launch apps */}
 				<div className="quick-launch flex items-center gap-1 ml-4">
-					<button className="quick-app-btn" title="Chat">
+					<button
+						type="button"
+						className="quick-app-btn"
+						title="AI Chat"
+						onClick={() => onQuickLaunch?.("chat")}
+					>
 						<Bot size={14} />
 					</button>
-					<button className="quick-app-btn" title="Files">
-						📁
+					<button
+						type="button"
+						className="quick-app-btn"
+						title="File Explorer"
+						onClick={() => onQuickLaunch?.("files")}
+					>
+						<Folder size={14} />
 					</button>
-					<button className="quick-app-btn" title="Terminal">
-						💻
+					<button
+						type="button"
+						className="quick-app-btn"
+						title="Terminal"
+						onClick={() => onQuickLaunch?.("terminal")}
+					>
+						<Terminal size={14} />
 					</button>
 				</div>
 			</div>
 
 			<div className="taskbar-center">
 				<div className="taskbar-items">
-					{/* Active windows will be listed here */}
+					{activeWindows.map((win) => {
+						const isCurrent = win.id === activeWindowId;
+						return (
+							<button
+								key={win.id}
+								type="button"
+								className={`taskbar-window-item ${isCurrent ? "active" : ""}`}
+								onClick={() => onFocusWindow?.(win.id)}
+								title={win.title}
+							>
+								<span className="taskbar-item-icon">{win.icon}</span>
+								<span className="taskbar-item-title">{win.title}</span>
+							</button>
+						);
+					})}
 				</div>
 			</div>
 

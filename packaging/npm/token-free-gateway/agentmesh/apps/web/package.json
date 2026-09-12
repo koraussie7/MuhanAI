@@ -3,6 +3,10 @@
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
+	"exports": {
+		"./i18n.js": "./src/i18n.ts",
+		"./components/menu-i18n.js": "./src/components/menu-i18n.ts"
+	},
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build",

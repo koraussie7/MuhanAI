@@ -86,6 +86,8 @@ test("cosmetic — every NAV_GROUPS item has a valid iconKey", () => {
 		"coins",
 		"settings",
 		"smartphone",
+		"monitor",
+		"package",
 	]);
 	for (const group of NAV_GROUPS) {
 		for (const item of group.items) {

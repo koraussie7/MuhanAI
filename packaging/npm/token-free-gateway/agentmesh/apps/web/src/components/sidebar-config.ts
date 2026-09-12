@@ -52,6 +52,20 @@ export const NAV_GROUPS: NavGroup[] = [
 				path: "/agent-mesh",
 				iconKey: "bot",
 			},
+			{
+				id: "desktop",
+				label: "Web Desktop",
+				path: "/desktop",
+				iconKey: "monitor",
+				badge: "DaedalOS",
+			},
+		{
+			id: "bitterbot",
+			label: "Bitterbot Agent",
+			path: "/desktop?app=bitterbot",
+			iconKey: "package",
+			badge: "Beta",
+		},
 		],
 	},
 	{
@@ -198,8 +212,16 @@ export const NAV_GROUPS: NavGroup[] = [
  *     the router pushes `search?q=...` not just `/search`.
  */
 export function isNavItemActive(itemPath: string, activePath: string): boolean {
+	if (itemPath === activePath) return true;
+	const cleanItem = itemPath.split("?")[0] ?? "/";
 	const cleanActive = activePath.split("?")[0] ?? "/";
-	if (cleanActive === itemPath) return true;
-	if (itemPath === "/") return false;
-	return cleanActive.startsWith(`${itemPath}/`);
+	if (cleanActive === cleanItem) {
+		// If item has query params (e.g. /desktop?app=bitterbot), check them
+		if (itemPath.includes("?")) {
+			return itemPath === activePath;
+		}
+		return true;
+	}
+	if (cleanItem === "/") return false;
+	return cleanActive.startsWith(`${cleanItem}/`);
 }

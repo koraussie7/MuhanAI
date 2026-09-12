@@ -9,6 +9,7 @@ import {
 	Database,
 	Layers,
 	LayoutDashboard,
+	Monitor,
 	Network,
 	Radio,
 	Search,
@@ -18,10 +19,13 @@ import {
 	Users,
 	X,
 	Zap,
+	Package,
 } from "lucide-react";
 import type React from "react";
 import { CreditBalance } from "./CreditBalance.js";
 import { formatPeerCountBare } from "../lib/mesh-stats.js";
+import { useI18n } from "../i18n.js";
+import { getMenuTranslation } from "./menu-i18n.js";
 import {
 	isNavItemActive,
 	NAV_GROUPS as NAV_GROUPS_CONFIG,
@@ -56,6 +60,8 @@ function renderIcon(key: string): React.ReactNode {
 			return <LayoutDashboard size={18} />;
 		case "radio":
 			return <Radio size={18} />;
+		case "package":
+			return <Package size={18} />;
 		case "bot":
 			return <Bot size={18} />;
 		case "network":
@@ -82,6 +88,8 @@ function renderIcon(key: string): React.ReactNode {
 			return <Settings size={18} />;
 		case "smartphone":
 			return <Smartphone size={18} />;
+		case "monitor":
+			return <Monitor size={18} />;
 		default:
 			return null;
 	}
@@ -104,6 +112,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 	isMobileOpen = false,
 	onCloseMobile,
 }) => {
+	const { lang } = useI18n();
+	const menuI18n = getMenuTranslation(lang);
+
 	return (
 		<aside
 			className={`sidebar ${isCollapsed ? "collapsed" : ""} ${isMobileOpen ? "mobile-open" : ""}`}
@@ -126,7 +137,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 								<span className="brand-name">MuhanAI</span>
 								<span className="brand-badge">CLINE</span>
 							</div>
-							<span className="brand-subtitle">Token-Free Mesh</span>
+							<span className="brand-subtitle">{menuI18n.footer.brandSubtitle}</span>
 						</div>
 					)}
 				</div>
@@ -157,41 +168,54 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
 			{/* Navigation Content */}
 			<div className="sidebar-content">
-				{NAV_GROUPS.map((group) => (
-					<div key={group.id} className="sidebar-group">
-						{!isCollapsed && <span className="sidebar-group-title">{group.title}</span>}
-						{group.items.map((item) => {
-							const isActive = isNavItemActive(item.path, activePath);
-							return (
-								<button
-									key={item.id}
-									type="button"
-									className={`nav-item-btn ${isActive ? "active" : ""}`}
-									onClick={() => {
-										onItemClick(item.path);
-										onCloseMobile?.();
-									}}
-									title={isCollapsed ? item.label : undefined}
-								>
-									<span className="nav-item-icon">{item.icon}</span>
-									{!isCollapsed && (
-										<>
-											<span className="nav-item-label">{item.label}</span>
-											{item.badge && <span className="nav-item-badge">{item.badge}</span>}
-										</>
-									)}
-								</button>
-							);
-						})}
-					</div>
-				))}
+				{NAV_GROUPS.map((group) => {
+					const groupTitle = menuI18n.groups[group.id] || group.title;
+					return (
+						<div key={group.id} className="sidebar-group">
+							{!isCollapsed && <span className="sidebar-group-title">{groupTitle}</span>}
+							{group.items.map((item) => {
+								const isActive = isNavItemActive(item.path, activePath);
+								const itemLabel = menuI18n.items[item.id] || item.label;
+								const badgeLabel = item.badge
+									? (menuI18n.badges?.[item.badge] || item.badge)
+									: undefined;
+								return (
+									<button
+										key={item.id}
+										type="button"
+										className={`nav-item-btn ${isActive ? "active" : ""}`}
+										onClick={() => {
+											onItemClick(item.path);
+											onCloseMobile?.();
+										}}
+										title={isCollapsed ? itemLabel : undefined}
+									>
+										<span className="nav-item-icon">{item.icon}</span>
+										{!isCollapsed && (
+											<>
+												<span className="nav-item-label">{itemLabel}</span>
+												{badgeLabel && <span className="nav-item-badge">{badgeLabel}</span>}
+											</>
+										)}
+									</button>
+								);
+							})}
+						</div>
+					);
+				})}
 			</div>
 
 			{/* Footer Profile & Live Mesh Indicator */}
 			<div className="sidebar-footer">
 				<div className="footer-status-pill">
 					<span className="pulse-dot" />
-					{!isCollapsed ? <span>P2P Mesh: {formatPeerCountBare(undefined)} Nodes</span> : <span>Live</span>}
+					{!isCollapsed ? (
+						<span>
+							{menuI18n.footer.peerMesh}: {formatPeerCountBare(undefined)} {menuI18n.footer.nodes}
+						</span>
+					) : (
+						<span>{menuI18n.footer.live}</span>
+					)}
 				</div>
 
 				<div className="footer-user-card" onClick={() => onItemClick("/token-bank")}>
@@ -200,7 +224,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 					</div>
 					{!isCollapsed && (
 						<div className="user-info">
-							<span className="user-name">Token-Free Active</span>
+							<span className="user-name">{menuI18n.footer.tokenFreeActive}</span>
 							<span className="user-credits">
 								<CreditBalance userId="demo" variant="inline" />
 							</span>

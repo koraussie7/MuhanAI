@@ -9,6 +9,8 @@ interface WindowProps {
 	defaultPosition?: { x: number; y: number };
 	icon?: ReactNode;
 	children: ReactNode;
+	zIndex?: number;
+	onFocus?: () => void;
 	onClose?: () => void;
 }
 
@@ -19,6 +21,8 @@ export function Window({
 	defaultPosition = { x: 100, y: 100 },
 	icon,
 	children,
+	zIndex = 100,
+	onFocus,
 	onClose,
 }: WindowProps) {
 	const [size, setSize] = useState(defaultSize);
@@ -62,12 +66,13 @@ export function Window({
 		<div
 			className="desktop-window"
 			ref={windowRef}
+			onMouseDown={() => onFocus?.()}
 			style={{
 				width: size.width,
 				height: size.height,
 				left: position.x,
 				top: position.y,
-				zIndex: 100,
+				zIndex,
 			}}
 		>
 			<div
