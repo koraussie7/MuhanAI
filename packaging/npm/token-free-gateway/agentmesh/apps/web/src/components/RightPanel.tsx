@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useI18n } from "../i18n.js";
 
 const API = import.meta.env.VITE_API_BASE ?? "";
 
@@ -67,6 +68,7 @@ const DEFAULT_AGENTS = [
 ];
 
 export function RightPanel() {
+	const { t } = useI18n();
 	const [agents, setAgents] = useState<any[]>(DEFAULT_AGENTS);
 	const [compute, setCompute] = useState<any>(DEFAULT_COMPUTE);
 	const [llm, setLlm] = useState<any>(DEFAULT_LLM);
@@ -116,7 +118,7 @@ export function RightPanel() {
 	return (
 		<aside className="right-panel">
 			<div className="panel-section">
-				<h3>Agents</h3>
+				<h3>{t.rightPanel.agents}</h3>
 				<div className="agent-list">
 					{agents.map((agent: any) => (
 						<div key={agent.id} className="agent-card">
@@ -133,78 +135,78 @@ export function RightPanel() {
 								))}
 							</div>
 							<div className="agent-stats">
-								<span>Rep: {agent.reputation}%</span>
-								<span>Success: {agent.success}%</span>
+								<span>{t.rightPanel.reputation}: {agent.reputation}%</span>
+								<span>{t.rightPanel.success}: {agent.success}%</span>
 							</div>
 						</div>
 					))}
 				</div>
 
-				<h3>Compute</h3>
+				<h3>{t.rightPanel.compute}</h3>
 				<div className="compute-stats">
 					<div className="compute-item">
 						<span className="compute-value">{compute.cpu?.toLocaleString()}</span>
-						<span className="compute-label">CPU Nodes</span>
+						<span className="compute-label">{t.rightPanel.cpuNodes}</span>
 					</div>
 					<div className="compute-item">
 						<span className="compute-value">{compute.gpu?.toLocaleString()}</span>
-						<span className="compute-label">GPU Nodes</span>
+						<span className="compute-label">{t.rightPanel.gpuNodes}</span>
 					</div>
 					<div className="compute-item">
 						<span className="compute-value">{compute.webgpu?.toLocaleString()}</span>
-						<span className="compute-label">WebGPU</span>
+						<span className="compute-label">{t.rightPanel.webgpu}</span>
 					</div>
 					<div className="compute-item total">
 						<span className="compute-value">{compute.totalTFLOPS?.toLocaleString()} TFLOPS</span>
-						<span className="compute-label">Total Compute</span>
+						<span className="compute-label">{t.rightPanel.totalCompute}</span>
 					</div>
 				</div>
 
-				<h3>LLM</h3>
+				<h3>{t.rightPanel.llm}</h3>
 				<div className="llm-stats">
 					<div className="llm-item">
 						<span className="llm-value">{llm.providers}</span>
-						<span className="llm-label">Providers</span>
+						<span className="llm-label">{t.rightPanel.providers}</span>
 					</div>
 					<div className="llm-item">
 						<span className="llm-value">{llm.models?.toLocaleString()}</span>
-						<span className="llm-label">Models</span>
+						<span className="llm-label">{t.rightPanel.models}</span>
 					</div>
 					<div className="llm-item">
 						<span className="llm-value">{llm.free}</span>
-						<span className="llm-label">Free</span>
+						<span className="llm-label">{t.rightPanel.free}</span>
 					</div>
 				</div>
 
-				<h3>MCP</h3>
+				<h3>{t.rightPanel.mcp}</h3>
 				<div className="mcp-stats">
 					<div className="mcp-item">
 						<span className="mcp-value">{mcp.servers?.toLocaleString()}</span>
-						<span className="mcp-label">Servers</span>
+						<span className="mcp-label">{t.rightPanel.servers}</span>
 					</div>
 					<div className="mcp-item">
 						<span className="mcp-value">{mcp.tools?.toLocaleString()}</span>
-						<span className="mcp-label">Tools</span>
+						<span className="mcp-label">{t.rightPanel.tools}</span>
 					</div>
 					<div className="mcp-item">
 						<span className="mcp-value">{mcp.categories}</span>
-						<span className="mcp-label">Categories</span>
+						<span className="mcp-label">{t.rightPanel.categories}</span>
 					</div>
 				</div>
 
-				<h3>Human</h3>
+				<h3>{t.rightPanel.human}</h3>
 				<div className="human-stats">
 					<div className="human-item">
 						<span className="human-value">{human.online?.toLocaleString()}</span>
-						<span className="human-label">Online</span>
+						<span className="human-label">{t.rightPanel.online}</span>
 					</div>
 					<div className="human-item">
 						<span className="human-value">{human.available?.toLocaleString()}</span>
-						<span className="human-label">Available</span>
+						<span className="human-label">{t.rightPanel.available}</span>
 					</div>
 					<div className="human-item">
 						<span className="human-value">{human.specialties}</span>
-						<span className="human-label">Specialties</span>
+						<span className="human-label">{t.rightPanel.specialties}</span>
 					</div>
 				</div>
 			</div>
