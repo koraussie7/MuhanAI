@@ -82,6 +82,28 @@ export interface I18nContent {
 		tabKnowledge: string;
 		tabKb: string;
 	};
+	rightPanel: {
+		agents: string;
+		compute: string;
+		cpuNodes: string;
+		gpuNodes: string;
+		webgpu: string;
+		totalCompute: string;
+		llm: string;
+		providers: string;
+		models: string;
+		free: string;
+		mcp: string;
+		servers: string;
+		tools: string;
+		categories: string;
+		human: string;
+		online: string;
+		available: string;
+		specialties: string;
+		reputation: string;
+		success: string;
+	};
 }
 
 export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
@@ -152,6 +174,28 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			tabVerify: "검증 & 쿼럼",
 			tabKnowledge: "인기 인텔리전스 & 가르치기",
 			tabKb: "지식 베이스",
+		},
+		rightPanel: {
+			agents: "에이전트",
+			compute: "연산",
+			cpuNodes: "CPU 노드",
+			gpuNodes: "GPU 노드",
+			webgpu: "WebGPU",
+			totalCompute: "총 연산",
+			llm: "LLM",
+			providers: "공급자",
+			models: "모델",
+			free: "무료",
+			mcp: "MCP",
+			servers: "서버",
+			tools: "도구",
+			categories: "카테고리",
+			human: "인간",
+			online: "온라인",
+			available: "가용",
+			specialties: "전문분야",
+			reputation: "평판",
+			success: "성공률",
 		},
 
 	},
@@ -225,6 +269,28 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			tabKnowledge: "Trending Intelligence & Teach",
 			tabKb: "Knowledge Base",
 		},
+		rightPanel: {
+			agents: "Agents",
+			compute: "Compute",
+			cpuNodes: "CPU Nodes",
+			gpuNodes: "GPU Nodes",
+			webgpu: "WebGPU",
+			totalCompute: "Total Compute",
+			llm: "LLM",
+			providers: "Providers",
+			models: "Models",
+			free: "Free",
+			mcp: "MCP",
+			servers: "Servers",
+			tools: "Tools",
+			categories: "Categories",
+			human: "Human",
+			online: "Online",
+			available: "Available",
+			specialties: "Specialties",
+			reputation: "Rep",
+			success: "Success",
+		},
 
 	},
 	ja: {
@@ -296,6 +362,28 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			tabKnowledge: "トレンド知能と学習",
 			tabKb: "ナレッジベース",
 		},
+		rightPanel: {
+			agents: "エージェント",
+			compute: "コンピュート",
+			cpuNodes: "CPUノード",
+			gpuNodes: "GPUノード",
+			webgpu: "WebGPU",
+			totalCompute: "総コンピュート",
+			llm: "LLM",
+			providers: "プロバイダー",
+			models: "モデル",
+			free: "無料",
+			mcp: "MCP",
+			servers: "サーバー",
+			tools: "ツール",
+			categories: "カテゴリ",
+			human: "人間",
+			online: "オンライン",
+			available: "利用可能",
+			specialties: "専門分野",
+			reputation: "評価",
+			success: "成功率",
+		},
 
 	},
 	zh: {
@@ -365,6 +453,28 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			tabVerify: "验证与仲裁",
 			tabKnowledge: "热门智能与教学",
 			tabKb: "知识库",
+		},
+		rightPanel: {
+			agents: "智能体",
+			compute: "算力",
+			cpuNodes: "CPU 节点",
+			gpuNodes: "GPU 节点",
+			webgpu: "WebGPU",
+			totalCompute: "总算力",
+			llm: "LLM",
+			providers: "提供商",
+			models: "模型",
+			free: "免费",
+			mcp: "MCP",
+			servers: "服务器",
+			tools: "工具",
+			categories: "分类",
+			human: "人类",
+			online: "在线",
+			available: "可用",
+			specialties: "专业领域",
+			reputation: "声誉",
+			success: "成功率",
 		},
 
 	},
@@ -438,6 +548,28 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			tabKnowledge: "Inteligencia en Tendencia y Enseñanza",
 			tabKb: "Base de Conocimiento",
 		},
+		rightPanel: {
+			agents: "Agentes",
+			compute: "Cómputo",
+			cpuNodes: "Nodos CPU",
+			gpuNodes: "Nodos GPU",
+			webgpu: "WebGPU",
+			totalCompute: "Cómputo Total",
+			llm: "LLM",
+			providers: "Proveedores",
+			models: "Modelos",
+			free: "Gratis",
+			mcp: "MCP",
+			servers: "Servidores",
+			tools: "Herramientas",
+			categories: "Categorías",
+			human: "Humanos",
+			online: "En línea",
+			available: "Disponible",
+			specialties: "Especialidades",
+			reputation: "Rep",
+			success: "Éxito",
+		},
 
 	},
 	de: {
@@ -509,6 +641,28 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			tabVerify: "Verifikation & Quorum",
 			tabKnowledge: "Trend-Intelligenz & Lehren",
 			tabKb: "Wissensdatenbank",
+		},
+		rightPanel: {
+			agents: "Agenten",
+			compute: "Computing",
+			cpuNodes: "CPU-Knoten",
+			gpuNodes: "GPU-Knoten",
+			webgpu: "WebGPU",
+			totalCompute: "Gesamt-Computing",
+			llm: "LLM",
+			providers: "Anbieter",
+			models: "Modelle",
+			free: "Kostenlos",
+			mcp: "MCP",
+			servers: "Server",
+			tools: "Werkzeuge",
+			categories: "Kategorien",
+			human: "Mensch",
+			online: "Online",
+			available: "Verfügbar",
+			specialties: "Fachgebiete",
+			reputation: "Rep",
+			success: "Erfolg",
 		},
 
 	},
@@ -583,6 +737,28 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			tabKnowledge: "Intelligence Tendance & Enseignement",
 			tabKb: "Base de Connaissances",
 		},
+		rightPanel: {
+			agents: "Agents",
+			compute: "Calcul",
+			cpuNodes: "Nœuds CPU",
+			gpuNodes: "Nœuds GPU",
+			webgpu: "WebGPU",
+			totalCompute: "Calcul Total",
+			llm: "LLM",
+			providers: "Fournisseurs",
+			models: "Modèles",
+			free: "Gratuit",
+			mcp: "MCP",
+			servers: "Serveurs",
+			tools: "Outils",
+			categories: "Catégories",
+			human: "Humain",
+			online: "En ligne",
+			available: "Disponible",
+			specialties: "Spécialités",
+			reputation: "Rép",
+			success: "Succès",
+		},
 
 	},
 	pt: {
@@ -653,6 +829,28 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			tabVerify: "Verificação & Quórum",
 			tabKnowledge: "Inteligência em Alta & Ensino",
 			tabKb: "Base de Conhecimento",
+		},
+		rightPanel: {
+			agents: "Agentes",
+			compute: "Computação",
+			cpuNodes: "Nós CPU",
+			gpuNodes: "Nós GPU",
+			webgpu: "WebGPU",
+			totalCompute: "Computação Total",
+			llm: "LLM",
+			providers: "Provedores",
+			models: "Modelos",
+			free: "Grátis",
+			mcp: "MCP",
+			servers: "Servidores",
+			tools: "Ferramentas",
+			categories: "Categorias",
+			human: "Humanos",
+			online: "Online",
+			available: "Disponível",
+			specialties: "Especialidades",
+			reputation: "Rep",
+			success: "Sucesso",
 		},
 
 	},
