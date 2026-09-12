@@ -1,8 +1,4 @@
 @import "tailwindcss";
-@import "./style.css";
-@import "./components/visuals/visuals.css";
-@import "./components/harvest/C/harvest-c.css";
-@import "./components/find/find.css";
 
 @theme {
 	--font-sans: "Inter", "Space Grotesk", system-ui, sans-serif;
@@ -125,10 +121,7 @@ body {
 	border: 1px solid rgba(148, 163, 184, 0.15);
 	border-radius: 8px;
 	cursor: pointer;
-	transition:
-		color 0.15s ease,
-		background 0.15s ease,
-		border-color 0.15s ease;
+	transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
 }
 .cosmic-back-btn:hover {
 	color: #fff;
@@ -143,9 +136,7 @@ body {
 	height: 8px;
 	border-radius: 50%;
 	background: #38bdf8;
-	box-shadow:
-		0 0 12px #38bdf8,
-		0 0 4px #38bdf8;
+	box-shadow: 0 0 12px #38bdf8, 0 0 4px #38bdf8;
 	animation: cosmic-pulse-beacon-flicker 2.4s ease-in-out infinite;
 }
 @keyframes cosmic-pulse-beacon-flicker {
@@ -187,9 +178,7 @@ body {
 	border: 1px solid rgba(148, 163, 184, 0.18);
 	color: #f1f5f9;
 	outline: none;
-	transition:
-		border-color 0.15s ease,
-		box-shadow 0.15s ease;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 .cosmic-search-input::placeholder {
 	color: #64748b;
@@ -622,10 +611,7 @@ body {
 	border-radius: 9999px;
 	backdrop-filter: blur(20px);
 	-webkit-backdrop-filter: blur(20px);
-	box-shadow:
-		0 0 24px rgba(56, 189, 248, 0.18),
-		0 12px 36px rgba(0, 0, 0, 0.65),
-		inset 0 1px 0 rgba(255, 255, 255, 0.12);
+	box-shadow: 0 0 24px rgba(56, 189, 248, 0.18), 0 12px 36px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 	transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -633,11 +619,7 @@ body {
 .cosmic-prompt-form.focused {
 	border-color: #38bdf8;
 	background: rgba(4, 9, 24, 0.94);
-	box-shadow:
-		0 0 35px rgba(56, 189, 248, 0.38),
-		0 0 18px rgba(168, 85, 247, 0.22),
-		0 16px 44px rgba(0, 0, 0, 0.75),
-		inset 0 1px 0 rgba(255, 255, 255, 0.18);
+	box-shadow: 0 0 35px rgba(56, 189, 248, 0.38), 0 0 18px rgba(168, 85, 247, 0.22), 0 16px 44px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 	transform: translateY(-1px);
 }
 
@@ -723,9 +705,7 @@ body {
 	margin-left: 2px;
 	color: #38bdf8;
 	font-weight: 700;
-	text-shadow:
-		0 0 8px #38bdf8,
-		0 0 14px rgba(56, 189, 248, 0.6);
+	text-shadow: 0 0 8px #38bdf8, 0 0 14px rgba(56, 189, 248, 0.6);
 	animation: neonCursorBlink 0.85s infinite ease-in-out;
 }
 

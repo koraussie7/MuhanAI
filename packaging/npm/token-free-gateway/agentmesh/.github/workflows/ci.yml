@@ -26,6 +26,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Generate Prisma client
+        run: pnpm exec prisma generate
+
       - name: Typecheck affected
         run: pnpm nx affected --target=typecheck --base=origin/main --parallel=4
 

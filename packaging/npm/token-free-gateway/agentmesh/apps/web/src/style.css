@@ -95,9 +95,7 @@ a {
 
 .status-pill,
 .section-label {
-	font:
-		500 11px "DM Mono",
-		monospace;
+	font: 500 11px "DM Mono", monospace;
 	letter-spacing: 0.1em;
 	color: #aeb1a3;
 	text-transform: uppercase;
@@ -245,9 +243,7 @@ h2 em {
 	border-radius: 50%;
 	background: #191a16;
 	color: #e6ff87;
-	font:
-		500 12px "DM Mono",
-		monospace;
+	font: 500 12px "DM Mono", monospace;
 }
 
 .node-a {
@@ -618,9 +614,7 @@ footer {
 	border-radius: 50%;
 	background: #191a16;
 	color: #e6ff87;
-	font:
-		500 12px "DM Mono",
-		monospace;
+	font: 500 12px "DM Mono", monospace;
 }
 
 .node-a {

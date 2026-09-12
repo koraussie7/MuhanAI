@@ -1,5 +1,6 @@
 {
 	"compilerOptions": {
+		"baseUrl": ".",
 		"target": "ES2022",
 		"lib": ["dom", "dom.iterable", "esnext", "webworker"],
 		"allowJs": true,
@@ -20,7 +21,8 @@
 		],
 		"paths": {
 			"@/*": ["./src/*"],
-			"@agentmesh/*": ["../../packages/*/src"]
+			"@agentmesh/*": ["../../packages/*/src"],
+			"@web/*": ["../../web/src/*"]
 		}
 	},
 	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

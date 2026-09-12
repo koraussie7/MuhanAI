@@ -22,6 +22,7 @@ import { HiveBearPanel } from "./components/HiveBearPanel";
 import { RightPanel } from "./components/RightPanel";
 import { SemanticVote } from "./components/SemanticVote";
 import { Sidebar } from "./components/Sidebar";
+import { WebDesktopPage } from "./components/WebDesktopPage";
 import {
 	AgentsPage,
 	ContributionsPage,
@@ -37,6 +38,7 @@ import {
 	WorkflowsPage,
 } from "./components/SpecPages";
 import { type SupportedLanguage, useI18n } from "./i18n";
+import { getMenuTranslation } from "./components/menu-i18n";
 
 /**
  * Single Source of Truth for all routes.
@@ -48,6 +50,8 @@ const SECTIONS = [
 	{ id: "find", path: "/", label: "Cosmic Mesh", category: "Core" },
 	{ id: "agent-cast", path: "/agent-cast", label: "Agent Cast", category: "Core" },
 	{ id: "agent-mesh", path: "/agent-mesh", label: "Agent Mesh", category: "Core" },
+	{ id: "bitterbot", path: "/bitterbot", label: "Bitterbot Agent", category: "Core" },
+	{ id: "desktop", path: "/desktop", label: "Web Desktop", category: "Core" },
 
 	// Network
 	{ id: "p2p-network", path: "/network", label: "P2P Nodes", category: "Network" },
@@ -135,6 +139,7 @@ function pathFromSectionId(id: string) {
 
 export function App() {
 	const { lang, setLanguage, t, supportedLanguages } = useI18n();
+	const menuI18n = getMenuTranslation(lang);
 	const [activeSection, setActiveSection] = useState(() => {
 		if (typeof window !== "undefined") {
 			return sectionIdFromPath(window.location.pathname);
@@ -197,6 +202,11 @@ export function App() {
 		);
 	}
 
+	// 2. DaedalOS Web Desktop - Full Desktop Environment
+	if (activeSection === "desktop") {
+		return <WebDesktopPage />;
+	}
+
 	const currentSectionMeta = SECTIONS.find((s) => s.id === activeSection) ?? {
 		id: activeSection,
 		label: activeSection,
@@ -242,9 +252,13 @@ export function App() {
 						<div className="breadcrumb-trail">
 							<span className="breadcrumb-root">MuhanAI</span>
 							<ChevronRight size={13} className="breadcrumb-separator" />
-							<span className="breadcrumb-root">{currentSectionMeta.category}</span>
+							<span className="breadcrumb-root">
+								{menuI18n.groups[currentSectionMeta.category.toLowerCase()] || currentSectionMeta.category}
+							</span>
 							<ChevronRight size={13} className="breadcrumb-separator" />
-							<span className="breadcrumb-current">{currentSectionMeta.label}</span>
+							<span className="breadcrumb-current">
+								{menuI18n.items[currentSectionMeta.id] || currentSectionMeta.label}
+							</span>
 						</div>
 					</div>
 
@@ -334,7 +348,7 @@ export function App() {
 								onClick={() => navigate("/agent-cast")}
 							>
 								<Radio size={14} />
-								Agent Cast
+								{menuI18n.items["agent-cast"] || "Agent Cast"}
 							</button>
 						)}
 					</div>
@@ -349,6 +363,7 @@ export function App() {
 						{/* Core & Chat */}
 						{activeSection === "agent-cast" && <AgentCast />}
 						{activeSection === "agent-mesh" && <AgentMeshPage />}
+						{activeSection === "desktop" && <WebDesktopPage />}
 						{activeSection === "agents" && <AgentsPage />}
 						{activeSection === "human-agents" && <HumanAgentsPage />}
 
