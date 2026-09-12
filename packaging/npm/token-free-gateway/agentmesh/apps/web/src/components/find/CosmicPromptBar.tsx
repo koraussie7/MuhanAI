@@ -32,6 +32,25 @@ interface ResolvedAnswer {
 	tier: string;
 }
 
+type FreeLlmProviderId =
+	| "pollinations"
+	| "pollinations-get"
+	| "api-llm-chat"
+	| "local-oauth"
+	| "omniroute";
+
+interface FreeLlmConfig {
+	enabledProviders: FreeLlmProviderId[];
+}
+
+const DEFAULT_FREE_LLM_PROVIDERS: FreeLlmProviderId[] = [
+	"pollinations",
+	"pollinations-get",
+	"api-llm-chat",
+	"local-oauth",
+	"omniroute",
+];
+
 /**
  * BYOK — Bring Your Own Key.
  *
@@ -775,7 +794,7 @@ let sippEngineInitPromise: Promise<SippEngine | null> | null = null;
  * - Gemini 2.5 Pro: Multilingual consensus and factual validation
  * - Bitterbot Agent: Local WebGPU inference (real response)
  */
-async function resolveAnswerFromMultiAgentQuorum(query: string): Promise<ResolvedAnswer | null> {
+async function resolveAnswerFromMultiAgentQuorum(query: string, config: FreeLlmConfig): Promise<ResolvedAnswer | null> {
 	if (typeof window === "undefined") return null;
 	if (!query || query.trim().length === 0) return null;
 
@@ -786,15 +805,15 @@ async function resolveAnswerFromMultiAgentQuorum(query: string): Promise<Resolve
 	// 1. Bitterbot (local WebGPU)
 	try { const engine = await getSippEngine(); if (engine) { bitterbotResponse = await engine.chat(query, { stream: false }); } } catch { /* continue */ }
 	// 2. Pollination POST
-	if (!bitterbotResponse) { try { const res = await fetchWithTimeout("https://text.pollinations.ai/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "openai-fast", messages: [{ role: "system", content: "You are MuhanAI, a helpful multilingual assistant." }, { role: "user", content: query }], stream: false, max_tokens: 300 }) }, 6000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (text && text.trim().length > 0) { bitterbotResponse = text.trim(); bitterbotProvider = "Pollination (Free)"; } } } catch { /* continue */ } }
+	if (!bitterbotResponse && config.enabledProviders.includes("pollinations")) { try { const res = await fetchWithTimeout("https://text.pollinations.ai/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "openai-fast", messages: [{ role: "system", content: "You are MuhanAI, a helpful multilingual assistant." }, { role: "user", content: query }], stream: false, max_tokens: 300 }) }, 6000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (text && text.trim().length > 0) { bitterbotResponse = text.trim(); bitterbotProvider = "Pollination (Free)"; } } } catch { /* continue */ } }
 	// 3. Pollination GET
-	if (!bitterbotResponse) { try { const promptText = `You are MuhanAI, a helpful assistant. User: ${query}`; const url = `https://text.pollinations.ai/prompt/${encodeURIComponent(promptText)}?model=openai-fast`; const res = await fetchWithTimeout(url, { method: "GET" }, 6000); if (res.ok) { const text = await res.text(); if (text && text.trim().length > 0) { bitterbotResponse = text.trim(); bitterbotProvider = "Pollination GET (Free)"; } } } catch { /* continue */ } }
+	if (!bitterbotResponse && config.enabledProviders.includes("pollinations-get")) { try { const promptText = `You are MuhanAI, a helpful assistant. User: ${query}`; const url = `https://text.pollinations.ai/prompt/${encodeURIComponent(promptText)}?model=openai-fast`; const res = await fetchWithTimeout(url, { method: "GET" }, 6000); if (res.ok) { const text = await res.text(); if (text && text.trim().length > 0) { bitterbotResponse = text.trim(); bitterbotProvider = "Pollination GET (Free)"; } } } catch { /* continue */ } }
 	// 4. /api/llm/chat
-	if (!bitterbotResponse) { try { const res = await fetchWithTimeout("/api/llm/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt: query, system: "You are MuhanAI, a helpful assistant." }) }, 8000); if (res.ok) { const data = (await res.json()) as { text?: string; provider?: string }; if (data.text && data.text.trim().length > 0) { bitterbotResponse = data.text.trim(); bitterbotProvider = data.provider || "MuhanAI LLM"; } } } catch { /* continue */ } }
+	if (!bitterbotResponse && config.enabledProviders.includes("api-llm-chat")) { try { const res = await fetchWithTimeout("/api/llm/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt: query, system: "You are MuhanAI, a helpful assistant." }) }, 8000); if (res.ok) { const data = (await res.json()) as { text?: string; provider?: string }; if (data.text && data.text.trim().length > 0) { bitterbotResponse = data.text.trim(); bitterbotProvider = data.provider || "MuhanAI LLM"; } } } catch { /* continue */ } }
 	// 5. Local OAuth Gateway
-	if (!bitterbotResponse) { try { const res = await fetchWithTimeout("http://127.0.0.1:3456/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "claude-3-7-sonnet", messages: [{ role: "system", content: "You are MuhanAI." }, { role: "user", content: query }] }) }, 4000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (text && text.trim().length > 0) { bitterbotResponse = text.trim(); bitterbotProvider = "Local OAuth"; } } } catch { /* continue */ } }
+	if (!bitterbotResponse && config.enabledProviders.includes("local-oauth")) { try { const res = await fetchWithTimeout("http://127.0.0.1:3456/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "claude-3-7-sonnet", messages: [{ role: "system", content: "You are MuhanAI." }, { role: "user", content: query }] }) }, 4000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (text && text.trim().length > 0) { bitterbotResponse = text.trim(); bitterbotProvider = "Local OAuth"; } } } catch { /* continue */ } }
 	// 6. OmniRoute
-	if (!bitterbotResponse) { try { const res = await fetchWithTimeout("http://127.0.0.1:20128/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "auto", messages: [{ role: "system", content: "You are MuhanAI." }, { role: "user", content: query }] }) }, 4000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (text && text.trim().length > 0) { bitterbotResponse = text.trim(); bitterbotProvider = "OmniRoute"; } } } catch { /* continue */ } }
+	if (!bitterbotResponse && config.enabledProviders.includes("omniroute")) { try { const res = await fetchWithTimeout("http://127.0.0.1:20128/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "auto", messages: [{ role: "system", content: "You are MuhanAI." }, { role: "user", content: query }] }) }, 4000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (text && text.trim().length > 0) { bitterbotResponse = text.trim(); bitterbotProvider = "OmniRoute"; } } } catch { /* continue */ } }
 
 	// Simulated agent analyses
 	const agents = [
@@ -981,6 +1000,8 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 	const [showByokKey, setShowByokKey] = useState(false);
 	const [byokError, setByokError] = useState<string | null>(null);
 	const [showComputerUsePanel, setShowComputerUsePanel] = useState(false);
+	const [freeLlmEnabled, setFreeLlmEnabled] = useState<Set<FreeLlmProviderId>>(new Set(DEFAULT_FREE_LLM_PROVIDERS));
+	const [showFreeLlmPanel, setShowFreeLlmPanel] = useState(false);
 
 	// Load BYOK from localStorage on mount; if absent, seed the draft with the OpenAI defaults.
 	useEffect(() => {
@@ -1065,7 +1086,7 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 		// Resolve the answer from the best available source, in order:
 		//   0. BYOK / Configured Provider (user's configured API key or OmniRoute/OAuth gateway)
 		//   0.5. Bitterbot Agent (local WebGPU inference — zero API calls, zero tokens, fully private)
-		//   0.7. Multi-Agent Quorum Consensus (simulated multi-agent analysis)
+		//   0.7. Multi-Agent Quorum Consensus (uses configured free LLM sources)
 		//   1. Local OAuth Gateway (Token-Free WebAuth Chrome session if daemon running on :3456)
 		//   2. Local OmniRoute Mesh (356 Providers routing daemon if running on :20128)
 		//   3. browser → pollinations (CORS, anonymous tier, no centralized quota burned)
@@ -1074,7 +1095,7 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 		//   6. quorum template → offline fallback so the UI never hangs
 		let resolved = await resolveAnswerFromByok(query, byokSettings);
 		if (!resolved) resolved = await resolveAnswerFromBitterbot(query);
-		if (!resolved) resolved = await resolveAnswerFromMultiAgentQuorum(query);
+		if (!resolved) resolved = await resolveAnswerFromMultiAgentQuorum(query, { enabledProviders: Array.from(freeLlmEnabled) });
 		if (!resolved) resolved = await resolveAnswerFromLocalOAuthGateway(query);
 		if (!resolved) resolved = await resolveAnswerFromLocalOmniRoute(query);
 		if (!resolved) resolved = await resolveAnswerFromPollinations(query);
@@ -1203,6 +1224,14 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 		}
 	};
 
+	const freeLlmProviderLabels: Record<FreeLlmProviderId, string> = {
+		pollinations: t.freeLlm.pollinations,
+		"pollinations-get": t.freeLlm.pollinationsGet,
+		"api-llm-chat": t.freeLlm.apiLlmChat,
+		"local-oauth": t.freeLlm.localOauth,
+		omniroute: t.freeLlm.omniroute,
+	};
+
 	return (
 		<div className="cosmic-prompt-bar-wrap pointer-events-auto">
 			<form onSubmit={handleSubmit} className={`cosmic-prompt-form ${isFocused ? "focused" : ""}`}>
@@ -1260,6 +1289,16 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 					>
 						<KeyRound size={13} className={byokSettings ? "text-amber-300" : "text-slate-400"} />
 						{byokSettings && <span className="prompt-byok-dot" />}
+					</button>
+					<button
+						type="button"
+						className={`prompt-byok-toggle ${showFreeLlmPanel ? "active" : ""}`}
+						onClick={() => setShowFreeLlmPanel((v) => !v)}
+						title={t.freeLlm.settingsTitle}
+						aria-label={t.freeLlm.settingsTitle}
+					>
+						<Globe size={13} className={showFreeLlmPanel ? "text-sky-400" : "text-slate-400"} />
+						{freeLlmEnabled.size > 0 && <span className="prompt-byok-dot" />}
 					</button>
 					{inputVal.trim() ? (
 						<button type="submit" className="prompt-action-pill-btn">
@@ -1413,6 +1452,58 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 							</div>
 						)}
 					</div>
+				</div>
+			)}
+
+			{/* Free LLM Fallback Panel */}
+			{showFreeLlmPanel && (
+				<div className="cosmic-free-llm-panel" role="dialog" aria-label={t.freeLlm.settingsTitle}>
+					<div className="cosmic-free-llm-header">
+						<div className="flex items-center gap-2">
+							<Globe size={14} className="text-sky-400" />
+							<span className="cosmic-free-llm-title">{t.freeLlm.settingsTitle}</span>
+							<span className="text-xs text-slate-500">({freeLlmEnabled.size}/{DEFAULT_FREE_LLM_PROVIDERS.length})</span>
+						</div>
+						<button
+							type="button"
+							className="text-slate-400 hover:text-white p-1"
+							onClick={() => setShowFreeLlmPanel(false)}
+							title={t.freeLlm.collapse}
+							aria-label={t.freeLlm.collapse}
+						>
+							<X size={14} />
+						</button>
+					</div>
+					<p className="text-xs text-slate-400 mb-2">{t.freeLlm.settingsDesc}</p>
+					<div className="cosmic-free-llm-list">
+						{DEFAULT_FREE_LLM_PROVIDERS.map((provider) => {
+							const isEnabled = freeLlmEnabled.has(provider);
+							return (
+								<label key={provider} className="cosmic-free-llm-row">
+									<input
+										type="checkbox"
+										checked={isEnabled}
+										onChange={() => {
+											setFreeLlmEnabled((prev) => {
+												const next = new Set(prev);
+												if (next.has(provider)) {
+													next.delete(provider);
+												} else {
+													next.add(provider);
+												}
+												return next;
+											});
+										}}
+										className="rounded"
+									/>
+									<span>{freeLlmProviderLabels[provider]}</span>
+								</label>
+							);
+						})}
+					</div>
+					{freeLlmEnabled.size === 0 && (
+						<p className="text-xs text-amber-400">{t.freeLlm.noneSelected}</p>
+					)}
 				</div>
 			)}
 
