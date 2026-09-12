@@ -1,21 +1,12 @@
 name: CI
 
-# Nx 기반 CI 워크플로우
-# - 기존 job(typecheck, test, biome, integrity)은 보존
-# - Nx job은 nx.json 존재 시 affected 명령 사용, 없으면 pnpm 스크립트 fallback
-# - PR: --base=origin/main (가능 시) 또는 --base=HEAD~1
-# - main push: --base=HEAD~1
-
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
 
-# The pnpm workspace (pnpm-lock.yaml, pnpm-workspace.yaml, apps/, packages/,
-# services/, client-adapter/) lives under packaging/npm/token-free-gateway/agentmesh.
-# actions/checkout runs from the repo root, so every subsequent step needs to
-# cd into the workspace before invoking pnpm.
+# Workspace lives under agentmesh; all run steps use this cwd.
 defaults:
   run:
     working-directory: packaging/npm/token-free-gateway/agentmesh
@@ -24,11 +15,12 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-jobs:
-  # ============================================================
-  # 기존 job (Agent A가 nx.json을 제공하면 Nx target으로 대체 가능)
-  # ============================================================
+permissions:
+  actions: read
+  contents: read
+  checks: write
 
+jobs:
   typecheck:
     name: TypeScript type check
     runs-on: ubuntu-latest
@@ -41,8 +33,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
-          cache-dependency-path: 'packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml'
+          cache: pnpm
+          cache-dependency-path: packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
 
@@ -58,18 +50,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
-          cache-dependency-path: 'packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml'
+          cache: pnpm
+          cache-dependency-path: packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - name: Run vitest with junit reporter
         run: pnpm test -- --reporter=junit --outputFile=junit.xml
-        env:
-          JEST_JUNIT_OUTPUT_NAME: junit.xml
       - uses: dorny/test-reporter@v1
         if: always()
         with:
           name: Tests
-          path: junit.xml
+          # reporter paths are relative to repo root, not working-directory
+          path: packaging/npm/token-free-gateway/agentmesh/junit.xml
           reporter: jest-junit
           fail-on-error: true
 
@@ -85,55 +76,52 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
-          cache-dependency-path: 'packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml'
+          cache: pnpm
+          cache-dependency-path: packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm biome ci .
 
-  # ============================================================
-  # Nx job (에이전트 A: nx.json 기반, fallback 포함)
-  # ============================================================
-
   nx-affect:
-    name: Nx affected (build, typecheck, test, lint)
+    name: Nx affected (typecheck, test, lint, build)
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: []
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
+          filter: tree:0
+
       - uses: pnpm/action-setup@v4
         with:
           version: 10
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
-          cache-dependency-path: 'packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml'
-      - run: pnpm install --frozen-lockfile
-      - name: Nx graph check
-        run: pnpm exec nx graph --file=nx-graph.json || true
-      - name: Determine base ref
-        id: base
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "base=origin/main" >> $GITHUB_OUTPUT
-          else
-            echo "base=HEAD~1" >> $GITHUB_OUTPUT
-          fi
-      - name: Nx affected build (dry-run)
-        run: pnpm exec nx affected -t build --base=${{ steps.base.outputs.base }} --head=HEAD --dry-run
-      - name: Nx affected typecheck
-        run: pnpm exec nx affected -t typecheck --base=${{ steps.base.outputs.base }} --head=HEAD
-      - name: Nx affected test
-        run: pnpm exec nx affected -t test --base=${{ steps.base.outputs.base }} --head=HEAD
-      - name: Nx affected lint
-        run: pnpm exec nx affected -t lint --base=${{ steps.base.outputs.base }} --head=HEAD
+          cache: pnpm
+          cache-dependency-path: packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml
 
-  # ============================================================
-  # Nx graph job (PR + main push에서 프로젝트 그래프 시각화)
-  # ============================================================
+      - run: pnpm install --frozen-lockfile
+
+      - name: Set Nx SHAs
+        uses: nrwl/nx-set-shas@v4
+        with:
+          main-branch-name: main
+
+      - name: Show projects
+        run: pnpm exec nx show projects
+
+      - name: Affected typecheck
+        run: pnpm exec nx affected -t typecheck
+
+      - name: Affected test
+        run: pnpm exec nx affected -t test
+
+      - name: Affected lint
+        run: pnpm exec nx affected -t lint
+
+      - name: Affected build
+        run: pnpm exec nx affected -t build
 
   nx-graph:
     name: Nx project graph
@@ -147,14 +135,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
-          cache-dependency-path: 'packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml'
+          cache: pnpm
+          cache-dependency-path: packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - name: Nx show projects
         run: pnpm exec nx show projects
-      - name: Nx show project agent-router
-        run: pnpm exec nx show project @agentmesh/agent-router || true
-      - name: Nx show project llm-router
-        run: pnpm exec nx show project @agentmesh/llm-router || true
-      - name: Nx show project personal-mcp
-        run: pnpm exec nx show project @agentmesh/personal-mcp || true
+      - name: Nx show sample projects
+        run: |
+          pnpm exec nx show project @agentmesh/agent-router || true
+          pnpm exec nx show project @agentmesh/llm-router || true
+          pnpm exec nx show project @agentmesh/personal-mcp || true
