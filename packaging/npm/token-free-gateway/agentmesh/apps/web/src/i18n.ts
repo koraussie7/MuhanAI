@@ -104,6 +104,23 @@ export interface I18nContent {
 		reputation: string;
 		success: string;
 	};
+	findPage: {
+		peerModalUserTitle: string;
+		peerModalPeerTitle: string;
+		peerModalUserLabel: string;
+		peerModalPeerLabel: string;
+		peerModalUserPlaceholder: string;
+		peerModalPeerPlaceholder: string;
+		peerModalRandomTitle: string;
+		peerModalRandom: string;
+		peerModalUserHelp: string;
+		peerModalPeerHelp: string;
+		peerModalDisconnect: string;
+		peerModalCancel: string;
+		peerModalApply: string;
+		peerModalConnect: string;
+		close: string;
+	};
 }
 
 export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
@@ -196,6 +213,23 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			specialties: "전문분야",
 			reputation: "평판",
 			success: "성공률",
+		},
+		findPage: {
+			peerModalUserTitle: "내 디바이스 피어 이름 지정",
+			peerModalPeerTitle: "P2P 피어 노드 연결 및 이름 지정",
+			peerModalUserLabel: "디바이스 피어 닉네임",
+			peerModalPeerLabel: "원격 피어 노드 이름",
+			peerModalUserPlaceholder: "예: Brian-MacBook, CosmicCoder...",
+			peerModalPeerPlaceholder: "예: Peer-Tokyo-Node...",
+			peerModalRandomTitle: "랜덤 코스믹 이름 생성",
+			peerModalRandom: "🎲 랜덤",
+			peerModalUserHelp: "P2P 분산 지식 메쉬 및 WebRTC 볼트에 표시될 디바이스 이름입니다.",
+			peerModalPeerHelp: "새로운 피어 노드로 지식 그래프에 마운트할 고유 이름입니다.",
+			peerModalDisconnect: "연결 해제",
+			peerModalCancel: "취소",
+			peerModalApply: "이름 변경 적용",
+			peerModalConnect: "이름 지정 및 연결",
+			close: "닫기",
 		},
 
 	},
@@ -291,6 +325,23 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			reputation: "Rep",
 			success: "Success",
 		},
+		findPage: {
+			peerModalUserTitle: "Set your device peer name",
+			peerModalPeerTitle: "Connect & name a P2P peer node",
+			peerModalUserLabel: "Device peer nickname",
+			peerModalPeerLabel: "Remote peer node name",
+			peerModalUserPlaceholder: "e.g. Brian-MacBook, CosmicCoder...",
+			peerModalPeerPlaceholder: "e.g. Peer-Tokyo-Node...",
+			peerModalRandomTitle: "Generate random cosmic name",
+			peerModalRandom: "🎲 Random",
+			peerModalUserHelp: "The device name shown on the P2P distributed knowledge mesh and WebRTC vault.",
+			peerModalPeerHelp: "A unique name to mount as a new peer node onto the knowledge graph.",
+			peerModalDisconnect: "Disconnect",
+			peerModalCancel: "Cancel",
+			peerModalApply: "Apply name change",
+			peerModalConnect: "Set name & connect",
+			close: "Close",
+		},
 
 	},
 	ja: {
@@ -384,6 +435,23 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			reputation: "評価",
 			success: "成功率",
 		},
+		findPage: {
+			peerModalUserTitle: "デバイス・ピア名を設定",
+			peerModalPeerTitle: "P2Pピアノードの接続と名前設定",
+			peerModalUserLabel: "デバイス・ピアのニックネーム",
+			peerModalPeerLabel: "リモートピアノード名",
+			peerModalUserPlaceholder: "例: Brian-MacBook, CosmicCoder...",
+			peerModalPeerPlaceholder: "例: Peer-Tokyo-Node...",
+			peerModalRandomTitle: "ランダムなコズミック名を生成",
+			peerModalRandom: "🎲 ランダム",
+			peerModalUserHelp: "P2P分散知識メッシュとWebRTCボールトに表示されるデバイス名です。",
+			peerModalPeerHelp: "知識グラフに新しいピアノードとしてマウントする一意の名前です。",
+			peerModalDisconnect: "切断",
+			peerModalCancel: "キャンセル",
+			peerModalApply: "名前を変更",
+			peerModalConnect: "名前を設定して接続",
+			close: "閉じる",
+		},
 
 	},
 	zh: {
@@ -475,6 +543,23 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			specialties: "专业领域",
 			reputation: "声誉",
 			success: "成功率",
+		},
+		findPage: {
+			peerModalUserTitle: "设置你的设备节点名称",
+			peerModalPeerTitle: "连接并命名 P2P 对等节点",
+			peerModalUserLabel: "设备节点昵称",
+			peerModalPeerLabel: "远程对等节点名称",
+			peerModalUserPlaceholder: "例如: Brian-MacBook, CosmicCoder...",
+			peerModalPeerPlaceholder: "例如: Peer-Tokyo-Node...",
+			peerModalRandomTitle: "生成随机宇宙名称",
+			peerModalRandom: "🎲 随机",
+			peerModalUserHelp: "在 P2P 分布式知识网格与 WebRTC 保险库中显示的设备名称。",
+			peerModalPeerHelp: "作为新对等节点挂载到知识图谱的唯一名称。",
+			peerModalDisconnect: "断开连接",
+			peerModalCancel: "取消",
+			peerModalApply: "应用名称更改",
+			peerModalConnect: "设定名称并连接",
+			close: "关闭",
 		},
 
 	},
@@ -570,6 +655,23 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			reputation: "Rep",
 			success: "Éxito",
 		},
+		findPage: {
+			peerModalUserTitle: "Define el nombre de tu peer de dispositivo",
+			peerModalPeerTitle: "Conecta y nombra un nodo peer P2P",
+			peerModalUserLabel: "Apodo del peer del dispositivo",
+			peerModalPeerLabel: "Nombre del nodo peer remoto",
+			peerModalUserPlaceholder: "ej. Brian-MacBook, CosmicCoder...",
+			peerModalPeerPlaceholder: "ej. Peer-Tokyo-Node...",
+			peerModalRandomTitle: "Generar nombre cósmico aleatorio",
+			peerModalRandom: "🎲 Aleatorio",
+			peerModalUserHelp: "El nombre del dispositivo mostrado en la malla de conocimiento P2P distribuida y la bóveda WebRTC.",
+			peerModalPeerHelp: "Un nombre único para montar como nuevo nodo peer en el grafo de conocimiento.",
+			peerModalDisconnect: "Desconectar",
+			peerModalCancel: "Cancelar",
+			peerModalApply: "Aplicar cambio de nombre",
+			peerModalConnect: "Definir nombre y conectar",
+			close: "Cerrar",
+		},
 
 	},
 	de: {
@@ -663,6 +765,23 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			specialties: "Fachgebiete",
 			reputation: "Rep",
 			success: "Erfolg",
+		},
+		findPage: {
+			peerModalUserTitle: "Geräte-Peer-Namen festlegen",
+			peerModalPeerTitle: "P2P-Peer-Knoten verbinden und benennen",
+			peerModalUserLabel: "Geräte-Peer-Spitzname",
+			peerModalPeerLabel: "Name des Remote-Peer-Knotens",
+			peerModalUserPlaceholder: "z. B. Brian-MacBook, CosmicCoder...",
+			peerModalPeerPlaceholder: "z. B. Peer-Tokyo-Node...",
+			peerModalRandomTitle: "Zufälligen kosmischen Namen erzeugen",
+			peerModalRandom: "🎲 Zufall",
+			peerModalUserHelp: "Der Gerätename, der im verteilten P2P-Wissensmesh und im WebRTC-Tresor angezeigt wird.",
+			peerModalPeerHelp: "Ein eindeutiger Name zum Einhängen als neuer Peer-Knoten in den Wissensgraphen.",
+			peerModalDisconnect: "Trennen",
+			peerModalCancel: "Abbrechen",
+			peerModalApply: "Namensänderung anwenden",
+			peerModalConnect: "Namen festlegen & verbinden",
+			close: "Schließen",
 		},
 
 	},
@@ -759,6 +878,23 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			reputation: "Rép",
 			success: "Succès",
 		},
+		findPage: {
+			peerModalUserTitle: "Définir le nom de votre pair d'appareil",
+			peerModalPeerTitle: "Connecter et nommer un nœud pair P2P",
+			peerModalUserLabel: "Pseudo du pair d'appareil",
+			peerModalPeerLabel: "Nom du nœud pair distant",
+			peerModalUserPlaceholder: "ex. Brian-MacBook, CosmicCoder...",
+			peerModalPeerPlaceholder: "ex. Peer-Tokyo-Node...",
+			peerModalRandomTitle: "Générer un nom cosmique aléatoire",
+			peerModalRandom: "🎲 Aléatoire",
+			peerModalUserHelp: "Le nom de l'appareil affiché sur le mesh de connaissances P2P distribué et le coffre WebRTC.",
+			peerModalPeerHelp: "Un nom unique à monter comme nouveau nœud pair sur le graphe de connaissances.",
+			peerModalDisconnect: "Déconnecter",
+			peerModalCancel: "Annuler",
+			peerModalApply: "Appliquer le changement de nom",
+			peerModalConnect: "Définir le nom et connecter",
+			close: "Fermer",
+		},
 
 	},
 	pt: {
@@ -851,6 +987,23 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			specialties: "Especialidades",
 			reputation: "Rep",
 			success: "Sucesso",
+		},
+		findPage: {
+			peerModalUserTitle: "Defina o nome do seu peer de dispositivo",
+			peerModalPeerTitle: "Conecte e nomeie um nó peer P2P",
+			peerModalUserLabel: "Apelido do peer do dispositivo",
+			peerModalPeerLabel: "Nome do nó peer remoto",
+			peerModalUserPlaceholder: "ex. Brian-MacBook, CosmicCoder...",
+			peerModalPeerPlaceholder: "ex. Peer-Tokyo-Node...",
+			peerModalRandomTitle: "Gerar nome cósmico aleatório",
+			peerModalRandom: "🎲 Aleatório",
+			peerModalUserHelp: "O nome do dispositivo exibido na malha de conhecimento P2P distribuída e no cofre WebRTC.",
+			peerModalPeerHelp: "Um nome único para montar como novo nó peer no grafo de conhecimento.",
+			peerModalDisconnect: "Desconectar",
+			peerModalCancel: "Cancelar",
+			peerModalApply: "Aplicar mudança de nome",
+			peerModalConnect: "Definir nome e conectar",
+			close: "Fechar",
 		},
 
 	},
