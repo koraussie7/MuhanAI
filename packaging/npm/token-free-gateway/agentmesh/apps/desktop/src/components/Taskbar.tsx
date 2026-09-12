@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, type ReactNode } from "react";
-import { Bot, Wifi, Battery, Volume2, Folder, Terminal } from "lucide-react";
+import { Bot, Wifi, Battery, Volume2, Folder, Terminal, Globe } from "lucide-react";
+import { useI18n, SUPPORTED_LANGUAGES, setLanguage } from "@agentmesh/web/i18n.js";
 
 export interface ActiveWindowItem {
 	id: string;
@@ -29,6 +30,7 @@ export function Taskbar({
 	onFocusWindow,
 	onQuickLaunch,
 }: TaskbarProps) {
+	const { lang, setLanguage } = useI18n();
 	const [time, setTime] = useState(new Date());
 	const [memoryUsage, setMemoryUsage] = useState<{
 		used: number;
@@ -142,6 +144,19 @@ export function Taskbar({
 
 			<div className="taskbar-right flex items-center gap-3">
 				<div className="system-tray flex items-center gap-3">
+					<button
+						type="button"
+						className="flex items-center gap-1 text-xs text-gray-400 hover:text-white cursor-pointer"
+						onClick={() => {
+							const idx = SUPPORTED_LANGUAGES.findIndex((l) => l.code === lang);
+							const next = SUPPORTED_LANGUAGES[(idx + 1) % SUPPORTED_LANGUAGES.length];
+							setLanguage(next.code);
+						}}
+						title="Switch Language"
+					>
+						<Globe size={14} />
+						<span>{lang.toUpperCase()}</span>
+					</button>
 					{memoryUsage && (
 						<span className="text-xs text-gray-400">
 							{(memoryUsage.used / 1024).toFixed(1)}GB / {(memoryUsage.total / 1024).toFixed(0)}GB

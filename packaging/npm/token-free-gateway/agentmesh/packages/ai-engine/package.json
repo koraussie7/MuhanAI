@@ -1,6 +1,6 @@
 {
   "name": "@agentmesh/ai-engine",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "main": "src/index.ts",
@@ -18,5 +18,8 @@
   "devDependencies": {
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "@mlc-ai/web-llm": "^0.2.78"
   }
 }
