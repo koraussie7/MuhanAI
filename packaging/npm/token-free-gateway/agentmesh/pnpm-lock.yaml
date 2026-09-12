@@ -18,6 +18,9 @@ importers:
       '@nx/js':
         specifier: ^20.0.0
         version: 20.8.4(@babel/traverse@7.29.8)(nx@20.8.4)
+      nx:
+        specifier: ^20.0.0
+        version: 20.8.4
       prisma:
         specifier: ^5.22.0
         version: 5.22.0
@@ -164,7 +167,18 @@ importers:
 
   packages/agent-mesh: {}
 
-  packages/agent-router: {}
+  packages/agent-router:
+    dependencies:
+      '@agentmesh/credit-system':
+        specifier: workspace:*
+        version: link:../credit-system
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)(lightningcss@1.32.0)
 
   packages/ai-engine:
     devDependencies:
@@ -187,6 +201,28 @@ importers:
       react:
         specifier: ^19.0.0
         version: 19.2.8
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)(lightningcss@1.32.0)
+
+  packages/bitterbot:
+    dependencies:
+      '@agentmesh/peer-mesh':
+        specifier: workspace:*
+        version: link:../peer-mesh
+      '@agentmesh/personal-mcp':
+        specifier: workspace:*
+        version: link:../personal-mcp
+      '@agentmesh/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.20.1
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
@@ -646,6 +682,9 @@ importers:
       '@agentmesh/agent-daemon':
         specifier: workspace:*
         version: link:../../packages/agent-daemon
+      '@agentmesh/agent-router':
+        specifier: workspace:*
+        version: link:../../packages/agent-router
       '@agentmesh/compute-market':
         specifier: workspace:*
         version: link:../../packages/compute-market
