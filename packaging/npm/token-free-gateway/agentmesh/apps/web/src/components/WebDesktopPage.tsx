@@ -2,6 +2,7 @@ import type React from "react";
 import { useState, useRef, useEffect, type ReactNode } from "react";
 import { useI18n } from "../i18n.js";
 import { getMenuTranslation } from "./menu-i18n.js";
+import { DownloadBanner } from "./DownloadBanner.js";
 import {
 	Bot,
 	Folder,
@@ -111,6 +112,7 @@ export const WebDesktopPage: React.FC = () => {
 	const [activeCategory, setActiveCategory] = useState("all");
 	const [topZIndex, setTopZIndex] = useState(100);
 	const [time, setTime] = useState(new Date());
+	const [showDownloadBanner, setShowDownloadBanner] = useState(true);
 
 	const localizedApps = DESKTOP_APPS.map((app) => {
 		const appTrans = menuI18n.desktop?.apps[app.id];
@@ -225,6 +227,11 @@ export const WebDesktopPage: React.FC = () => {
 				userSelect: "none",
 			}}
 		>
+			{/* Download DaedalOS Banner */}
+			{showDownloadBanner && (
+				<DownloadBanner onClose={() => setShowDownloadBanner(false)} />
+			)}
+
 			{/* Desktop Work Area with Wallpaper Pattern */}
 			<div
 				style={{
