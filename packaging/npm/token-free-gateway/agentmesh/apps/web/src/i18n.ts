@@ -170,7 +170,19 @@ export interface I18nContent {
 		apiKeyRequired: string;
 		rateLimitedHint: string;
 		noLlmHint: string;
-	};
+	},
+	freeLlm: {
+		settingsTitle: string;
+		settingsDesc: string;
+		pollinations: string;
+		pollinationsGet: string;
+		apiLlmChat: string;
+		localOauth: string;
+		omniroute: string;
+		noneSelected: string;
+		expand: string;
+		collapse: string;
+	},
 }
 
 
@@ -277,7 +289,20 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			rateLimitedHint: "⚠ Rate-Limited · BYOK 권장",
 			noLlmHint: "No LLM · BYOK 추가 필요",
 		},
-		dashboard: {
+	
+		freeLlm: {
+			settingsTitle: "무료 LLM 폴백 설정",
+			settingsDesc: "폴백으로 사용할 무료 LLM 공급자를 선택하세요",
+			pollinations: "Pollinations (POST)",
+			pollinationsGet: "Pollinations (GET)",
+			apiLlmChat: "/api/llm/chat (키리스 풀)",
+			localOauth: "로컬 OAuth 게이트웨이",
+			omniroute: "OmniRoute 메쉬",
+			noneSelected: "선택된 공급자 없음",
+			expand: "열기",
+			collapse: "닫기",
+		},
+	dashboard: {
 			meshOperational: "● P2P 메쉬 가동 중",
 			gatewayActive: "토큰 프리 게이트웨이 활성",
 			heroTitle: "MuhanAI 자율 에이전트 메쉬",
@@ -439,7 +464,20 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			rateLimitedHint: "⚠ Rate-Limited · BYOK recommended",
 			noLlmHint: "No LLM · Add BYOK",
 		},
-		dashboard: {
+	
+		freeLlm: {
+			settingsTitle: "Free LLM Fallback Settings",
+			settingsDesc: "Select free LLM providers for fallback",
+			pollinations: "Pollinations (POST)",
+			pollinationsGet: "Pollinations (GET)",
+			apiLlmChat: "/api/llm/chat (Keyless Pool)",
+			localOauth: "Local OAuth Gateway",
+			omniroute: "OmniRoute Mesh",
+			noneSelected: "No providers selected",
+			expand: "Expand",
+			collapse: "Collapse",
+		},
+	dashboard: {
 			meshOperational: "● P2P MESH OPERATIONAL",
 			gatewayActive: "TOKEN-FREE GATEWAY ACTIVE",
 			heroTitle: "MuhanAI Autonomous Agent Mesh",
@@ -600,7 +638,20 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			rateLimitedHint: "⚠ Rate-Limited · BYOK推奨",
 			noLlmHint: "No LLM · BYOK追加必要",
 		},
-		dashboard: {
+	
+		freeLlm: {
+			settingsTitle: "無料LLMフォールバック設定",
+			settingsDesc: "フォールバックに使用する無料LLMプロバイダーを選択",
+			pollinations: "Pollinations (POST)",
+			pollinationsGet: "Pollinations (GET)",
+			apiLlmChat: "/api/llm/chat (キーレスプール)",
+			localOauth: "ローカルOAuthゲートウェイ",
+			omniroute: "OmniRouteメッシュ",
+			noneSelected: "選択されたプロバイダーなし",
+			expand: "展開",
+			collapse: "折りたたみ",
+		},
+	dashboard: {
 			meshOperational: "● P2Pメッシュ稼働中",
 			gatewayActive: "トークンフリーゲートウェイ有効",
 			heroTitle: "MuhanAI 自律エージェントメッシュ",
@@ -760,7 +811,20 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			rateLimitedHint: "⚠ Rate-Limited · 建议使用 BYOK",
 			noLlmHint: "No LLM · 需添加 BYOK",
 		},
-		dashboard: {
+	
+		freeLlm: {
+			settingsTitle: "免费LLM回退设置",
+			settingsDesc: "选择用作回退的免费LLM提供商",
+			pollinations: "Pollinations (POST)",
+			pollinationsGet: "Pollinations (GET)",
+			apiLlmChat: "/api/llm/chat (无密钥池)",
+			localOauth: "本地OAuth网关",
+			omniroute: "OmniRoute网格",
+			noneSelected: "未选择提供商",
+			expand: "展开",
+			collapse: "收起",
+		},
+	dashboard: {
 			meshOperational: "● P2P 网格运行中",
 			gatewayActive: "免代币网关已启用",
 			heroTitle: "MuhanAI 自治智能体网格",
@@ -922,7 +986,20 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			rateLimitedHint: "⚠ Rate-Limited · BYOK recomendado",
 			noLlmHint: "No LLM · Añadir BYOK",
 		},
-		dashboard: {
+	
+		freeLlm: {
+			settingsTitle: "Configuración de respaldo LLM gratuito",
+			settingsDesc: "Selecciona proveedores LLM gratuitos para respaldo",
+			pollinations: "Pollinations (POST)",
+			pollinationsGet: "Pollinations (GET)",
+			apiLlmChat: "/api/llm/chat (Pools sin clave)",
+			localOauth: "Gateway OAuth local",
+			omniroute: "Malla OmniRoute",
+			noneSelected: "Sin proveedores seleccionados",
+			expand: "Expandir",
+			collapse: "Contraer",
+		},
+	dashboard: {
 			meshOperational: "● MALLA P2P OPERATIVA",
 			gatewayActive: "PASARELA SIN TOKENS ACTIVA",
 			heroTitle: "Malla de Agentes Autónomos MuhanAI",
@@ -1084,7 +1161,20 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			rateLimitedHint: "⚠ Rate-Limited · BYOK empfohlen",
 			noLlmHint: "No LLM · BYOK hinzufügen",
 		},
-		dashboard: {
+	
+		freeLlm: {
+			settingsTitle: "Kostenloser LLM-Fallback-Einstellungen",
+			settingsDesc: "Wählen Sie kostenlose LLM-Anbieter für Fallback",
+			pollinations: "Pollinations (POST)",
+			pollinationsGet: "Pollinations (GET)",
+			apiLlmChat: "/api/llm/chat (Schlüssellos-Pool)",
+			localOauth: "Lokales OAuth-Gateway",
+			omniroute: "OmniRoute-Mesh",
+			noneSelected: "Keine Anbieter ausgewählt",
+			expand: "Erweitern",
+			collapse: "Einklappen",
+		},
+	dashboard: {
 			meshOperational: "● P2P-MESH AKTIV",
 			gatewayActive: "TOKEN-FREIES GATEWAY AKTIV",
 			heroTitle: "MuhanAI Autonomes Agenten-Mesh",
@@ -1247,7 +1337,20 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			rateLimitedHint: "⚠ Rate-Limited · BYOK recommandé",
 			noLlmHint: "No LLM · Ajouter BYOK",
 		},
-		dashboard: {
+	
+		freeLlm: {
+			settingsTitle: "Paramètres de secours LLM gratuit",
+			settingsDesc: "Sélectionnez les fournisseurs LLM gratuits pour le secours",
+			pollinations: "Pollinations (POST)",
+			pollinationsGet: "Pollinations (GET)",
+			apiLlmChat: "/api/llm/chat (Pool sans clé)",
+			localOauth: "Passerelle OAuth locale",
+			omniroute: "Maillage OmniRoute",
+			noneSelected: "Aucun fournisseur sélectionné",
+			expand: "Développer",
+			collapse: "Réduire",
+		},
+	dashboard: {
 			meshOperational: "● MAILLE P2P OPÉRATIONNELLE",
 			gatewayActive: "PASSERELLE SANS JETON ACTIVE",
 			heroTitle: "Maillage d'Agents Autonomes MuhanAI",
@@ -1408,7 +1511,20 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			rateLimitedHint: "⚠ Rate-Limited · BYOK recomendado",
 			noLlmHint: "No LLM · Adicionar BYOK",
 		},
-		dashboard: {
+	
+		freeLlm: {
+			settingsTitle: "Configurações de fallback LLM gratuito",
+			settingsDesc: "Selecione provedores LLM gratuitos para fallback",
+			pollinations: "Pollinations (POST)",
+			pollinationsGet: "Pollinations (GET)",
+			apiLlmChat: "/api/llm/chat (Pool sem chave)",
+			localOauth: "Gateway OAuth local",
+			omniroute: "Malha OmniRoute",
+			noneSelected: "Nenhum provedor selecionado",
+			expand: "Expandir",
+			collapse: "Recuar",
+		},
+	dashboard: {
 			meshOperational: "● MALHA P2P OPERACIONAL",
 			gatewayActive: "GATEWAY SEM TOKENS ATIVA",
 			heroTitle: "Malha de Agentes Autônomos MuhanAI",
