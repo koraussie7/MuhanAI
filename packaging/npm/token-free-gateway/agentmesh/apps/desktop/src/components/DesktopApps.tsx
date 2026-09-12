@@ -24,6 +24,8 @@ import {
   Bot,
 } from "lucide-react";
 import { BitterbotStatus, type BitterbotWorkerConfig } from "@agentmesh/bitterbot";
+import { AIEngineFactory } from "@agentmesh/ai-engine/factory";
+import type { SippEngine } from "@agentmesh/ai-engine";
 import { getMenuTranslation } from "@agentmesh/web/components/menu-i18n.js";
 import { useI18n } from "@agentmesh/web/i18n.js";
 
@@ -394,7 +396,22 @@ export function BitterbotApp() {
   });
   const [messages, setMessages] = useState<Array<{ role: string; text: string }>>([]);
   const [input, setInput] = useState("");
+  const [isThinking, setIsThinking] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const sippEngineRef = useRef<SippEngine | null>(null);
+
+  // Initialize SippEngine for local mode inference
+  const initEngine = async () => {
+    if (sippEngineRef.current) return;
+    try {
+      const engine = AIEngineFactory.createDefault();
+      await engine.init();
+      await engine.loadModel("llama-3-8b-q4");
+      sippEngineRef.current = engine;
+    } catch (err) {
+      console.warn("SippEngine init failed, falling back to mock:", err);
+    }
+  };
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -403,6 +420,9 @@ export function BitterbotApp() {
   const toggleMode = () => {
     setStatus((prev) => {
       const nextMode: "local" | "p2p" = prev.mode === "p2p" ? "local" : "p2p";
+      if (nextMode === "local") {
+        initEngine();
+      }
       return {
         ...prev,
         started: true,
@@ -413,26 +433,57 @@ export function BitterbotApp() {
     });
   };
 
-  const handleSend = (e: FormEvent) => {
+  const handleSend = async (e: FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || isThinking) return;
     const userMsg = input.trim();
     setInput("");
     setMessages((prev) => [...prev, { role: "user", text: userMsg }]);
     setStatus((prev) => ({ ...prev, started: true }));
-    setTimeout(() => {
+    setIsThinking(true);
+
+    // Local mode: use SippEngine for real inference
+    if (status.mode === "local" && sippEngineRef.current) {
+      try {
+        const response = await sippEngineRef.current.chat(userMsg, {
+          stream: false,
+        });
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", text: response },
+        ]);
+      } catch {
+        // Fallback to mock on error
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            text: `🤖 Bitterbot (Local): "${userMsg}" 메시지를 확인했습니다. 로컬 환경에서 작업을 처리하겠습니다.`,
+          },
+        ]);
+      }
+    } else if (status.mode === "local") {
+      // Engine not ready yet, initialize and use mock for now
+      await initEngine();
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          text: `🤖 Bitterbot Agent (${status.mode.toUpperCase()}): "${userMsg}" 메시지를 확인했습니다. ${
-            status.mode === "p2p"
-              ? "P2P 메쉬를 통해 피어들과 협업하여 작업을 처리하겠습니다."
-              : "로컬 환경에서 작업을 처리하겠습니다."
-          }`,
+          text: `🤖 Bitterbot (Local): "${userMsg}" 메시지를 확인했습니다. AI 엔진 초기화 중...`,
         },
       ]);
-    }, 1200);
+    } else {
+      // P2P mode: mock response
+      await new Promise((r) => setTimeout(r, 1200));
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          text: `🤖 Bitterbot (P2P): "${userMsg}" 메시지를 확인했습니다. P2P 메쉬를 통해 피어들과 협업하여 작업을 처리하겠습니다.`,
+        },
+      ]);
+    }
+    setIsThinking(false);
   };
 
   return (
@@ -480,7 +531,7 @@ export function BitterbotApp() {
 
       {/* Messages */}
       <div className="flex-1 p-3 overflow-y-auto space-y-2">
-        {messages.length === 0 && (
+        {messages.length === 0 && !isThinking && (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center mb-3 border border-amber-500/20">
               <Package size={24} className="text-amber-400" />
@@ -489,6 +540,19 @@ export function BitterbotApp() {
             <p className="text-gray-500 text-[10px] max-w-[200px]">
               {menuI18n.desktop?.apps?.bitterbot?.description || "P2P 자율 에이전트 태스크 러너"}
             </p>
+            <p className="text-amber-500/60 text-[9px] mt-2">
+              💡 로컬 모드: Sipp AI 엔진으로 실제 추론 수행
+            </p>
+          </div>
+        )}
+        {isThinking && (
+          <div className="flex justify-start">
+            <div className="bg-gray-800/6 border border-gray-700/40 rounded-lg p-2.3 max-w-[80%]">
+              <div className="flex items-center gap-1.5 text-amber-400 text-[10px]">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                AI 추론 중...
+              </div>
+            </div>
           </div>
         )}
         {messages.map((msg, i) => (
@@ -520,8 +584,8 @@ export function BitterbotApp() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="비터봇 에이전트에게 질문..."
-            disabled={!status.started}
+            placeholder={isThinking ? "AI 추론 중..." : "비터봇 에이전트에게 질문..."}
+            disabled={!status.started || isThinking}
             className="flex-1 bg-black/40 border border-gray-600/50 rounded px-3 py-1.5 font-mono text-[11px] text-gray-200 placeholder-gray-500 outline-none focus:border-amber-500/50 transition-colors disabled:opacity-50"
           />
           <button
