@@ -23,6 +23,7 @@ import { useI18n } from "../../i18n";
 import { ComputerUsePanel } from "../ComputerUsePanel";
 import { AIEngineFactory } from "@agentmesh/ai-engine/factory";
 import type { SippEngine } from "@agentmesh/ai-engine";
+import { answerWithBitterbot } from "../../lib/bitterbot-engine.js";
 
 interface ResolvedAnswer {
 	text: string;
@@ -916,11 +917,11 @@ let sippEngineInitPromise: Promise<SippEngine | null> | null = null;
 
 /**
  * Multi-Agent Quorum Consensus Engine with Bitterbot Integration
- * 
+ *
  * First attempts to get a real response from Bitterbot (SippEngine).
  * If successful, wraps it in the quorum consensus format.
  * Falls back to simulated multi-agent analysis if Bitterbot is unavailable.
- * 
+ *
  * Agents in the quorum:
  * - Claude 3.7 Sonnet: Architecture & cognitive intent analysis
  * - DeepSeek R1: Logical inference and edge case verification
@@ -1046,49 +1047,15 @@ async function getSippEngine(): Promise<SippEngine | null> {
 	return sippEngineInitPromise;
 }
 
-/**
- * Resolve answer from Bitterbot Agent (local WebGPU inference via SippEngine).
- * Uses WebLLM to run GGUF models directly in the browser — zero API calls,
- * zero tokens, fully private. Falls back to Pollination if WebGPU unavailable.
- */
+/** Resolve local Bitterbot providers without allowing an offline placeholder here. */
 async function resolveAnswerFromBitterbot(query: string): Promise<ResolvedAnswer | null> {
 	if (typeof window === "undefined") return null;
-	// 1. WebGPU (local Bitterbot)
-	try {
-		if (!("gpu" in navigator)) throw new Error("WebGPU unavailable");
-		const engine = await getSippEngine();
-		if (!engine) throw new Error("SippEngine unavailable");
-		const start = typeof performance !== "undefined" ? performance.now() : Date.now();
-		const response = await engine.chat(query, { stream: false });
-		if (response && response.trim().length > 0) {
-			const elapsed = (typeof performance !== "undefined" ? performance.now() : Date.now()) - start;
-			return {
-				text: response,
-				provider: "bitterbot-webgpu",
-				model: "llama-3-8b-q4",
-				latencyMs: Math.round(elapsed),
-				tier: "local-webgpu",
-			};
-		}
-	} catch { /* fall through to Pollination fallback */ }
-	// 2. Pollination POST fallback (when WebGPU/SippEngine unavailable)
-	try {
-		const res = await fetchWithTimeout("https://text.pollinations.ai/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "openai-fast", messages: [{ role: "system", content: "You are MuhanAI Bitterbot, a helpful multilingual AI assistant." }, { role: "user", content: query }], stream: false, max_tokens: 300 }) }, 6000);
-		if (res.ok) {
-			const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-			const text = data?.choices?.[0]?.message?.content;
-			if (text && text.trim().length > 0) {
-				return {
-					text: text.trim(),
-					provider: "bitterbot-pollination",
-					model: "openai-fast",
-					latencyMs: 0,
-					tier: "pollination",
-				};
-			}
-		}
-	} catch { /* continue */ }
-	return null;
+	const response = await answerWithBitterbot(
+	[{ id: `prompt-${Date.now()}`, role: "user", content: query, createdAt: Date.now() }],
+	{ allowOffline: false },
+	);
+	if (!response) return null;
+	return response;
 }
 
 interface CosmicPromptBarProps {
