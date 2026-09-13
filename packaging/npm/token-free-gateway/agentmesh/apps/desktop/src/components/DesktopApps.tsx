@@ -196,25 +196,51 @@ export function BrowserApp() {
   const { lang } = useI18n();
   const menuI18n = getMenuTranslation(lang);
   const [url, setUrl] = useState("https://find.muhanai.com");
+  const [currentUrl, setCurrentUrl] = useState("https://find.muhanai.com");
+  const [isLoading, setIsLoading] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  const handleNavigate = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setCurrentUrl(url);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      setIsLoading(true);
+    }
+  };
 
   return (
     <div className="h-full flex flex-col bg-[#1a1a2e] text-gray-200">
-      <div className="flex items-center gap-2 p-2 border-b border-gray-700 bg-[#141426]">
+      <form onSubmit={handleNavigate} className="flex items-center gap-2 p-2 border-b border-gray-700 bg-[#141426]">
         <button
           type="button"
           className="p-1 rounded hover:bg-white/10 text-gray-400"
+          onClick={() => iframeRef.current?.contentWindow?.history?.back()}
+          title="뒤로"
         >
           <ArrowLeft size={14} />
         </button>
         <button
           type="button"
           className="p-1 rounded hover:bg-white/10 text-gray-400"
+          onClick={() => iframeRef.current?.contentWindow?.history?.forward()}
+          title="앞으로"
         >
           <ArrowRight size={14} />
         </button>
         <button
           type="button"
           className="p-1 rounded hover:bg-white/10 text-gray-400"
+          onClick={() => {
+            if (iframeRef.current) {
+              iframeRef.current.src = iframeRef.current.src;
+            }
+          }}
+          title="새로고침"
         >
           <RefreshCw size={14} />
         </button>
@@ -222,21 +248,29 @@ export function BrowserApp() {
           type="text"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
+          onKeyDown={handleKeyDown}
           className="flex-1 bg-black/40 border border-gray-700 rounded px-3 py-1 text-xs text-cyan-300 font-mono outline-none"
+          placeholder="URL 입력 후 Enter"
         />
-      </div>
-      <div className="flex-1 p-6 flex flex-col items-center justify-center text-center bg-gradient-to-b from-[#16162a] to-[#0d0e1a]">
-        <Globe size={48} className="text-blue-400 mb-3 animate-pulse" />
-        <h2 className="text-lg font-bold text-white mb-1">
-          {menuI18n.desktop?.apps?.browser?.name || "웹 브라우저"}
-        </h2>
-        <p className="text-xs text-gray-400 max-w-sm mb-4">
-          {menuI18n.desktop?.apps?.browser?.description || "탈중앙화 P2P 웹 & 분산 검색"}
-        </p>
-        <div className="flex items-center gap-2 text-xs bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-3 py-1.5 rounded-full">
-          <CheckCircle2 size={13} />
-          <span>안전한 E2E 메쉬 터널 활성</span>
-        </div>
+        {isLoading && <div className="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />}
+      </form>
+      <div className="flex-1 relative overflow-hidden">
+        <iframe
+          ref={iframeRef}
+          src={currentUrl}
+          className="w-full h-full border-0"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals"
+          onLoad={() => setIsLoading(false)}
+          onError={() => setIsLoading(false)}
+        />
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-[#1a1a2e] z-10">
+            <div className="text-center">
+              <div className="w-8 h-8 border-3 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+              <p className="text-gray-400 text-sm">로딩 중...</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -37,7 +37,8 @@ type FreeLlmProviderId =
 	| "pollinations-get"
 	| "api-llm-chat"
 	| "local-oauth"
-	| "omniroute";
+	| "omniroute"
+	| "gemini-cli";
 
 interface FreeLlmConfig {
 	enabledProviders: FreeLlmProviderId[];
@@ -49,7 +50,50 @@ const DEFAULT_FREE_LLM_PROVIDERS: FreeLlmProviderId[] = [
 	"api-llm-chat",
 	"local-oauth",
 	"omniroute",
+	"gemini-cli",
 ];
+
+/**
+ * Gemini CLI free tier via CLIProxyAPI (github.com/router-for-me/CLIProxyAPI).
+ * The user logs in once with a personal Google account (`gemini` OAuth) and the
+ * proxy exposes the Code Assist API as an OpenAI-compatible /v1/chat/completions
+ * endpoint on the default port 8317. Free limits: 60 req/min, 1,000 req/day.
+ * Override via localStorage "muhanai.gemini-cli-url".
+ */
+const DEFAULT_GEMINI_CLI_URL = "http://127.0.0.1:8317";
+
+function getGeminiCliBaseUrl(): string {
+	if (typeof window === "undefined") return DEFAULT_GEMINI_CLI_URL;
+	try {
+		const saved = window.localStorage.getItem("muhanai.gemini-cli-url");
+		if (saved && saved.trim().length > 0) return saved.trim().replace(/\/+$/, "");
+	} catch { /* ignore */ }
+	return DEFAULT_GEMINI_CLI_URL;
+}
+
+/**
+ * Validate a raw LLM response body: free proxies sometimes return ad/error
+ * pages (e.g. Pollinations budget exhaustion with a "Support us" ad) that must
+ * NOT be treated as a real answer. Returns true when the text looks like a
+ * genuine model reply.
+ */
+function isValidLlmText(text: string | null | undefined): boolean {
+	if (!text || typeof text !== "string") return false;
+	const t = text.trim();
+	if (t.length === 0) return false;
+	const badPatterns = [
+		/has reached its budget/i,
+		/raise the key budget/i,
+		/supported?\s+pollinations/i,
+		/pollinations\.ai\/redirect/i,
+		/support our mission/i,
+		/keep ai accessible/i,
+		/powered by pollinations/i,
+		/🌸/, // ad emoji marker
+		/topping up the wallet/i,
+	];
+	return !badPatterns.some((p) => p.test(t));
+}
 
 /**
  * BYOK — Bring Your Own Key.
@@ -319,6 +363,94 @@ function clearByok() {
 	}
 }
 
+/* ------------------------------------------------------------------ */
+/* One-Click OAuth Connect (OpenRouter, PKCE)                          */
+/*                                                                     */
+/* Click → popup → user signs into OpenRouter → callback receives a    */
+/* `code` → our Worker exchanges it for a real API key → postMessage   */
+/* back to the opener → BYOK entry saved instantly. No key copy/paste. */
+/* ------------------------------------------------------------------ */
+
+const OPENROUTER_OAUTH_STATE_KEY = "muhanai.openrouter.pkce.verifier";
+export const OPENROUTER_OAUTH_MESSAGE_TYPE = "muhanai-openrouter-key";
+
+function base64UrlEncode(bytes: Uint8Array): string {
+	let bin = "";
+	for (const b of bytes) bin += String.fromCharCode(b);
+	return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+async function createPkcePair(): Promise<{ verifier: string; challenge: string }> {
+	const verifierBytes = crypto.getRandomValues(new Uint8Array(32));
+	const verifier = base64UrlEncode(verifierBytes);
+	const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
+	const challenge = base64UrlEncode(new Uint8Array(digest));
+	return { verifier, challenge };
+}
+
+/** Launch the OpenRouter OAuth popup with a PKCE challenge. */
+export async function startOpenRouterOAuth(): Promise<void> {
+	if (typeof window === "undefined") return;
+	const { verifier, challenge } = await createPkcePair();
+	try {
+		window.sessionStorage.setItem(OPENROUTER_OAUTH_STATE_KEY, verifier);
+	} catch { /* ignore */ }
+	const callbackUrl = `${window.location.origin}/oauth-callback`;
+	const authUrl =
+		`https://openrouter.ai/oauth?callback_url=${encodeURIComponent(callbackUrl)}` +
+		`&code_challenge=${encodeURIComponent(challenge)}&code_challenge_method=S256`;
+	window.open(authUrl, "muhanai-openrouter-oauth", "width=520,height=720,left=200,top=100");
+}
+
+interface OpenRouterKeyMessage {
+	type: typeof OPENROUTER_OAUTH_MESSAGE_TYPE;
+	key?: string;
+	error?: string;
+}
+
+/**
+ * Handle the OAuth callback inside the popup window (`/oauth-callback?code=...`).
+ * Exchanges the code via the muhanai.com Worker and hands the key back to the
+ * opener via postMessage, then closes itself. Returns true when this page load
+ * was a callback (so the caller can skip normal rendering).
+ */
+export async function handleOpenRouterCallbackIfPresent(): Promise<boolean> {
+	if (typeof window === "undefined") return false;
+	const url = new URL(window.location.href);
+	if (url.pathname !== "/oauth-callback") return false;
+	const code = url.searchParams.get("code");
+	let message: OpenRouterKeyMessage;
+	if (!code) {
+		message = { type: OPENROUTER_OAUTH_MESSAGE_TYPE, error: "No code in callback URL" };
+	} else {
+		try {
+			const verifier = window.sessionStorage.getItem(OPENROUTER_OAUTH_STATE_KEY) ?? "";
+			const res = await fetch("/api/openrouter/oauth/exchange", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ code, code_verifier: verifier }),
+			});
+			const data = (await res.json()) as { key?: string; error?: string };
+			message = res.ok && data.key
+				? { type: OPENROUTER_OAUTH_MESSAGE_TYPE, key: data.key }
+				: { type: OPENROUTER_OAUTH_MESSAGE_TYPE, error: data.error || "Exchange failed" };
+		} catch (err: any) {
+			message = { type: OPENROUTER_OAUTH_MESSAGE_TYPE, error: err?.message || "Network error" };
+		}
+	}
+	try { window.sessionStorage.removeItem(OPENROUTER_OAUTH_STATE_KEY); } catch { /* ignore */ }
+	if (window.opener && !window.opener.closed) {
+		window.opener.postMessage(message, window.location.origin);
+		window.close();
+	} else {
+		// No opener (user navigated directly) — show a minimal confirmation page.
+		document.body.innerHTML = message.key
+			? "<p style='font-family:sans-serif;padding:2rem'>✅ OpenRouter 연결 완료! 이 창을 닫고 muhanai.com으로 돌아가세요.</p>"
+			: `<p style='font-family:sans-serif;padding:2rem'>⚠️ ${message.error ?? "OAuth 실패"}</p>`;
+	}
+	return true;
+}
+
 /**
  * Resolve the answer using the user's own API key, calling the provider
  * directly from the browser. The key never leaves the device and is never
@@ -480,6 +612,7 @@ async function resolveAnswerFromPollinations(query: string): Promise<ResolvedAns
 				text = (await res.text()) ?? "";
 			}
 			if (typeof text !== "string" || text.trim().length === 0) continue;
+			if (!isValidLlmText(text)) continue; // ad/budget-error page — treat as failure
 			const elapsed =
 				(typeof performance !== "undefined" ? performance.now() : Date.now()) - start;
 			return {
@@ -805,15 +938,16 @@ async function resolveAnswerFromMultiAgentQuorum(query: string, config: FreeLlmC
 	// 1. Bitterbot (local WebGPU)
 	try { const engine = await getSippEngine(); if (engine) { bitterbotResponse = await engine.chat(query, { stream: false }); } } catch { /* continue */ }
 	// 2. Pollination POST
-	if (!bitterbotResponse && config.enabledProviders.includes("pollinations")) { try { const res = await fetchWithTimeout("https://text.pollinations.ai/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "openai-fast", messages: [{ role: "system", content: "You are MuhanAI, a helpful multilingual assistant." }, { role: "user", content: query }], stream: false, max_tokens: 300 }) }, 6000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (text && text.trim().length > 0) { bitterbotResponse = text.trim(); bitterbotProvider = "Pollination (Free)"; } } } catch { /* continue */ } }
+	if (!bitterbotResponse && config.enabledProviders.includes("pollinations")) { try { const res = await fetchWithTimeout("https://text.pollinations.ai/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "openai-fast", messages: [{ role: "system", content: "You are MuhanAI, a helpful multilingual assistant." }, { role: "user", content: query }], stream: false, max_tokens: 300 }) }, 6000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (isValidLlmText(text)) { bitterbotResponse = (text as string).trim(); bitterbotProvider = "Pollination (Free)"; } } } catch { /* continue */ } }
 	// 3. Pollination GET
-	if (!bitterbotResponse && config.enabledProviders.includes("pollinations-get")) { try { const promptText = `You are MuhanAI, a helpful assistant. User: ${query}`; const url = `https://text.pollinations.ai/prompt/${encodeURIComponent(promptText)}?model=openai-fast`; const res = await fetchWithTimeout(url, { method: "GET" }, 6000); if (res.ok) { const text = await res.text(); if (text && text.trim().length > 0) { bitterbotResponse = text.trim(); bitterbotProvider = "Pollination GET (Free)"; } } } catch { /* continue */ } }
+	if (!bitterbotResponse && config.enabledProviders.includes("pollinations-get")) { try { const promptText = `You are MuhanAI, a helpful assistant. User: ${query}`; const url = `https://text.pollinations.ai/prompt/${encodeURIComponent(promptText)}?model=openai-fast`; const res = await fetchWithTimeout(url, { method: "GET" }, 6000); if (res.ok) { const text = await res.text(); if (isValidLlmText(text)) { bitterbotResponse = text.trim(); bitterbotProvider = "Pollination GET (Free)"; } } } catch { /* continue */ } }
 	// 4. /api/llm/chat
 	if (!bitterbotResponse && config.enabledProviders.includes("api-llm-chat")) { try { const res = await fetchWithTimeout("/api/llm/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt: query, system: "You are MuhanAI, a helpful assistant." }) }, 8000); if (res.ok) { const data = (await res.json()) as { text?: string; provider?: string }; if (data.text && data.text.trim().length > 0) { bitterbotResponse = data.text.trim(); bitterbotProvider = data.provider || "MuhanAI LLM"; } } } catch { /* continue */ } }
 	// 5. Local OAuth Gateway
 	if (!bitterbotResponse && config.enabledProviders.includes("local-oauth")) { try { const res = await fetchWithTimeout("http://127.0.0.1:3456/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "claude-3-7-sonnet", messages: [{ role: "system", content: "You are MuhanAI." }, { role: "user", content: query }] }) }, 4000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (text && text.trim().length > 0) { bitterbotResponse = text.trim(); bitterbotProvider = "Local OAuth"; } } } catch { /* continue */ } }
 	// 6. OmniRoute
 	if (!bitterbotResponse && config.enabledProviders.includes("omniroute")) { try { const res = await fetchWithTimeout("http://127.0.0.1:20128/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "auto", messages: [{ role: "system", content: "You are MuhanAI." }, { role: "user", content: query }] }) }, 4000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (text && text.trim().length > 0) { bitterbotResponse = text.trim(); bitterbotProvider = "OmniRoute"; } } } catch { /* continue */ } }
+	if (!bitterbotResponse && config.enabledProviders.includes("gemini-cli")) { try { const res = await fetchWithTimeout(getGeminiCliBaseUrl() + "/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "gemini-2.5-pro", messages: [{ role: "system", content: "You are MuhanAI Bitterbot, a helpful multilingual AI assistant." }, { role: "user", content: query }] }) }, 5000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (isValidLlmText(text)) { bitterbotResponse = text!.trim(); bitterbotProvider = "Gemini CLI (Free)"; } } } catch { /* continue */ } }
 
 	// Simulated agent analyses
 	const agents = [
@@ -1012,6 +1146,40 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 			setByokDraftModel(stored.model);
 			setByokDraftKey(stored.apiKey);
 		}
+	}, []);
+
+	// One-Click OpenRouter OAuth:
+	// 1) In the popup window, this page IS the /oauth-callback route — exchange
+	//    the code via the Worker and postMessage the key back to the opener.
+	// 2) In the main window, listen for the key message and save the BYOK entry.
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+		if (window.location.pathname === "/oauth-callback") {
+			void handleOpenRouterCallbackIfPresent();
+			return;
+		}
+		const onMessage = (event: MessageEvent) => {
+			if (event.origin !== window.location.origin) return;
+			const data = event.data as OpenRouterKeyMessage | undefined;
+			if (!data || data.type !== OPENROUTER_OAUTH_MESSAGE_TYPE) return;
+			if (data.key && data.key.length > 0) {
+				const settings: ByokSettings = {
+					provider: "openrouter",
+					model: BYOK_PROVIDERS.openrouter.defaultModel,
+					apiKey: data.key,
+				};
+				saveByok(settings);
+				setByokSettings(settings);
+				setByokDraftProvider("openrouter");
+				setByokDraftModel(settings.model);
+				setByokDraftKey(data.key);
+				setByokError(null);
+			} else if (data.error) {
+				setByokError(`OpenRouter OAuth 실패: ${data.error}`);
+			}
+		};
+		window.addEventListener("message", onMessage);
+		return () => window.removeEventListener("message", onMessage);
 	}, []);
 
 	// When the user switches provider in the dropdown, snap the model to that
@@ -1230,6 +1398,7 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 		"api-llm-chat": t.freeLlm.apiLlmChat,
 		"local-oauth": t.freeLlm.localOauth,
 		omniroute: t.freeLlm.omniroute,
+		"gemini-cli": t.freeLlm?.geminiCli || "Gemini CLI (Free · 1,000/day)",
 	};
 
 	return (
@@ -1342,6 +1511,16 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 					</div>
 
 					<div className="cosmic-byok-body">
+						{/* One-Click OAuth Connect */}
+						<button
+							type="button"
+							className="cosmic-oneclick-oauth"
+							onClick={() => void startOpenRouterOAuth()}
+							title="OpenRouter 계정으로 로그인하여 API 키를 자동 발급받습니다 (무료 모델 포함)"
+						>
+							<Zap size={14} className="text-amber-300" />
+							<span>⚡ 한방 연결 — OpenRouter 무료 (OAuth 자동 발급)</span>
+						</button>
 						<div className="cosmic-byok-warning">
 							<AlertTriangle size={12} className="text-amber-400 flex-shrink-0 mt-0.5" />
 							<span>

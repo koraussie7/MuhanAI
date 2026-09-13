@@ -461,7 +461,7 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
 	}, [nodes, addEvent]);
 
 	const handlePublishGeneratedNote = useCallback(
-		(title: string, markdownContent: string) => {
+		async (title: string, markdownContent: string) => {
 			const newNoteId = `note-ai-${Date.now()}`;
 			const colors = ["#38bdf8", "#10b981", "#a855f7", "#ec4899", "#e6ff87"];
 			const color = colors[Math.floor(Math.random() * colors.length)];
@@ -507,9 +507,124 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
 			spawnShockwave(x, y, color);
 			playCosmicChime();
 			addEvent(`✨ New Knowledge Node published from AI: [[${cleanTitle}.md]]`);
+
+			// Publish to the shared server-side knowledge graph (FEED_KV) so every
+			// visitor of muhanai.com can see this node in their Obsidian graph view.
+			try {
+				const res = await fetch("/api/knowledge/nodes", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						title: cleanTitle,
+						author: "MuhanAI Multi-Agent Quorum",
+						summary: `${cleanTitle} - MuhanAI 다중 에이전트 쿼럼 합의 지식 노드`,
+						tags: ["ai-quorum", "knowledge", "zero-token"],
+						links: ["note-muhanai-core"],
+						markdown: markdownContent,
+					}),
+				});
+				if (res.ok) {
+					const data = (await res.json()) as { node?: { id?: string } };
+					const serverId = data.node?.id;
+					if (serverId) {
+						// Swap the temporary local id for the persistent server id so
+						// the polling refresh won't duplicate this node.
+						setNodes((prev) => prev.map((n) => (n.id === newNoteId ? { ...n, id: serverId } : n)));
+						setEdges((prev) => prev.map((e) => (e.target === newNoteId ? { ...e, target: serverId } : e)));
+					}
+				}
+			} catch {
+				// Offline or KV unavailable — the node stays as a local-only node.
+			}
 		},
 		[spawnShockwave, addEvent],
 	);
+
+	// Shared knowledge graph sync: load nodes published by other visitors and
+	// merge them into the Obsidian graph (linked to the core node). Refreshes
+	// periodically so newly published nodes appear for everyone.
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+		let cancelled = false;
+		const pullSharedNodes = async () => {
+			try {
+				const res = await fetch("/api/knowledge/nodes");
+				if (!res.ok) return;
+				const data = (await res.json()) as {
+					nodes?: Array<{
+						id: string;
+						title: string;
+						author: string;
+						summary: string;
+						tags: string[];
+						links: string[];
+						markdown: string;
+						createdAt: string;
+					}>;
+				};
+				const remote = data.nodes ?? [];
+				if (cancelled || remote.length === 0) return;
+				setNodes((prev) => {
+					const known = new Set(prev.map((n) => n.id));
+					const additions: CosmicNode[] = [];
+					for (const r of remote) {
+						if (known.has(r.id)) continue;
+						const colors = ["#38bdf8", "#10b981", "#a855f7", "#ec4899", "#e6ff87"];
+						const angle = Math.random() * Math.PI * 2;
+						const rad = 260 + Math.random() * 80;
+						additions.push({
+							id: r.id,
+							label: `[[${r.title}.md]]`,
+							type: "note",
+							x: Math.cos(angle) * rad,
+							y: Math.sin(angle) * rad,
+							vx: 0,
+							vy: 0,
+							radius: 14,
+							color: colors[Math.floor(Math.random() * colors.length)],
+							connectionsCount: 2,
+							frontmatter: {
+								title: r.title,
+								author: r.author,
+								created: r.createdAt.slice(0, 10),
+								tags: r.tags,
+								links: r.links,
+								summary: r.summary,
+								markdown: r.markdown,
+							},
+						});
+					}
+					if (additions.length === 0) return prev;
+					return [...prev, ...additions];
+				});
+				setEdges((prev) => {
+					const known = new Set(prev.map((e) => `${e.source}->${e.target}`));
+					const additions: CosmicEdge[] = [];
+					for (const r of remote) {
+						const key = `note-muhanai-core->${r.id}`;
+						if (known.has(key)) continue;
+						additions.push({
+							id: `e-${r.id}`,
+							source: "note-muhanai-core",
+							target: r.id,
+							label: "shared-knowledge",
+							weight: 1.2,
+						});
+					}
+					if (additions.length === 0) return prev;
+					return [...prev, ...additions];
+				});
+			} catch {
+				// Network error — keep the local-only graph.
+			}
+		};
+		void pullSharedNodes();
+		const interval = window.setInterval(pullSharedNodes, 60_000);
+		return () => {
+			cancelled = true;
+			window.clearInterval(interval);
+		};
+	}, []);
 
 	const allNodesForInspector = useMemo(() => nodes, [nodes]);
 
