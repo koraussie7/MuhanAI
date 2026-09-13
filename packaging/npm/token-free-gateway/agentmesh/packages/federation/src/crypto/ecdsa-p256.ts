@@ -13,15 +13,13 @@
  * (`generateKeyPair`, `sign`, `verify`, `computeFingerprint`).
  */
 
-import { webcrypto } from "node:crypto";
-
 export interface KeyPair {
 	publicKey: string;
 	privateKey: string;
 }
 
 export async function generateKeyPair(): Promise<KeyPair> {
-	const keyPair = await webcrypto.subtle.generateKey(
+	const keyPair = await globalThis.crypto.subtle.generateKey(
 		{
 			name: "ECDSA",
 			namedCurve: "P-256",
@@ -30,8 +28,8 @@ export async function generateKeyPair(): Promise<KeyPair> {
 		["sign", "verify"],
 	);
 
-	const publicKeyBuffer = await webcrypto.subtle.exportKey("spki", keyPair.publicKey);
-	const privateKeyBuffer = await webcrypto.subtle.exportKey("pkcs8", keyPair.privateKey);
+	const publicKeyBuffer = await globalThis.crypto.subtle.exportKey("spki", keyPair.publicKey);
+	const privateKeyBuffer = await globalThis.crypto.subtle.exportKey("pkcs8", keyPair.privateKey);
 
 	return {
 		publicKey: bufferToHex(publicKeyBuffer),
@@ -41,7 +39,7 @@ export async function generateKeyPair(): Promise<KeyPair> {
 
 export async function sign(data: string, privateKeyHex: string): Promise<string> {
 	const privateKeyBuffer = hexToBuffer(privateKeyHex);
-	const privateKey = await webcrypto.subtle.importKey(
+	const privateKey = await globalThis.crypto.subtle.importKey(
 		"pkcs8",
 		privateKeyBuffer,
 		{
@@ -53,7 +51,7 @@ export async function sign(data: string, privateKeyHex: string): Promise<string>
 	);
 
 	const encoder = new TextEncoder();
-	const signature = await webcrypto.subtle.sign(
+	const signature = await globalThis.crypto.subtle.sign(
 		{
 			name: "ECDSA",
 			hash: "SHA-256",
@@ -72,7 +70,7 @@ export async function verify(
 ): Promise<boolean> {
 	try {
 		const publicKeyBuffer = hexToBuffer(publicKeyHex);
-		const publicKey = await webcrypto.subtle.importKey(
+		const publicKey = await globalThis.crypto.subtle.importKey(
 			"spki",
 			publicKeyBuffer,
 			{
@@ -86,7 +84,7 @@ export async function verify(
 		const encoder = new TextEncoder();
 		const signatureBuffer = hexToBuffer(signatureHex);
 
-		return webcrypto.subtle.verify(
+		return globalThis.crypto.subtle.verify(
 			{
 				name: "ECDSA",
 				hash: "SHA-256",
