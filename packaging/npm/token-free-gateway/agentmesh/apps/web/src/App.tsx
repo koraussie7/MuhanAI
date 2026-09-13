@@ -1,44 +1,65 @@
-import type React from "react";
-import { useEffect, useState } from "react";
+import React from "react";
+import { Suspense, useEffect, useState } from "react";
 import "./styles/cline-theme.css";
 import "./styles/mobile.css";
 import { ChevronRight, Globe, Menu, Radio, Search, Sparkles, Zap } from "lucide-react";
-import { AgentCast } from "./components/AgentCast";
+
+function PageSkeleton() {
+	const styleId = "page-skeleton-style";
+	if (typeof document !== "undefined" && !document.getElementById(styleId)) {
+		const style = document.createElement("style");
+		style.id = styleId;
+		style.textContent = `
+			@keyframes shimmer {
+				0% { background-position: -200% 0; }
+				100% { background-position: 200% 0; }
+			}
+			.skeleton-loader { background-size: 200% 100%; }
+		`;
+		document.head.appendChild(style);
+	}
+	return (
+		<div style={{ padding: 40, display: "flex", flexDirection: "column", gap: 16, alignItems: "center", justifyContent: "center", minHeight: "300px" }}>
+			<div className="skeleton-loader" style={{ width: 60, height: 60, borderRadius: 12, background: "linear-gradient(90deg, var(--cline-border) 25%, var(--cline-primary-bg) 50%, var(--cline-border) 75%)", animation: "shimmer 1.5s infinite" }} />
+			<div className="skeleton-loader" style={{ width: "60%", height: 24, borderRadius: 6, background: "linear-gradient(90deg, var(--cline-border) 25%, var(--cline-primary-bg) 50%, var(--cline-border) 75%)", animation: "shimmer 1.5s infinite" }} />
+			<div className="skeleton-loader" style={{ width: "40%", height: 16, borderRadius: 4, background: "linear-gradient(90deg, var(--cline-border) 25%, var(--cline-primary-bg) 50%, var(--cline-border) 75%)", animation: "shimmer 1.5s infinite" }} />
+		</div>
+	);
+}
 import { Dashboard } from "./components/Dashboard";
-import {
-	AgentMeshPage,
-	ComputeMeshPage,
-	LlmMeshPage,
-	MarketplacePage,
-	NetworkMonitorPage,
-	P2pNetworkPage,
-	TokenBankPage,
-	VerificationPage,
-} from "./components/DashPages";
-import { FederationPanel } from "./components/FederationPanel";
 import { FindPage } from "./components/find/FindPage";
-import { HappyPage } from "./components/HappyPage";
-import { HiveBearPanel } from "./components/HiveBearPanel";
 import { RightPanel } from "./components/RightPanel";
-import { SemanticVote } from "./components/SemanticVote";
 import { Sidebar } from "./components/Sidebar";
-import { WebDesktopPage } from "./components/WebDesktopPage";
-import {
-	AgentsPage,
-	ContributionsPage,
-	HumanAgentsPage,
-	KnowledgePage,
-	McpSkillsPage,
-	ModelsPage,
-	ProjectsPage,
-	ReputationPage,
-	SearchPage,
-	SettingsPage,
-	TasksPage,
-	WorkflowsPage,
-} from "./components/SpecPages";
 import { type SupportedLanguage, useI18n } from "./i18n";
 import { getMenuTranslation } from "./components/menu-i18n";
+
+// Lazy load heavy pages
+const P2pNetworkPageLazy = React.lazy(() => import("./components/DashPages").then(m => ({ default: m.P2pNetworkPage })));
+const AgentCastLazy = React.lazy(() => import("./components/AgentCast").then(m => ({ default: m.AgentCast })));
+const TokenBankPageLazy = React.lazy(() => import("./components/DashPages").then(m => ({ default: m.TokenBankPage })));
+const WebDesktopPageLazy = React.lazy(() => import("./components/WebDesktopPage").then(m => ({ default: m.WebDesktopPage })));
+const AgentMeshPageLazy = React.lazy(() => import("./components/DashPages").then(m => ({ default: m.AgentMeshPage })));
+const KnowledgePageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.KnowledgePage })));
+const MarketplacePageLazy = React.lazy(() => import("./components/DashPages").then(m => ({ default: m.MarketplacePage })));
+const ModelsPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.ModelsPage })));
+const ComputeMeshPageLazy = React.lazy(() => import("./components/DashPages").then(m => ({ default: m.ComputeMeshPage })));
+const McpSkillsPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.McpSkillsPage })));
+const NetworkMonitorPageLazy = React.lazy(() => import("./components/DashPages").then(m => ({ default: m.NetworkMonitorPage })));
+const VerificationPageLazy = React.lazy(() => import("./components/DashPages").then(m => ({ default: m.VerificationPage })));
+const FederationPanelLazy = React.lazy(() => import("./components/FederationPanel").then(m => ({ default: m.FederationPanel })));
+const SemanticVoteLazy = React.lazy(() => import("./components/SemanticVote").then(m => ({ default: m.SemanticVote })));
+const AgentsPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.AgentsPage })));
+const HumanAgentsPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.HumanAgentsPage })));
+const ContributionsPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.ContributionsPage })));
+const ReputationPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.ReputationPage })));
+const ProjectsPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.ProjectsPage })));
+const TasksPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.TasksPage })));
+const WorkflowsPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.WorkflowsPage })));
+const SettingsPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.SettingsPage })));
+const HiveBearPanelLazy = React.lazy(() => import("./components/HiveBearPanel").then(m => ({ default: m.HiveBearPanel })));
+const HappyPageLazy = React.lazy(() => import("./components/HappyPage").then(m => ({ default: m.HappyPage })));
+const SearchPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.SearchPage })));
+const LlmMeshPageLazy = React.lazy(() => import("./components/DashPages").then(m => ({ default: m.LlmMeshPage })));
 
 /**
  * Single Source of Truth for all routes.
@@ -203,8 +224,12 @@ export function App() {
 	}
 
 	// 2. DaedalOS Web Desktop - Full Desktop Environment
-	if (activeSection === "desktop") {
-		return <WebDesktopPage />;
+	if (activeSection === "desktop" || activeSection === "bitterbot") {
+	return (
+	<Suspense fallback={<PageSkeleton />}>
+	<WebDesktopPageLazy initialApp={activeSection === "bitterbot" ? "bitterbot" : undefined} />
+	</Suspense>
+	);
 	}
 
 	const currentSectionMeta = SECTIONS.find((s) => s.id === activeSection) ?? {
@@ -361,26 +386,82 @@ export function App() {
 						{activeSection === "dashboard" && <Dashboard onNavigate={navigate} />}
 
 						{/* Core & Chat */}
-						{activeSection === "agent-cast" && <AgentCast />}
-						{activeSection === "agent-mesh" && <AgentMeshPage />}
-						{activeSection === "desktop" && <WebDesktopPage />}
-						{activeSection === "agents" && <AgentsPage />}
-						{activeSection === "human-agents" && <HumanAgentsPage />}
+						{activeSection === "agent-cast" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<AgentCastLazy />
+							</Suspense>
+						)}
+						{activeSection === "agent-mesh" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<AgentMeshPageLazy />
+							</Suspense>
+						)}
+						{activeSection === "desktop" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<WebDesktopPageLazy />
+							</Suspense>
+						)}
+						{activeSection === "agents" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<AgentsPageLazy />
+							</Suspense>
+						)}
+						{activeSection === "human-agents" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<HumanAgentsPageLazy />
+							</Suspense>
+						)}
 
 						{/* Network */}
-						{activeSection === "p2p-network" && <P2pNetworkPage />}
-						{activeSection === "network-monitor" && <NetworkMonitorPage />}
+						{activeSection === "p2p-network" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<P2pNetworkPageLazy />
+							</Suspense>
+						)}
+						{activeSection === "network-monitor" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<NetworkMonitorPageLazy />
+							</Suspense>
+						)}
 
 						{/* Resources */}
-						{activeSection === "models" && <ModelsPage />}
-						{activeSection === "compute-mesh" && <ComputeMeshPage />}
-						{activeSection === "mcp-skills" && <McpSkillsPage />}
-						{activeSection === "llm-mesh" && <LlmMeshPage />}
+						{activeSection === "models" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<ModelsPageLazy />
+							</Suspense>
+						)}
+						{activeSection === "compute-mesh" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<ComputeMeshPageLazy />
+							</Suspense>
+						)}
+						{activeSection === "mcp-skills" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<McpSkillsPageLazy />
+							</Suspense>
+						)}
+						{activeSection === "llm-mesh" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<LlmMeshPageLazy />
+							</Suspense>
+						)}
 
 						{/* Intelligence */}
-						{activeSection === "knowledge" && <KnowledgePage />}
-						{activeSection === "verification" && <VerificationPage />}
-						{activeSection === "search" && <SearchPage />}
+						{activeSection === "knowledge" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<KnowledgePageLazy />
+							</Suspense>
+						)}
+						{activeSection === "verification" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<VerificationPageLazy />
+							</Suspense>
+						)}
+						{activeSection === "search" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<SearchPageLazy />
+							</Suspense>
+						)}
 
 						{/* Marketplace */}
 						{(activeSection === "agents-market" ||
@@ -388,43 +469,87 @@ export function App() {
 							activeSection === "mcp-market" ||
 							activeSection === "knowledge-market" ||
 							activeSection === "compute-market") && (
-							<MarketplacePage
-								defaultTab={
-									activeSection === "human-experts"
-										? "human"
-										: activeSection === "mcp-market"
-											? "mcp"
-											: activeSection === "knowledge-market"
-												? "knowledge"
-												: activeSection === "compute-market"
-													? "compute"
-													: "agents"
-								}
-							/>
+							<Suspense fallback={<PageSkeleton />}>
+								<MarketplacePageLazy
+									defaultTab={
+										activeSection === "human-experts"
+											? "human"
+											: activeSection === "mcp-market"
+												? "mcp"
+												: activeSection === "knowledge-market"
+													? "knowledge"
+													: activeSection === "compute-market"
+														? "compute"
+														: "agents"
+									}
+								/>
+							</Suspense>
 						)}
 
 						{/* Economy */}
-						{activeSection === "token-bank" && <TokenBankPage />}
-						{activeSection === "contributions" && <ContributionsPage />}
-						{activeSection === "reputation" && <ReputationPage />}
+						{activeSection === "token-bank" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<TokenBankPageLazy />
+							</Suspense>
+						)}
+						{activeSection === "contributions" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<ContributionsPageLazy />
+							</Suspense>
+						)}
+						{activeSection === "reputation" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<ReputationPageLazy />
+							</Suspense>
+						)}
 
 						{/* Workspace */}
-						{activeSection === "projects" && <ProjectsPage />}
-						{activeSection === "tasks" && <TasksPage />}
-						{activeSection === "workflows" && <WorkflowsPage />}
+						{activeSection === "projects" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<ProjectsPageLazy />
+							</Suspense>
+						)}
+						{activeSection === "tasks" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<TasksPageLazy />
+							</Suspense>
+						)}
+						{activeSection === "workflows" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<WorkflowsPageLazy />
+							</Suspense>
+						)}
 
 						{/* System */}
-						{activeSection === "settings" && <SettingsPage />}
-
-						{/* Semantic Intelligence & Federation */}
-						{activeSection === "semantic-vote" && (
-							<SemanticVote onSubmit={(route) => navigate(`/agent-cast?route=${route}`)} />
+						{activeSection === "settings" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<SettingsPageLazy />
+							</Suspense>
 						)}
-						{activeSection === "hivebear" && <HiveBearPanel />}
-						{activeSection === "federation" && <FederationPanel />}
+
+{/* Semantic Intelligence & Federation */}
+						{activeSection === "semantic-vote" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<SemanticVoteLazy onSubmit={(route) => navigate(`/agent-cast?route=${route}`)} />
+							</Suspense>
+						)}
+						{activeSection === "hivebear" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<HiveBearPanelLazy />
+							</Suspense>
+						)}
+						{activeSection === "federation" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<FederationPanelLazy />
+							</Suspense>
+						)}
 
 						{/* Happy Coder — Token-Free Gateway for Claude Code & Codex */}
-						{activeSection === "happy" && <HappyPage />}
+						{activeSection === "happy" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<HappyPageLazy />
+							</Suspense>
+						)}
 
 						{!IMPLEMENTED_SECTIONS.has(activeSection) && (
 							<div className="placeholder-page" style={{ padding: 40, textAlign: "center" }}>

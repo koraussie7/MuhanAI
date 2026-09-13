@@ -9,6 +9,7 @@ import {
 	type SearchResult,
 	weknoraMcpClient,
 } from "./weknora-mcp-client";
+import { getHotelMcpClient, type HotelSearchParams, HotelMcpUnavailableError, isHotelMcpAvailable } from "./hotel-mcp-client";
 
 export const PERSONAL_MCP_TOOLS: Tool[] = [
 	{
@@ -297,6 +298,37 @@ export const PERSONAL_MCP_TOOLS: Tool[] = [
 			required: [],
 		},
 	},
+	{
+		id: "hotel_search",
+		name: "hotel_search",
+		description:
+			"Search hotels via Google Hotels API. Requires HOTEL_API_BASE_URL env var.",
+		inputSchema: {
+			type: "object",
+			properties: {
+				location: { type: "string", description: "City or region (e.g., Seoul, South Korea)" },
+				checkIn: { type: "string", description: "Check-in date (YYYY-MM-DD)" },
+				checkOut: { type: "string", description: "Check-out date (YYYY-MM-DD)" },
+				adults: { type: "number", default: 2 },
+				children: { type: "number", default: 0 },
+				currency: { type: "string", default: "KRW" },
+				sortBy: { type: "string", enum: ["price", "rating", "distance"] },
+			},
+			required: ["location", "checkIn", "checkOut"],
+		},
+	},
+	{
+		id: "hotel_details",
+		name: "hotel_details",
+		description: "Get detailed hotel information by hotel ID",
+		inputSchema: {
+			type: "object",
+			properties: {
+				hotelId: { type: "string" },
+			},
+			required: ["hotelId"],
+		},
+	},
 ];
 
 export async function executePersonalTool(
@@ -524,6 +556,47 @@ export async function executePersonalTool(
 			const client = getOmniRouteClient();
 			if (!client) return { combos: [], fallback: "omniroute_unavailable" };
 			return client.listCombos();
+		}
+
+case "hotel_search": {
+			const client = getHotelMcpClient();
+			if (!isHotelMcpAvailable()) {
+				return { hotels: [], totalCount: 0, fallback: "hotel_api_unconfigured" };
+			}
+			try {
+				const params: HotelSearchParams = {
+					location: String(args.location ?? ""),
+					checkIn: String(args.checkIn ?? ""),
+					checkOut: String(args.checkOut ?? ""),
+					adults: typeof args.adults === "number" ? args.adults : 2,
+					children: typeof args.children === "number" ? args.children : 0,
+					currency: typeof args.currency === "string" ? args.currency : "KRW",
+					sortBy: typeof args.sortBy === "string" ? args.sortBy as "price" | "rating" | "distance" : undefined,
+				};
+				return client.searchHotels(params);
+			} catch (err) {
+				if (err instanceof HotelMcpUnavailableError) {
+					return { hotels: [], totalCount: 0, fallback: "hotel_api_unavailable" };
+				}
+				throw err;
+			}
+		}
+
+		case "hotel_details": {
+			const client = getHotelMcpClient();
+			if (!isHotelMcpAvailable()) {
+				return { error: "hotel_api_unconfigured", fallback: "hotel_api_unconfigured" };
+			}
+			try {
+				const hotelId = String(args.hotelId ?? "");
+				if (!hotelId) return { error: "hotelId is required" };
+				return client.getHotelDetails(hotelId);
+			} catch (err) {
+				if (err instanceof HotelMcpUnavailableError) {
+					return { error: "hotel_api_unavailable", fallback: "hotel_api_unavailable" };
+				}
+				throw err;
+			}
 		}
 
 		default:

@@ -27,6 +27,8 @@ export interface NavGroup {
  *
  * Keep this in lockstep with the sidebar's visual presentation; the
  * Sidebar component is the only consumer.
+ *
+ * This MUST stay in sync with App.tsx SECTIONS array.
  */
 export const NAV_GROUPS: NavGroup[] = [
 	{
@@ -38,6 +40,13 @@ export const NAV_GROUPS: NavGroup[] = [
 				label: "Dashboard",
 				path: "/dashboard",
 				iconKey: "layout-dashboard",
+			},
+			{
+				id: "find",
+				label: "Cosmic Mesh",
+				path: "/",
+				iconKey: "search",
+				badge: "NEW",
 			},
 			{
 				id: "agent-cast",
@@ -52,21 +61,21 @@ export const NAV_GROUPS: NavGroup[] = [
 				path: "/agent-mesh",
 				iconKey: "bot",
 			},
-			{
-				id: "desktop",
-				label: "Web Desktop",
-				path: "/desktop",
-				iconKey: "monitor",
-				badge: "DaedalOS",
+				{
+			id: "desktop",
+			label: "Web Desktop",
+			path: "/desktop",
+			iconKey: "monitor",
+			badge: "DaedalOS",
 			},
-		{
+			{
 			id: "bitterbot",
 			label: "Bitterbot Agent",
-			path: "/desktop?app=bitterbot",
+			path: "/bitterbot",
 			iconKey: "package",
 			badge: "Beta",
-		},
-		],
+			},
+			],
 	},
 	{
 		id: "network",
@@ -109,11 +118,17 @@ export const NAV_GROUPS: NavGroup[] = [
 				path: "/mcp-skills",
 				iconKey: "layers",
 			},
+			{
+				id: "hivebear",
+				label: "HiveBear Mesh",
+				path: "/hivebear",
+				iconKey: "git-branch",
+			},
 		],
 	},
 	{
-		id: "knowledge",
-		title: "Knowledge Lake",
+		id: "intelligence",
+		title: "Intelligence",
 		items: [
 			{
 				id: "knowledge",
@@ -128,22 +143,27 @@ export const NAV_GROUPS: NavGroup[] = [
 				iconKey: "check-circle",
 			},
 			{
-				id: "find",
-				label: "Cosmic Mesh",
-				path: "/",
-				iconKey: "search",
-				badge: "NEW",
-			},
-			{
 				id: "search",
 				label: "Mesh Search",
 				path: "/search",
 				iconKey: "search",
 			},
+			{
+				id: "semantic-vote",
+				label: "Semantic Vote",
+				path: "/semantic-vote",
+				iconKey: "vote",
+			},
+			{
+				id: "federation",
+				label: "Federation",
+				path: "/federation",
+				iconKey: "git-merge",
+			},
 		],
 	},
 	{
-		id: "market",
+		id: "marketplace",
 		title: "Marketplace",
 		items: [
 			{
@@ -164,6 +184,18 @@ export const NAV_GROUPS: NavGroup[] = [
 				path: "/marketplace/compute",
 				iconKey: "cpu",
 			},
+			{
+				id: "mcp-market",
+				label: "MCP Marketplace",
+				path: "/marketplace/mcp",
+				iconKey: "layers",
+			},
+			{
+				id: "knowledge-market",
+				label: "Knowledge Market",
+				path: "/marketplace/knowledge",
+				iconKey: "book-open",
+			},
 		],
 	},
 	{
@@ -175,6 +207,42 @@ export const NAV_GROUPS: NavGroup[] = [
 				label: "Token Bank",
 				path: "/token-bank",
 				iconKey: "coins",
+			},
+			{
+				id: "contributions",
+				label: "Contributions",
+				path: "/contributions",
+				iconKey: "activity",
+			},
+			{
+				id: "reputation",
+				label: "Reputation",
+				path: "/reputation",
+				iconKey: "star",
+			},
+		],
+	},
+	{
+		id: "workspace",
+		title: "Workspace",
+		items: [
+			{
+				id: "projects",
+				label: "Projects",
+				path: "/projects",
+				iconKey: "folder-git",
+			},
+			{
+				id: "tasks",
+				label: "Tasks",
+				path: "/tasks",
+				iconKey: "list-todo",
+			},
+			{
+				id: "workflows",
+				label: "Workflows",
+				path: "/workflows",
+				iconKey: "git-branch",
 			},
 		],
 	},

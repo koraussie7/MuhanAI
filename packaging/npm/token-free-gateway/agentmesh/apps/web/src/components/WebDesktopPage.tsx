@@ -102,7 +102,11 @@ const DESKTOP_APPS = [
 	},
 ];
 
-export const WebDesktopPage: React.FC = () => {
+interface WebDesktopPageProps {
+	initialApp?: string;
+}
+
+export const WebDesktopPage: React.FC<WebDesktopPageProps> = ({ initialApp }) => {
 	const { lang } = useI18n();
 	const menuI18n = getMenuTranslation(lang);
 	const [windows, setWindows] = useState<WindowItem[]>([]);
@@ -127,9 +131,15 @@ export const WebDesktopPage: React.FC = () => {
 
 	// Update clock every second
 	useEffect(() => {
-		const timer = setInterval(() => setTime(new Date()), 1000);
-		return () => clearInterval(timer);
+	const timer = setInterval(() => setTime(new Date()), 1000);
+	return () => clearInterval(timer);
 	}, []);
+
+	useEffect(() => {
+	if (initialApp) launchApp(initialApp);
+	// The initial app is only opened when the desktop route requests it.
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [initialApp]);
 
 	// Bring window to front
 	const focusWindow = (id: string) => {
