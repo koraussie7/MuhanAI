@@ -81,6 +81,14 @@ export interface I18nContent {
 		tabVerify: string;
 		tabKnowledge: string;
 		tabKb: string;
+		tokenBank: {
+			title: string;
+			subtitle: string;
+			balance: string;
+			entries: string;
+			trustScore: string;
+			viewDetails: string;
+		};
 	};
 	rightPanel: {
 		agents: string;
@@ -179,6 +187,8 @@ export interface I18nContent {
 		apiLlmChat: string;
 		localOauth: string;
 		omniroute: string;
+		geminiProxy?: string;
+		geminiCli?: string;
 		noneSelected: string;
 		expand: string;
 		collapse: string;
@@ -298,6 +308,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			apiLlmChat: "/api/llm/chat (키리스 풀)",
 			localOauth: "로컬 OAuth 게이트웨이",
 			omniroute: "OmniRoute 메쉬",
+			geminiProxy: "Gemini 프록시 (무료)",
+			geminiCli: "Gemini CLI (무료 · 1,000건/일)",
 			noneSelected: "선택된 공급자 없음",
 			expand: "열기",
 			collapse: "닫기",
@@ -318,6 +330,14 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			tabVerify: "검증 & 쿼럼",
 			tabKnowledge: "인기 인텔리전스 & 가르치기",
 			tabKb: "지식 베이스",
+			tokenBank: {
+				title: "토큰 뱅크",
+				subtitle: "p2ptokens 기여 회계 원장 · PinkyBrain Web of Trust 평판 링",
+				balance: "잔액",
+				entries: "항목 수",
+				trustScore: "신뢰 점수",
+				viewDetails: "상세 보기",
+			},
 		},
 		rightPanel: {
 			agents: "에이전트",
@@ -473,6 +493,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			apiLlmChat: "/api/llm/chat (Keyless Pool)",
 			localOauth: "Local OAuth Gateway",
 			omniroute: "OmniRoute Mesh",
+			geminiProxy: "Gemini Proxy (Free)",
+			geminiCli: "Gemini CLI (Free · 1,000/day)",
 			noneSelected: "No providers selected",
 			expand: "Expand",
 			collapse: "Collapse",
@@ -493,6 +515,14 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			tabVerify: "Verification & Quorum",
 			tabKnowledge: "Trending Intelligence & Teach",
 			tabKb: "Knowledge Base",
+			tokenBank: {
+				title: "Token Bank",
+				subtitle: "p2ptokens contribution ledger · PinkyBrain Web of Trust reputation ring",
+				balance: "Balance",
+				entries: "Entries",
+				trustScore: "Trust Score",
+				viewDetails: "View Details",
+			},
 		},
 		rightPanel: {
 			agents: "Agents",
@@ -647,6 +677,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			apiLlmChat: "/api/llm/chat (キーレスプール)",
 			localOauth: "ローカルOAuthゲートウェイ",
 			omniroute: "OmniRouteメッシュ",
+			geminiProxy: "Geminiプロキシ（無料）",
+			geminiCli: "Gemini CLI（無料 · 1,000/日）",
 			noneSelected: "選択されたプロバイダーなし",
 			expand: "展開",
 			collapse: "折りたたみ",
@@ -667,6 +699,14 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			tabVerify: "検証とクォーラム",
 			tabKnowledge: "トレンド知能と学習",
 			tabKb: "ナレッジベース",
+			tokenBank: {
+				title: "トークンバンク",
+				subtitle: "p2ptokens 貢献会計台帳 · PinkyBrain Web of Trust 評判リング",
+				balance: "残高",
+				entries: "エントリ数",
+				trustScore: "信頼スコア",
+				viewDetails: "詳細を見る",
+			},
 		},
 		rightPanel: {
 			agents: "エージェント",
@@ -820,6 +860,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			apiLlmChat: "/api/llm/chat (无密钥池)",
 			localOauth: "本地OAuth网关",
 			omniroute: "OmniRoute网格",
+			geminiProxy: "Gemini 代理（免费）",
+			geminiCli: "Gemini CLI（免费 · 1,000/天）",
 			noneSelected: "未选择提供商",
 			expand: "展开",
 			collapse: "收起",
@@ -840,6 +882,14 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			tabVerify: "验证与仲裁",
 			tabKnowledge: "热门智能与教学",
 			tabKb: "知识库",
+			tokenBank: {
+				title: "代币银行",
+				subtitle: "p2ptokens 贡献会计账本 · PinkyBrain Web of Trust 声誉环",
+				balance: "余额",
+				entries: "条目数",
+				trustScore: "信任分数",
+				viewDetails: "查看详情",
+			},
 		},
 		rightPanel: {
 			agents: "智能体",
@@ -995,6 +1045,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			apiLlmChat: "/api/llm/chat (Pools sin clave)",
 			localOauth: "Gateway OAuth local",
 			omniroute: "Malla OmniRoute",
+			geminiProxy: "Proxy Gemini (gratis)",
+			geminiCli: "Gemini CLI (gratis · 1.000/día)",
 			noneSelected: "Sin proveedores seleccionados",
 			expand: "Expandir",
 			collapse: "Contraer",
@@ -1015,6 +1067,14 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			tabVerify: "Verificación y Quórum",
 			tabKnowledge: "Inteligencia en Tendencia y Enseñanza",
 			tabKb: "Base de Conocimiento",
+			tokenBank: {
+				title: "Banco de Tokens",
+				subtitle: "Libro mayor de contribuciones p2ptokens · Anillo de confianza Web of Trust de PinkyBrain",
+				balance: "Saldo",
+				entries: "Entradas",
+				trustScore: "Puntuación de Confianza",
+				viewDetails: "Ver Detalles",
+			},
 		},
 		rightPanel: {
 			agents: "Agentes",
@@ -1170,6 +1230,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			apiLlmChat: "/api/llm/chat (Schlüssellos-Pool)",
 			localOauth: "Lokales OAuth-Gateway",
 			omniroute: "OmniRoute-Mesh",
+			geminiProxy: "Gemini-Proxy (kostenlos)",
+			geminiCli: "Gemini CLI (kostenlos · 1.000/Tag)",
 			noneSelected: "Keine Anbieter ausgewählt",
 			expand: "Erweitern",
 			collapse: "Einklappen",
@@ -1190,6 +1252,14 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			tabVerify: "Verifikation & Quorum",
 			tabKnowledge: "Trend-Intelligenz & Lehren",
 			tabKb: "Wissensdatenbank",
+			tokenBank: {
+				title: "Token-Bank",
+				subtitle: "p2ptokens Beitragsbuchhaltung · PinkyBrain Web of Trust Reputationsring",
+				balance: "Guthaben",
+				entries: "Einträge",
+				trustScore: "Vertrauensscore",
+				viewDetails: "Details anzeigen",
+			},
 		},
 		rightPanel: {
 			agents: "Agenten",
@@ -1346,6 +1416,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			apiLlmChat: "/api/llm/chat (Pool sans clé)",
 			localOauth: "Passerelle OAuth locale",
 			omniroute: "Maillage OmniRoute",
+			geminiProxy: "Proxy Gemini (gratuit)",
+			geminiCli: "Gemini CLI (gratuit · 1 000/jour)",
 			noneSelected: "Aucun fournisseur sélectionné",
 			expand: "Développer",
 			collapse: "Réduire",
@@ -1366,6 +1438,14 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			tabVerify: "Vérification & Quorum",
 			tabKnowledge: "Intelligence Tendance & Enseignement",
 			tabKb: "Base de Connaissances",
+			tokenBank: {
+				title: "Banque de Jetons",
+				subtitle: "Grand livre des contributions p2ptokens · Anneau de confiance Web of Trust de PinkyBrain",
+				balance: "Solde",
+				entries: "Entrées",
+				trustScore: "Score de Confiance",
+				viewDetails: "Voir les Détails",
+			},
 		},
 		rightPanel: {
 			agents: "Agents",
@@ -1520,6 +1600,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			apiLlmChat: "/api/llm/chat (Pool sem chave)",
 			localOauth: "Gateway OAuth local",
 			omniroute: "Malha OmniRoute",
+			geminiProxy: "Proxy Gemini (grátis)",
+			geminiCli: "Gemini CLI (grátis · 1.000/dia)",
 			noneSelected: "Nenhum provedor selecionado",
 			expand: "Expandir",
 			collapse: "Recuar",
@@ -1540,6 +1622,14 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			tabVerify: "Verificação & Quórum",
 			tabKnowledge: "Inteligência em Alta & Ensino",
 			tabKb: "Base de Conhecimento",
+			tokenBank: {
+				title: "Banco de Tokens",
+				subtitle: "Livro-razão de contribuições p2ptokens · Anel de Confiança Web of Trust do PinkyBrain",
+				balance: "Saldo",
+				entries: "Entradas",
+				trustScore: "Pontuação de Confiança",
+				viewDetails: "Ver Detalhes",
+			},
 		},
 		rightPanel: {
 			agents: "Agentes",
