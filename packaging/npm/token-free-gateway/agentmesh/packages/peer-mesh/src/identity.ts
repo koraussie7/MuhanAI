@@ -9,8 +9,6 @@
  * and supports future migrations (the loader translates old formats on read).
  */
 
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
 import { privateKeyFromRaw } from "@libp2p/crypto/keys";
 import type { PrivateKey } from "@libp2p/interface";
 import { peerIdFromPrivateKey } from "@libp2p/peer-id";
@@ -41,6 +39,8 @@ function generateRawEd25519(): Uint8Array {
 }
 
 export async function loadOrCreateIdentity(path: string): Promise<LoadedIdentity> {
+	const { mkdir, readFile, writeFile } = await import("node:fs/promises");
+	const { dirname } = await import("node:path");
 	let existing: IdentityFile | null = null;
 
 	try {
