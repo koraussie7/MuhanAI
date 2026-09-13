@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, type ReactNode } from "react";
 import { useI18n } from "../i18n.js";
 import { getMenuTranslation } from "./menu-i18n.js";
 import { DownloadBanner } from "./DownloadBanner.js";
+import { BitterbotChat } from "./bitterbot/BitterbotChat.js";
 import {
 	Bot,
 	Folder,
@@ -1169,9 +1170,11 @@ function renderAppContent(appId: string): ReactNode {
 			</div>
 			);
 
-		case "bitterbot":
+			case "bitterbot":
+		return <BitterbotChat />;
+		/*
 		return (
-			<div style={{ display: "flex", flexDirection: "column", height: "100%", color: "#e2e8f0", fontSize: "11px" }}>
+		<div style={{ display: "flex", flexDirection: "column", height: "100%", color: "#e2e8f0", fontSize: "11px" }}>
 				<div
 					style={{
 						padding: "0.5rem 0.75rem",
@@ -1234,9 +1237,10 @@ function renderAppContent(appId: string): ReactNode {
 						</button>
 					</div>
 				</div>
-			</div>
-		);
-		case "editor":
+				</div>
+			);
+			*/
+			case "editor":
 			return (
 				<div style={{ display: "flex", flexDirection: "column", height: "100%", color: "#e2e8f0" }}>
 					<div
