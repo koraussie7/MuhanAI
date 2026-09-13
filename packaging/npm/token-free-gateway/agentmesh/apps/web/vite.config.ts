@@ -354,5 +354,16 @@ function mcpRpcPlugin(): Plugin {
 export default defineConfig({
 	plugins: [react(), tailwindcss(), llmChatPlugin(), mcpRpcPlugin()],
 	server: { port: 5173, proxy: { "/api": "http://localhost:3001" } },
-	build: { outDir: "dist" },
+	build: {
+		outDir: "dist",
+		rollupOptions: {
+			output: {
+				manualChunks: {
+					'mcp-vendor': ['@agentmesh/personal-mcp', '@agentmesh/shared-types'],
+					'vendor': ['lucide-react'],
+				},
+			},
+		},
+		chunkSizeWarningLimit: 1000,
+	},
 });

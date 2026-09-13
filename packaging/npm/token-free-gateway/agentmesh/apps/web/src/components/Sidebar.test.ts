@@ -88,6 +88,13 @@ test("cosmetic — every NAV_GROUPS item has a valid iconKey", () => {
 		"smartphone",
 		"monitor",
 		"package",
+		"git-branch",
+		"git-merge",
+		"vote",
+		"book-open",
+		"star",
+		"folder-git",
+		"list-todo",
 	]);
 	for (const group of NAV_GROUPS) {
 		for (const item of group.items) {
