@@ -13,10 +13,10 @@ import { defineConfig, type Plugin } from "vite";
  * through to the offline mock.
  *
  * This plugin replicates the server-side `callKeylessProviders` chain
- * (omniroute, oauth-gateway, pollinations POST) and races them in parallel,
- * returning the first success. Dead providers (pollinations GET, openrouter
- * free tier, HF-inference, cloudflare-workers-ai) were removed after probing
- * confirmed they cannot answer without credentials.
+ * (omniroute, oauth-gateway, mesh-llm, pollinations POST) and races them in
+ * parallel, returning the first success. Dead providers (pollinations GET,
+ * openrouter free tier, HF-inference, cloudflare-workers-ai) were removed after
+ * probing confirmed they cannot answer without credentials.
  *
  * The route only activates when the api backend on :3001 is unreachable,
  * so production builds still flow through the real gateway.
@@ -106,7 +106,35 @@ function buildAttempts(prompt: string, system: string, authToken?: string | null
 		},
 	});
 
-	// 3. Pollinations POST (Keyless free LLM)
+	// 3. Mesh-LLM local node (port 9337) — tries next: a running mesh answers
+	//    locally without burning keyless quota.
+	attempts.push({
+		name: "mesh-llm",
+		fetch: () =>
+			fetchWithTimeout(
+				"http://127.0.0.1:9337/v1/chat/completions",
+				{
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						model: "auto",
+						messages: [
+							...(system ? [{ role: "system", content: system }] : []),
+							{ role: "user", content: prompt },
+						],
+						temperature: 0.7,
+						max_tokens: 1024,
+					}),
+				},
+				4000,
+			),
+		parse: async (res) => {
+			const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+			return data?.choices?.[0]?.message?.content ?? "";
+		},
+	});
+
+	// 4. Pollinations POST (Keyless free LLM)
 	attempts.push({
 		name: "pollinations-post",
 		fetch: () =>

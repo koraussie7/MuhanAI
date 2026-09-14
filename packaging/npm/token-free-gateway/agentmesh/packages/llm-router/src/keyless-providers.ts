@@ -4,9 +4,10 @@
  * These providers require NO API key, NO account, and NO setup.
  *
  * Only providers verified to actually work without credentials are kept here.
- * As of the last full sweep the pollinations OpenAI-compatible POST API is the
- * sole live keyless provider; the GET text endpoint and openrouter-free /
- * cloudflare-worker-ai / HF-inference paths were removed as non-functional.
+ * The local Mesh-LLM node (127.0.0.1:9337) is tried first when running, followed
+ * by the pollinations OpenAI-compatible POST API. The pollinations GET text
+ * endpoint and openrouter-free / cloudflare-worker-ai / HF-inference paths were
+ * removed as non-functional.
  *
  * Usage:
  *   import { callKeylessProviders } from "./keyless-providers.js";
@@ -37,6 +38,24 @@ interface KeylessProviderConfig {
 }
 
 const KEYLESS_PROVIDERS: KeylessProviderConfig[] = [
+	{
+		name: "mesh-llm",
+		// Local Mesh-LLM node — OpenAI-compatible endpoint exposed by
+		// `mesh-llm serve` (see https://github.com/Mesh-LLM/mesh-llm).
+		// Highest priority: a local mesh usually answers faster than a keyless API.
+		endpoint: "http://127.0.0.1:9337/v1/chat/completions",
+		headers: { "Content-Type": "application/json" },
+		body: (req) => ({
+			messages: [
+				...(req.system ? [{ role: "system", content: req.system }] : []),
+				{ role: "user", content: req.prompt },
+			],
+			model: req.model ?? "auto",
+			temperature: req.temperature ?? 0.3,
+			max_tokens: req.maxTokens ?? 1024,
+		}),
+		parse: (data) => data?.choices?.[0]?.message?.content ?? "",
+	},
 	{
 		name: "pollinations-api",
 		endpoint: "https://api.pollinations.ai/v1/chat/completions",
