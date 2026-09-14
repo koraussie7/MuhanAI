@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PageBox } from "./PageBox.js";
 
 export function SemanticVote({ onSubmit }: { onSubmit: (route: string, primary: string) => void }) {
 	const [text, setText] = useState("");
@@ -32,28 +33,34 @@ export function SemanticVote({ onSubmit }: { onSubmit: (route: string, primary: 
 	};
 
 	return (
-		<section className="panel">
-			<h3>Semantic Vote</h3>
-			<div className="search-bar">
-				<input
-					value={text}
-					onChange={(e) => setText(e.target.value)}
-					placeholder="질문을 입력하세요... 자동 라우팅"
-					onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), submit())}
-				/>
-				<button type="button" onClick={submit} disabled={loading}>
-					{loading ? "분류 중..." : "Classify"}
-				</button>
-			</div>
-			{error && <p className="form-error">{error}</p>}
-			{result && (
-				<div className="cast-results">
-					<div>
-						Primary: <strong>{result.primary}</strong> · Route: <strong>{result.route}</strong>
-					</div>
-					{result.topicId && <div className="cast-time">Topic: {result.topicId}</div>}
+		<PageBox
+			iconKey="vote"
+			title="Semantic Vote"
+			subtitle="시맨틱 투표"
+		>
+			<section className="panel">
+				<h3>Semantic Vote</h3>
+				<div className="search-bar">
+					<input
+						value={text}
+						onChange={(e) => setText(e.target.value)}
+						placeholder="질문을 입력하세요... 자동 라우팅"
+						onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), submit())}
+					/>
+					<button type="button" onClick={submit} disabled={loading}>
+						{loading ? "분류 중..." : "Classify"}
+					</button>
 				</div>
-			)}
-		</section>
+				{error && <p className="form-error">{error}</p>}
+				{result && (
+					<div className="cast-results">
+						<div>
+							Primary: <strong>{result.primary}</strong> · Route: <strong>{result.route}</strong>
+						</div>
+						{result.topicId && <div className="cast-time">Topic: {result.topicId}</div>}
+					</div>
+				)}
+			</section>
+		</PageBox>
 	);
 }

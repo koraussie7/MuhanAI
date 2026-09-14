@@ -33,6 +33,42 @@ export default {
 			return new Response("worker-alive", { status: 200 });
 		}
 
+		// OpenRouter OAuth (PKCE) code exchange — lets users connect their own
+		// OpenRouter account in one click from the Cosmic Prompt BYOK panel.
+		// The browser cannot call openrouter.ai/api/v1/auth/keys directly for the
+		// exchange (no CORS), so the Worker performs the server-side swap.
+		if (url.pathname === "/api/openrouter/oauth/exchange" && request.method === "POST") {
+			try {
+				const body = (await request.json()) as { code?: string; code_verifier?: string };
+				if (!body.code || !body.code_verifier) {
+					return new Response(JSON.stringify({ error: "Missing code or code_verifier" }), {
+						status: 400,
+						headers: { "content-type": "application/json" },
+					});
+				}
+				const orRes = await fetch("https://openrouter.ai/api/v1/auth/keys", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ code: body.code, code_verifier: body.code_verifier }),
+				});
+				const orData = (await orRes.json()) as { key?: string };
+				if (!orRes.ok || !orData.key) {
+					return new Response(JSON.stringify({ error: "OpenRouter exchange failed", status: orRes.status }), {
+						status: 502,
+						headers: { "content-type": "application/json" },
+					});
+				}
+				return new Response(JSON.stringify({ key: orData.key }), {
+					headers: { "content-type": "application/json" },
+				});
+			} catch (err: any) {
+				return new Response(JSON.stringify({ error: "Exchange error", message: err?.message }), {
+					status: 500,
+					headers: { "content-type": "application/json" },
+				});
+			}
+		}
+
 		if (url.pathname.startsWith("/api/")) {
 			const feedResponse = await handleFeedApi(request, url.pathname, env.FEED_KV);
 			if (feedResponse) return feedResponse;

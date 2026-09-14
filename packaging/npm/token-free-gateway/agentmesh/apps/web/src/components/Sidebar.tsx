@@ -1,5 +1,6 @@
 import {
 	Activity,
+	BookOpen,
 	Bot,
 	CheckCircle2,
 	ChevronLeft,
@@ -7,24 +8,30 @@ import {
 	Coins,
 	Cpu,
 	Database,
+	FolderGit,
+	GitBranch,
+	GitMerge,
 	Layers,
 	LayoutDashboard,
+	ListTodo,
 	Monitor,
 	Network,
+	Package,
 	Radio,
 	Search,
 	Settings,
 	Smartphone,
 	Sparkles,
+	Star,
 	Users,
+	Vote,
 	X,
 	Zap,
-	Package,
 } from "lucide-react";
 import type React from "react";
-import { CreditBalance } from "./CreditBalance.js";
-import { formatPeerCountBare } from "../lib/mesh-stats.js";
 import { useI18n } from "../i18n.js";
+import { formatPeerCountBare } from "../lib/mesh-stats.js";
+import { CreditBalance } from "./CreditBalance.js";
 import { getMenuTranslation } from "./menu-i18n.js";
 import {
 	isNavItemActive,
@@ -90,6 +97,20 @@ function renderIcon(key: string): React.ReactNode {
 			return <Smartphone size={18} />;
 		case "monitor":
 			return <Monitor size={18} />;
+		case "vote":
+			return <Vote size={18} />;
+		case "git-merge":
+			return <GitMerge size={18} />;
+		case "book-open":
+			return <BookOpen size={18} />;
+		case "folder-git":
+			return <FolderGit size={18} />;
+		case "list-todo":
+			return <ListTodo size={18} />;
+		case "star":
+			return <Star size={18} />;
+		case "git-branch":
+			return <GitBranch size={18} />;
 		default:
 			return null;
 	}
@@ -177,7 +198,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 								const isActive = isNavItemActive(item.path, activePath);
 								const itemLabel = menuI18n.items[item.id] || item.label;
 								const badgeLabel = item.badge
-									? (menuI18n.badges?.[item.badge] || item.badge)
+									? menuI18n.badges?.[item.badge] || item.badge
 									: undefined;
 								return (
 									<button

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { PageBox } from "./PageBox.js";
 
 export interface PeerInfo {
 	peerId: string;
@@ -88,71 +89,77 @@ export function FederationPanel() {
 	};
 
 	return (
-		<section className="panel">
-			<div className="section-heading compact">
-				<span className="section-label">FOLKLORE FEDERATION</span>
-				<h2>Decentralized Knowledge Mesh</h2>
-			</div>
-
-			<div className="cast-actions">
-				<button type="button" onClick={sync} disabled={loading}>
-					{loading ? "동기화 중..." : "Sync"}
-				</button>
-				<button type="button" onClick={loadStatus}>
-					Refresh
-				</button>
-			</div>
-
-			{error && <p className="form-error">{error}</p>}
-
-			<div className="cast-results">
-				<div>
-					Local records: <strong>{status.localRecords}</strong>
+		<PageBox
+			iconKey="git-merge"
+			title="Federation"
+			subtitle="페더레이션"
+		>
+			<section className="panel">
+				<div className="section-heading compact">
+					<span className="section-label">FOLKLORE FEDERATION</span>
+					<h2>Decentralized Knowledge Mesh</h2>
 				</div>
-				<div>
-					Peers: <strong>{status.peers.length}</strong>
-				</div>
-			</div>
 
-			{status.peers.length > 0 && (
-				<div className="agent-list">
-					{status.peers.map((peer) => (
-						<div key={peer.peerId} className="agent-card">
-							<div className="agent-header">
-								<span className={`agent-type ${peer.online ? "online" : "offline"}`}>
-									{peer.online ? "online" : "offline"}
-								</span>
-								<span>Rep: {Math.round(peer.reputation * 100)}%</span>
-							</div>
-							<div className="agent-name">{peer.peerId}</div>
-							<div className="agent-capabilities">
-								{(peer.capabilities ?? []).map((cap) => (
-									<span key={cap} className="cap-tag">
-										{cap}
+				<div className="cast-actions">
+					<button type="button" onClick={sync} disabled={loading}>
+						{loading ? "동기화 중..." : "Sync"}
+					</button>
+					<button type="button" onClick={loadStatus}>
+						Refresh
+					</button>
+				</div>
+
+				{error && <p className="form-error">{error}</p>}
+
+				<div className="cast-results">
+					<div>
+						Local records: <strong>{status.localRecords}</strong>
+					</div>
+					<div>
+						Peers: <strong>{status.peers.length}</strong>
+					</div>
+				</div>
+
+				{status.peers.length > 0 && (
+					<div className="agent-list">
+						{status.peers.map((peer) => (
+							<div key={peer.peerId} className="agent-card">
+								<div className="agent-header">
+									<span className={`agent-type ${peer.online ? "online" : "offline"}`}>
+										{peer.online ? "online" : "offline"}
 									</span>
-								))}
+									<span>Rep: {Math.round(peer.reputation * 100)}%</span>
+								</div>
+								<div className="agent-name">{peer.peerId}</div>
+								<div className="agent-capabilities">
+									{(peer.capabilities ?? []).map((cap) => (
+										<span key={cap} className="cap-tag">
+											{cap}
+										</span>
+									))}
+								</div>
 							</div>
-						</div>
-					))}
-				</div>
-			)}
+						))}
+					</div>
+				)}
 
-			<div className="cast-input" style={{ marginTop: 16 }}>
-				<label>Add Peer</label>
-				<input
-					value={newPeer.peerId}
-					onChange={(e) => setNewPeer((s) => ({ ...s, peerId: e.target.value }))}
-					placeholder="Peer ID"
-				/>
-				<input
-					value={newPeer.address}
-					onChange={(e) => setNewPeer((s) => ({ ...s, address: e.target.value }))}
-					placeholder="Address"
-				/>
-				<button type="button" onClick={addPeer} disabled={loading}>
-					Add Peer
-				</button>
-			</div>
-		</section>
+				<div className="cast-input" style={{ marginTop: 16 }}>
+					<label>Add Peer</label>
+					<input
+						value={newPeer.peerId}
+						onChange={(e) => setNewPeer((s) => ({ ...s, peerId: e.target.value }))}
+						placeholder="Peer ID"
+					/>
+					<input
+						value={newPeer.address}
+						onChange={(e) => setNewPeer((s) => ({ ...s, address: e.target.value }))}
+						placeholder="Address"
+					/>
+					<button type="button" onClick={addPeer} disabled={loading}>
+						Add Peer
+					</button>
+				</div>
+			</section>
+		</PageBox>
 	);
 }

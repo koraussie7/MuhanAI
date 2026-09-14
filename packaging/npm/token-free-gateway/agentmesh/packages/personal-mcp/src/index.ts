@@ -1,4 +1,5 @@
 export * from "./hound-mcp-client";
+export * from "./hotel-mcp-client";
 export * from "./knowledge";
 export * from "./memory";
 export * from "./omniroute-mcp-client";

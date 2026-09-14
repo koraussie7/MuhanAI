@@ -12,6 +12,7 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
+		"@agentmesh/agent-router": "workspace:*",
 		"@agentmesh/noema": "workspace:*",
 		"@agentmesh/semantic-vote": "workspace:*",
 		"@agentmesh/hivebear": "workspace:*",

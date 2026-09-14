@@ -1,5 +1,4 @@
-import React from "react";
-import { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import "./styles/cline-theme.css";
 import "./styles/mobile.css";
 import { ChevronRight, Globe, Menu, Radio, Search, Sparkles, Zap } from "lucide-react";
@@ -19,99 +18,164 @@ function PageSkeleton() {
 		document.head.appendChild(style);
 	}
 	return (
-		<div style={{ padding: 40, display: "flex", flexDirection: "column", gap: 16, alignItems: "center", justifyContent: "center", minHeight: "300px" }}>
-			<div className="skeleton-loader" style={{ width: 60, height: 60, borderRadius: 12, background: "linear-gradient(90deg, var(--cline-border) 25%, var(--cline-primary-bg) 50%, var(--cline-border) 75%)", animation: "shimmer 1.5s infinite" }} />
-			<div className="skeleton-loader" style={{ width: "60%", height: 24, borderRadius: 6, background: "linear-gradient(90deg, var(--cline-border) 25%, var(--cline-primary-bg) 50%, var(--cline-border) 75%)", animation: "shimmer 1.5s infinite" }} />
-			<div className="skeleton-loader" style={{ width: "40%", height: 16, borderRadius: 4, background: "linear-gradient(90deg, var(--cline-border) 25%, var(--cline-primary-bg) 50%, var(--cline-border) 75%)", animation: "shimmer 1.5s infinite" }} />
+		<div
+			style={{
+				padding: 40,
+				display: "flex",
+				flexDirection: "column",
+				gap: 16,
+				alignItems: "center",
+				justifyContent: "center",
+				minHeight: "300px",
+			}}
+		>
+			<div
+				className="skeleton-loader"
+				style={{
+					width: 60,
+					height: 60,
+					borderRadius: 12,
+					background:
+						"linear-gradient(90deg, var(--cline-border) 25%, var(--cline-primary-bg) 50%, var(--cline-border) 75%)",
+					animation: "shimmer 1.5s infinite",
+				}}
+			/>
+			<div
+				className="skeleton-loader"
+				style={{
+					width: "60%",
+					height: 24,
+					borderRadius: 6,
+					background:
+						"linear-gradient(90deg, var(--cline-border) 25%, var(--cline-primary-bg) 50%, var(--cline-border) 75%)",
+					animation: "shimmer 1.5s infinite",
+				}}
+			/>
+			<div
+				className="skeleton-loader"
+				style={{
+					width: "40%",
+					height: 16,
+					borderRadius: 4,
+					background:
+						"linear-gradient(90deg, var(--cline-border) 25%, var(--cline-primary-bg) 50%, var(--cline-border) 75%)",
+					animation: "shimmer 1.5s infinite",
+				}}
+			/>
 		</div>
 	);
 }
+
 import { Dashboard } from "./components/Dashboard";
 import { FindPage } from "./components/find/FindPage";
+import { getMenuTranslation } from "./components/menu-i18n";
 import { RightPanel } from "./components/RightPanel";
 import { Sidebar } from "./components/Sidebar";
 import { type SupportedLanguage, useI18n } from "./i18n";
-import { getMenuTranslation } from "./components/menu-i18n";
+import { ROUTES, routeByPath } from "./routes.js";
 
 // Lazy load heavy pages
-const P2pNetworkPageLazy = React.lazy(() => import("./components/DashPages").then(m => ({ default: m.P2pNetworkPage })));
-const AgentCastLazy = React.lazy(() => import("./components/AgentCast").then(m => ({ default: m.AgentCast })));
-const TokenBankPageLazy = React.lazy(() => import("./components/DashPages").then(m => ({ default: m.TokenBankPage })));
-const WebDesktopPageLazy = React.lazy(() => import("./components/WebDesktopPage").then(m => ({ default: m.WebDesktopPage })));
-const AgentMeshPageLazy = React.lazy(() => import("./components/DashPages").then(m => ({ default: m.AgentMeshPage })));
-const KnowledgePageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.KnowledgePage })));
-const MarketplacePageLazy = React.lazy(() => import("./components/DashPages").then(m => ({ default: m.MarketplacePage })));
-const ModelsPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.ModelsPage })));
-const ComputeMeshPageLazy = React.lazy(() => import("./components/DashPages").then(m => ({ default: m.ComputeMeshPage })));
-const McpSkillsPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.McpSkillsPage })));
-const NetworkMonitorPageLazy = React.lazy(() => import("./components/DashPages").then(m => ({ default: m.NetworkMonitorPage })));
-const VerificationPageLazy = React.lazy(() => import("./components/DashPages").then(m => ({ default: m.VerificationPage })));
-const FederationPanelLazy = React.lazy(() => import("./components/FederationPanel").then(m => ({ default: m.FederationPanel })));
-const SemanticVoteLazy = React.lazy(() => import("./components/SemanticVote").then(m => ({ default: m.SemanticVote })));
-const AgentsPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.AgentsPage })));
-const HumanAgentsPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.HumanAgentsPage })));
-const ContributionsPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.ContributionsPage })));
-const ReputationPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.ReputationPage })));
-const ProjectsPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.ProjectsPage })));
-const TasksPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.TasksPage })));
-const WorkflowsPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.WorkflowsPage })));
-const SettingsPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.SettingsPage })));
-const HiveBearPanelLazy = React.lazy(() => import("./components/HiveBearPanel").then(m => ({ default: m.HiveBearPanel })));
-const HappyPageLazy = React.lazy(() => import("./components/HappyPage").then(m => ({ default: m.HappyPage })));
-const SearchPageLazy = React.lazy(() => import("./components/SpecPages").then(m => ({ default: m.SearchPage })));
-const LlmMeshPageLazy = React.lazy(() => import("./components/DashPages").then(m => ({ default: m.LlmMeshPage })));
+const P2pNetworkPageLazy = React.lazy(() =>
+	import("./components/DashPages").then((m) => ({ default: m.P2pNetworkPage })),
+);
+const AgentCastLazy = React.lazy(() =>
+	import("./components/AgentCast").then((m) => ({ default: m.AgentCast })),
+);
+const TokenBankPageLazy = React.lazy(() =>
+	import("./components/DashPages").then((m) => ({ default: m.TokenBankPage })),
+);
+const WebDesktopPageLazy = React.lazy(() =>
+	import("./components/WebDesktopPage").then((m) => ({ default: m.WebDesktopPage })),
+);
+const AgentMeshPageLazy = React.lazy(() =>
+	import("./components/DashPages").then((m) => ({ default: m.AgentMeshPage })),
+);
+const KnowledgePageLazy = React.lazy(() =>
+	import("./components/SpecPages").then((m) => ({ default: m.KnowledgePage })),
+);
+const MarketplacePageLazy = React.lazy(() =>
+	import("./components/DashPages").then((m) => ({ default: m.MarketplacePage })),
+);
+const ModelsPageLazy = React.lazy(() =>
+	import("./components/SpecPages").then((m) => ({ default: m.ModelsPage })),
+);
+const ComputeMeshPageLazy = React.lazy(() =>
+	import("./components/DashPages").then((m) => ({ default: m.ComputeMeshPage })),
+);
+const McpSkillsPageLazy = React.lazy(() =>
+	import("./components/SpecPages").then((m) => ({ default: m.McpSkillsPage })),
+);
+const NetworkMonitorPageLazy = React.lazy(() =>
+	import("./components/DashPages").then((m) => ({ default: m.NetworkMonitorPage })),
+);
+const VerificationPageLazy = React.lazy(() =>
+	import("./components/DashPages").then((m) => ({ default: m.VerificationPage })),
+);
+const FederationPanelLazy = React.lazy(() =>
+	import("./components/FederationPanel").then((m) => ({ default: m.FederationPanel })),
+);
+const SemanticVoteLazy = React.lazy(() =>
+	import("./components/SemanticVote").then((m) => ({ default: m.SemanticVote })),
+);
+const AgentsPageLazy = React.lazy(() =>
+	import("./components/SpecPages").then((m) => ({ default: m.AgentsPage })),
+);
+const HumanAgentsPageLazy = React.lazy(() =>
+	import("./components/SpecPages").then((m) => ({ default: m.HumanAgentsPage })),
+);
+const ContributionsPageLazy = React.lazy(() =>
+	import("./components/SpecPages").then((m) => ({ default: m.ContributionsPage })),
+);
+const ReputationPageLazy = React.lazy(() =>
+	import("./components/SpecPages").then((m) => ({ default: m.ReputationPage })),
+);
+const ProjectsPageLazy = React.lazy(() =>
+	import("./components/SpecPages").then((m) => ({ default: m.ProjectsPage })),
+);
+const TasksPageLazy = React.lazy(() =>
+	import("./components/SpecPages").then((m) => ({ default: m.TasksPage })),
+);
+const WorkflowsPageLazy = React.lazy(() =>
+	import("./components/SpecPages").then((m) => ({ default: m.WorkflowsPage })),
+);
+const SettingsPageLazy = React.lazy(() =>
+	import("./components/SpecPages").then((m) => ({ default: m.SettingsPage })),
+);
+const HiveBearPanelLazy = React.lazy(() =>
+	import("./components/HiveBearPanel").then((m) => ({ default: m.HiveBearPanel })),
+);
+const HappyPageLazy = React.lazy(() =>
+	import("./components/HappyPage").then((m) => ({ default: m.HappyPage })),
+);
+const SearchPageLazy = React.lazy(() =>
+	import("./components/SpecPages").then((m) => ({ default: m.SearchPage })),
+);
+const LlmMeshPageLazy = React.lazy(() =>
+	import("./components/DashPages").then((m) => ({ default: m.LlmMeshPage })),
+);
 
 /**
  * Single Source of Truth for all routes.
  * Each section has a unique id and path — no duplicates.
  * Legacy paths are handled by redirects in sectionIdFromPath().
  */
-const SECTIONS = [
-	{ id: "dashboard", path: "/dashboard", label: "Dashboard", category: "Core" },
-	{ id: "find", path: "/", label: "Cosmic Mesh", category: "Core" },
-	{ id: "agent-cast", path: "/agent-cast", label: "Agent Cast", category: "Core" },
-	{ id: "agent-mesh", path: "/agent-mesh", label: "Agent Mesh", category: "Core" },
-	{ id: "bitterbot", path: "/bitterbot", label: "Bitterbot Agent", category: "Core" },
-	{ id: "desktop", path: "/desktop", label: "Web Desktop", category: "Core" },
+const GROUP_LABELS: Record<string, string> = {
+	core: "Core",
+	network: "Network",
+	resources: "Resources",
+	knowledge: "Knowledge & Intelligence",
+	marketplace: "Marketplace",
+	economy: "Economy",
+	workspace: "Workspace",
+	system: "System",
+};
 
-	// Network
-	{ id: "p2p-network", path: "/network", label: "P2P Nodes", category: "Network" },
-	{ id: "network-monitor", path: "/monitor", label: "Telemetry & Pulse", category: "Network" },
-
-	// Resources
-	{ id: "models", path: "/models", label: "LLM Models", category: "Resources" },
-	{ id: "compute-mesh", path: "/compute-mesh", label: "Compute Mesh", category: "Resources" },
-	{ id: "mcp-skills", path: "/mcp-skills", label: "MCP Tools", category: "Resources" },
-	{ id: "hivebear", path: "/hivebear", label: "HiveBear Mesh", category: "Resources" },
-
-	// Intelligence
-	{ id: "knowledge", path: "/knowledge", label: "Knowledge Graph", category: "Intelligence" },
-	{ id: "verification", path: "/verification", label: "Verification", category: "Intelligence" },
-	{ id: "search", path: "/search", label: "Mesh Search", category: "Intelligence" },
-	{ id: "semantic-vote", path: "/semantic-vote", label: "Semantic Vote", category: "Intelligence" },
-	{ id: "federation", path: "/federation", label: "Federation", category: "Intelligence" },
-
-	// Marketplace
-	{ id: "agents-market", path: "/marketplace/agents", label: "Agent Hub", category: "Marketplace" },
-	{ id: "human-experts", path: "/marketplace/human-experts", label: "Human Experts", category: "Marketplace" },
-	{ id: "compute-market", path: "/marketplace/compute", label: "Compute Market", category: "Marketplace" },
-	{ id: "mcp-market", path: "/marketplace/mcp", label: "MCP Marketplace", category: "Marketplace" },
-	{ id: "knowledge-market", path: "/marketplace/knowledge", label: "Knowledge Market", category: "Marketplace" },
-
-	// Economy
-	{ id: "token-bank", path: "/token-bank", label: "Token Bank", category: "Economy" },
-	{ id: "contributions", path: "/contributions", label: "Contributions", category: "Economy" },
-	{ id: "reputation", path: "/reputation", label: "Reputation", category: "Economy" },
-
-	// Workspace
-	{ id: "projects", path: "/projects", label: "Projects", category: "Workspace" },
-	{ id: "tasks", path: "/tasks", label: "Tasks", category: "Workspace" },
-	{ id: "workflows", path: "/workflows", label: "Workflows", category: "Workspace" },
-
-	// System
-	{ id: "settings", path: "/settings", label: "Settings", category: "System" },
-	{ id: "happy", path: "/happy", label: "Happy Coder", category: "System" },
-];
+const SECTIONS = ROUTES.map((route) => ({
+	id: route.id,
+	path: route.path,
+	label: route.label,
+	category: GROUP_LABELS[route.group] ?? route.group,
+}));
 
 /**
  * Legacy path redirects — maps old/duplicate paths to canonical section IDs.
@@ -148,14 +212,14 @@ function sectionIdFromPath(path: string) {
 			return "find";
 		}
 	}
-	const found = SECTIONS.find((s) => s.path === cleanPath);
+	const found = routeByPath(cleanPath);
 	if (found) return found.id;
 	const bare = cleanPath.replace(/^\//, "");
 	return bare || "find";
 }
 
 function pathFromSectionId(id: string) {
-	return SECTIONS.find((section) => section.id === id)?.path ?? `/${id}`;
+	return ROUTES.find((route) => route.id === id)?.path ?? `/${id}`;
 }
 
 export function App() {
@@ -225,11 +289,11 @@ export function App() {
 
 	// 2. DaedalOS Web Desktop - Full Desktop Environment
 	if (activeSection === "desktop" || activeSection === "bitterbot") {
-	return (
-	<Suspense fallback={<PageSkeleton />}>
-	<WebDesktopPageLazy initialApp={activeSection === "bitterbot" ? "bitterbot" : undefined} />
-	</Suspense>
-	);
+		return (
+			<Suspense fallback={<PageSkeleton />}>
+				<WebDesktopPageLazy initialApp={activeSection === "bitterbot" ? "bitterbot" : undefined} />
+			</Suspense>
+		);
 	}
 
 	const currentSectionMeta = SECTIONS.find((s) => s.id === activeSection) ?? {
@@ -278,7 +342,8 @@ export function App() {
 							<span className="breadcrumb-root">MuhanAI</span>
 							<ChevronRight size={13} className="breadcrumb-separator" />
 							<span className="breadcrumb-root">
-								{menuI18n.groups[currentSectionMeta.category.toLowerCase()] || currentSectionMeta.category}
+								{menuI18n.groups[currentSectionMeta.category.toLowerCase()] ||
+									currentSectionMeta.category}
 							</span>
 							<ChevronRight size={13} className="breadcrumb-separator" />
 							<span className="breadcrumb-current">
@@ -527,7 +592,7 @@ export function App() {
 							</Suspense>
 						)}
 
-{/* Semantic Intelligence & Federation */}
+						{/* Semantic Intelligence & Federation */}
 						{activeSection === "semantic-vote" && (
 							<Suspense fallback={<PageSkeleton />}>
 								<SemanticVoteLazy onSubmit={(route) => navigate(`/agent-cast?route=${route}`)} />

@@ -1,87 +1,123 @@
 import type React from "react";
-import { AI_VS_HUMAN } from "../data/mockData";
+import { PageBox } from "./PageBox.js";
+import { useEffect, useState } from "react";
+import { useI18n } from "../i18n";
 
-interface AiVsHumanItem {
+interface VersusItem {
 	id: string;
 	question: string;
 	aiConsensus: number;
 	humanConsensus: number;
-	winner: "AI" | "HUMAN" | "TIE";
+	winner: "AI" | "HUMAN" | "undecided";
 	participants: { ai: number; human: number };
 	tags: string[];
 }
 
 interface AiVsHumanProps {
-	items?: AiVsHumanItem[];
 	maxItems?: number;
 }
 
-export const AiVsHuman: React.FC<AiVsHumanProps> = ({ items = AI_VS_HUMAN, maxItems = 2 }) => {
-	return (
-		<section className="ai-vs-human-section">
-			<div className="section-header">
-				<h2 className="section-title">
-					<span className="versus-icon">⚔️</span>
-					AI vs HUMAN
-				</h2>
-			</div>
+export const AiVsHuman: React.FC<AiVsHumanProps> = ({
+	maxItems = 3,
+}) => {
+	const { t } = useI18n();
+	const [items, setItems] = useState<VersusItem[]>([]);
+	const [loading, setLoading] = useState(true);
 
-			<div className="versus-list">
-				{items.slice(0, maxItems).map((item) => (
-					<article key={item.id} className="versus-card">
-						<div className="versus-question">"{item.question}"</div>
+	useEffect(() => {
+		const fetchItems = async () => {
+			try {
+				const res = await fetch("/api/ai-vs-human");
+				if (res.ok) {
+					const data = await res.json();
+					setItems(data);
+				}
+			} catch {
+				// Silently fail
+			} finally {
+				setLoading(false);
+			}
+		};
+		fetchItems();
+	}, []);
 
-						<div className="versus-bars">
-							<div className="bar-group ai-bar-group">
-								<div className="bar-label">
-									<span className="bar-icon">🤖</span>
-									<span>AI Consensus</span>
-									<span className="bar-value">{item.aiConsensus}%</span>
-								</div>
-								<div className="bar-track">
-									<div className="bar-fill ai-fill" style={{ width: `${item.aiConsensus}%` }}></div>
-								</div>
-								<div className="bar-participants">{item.participants.ai} agents</div>
-							</div>
-
-							<div className="bar-group human-bar-group">
-								<div className="bar-label">
-									<span className="bar-icon">👤</span>
-									<span>Human Consensus</span>
-									<span className="bar-value">{item.humanConsensus}%</span>
-								</div>
-								<div className="bar-track">
-									<div
-										className="bar-fill human-fill"
-										style={{ width: `${item.humanConsensus}%` }}
-									></div>
-								</div>
-								<div className="bar-participants">{item.participants.human} experts</div>
-							</div>
-						</div>
-
-						<div className="versus-result">
-							<div className="winner-badge">
-								<span className="winner-label">Winner</span>
-								<span className={`winner-value ${item.winner.toLowerCase()}`}>
-									{item.winner === "AI" ? "🤖 AI" : item.winner === "HUMAN" ? "👤 HUMAN" : "🤝 TIE"}
-								</span>
-							</div>
-							<button type="button" className="btn-secondary view-result-btn">
-								결과 보기
-							</button>
-						</div>
-
-						<div className="versus-tags">
-							{item.tags.map((tag) => (
-								<span key={tag} className="tag">
-									{tag}
-								</span>
-							))}
-						</div>
-					</article>
+	const LoadingView = () => (
+		<section className="ai-vs-human-section" aria-label="AI vs Human">
+			<h3 className="section-title">AI vs HUMAN CONSENSUS</h3>
+			<div className="ai-vs-human-list">
+				{[...Array(maxItems)].map((_, i) => (
+					<div key={i} className="vs-item skeleton">
+						<div className="skeleton-question" />
+						<div className="skeleton-bars" />
+					</div>
 				))}
 			</div>
 		</section>
+	);
+
+	const EmptyView = () => (
+		<section className="ai-vs-human-section" aria-label="AI vs Human">
+			<h3 className="section-title">AI vs HUMAN CONSENSUS</h3>
+			<p className="empty-state">No consensus votes yet</p>
+		</section>
+	);
+
+	const ContentView = () => (
+		<section className="ai-vs-human-section" aria-label="AI vs Human">
+			<h3 className="section-title">AI vs HUMAN CONSENSUS</h3>
+			<div className="ai-vs-human-list">
+				{items.slice(0, maxItems).map((item) => (
+					<div key={item.id} className="vs-item">
+						<div className="vs-question">{item.question}</div>
+						<div className="vs-bars">
+							<div className="vs-bar-row">
+								<span className="vs-label">🤖 AI</span>
+								<div className="vs-bar-container">
+									<div
+										className="vs-bar ai"
+										style={{ width: `${item.aiConsensus}%` }}
+									></div>
+								</div>
+								<span className="vs-percent">{item.aiConsensus}%</span>
+							</div>
+							<div className="vs-bar-row">
+								<span className="vs-label">👤 Human</span>
+								<div className="vs-bar-container">
+									<div
+										className="vs-bar human"
+										style={{ width: `${item.humanConsensus}%` }}
+									></div>
+								</div>
+								<span className="vs-percent">{item.humanConsensus}%</span>
+							</div>
+						</div>
+						<div className="vs-winner">
+							<span className={`winner-badge ${item.winner.toLowerCase()}`}>
+								{item.winner === "AI" ? "🤖 AI Wins" : item.winner === "HUMAN" ? "👤 Human Wins" : "⏳ Undecided"}
+							</span>
+							<span className="participants">🤖 {item.participants.ai} · 👤 {item.participants.human}</span>
+						</div>
+					</div>
+				))}
+			</div>
+		</section>
+	);
+
+	if (loading)
+		return (
+			<PageBox iconKey="users" title="AI vs Human" subtitle="AI와 인간의 합의 비교">
+				<LoadingView />
+			</PageBox>
+		);
+	if (items.length === 0)
+		return (
+			<PageBox iconKey="users" title="AI vs Human" subtitle="AI와 인간의 합의 비교">
+				<EmptyView />
+			</PageBox>
+		);
+	return (
+		<PageBox iconKey="users" title="AI vs Human" subtitle="AI와 인간의 합의 비교">
+			<ContentView />
+		</PageBox>
 	);
 };

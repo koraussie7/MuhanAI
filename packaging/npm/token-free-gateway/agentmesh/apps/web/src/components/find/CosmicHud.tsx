@@ -99,7 +99,7 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 							e.preventDefault();
 							onNavigateHome();
 						}}
-						title="Open Developer Console & Knowledge IN Feed"
+						title={t.cosmicHud.developerConsole}
 						style={{
 							display: "flex",
 							alignItems: "center",
@@ -109,13 +109,13 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 						}}
 					>
 						<LayoutDashboard size={14} className="text-sky-400" />
-						<span>Developer Console</span>
+						<span>{t.cosmicHud.developerConsole}</span>
 					</a>
 					<button
 						type="button"
 						className="cosmic-back-btn"
 						onClick={onOpenUserGuide}
-						title="Open MuhanAI User Guide (초급·중급·고급 종합 사용설명서)"
+						title={t.cosmicHud.userGuideTitle}
 						style={{
 							display: "flex",
 							alignItems: "center",
@@ -138,7 +138,7 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 								<span className="cosmic-badge">COSMIC MESH</span>
 							</div>
 							<div className="text-[10px] text-slate-400 font-mono tracking-tight">
-								Obsidian Graph Topology & P2P Silhouette
+								{t.cosmicHud.subtitle}
 							</div>
 						</div>
 					</div>
@@ -148,25 +148,25 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 				<div className="hidden lg:flex items-center gap-5 px-4 py-1.5 rounded-full bg-slate-950/70 border border-white/10 backdrop-blur-md font-mono text-xs shadow-lg">
 					<div className="flex items-center gap-1.5 text-slate-300">
 						<Globe size={13} className="text-sky-400" />
-						<span className="text-slate-400">Peers:</span>
+						<span className="text-slate-400">{t.cosmicHud.peersLabel}</span>
 						<span className="text-white font-bold">{peersCount.toLocaleString()}</span>
 					</div>
 					<span className="text-white/20">|</span>
 					<div className="flex items-center gap-1.5 text-slate-300">
 						<Layers size={13} className="text-emerald-400" />
-						<span className="text-slate-400">Notes:</span>
+						<span className="text-slate-400">{t.cosmicHud.notesLabel}</span>
 						<span className="text-white font-bold">{notesCount}</span>
 					</div>
 					<span className="text-white/20">|</span>
 					<div className="flex items-center gap-1.5 text-slate-300">
 						<Radio size={13} className="text-purple-400" />
-						<span className="text-slate-400">Synapses:</span>
+						<span className="text-slate-400">{t.cosmicHud.synapsesLabel}</span>
 						<span className="text-white font-bold">{edgesCount}</span>
 					</div>
 					<span className="text-white/20">|</span>
 					<div className="flex items-center gap-1.5 text-slate-300">
 						<Wifi size={13} className="text-amber-400" />
-						<span className="text-slate-400">Latency:</span>
+						<span className="text-slate-400">{t.cosmicHud.latencyLabel}</span>
 						<span className="text-emerald-400 font-bold">{latencyMs}ms</span>
 					</div>
 				</div>
@@ -184,10 +184,10 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 								onConnectSimulatedPeer();
 							}
 						}}
-						title="새로운 P2P 피어 노드 이름을 지정하고 연결합니다"
+						title={t.cosmicHud.connectPeerTitle}
 					>
 						<Sparkles size={13} className="text-sky-300" />
-						<span>Connect Peer</span>
+						<span>{t.cosmicHud.connectPeer}</span>
 					</button>
 
 					<button
@@ -202,17 +202,17 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 						}}
 						title={
 							userPeerConnected
-								? "내 디바이스 피어 이름 변경 또는 관리"
-								: "내 디바이스 피어 이름을 지정하고 P2P 메쉬에 마운트합니다"
+								? t.cosmicHud.devicePeerManage
+								: t.cosmicHud.devicePeerConnect
 						}
 					>
 						<Zap size={13} className={userPeerConnected ? "text-emerald-400" : "text-amber-400"} />
 						<span>
 							{userPeerConnected
-								? `${connectedPeerName || "User"} (연결됨)`
+								? `${connectedPeerName || t.cosmicHud.userFallback}${t.cosmicHud.connectedSuffix}`
 								: connectedPeerName
-									? `Connect ${connectedPeerName}`
-									: "Connect My Device"}
+									? `${t.cosmicHud.connectPrefix} ${connectedPeerName}`
+									: t.cosmicHud.connectMyDevice}
 						</span>
 					</button>
 
@@ -221,7 +221,7 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 						type="button"
 						className={`cosmic-icon-btn ${showSettings ? "active" : ""}`}
 						onClick={() => setShowSettings(!showSettings)}
-						title="Graph Physics Parameters"
+						title={t.cosmicHud.physicsTitle}
 					>
 						<Sliders size={14} />
 					</button>
@@ -231,7 +231,7 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 						type="button"
 						className="cosmic-icon-btn"
 						onClick={toggleFullscreen}
-						title="Toggle Fullscreen"
+						title={t.cosmicHud.fullscreenTitle}
 					>
 						{isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
 					</button>
@@ -244,7 +244,7 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 					<div className="flex items-center justify-between pb-2 mb-3 border-b border-white/10">
 						<span className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
 							<Sliders size={13} className="text-sky-400" />
-							Obsidian Graph Forces
+							{t.cosmicHud.graphForces}
 						</span>
 						<button
 							type="button"
@@ -259,7 +259,7 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 					<div className="space-y-3 font-mono text-xs">
 						<div>
 							<div className="flex justify-between text-slate-300 mb-1">
-								<span>Repel Force</span>
+								<span>{t.cosmicHud.repelForce}</span>
 								<span className="text-sky-400">{repelStrength}x</span>
 							</div>
 							<input
@@ -275,7 +275,7 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 
 						<div>
 							<div className="flex justify-between text-slate-300 mb-1">
-								<span>Link Distance</span>
+								<span>{t.cosmicHud.linkDistance}</span>
 								<span className="text-emerald-400">{linkDistance}px</span>
 							</div>
 							<input
@@ -291,7 +291,7 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 
 						<div>
 							<div className="flex justify-between text-slate-300 mb-1">
-								<span>Center Gravity</span>
+								<span>{t.cosmicHud.centerGravity}</span>
 								<span className="text-purple-400">{centerGravity}x</span>
 							</div>
 							<input
@@ -308,7 +308,7 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 
 					{/* Type Filters */}
 					<div className="pt-3 mt-3 border-t border-white/10">
-						<span className="text-[11px] font-mono text-slate-400 block mb-2">VISIBLE FILTERS</span>
+						<span className="text-[11px] font-mono text-slate-400 block mb-2">{t.cosmicHud.visibleFilters}</span>
 						<div className="flex flex-wrap gap-1.5">
 							{(["core", "agent", "note", "tag"] as const).map((t) => (
 								<button
@@ -332,7 +332,7 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 					<div className="flex items-center gap-2">
 						<Terminal size={12} className="text-emerald-400" />
 						<span className="font-mono text-[11px] font-bold text-slate-300">
-							P2P MESH EVENT FEED & WEBRTC CRDT LOG
+							{t.cosmicHud.eventFeed}
 						</span>
 					</div>
 					<button

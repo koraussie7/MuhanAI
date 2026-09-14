@@ -1,0 +1,34 @@
+muhanai.com, www.muhanai.com, find.muhanai.com {
+	auto_https disable_redirect
+	root * /var/www/muhanai.com/current
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+	}
+
+	@api path /api/*
+	handle @api {
+		uri strip_prefix /api
+		reverse_proxy 127.0.0.1:3001 {
+			header_up Host {upstream_hostport}
+			header_up X-Real-IP {remote_host}
+			header_up X-Forwarded-For {remote_host}
+			header_up X-Forwarded-Proto {scheme}
+		}
+	}
+
+	@asset path_regexp asset "\.(css|js|svg|png|jpg|jpeg|webp|woff2)(\?.*)?$"
+	handle @asset {
+		file_server
+		header Cache-Control "public, immutable, max-age=604800"
+	}
+
+	handle {
+		rewrite /index.html
+		file_server
+	}
+}
