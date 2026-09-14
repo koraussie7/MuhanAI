@@ -217,6 +217,31 @@ export async function buildServer() {
     const { q } = request.query as { q?: string };
     return search(typeof q === "string" ? q : undefined);
   });
+
+  // ---- Society Protocol (P2P) — optional, Node only ----
+  // Enabled when SOCIETY_ENABLED=1. Uses dynamic import so the native
+  // society-protocol module is not loaded unless explicitly requested.
+  if (process.env.SOCIETY_ENABLED === "1") {
+    try {
+      const { connectSocietyMesh } = await import("@agentmesh/society");
+      const { registerSocietyRoutes } = await import("./society-routes.js");
+      const societyRoom = process.env.SOCIETY_ROOM ?? "agentmesh";
+      const society = await connectSocietyMesh({
+        name: process.env.SOCIETY_NAME ?? "agentmesh-api",
+        room: societyRoom,
+        ...(process.env.SOCIETY_STORAGE ? { storagePath: process.env.SOCIETY_STORAGE } : {}),
+      });
+      await registerSocietyRoutes(app, {
+        client: society,
+        room: societyRoom,
+        knowledgeSpace: process.env.SOCIETY_KNOWLEDGE_SPACE ?? "AgentMesh",
+      });
+      app.log.info({ room: societyRoom }, "society protocol enabled");
+    } catch (err) {
+      app.log.warn({ err }, "society protocol disabled (import failed)");
+    }
+  }
+
   return app;
 }
 
