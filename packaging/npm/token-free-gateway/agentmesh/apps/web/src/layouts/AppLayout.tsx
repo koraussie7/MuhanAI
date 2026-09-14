@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { Sidebar } from "../components/Sidebar";
 import { RightPanel } from "../components/RightPanel";
+import { CosmicPrompt } from "../components/CosmicPrompt";
 import { sectionByPath } from "../routes/section-config";
 
 // Common shell for every section: sidebar + top bar + right panel.
@@ -42,6 +43,9 @@ export function AppLayout() {
           <RightPanel />
         </div>
       </div>
+
+      {/* Global Cosmic Prompt - WebLLM-powered local AI chat */}
+      <CosmicPrompt />
     </div>
   );
 }
