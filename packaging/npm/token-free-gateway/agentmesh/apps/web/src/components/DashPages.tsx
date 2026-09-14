@@ -26,26 +26,25 @@ import {
 	KnowledgeMarket,
 	McpMarket,
 } from "./harvest/C/MarketplaceGrid.js";
+import { PageBox } from "./PageBox.js";
 
 const API = import.meta.env.VITE_API_BASE ?? "";
 
 function Page({
+	iconKey,
 	title,
 	subtitle,
 	children,
 }: {
+	iconKey?: string;
 	title: string;
 	subtitle?: string;
 	children: React.ReactNode;
 }) {
 	return (
-		<section className="dash-page">
-			<header className="dash-page-header">
-				<h2>{title}</h2>
-				{subtitle && <p className="dash-page-subtitle">{subtitle}</p>}
-			</header>
+		<PageBox iconKey={iconKey} title={title} subtitle={subtitle}>
 			{children}
-		</section>
+		</PageBox>
 	);
 }
 
@@ -82,7 +81,7 @@ export function NetworkMonitorPage() {
 			]
 		: [["상태", "연결 중…"]];
 	return (
-		<Page title="Network Monitor" subtitle="실시간 네트워크 상태">
+		<Page iconKey="activity" title="Network Monitor" subtitle="실시간 네트워크 상태">
 			<StatGrid stats={stats} />
 		</Page>
 	);
@@ -176,6 +175,7 @@ export function AgentMeshPage() {
 	const [view, setView] = useState<"cards" | "topology">("cards");
 	return (
 		<Page
+			iconKey="bot"
 			title="Agent Mesh"
 			subtitle="ISEK Agent Identity · A2A Discovery · DID Attestation · Decentralized Router"
 		>
@@ -270,6 +270,7 @@ export function P2pNetworkPage() {
 
 	return (
 		<Page
+			iconKey="network"
 			title="P2P Network"
 			subtitle="peerd WebRTC Browser Mesh · nekoni Personal Agent Node · Sandbox Isolation"
 		>
@@ -363,6 +364,7 @@ export function TokenBankPage() {
 
 	return (
 		<Page
+			iconKey="coins"
 			title="Token Bank & Accounting"
 			subtitle="p2ptokens 기여 회계 원장 · PinkyBrain Web of Trust 평판 링"
 		>
@@ -500,7 +502,11 @@ const CLUSTER_NODES: ClusterNode[] = [
 export function ComputeMeshPage() {
 	const [tab, setTab] = useState<"workers" | "gpu" | "cluster">("workers");
 	return (
-		<Page title="Compute Mesh" subtitle="AgentFM 분산 워커 · mycellm GPU 풀 · DAC 클러스터">
+		<Page
+			iconKey="cpu"
+			title="Compute Mesh"
+			subtitle="AgentFM 분산 워커 · mycellm GPU 풀 · DAC 클러스터"
+		>
 			<GpuRackVisualizer />
 			<StatGrid
 				stats={[
@@ -549,7 +555,11 @@ export function MarketplacePage({
 		setTab(defaultTab);
 	}, [defaultTab]);
 	return (
-		<Page title="Marketplace" subtitle="AI Capability App Store — 탈중앙화 자원 및 에이전트 마켓">
+		<Page
+			iconKey="layers"
+			title="Marketplace"
+			subtitle="AI Capability App Store — 탈중앙화 자원 및 에이전트 마켓"
+		>
 			<div className="policy-row" style={{ marginBottom: 16 }}>
 				<button
 					className={`policy-chip ${tab === "agents" ? "active" : ""}`}
@@ -610,6 +620,7 @@ export function VerificationPage() {
 	}, []);
 	return (
 		<Page
+			iconKey="check-circle"
 			title="Verification Center"
 			subtitle={`대기 중: ${items.length}건 · 모드: AI vs AI · AI vs Web · AI vs Human · Human vs Human`}
 		>

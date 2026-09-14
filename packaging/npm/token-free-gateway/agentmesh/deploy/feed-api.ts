@@ -495,6 +495,63 @@ async function listUnsolved(
 }
 
 const ID = "([^/]+)";
+
+/* ------------------------------ Knowledge Nodes ------------------------------ */
+/* Obsidian-style knowledge graph nodes published from the Cosmic Prompt.        */
+/* Stored in FEED_KV so every visitor of muhanai.com sees the shared graph.      */
+
+export interface KnowledgeNodeRecord {
+	id: string;
+	title: string;
+	author: string;
+	summary: string;
+	tags: string[];
+	links: string[]; // wikilink targets (node ids or [[Title]])
+	markdown: string;
+	createdAt: string;
+}
+
+const KNOWLEDGE_KEY = "knowledge:nodes";
+const KNOWLEDGE_MAX = 200;
+
+async function listKnowledgeNodes(store: FeedStore): Promise<Response> {
+	const nodes = await store.read(KNOWLEDGE_KEY, [] as KnowledgeNodeRecord[]);
+	return json({ nodes, count: nodes.length });
+}
+
+async function createKnowledgeNode(
+	request: Request,
+	_match: RegExpExecArray | null,
+	store: FeedStore,
+): Promise<Response> {
+	let body: Partial<KnowledgeNodeRecord>;
+	try {
+		body = (await request.json()) as Partial<KnowledgeNodeRecord>;
+	} catch {
+		return json({ error: "Invalid JSON body" }, 400);
+	}
+	const title = (body.title ?? "").trim().slice(0, 120);
+	const markdown = (body.markdown ?? "").trim().slice(0, 20_000);
+	if (!title || !markdown) {
+		return json({ error: "title and markdown are required" }, 400);
+	}
+	const node: KnowledgeNodeRecord = {
+		id: `kn-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+		title,
+		author: (body.author ?? "anonymous").trim().slice(0, 80),
+		summary: (body.summary ?? title).trim().slice(0, 300),
+		tags: Array.isArray(body.tags) ? body.tags.slice(0, 8).map((t) => String(t).slice(0, 24)) : [],
+		links: Array.isArray(body.links) ? body.links.slice(0, 24).map((l) => String(l).slice(0, 120)) : [],
+		markdown,
+		createdAt: now(),
+	};
+	await store.update(KNOWLEDGE_KEY, [] as KnowledgeNodeRecord[], (list) => {
+		const next = [node, ...list];
+		return next.length > KNOWLEDGE_MAX ? next.slice(0, KNOWLEDGE_MAX) : next;
+	});
+	return json({ node }, 201);
+}
+
 const ROUTES: Route[] = [
 	{ method: "GET", pattern: /^\/api\/pulse$/, handler: getPulse },
 	{
@@ -537,6 +594,8 @@ const ROUTES: Route[] = [
 		handler: getRewards,
 	},
 	{ method: "GET", pattern: /^\/api\/unsolved$/, handler: listUnsolved },
+	{ method: "GET", pattern: /^\/api\/knowledge\/nodes$/, handler: (r, m, s) => listKnowledgeNodes(s) },
+	{ method: "POST", pattern: /^\/api\/knowledge\/nodes$/, handler: (r, m, s) => createKnowledgeNode(r, m, s) },
 ];
 
 const FEED_PREFIXES = [
@@ -551,6 +610,7 @@ const FEED_PREFIXES = [
 	"/api/network",
 	"/api/agents",
 	"/api/cast",
+	"/api/knowledge",
 ];
 
 /** Returns a Response for worker-handled /api paths, or null to fall through to proxy. */

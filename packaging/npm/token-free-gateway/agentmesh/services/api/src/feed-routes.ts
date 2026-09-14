@@ -265,4 +265,20 @@ export async function feedRoutes(app: FastifyInstance) {
 			return { actorId, balance: 0, entries: [] };
 		}
 	});
-}
+
+		// ===========================================================================
+		// Trending Questions
+		// ===========================================================================
+		app.get("/api/trending", async (_request, reply) => {
+			try {
+				const prisma = await getPrisma();
+				const items = await prisma.trendingQuestion.findMany({
+					orderBy: { score: "desc" },
+					take: 20,
+				});
+				return items;
+			} catch {
+				return reply.code(503).send({ error: "Database unavailable" });
+			}
+		});
+	}

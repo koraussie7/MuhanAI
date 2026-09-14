@@ -16,3 +16,4 @@ packages/*/types/**/*.js.map
 packages/*/types/**/*.d.ts
 packages/*/types/**/*.d.ts.map
 apps/web/package-lock.json
+officeDist/

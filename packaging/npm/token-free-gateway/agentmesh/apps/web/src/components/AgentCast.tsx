@@ -1,6 +1,7 @@
 import { Brain, CheckCircle2, Clock, ListTodo, RefreshCw, Send, Zap } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
+import { PageBox } from "./PageBox.js";
 
 interface AgentOption {
 	id: string;

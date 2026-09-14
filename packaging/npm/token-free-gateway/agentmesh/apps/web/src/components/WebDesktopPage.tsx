@@ -1,4 +1,5 @@
 import type React from "react";
+import { PageBox } from "./PageBox.js";
 import { useState, useRef, useEffect, type ReactNode } from "react";
 import { useI18n } from "../i18n.js";
 import { getMenuTranslation } from "./menu-i18n.js";

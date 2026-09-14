@@ -12,30 +12,26 @@ import { ContributionHistory } from "./harvest/C/ContributionHistory.js";
 import { ReputationMatrix } from "./harvest/C/ReputationMatrix.js";
 import { SecuritySettings } from "./harvest/C/SecuritySettings.js";
 import { MuhanSettingsPanel } from "./MuhanSettingsPanel.js";
+import { PageBox } from "./PageBox.js";
 import { InteractiveKnowledgeGraph } from "./visuals/InteractiveKnowledgeGraph.js";
 
 function PageShell({
+	iconKey,
 	title,
 	subtitle,
 	badge,
 	children,
 }: {
+	iconKey?: string;
 	title: string;
 	subtitle?: string;
 	badge?: string;
 	children: React.ReactNode;
 }) {
 	return (
-		<section className="dash-page">
-			<header className="dash-page-header">
-				<div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-					<h2>{title}</h2>
-					{badge && <span className="protocol-badge proto-webrtc">{badge}</span>}
-				</div>
-				{subtitle && <p className="dash-page-subtitle">{subtitle}</p>}
-			</header>
+		<PageBox iconKey={iconKey} title={title} subtitle={subtitle} badge={badge}>
 			{children}
-		</section>
+		</PageBox>
 	);
 }
 
@@ -81,6 +77,7 @@ export function AgentsPage() {
 	];
 	return (
 		<PageShell
+			iconKey="bot"
 			title="Agents Directory"
 			subtitle="ISEK Protocol A2A DID 등록 에이전트 풀"
 			badge="A2A Federated"
@@ -145,6 +142,7 @@ export function HumanAgentsPage() {
 	];
 	return (
 		<PageShell
+			iconKey="users"
 			title="Human Expert Agents"
 			subtitle="AI vs Human 검증 및 도메인 전문가 풀"
 			badge="PoH Verified"
@@ -177,6 +175,7 @@ export function HumanAgentsPage() {
 export function KnowledgePage() {
 	return (
 		<PageShell
+			iconKey="database"
 			title="Knowledge Lake"
 			subtitle="Society Protocol 탈중앙화 지식 풀 & CRDT 버전 관리"
 			badge="Society Protocol"
@@ -189,6 +188,7 @@ export function KnowledgePage() {
 export function KnowledgeGraphPage() {
 	return (
 		<PageShell
+			iconKey="database"
 			title="Knowledge Graph"
 			subtitle="NeuroMesh 분산 지식 노드 및 관계 토폴로지"
 			badge="NeuroMesh"
@@ -205,6 +205,7 @@ export function KnowledgeGraphPage() {
 export function SearchPage() {
 	return (
 		<PageShell
+			iconKey="search"
 			title="Federated Mesh Search"
 			subtitle="InfoMesh P2P 분산 색인 & Web 검색"
 			badge="InfoMesh"
@@ -218,6 +219,7 @@ export function SearchPage() {
 export function McpSkillsPage() {
 	return (
 		<PageShell
+			iconKey="layers"
 			title="MCP Skills & Tools"
 			subtitle="Model Context Protocol 분산 도구 등록소"
 			badge="MCP v1.0"
@@ -230,6 +232,7 @@ export function McpSkillsPage() {
 export function ModelsPage() {
 	return (
 		<PageShell
+			iconKey="sparkles"
 			title="Model Registry & Hub"
 			subtitle="mycellm 로컬 및 P2P 캐시 LLM 웨이트"
 			badge="mycellm"
@@ -243,6 +246,7 @@ export function ModelsPage() {
 export function ContributionsPage() {
 	return (
 		<PageShell
+			iconKey="activity"
 			title="Contribution Accounting"
 			subtitle="p2ptokens 분산 인센티브 및 기여 내역"
 			badge="p2ptokens"
@@ -255,6 +259,7 @@ export function ContributionsPage() {
 export function ReputationPage() {
 	return (
 		<PageShell
+			iconKey="star"
 			title="Web of Trust & Reputation"
 			subtitle="PinkyBrain 암호학적 신뢰 매트릭스"
 			badge="PinkyBrain"
@@ -288,6 +293,7 @@ export function ProjectsPage() {
 	];
 	return (
 		<PageShell
+			iconKey="folder-git"
 			title="Workspace Projects"
 			subtitle="AgentFM 협업 에이전트 프로젝트 풀"
 			badge="AgentFM"
@@ -326,6 +332,7 @@ export function ProjectsPage() {
 export function TasksPage() {
 	return (
 		<PageShell
+			iconKey="list-todo"
 			title="Task Dispatch Board"
 			subtitle="AgentFM 에이전트 간 작업 실시간 디스패치 및 큐"
 			badge="Dispatch Engine"
@@ -338,6 +345,7 @@ export function TasksPage() {
 export function WorkflowsPage() {
 	return (
 		<PageShell
+			iconKey="git-branch"
 			title="Autonomous Workflows"
 			subtitle="AgentFM 다중 에이전트 자율 파이프라인 시각화 (현재는 linear; DAG 분기는 후속)"
 			badge="Pipeline"
@@ -353,6 +361,7 @@ export function SettingsPage() {
 	const [tab, setTab] = useState<Tab>("security");
 	return (
 		<PageShell
+			iconKey="settings"
 			title="System & Gateway Settings"
 			subtitle="tkngate 제로트러스트 보안 및 게이트웨이 파라미터"
 			badge="tkngate"

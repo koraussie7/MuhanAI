@@ -2326,3 +2326,111 @@ html {
 		animation: none;
 	}
 }
+
+/* ---------------------------------------------------------------------------
+ * PageBox — boxed page container shared by every menu route.
+ * Each /sidebar item opens a page whose content lives inside this box, giving
+ * the menu contents a clean, organized card layout with a matching icon chip.
+ * ------------------------------------------------------------------------- */
+.page-box {
+	display: block;
+	width: 100%;
+	max-width: 980px;
+	margin: 0 auto;
+	background: rgba(17, 17, 17, 0.55);
+	border: 1px solid var(--cline-border, #26262b);
+	border-radius: 16px;
+	box-shadow:
+		0 1px 0 rgba(255, 255, 255, 0.04) inset,
+		0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+.page-box-header {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 16px 20px 14px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+	background: linear-gradient(180deg, rgba(26, 25, 30, 0.9), rgba(17, 17, 17, 0.4));
+	border-radius: 16px 16px 0 0;
+}
+
+.page-box-title-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.page-box-icon {
+	display: inline-grid;
+	place-items: center;
+	width: 34px;
+	height: 34px;
+	flex-shrink: 0;
+	border-radius: 10px;
+	background: color-mix(in srgb, var(--cline-primary, #e6ff87) 22%, transparent);
+	border: 1px solid color-mix(in srgb, var(--cline-primary, #e6ff87) 45%, transparent);
+	color: var(--cline-primary, #f0ffa8);
+	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+}
+
+.page-box-title {
+	margin: 0;
+	font-size: 17px;
+	font-weight: 700;
+	letter-spacing: 0.2px;
+	color: var(--cline-text, #f4f5ed);
+	line-height: 1.25;
+}
+
+.page-box-badge {
+	display: inline-flex;
+	align-items: center;
+	margin-left: auto;
+	padding: 2px 9px;
+	border-radius: 999px;
+	font-size: 10.5px;
+	font-weight: 700;
+	letter-spacing: 0.6px;
+	background: rgba(16, 185, 129, 0.16);
+	border: 1px solid rgba(16, 185, 129, 0.4);
+	color: #6ee7b7;
+}
+
+.page-box-subtitle {
+	margin: 0;
+	font-size: 12.5px;
+	line-height: 1.55;
+	color: var(--cline-text-muted, #a1a1aa);
+}
+
+.page-box-body {
+	padding: 18px 20px 22px;
+}
+
+/* Make existing harvested card components feel at home inside the box. */
+.page-box-body .stat-grid,
+.page-box-body .peer-grid,
+.page-box-body .policy-row,
+.page-box-body .verify-queue {
+	width: 100%;
+}
+
+@media (max-width: 768px) {
+	.page-box {
+		border-radius: 12px;
+	}
+	.page-box-header {
+		padding: 12px 14px 10px;
+	}
+	.page-box-body {
+		padding: 14px 14px 18px;
+	}
+	.page-box-icon {
+		width: 30px;
+		height: 30px;
+	}
+	.page-box-title {
+		font-size: 15.5px;
+	}
+}

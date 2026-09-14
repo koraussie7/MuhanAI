@@ -14,6 +14,8 @@ export interface NavItem {
 	badge?: string;
 }
 
+import { ROUTES } from "../routes.js";
+
 export interface NavGroup {
 	id: string;
 	title: string;
@@ -21,251 +23,36 @@ export interface NavGroup {
 }
 
 /**
- * Source-of-truth navigation definition. Icons are referenced by key
- * (e.g. 'layout-dashboard') instead of React elements so this file
- * is portable to non-React runtimes and to tests.
- *
- * Keep this in lockstep with the sidebar's visual presentation; the
- * Sidebar component is the only consumer.
- *
- * This MUST stay in sync with App.tsx SECTIONS array.
+ * Sidebar groups are derived from the route registry (routes.ts),
+ * the single source of truth for navigation, routing, and lazy pages.
+ * Icons are referenced by key (e.g. 'layout-dashboard') instead of React
+ * elements so this file stays portable to non-React runtimes and tests.
  */
-export const NAV_GROUPS: NavGroup[] = [
-	{
-		id: "core",
-		title: "Core & Chat",
-		items: [
-			{
-				id: "dashboard",
-				label: "Dashboard",
-				path: "/dashboard",
-				iconKey: "layout-dashboard",
-			},
-			{
-				id: "find",
-				label: "Cosmic Mesh",
-				path: "/",
-				iconKey: "search",
-				badge: "NEW",
-			},
-			{
-				id: "agent-cast",
-				label: "Agent Cast",
-				path: "/agent-cast",
-				iconKey: "radio",
-				badge: "LIVE",
-			},
-			{
-				id: "agent-mesh",
-				label: "Agent Mesh",
-				path: "/agent-mesh",
-				iconKey: "bot",
-			},
-				{
-			id: "desktop",
-			label: "Web Desktop",
-			path: "/desktop",
-			iconKey: "monitor",
-			badge: "DaedalOS",
-			},
-			{
-			id: "bitterbot",
-			label: "Bitterbot Agent",
-			path: "/bitterbot",
-			iconKey: "package",
-			badge: "Beta",
-			},
-			],
-	},
-	{
-		id: "network",
-		title: "P2P Network",
-		items: [
-			{
-				id: "p2p-network",
-				label: "P2P Nodes",
-				path: "/network",
-				iconKey: "network",
-			},
-			{
-				id: "network-monitor",
-				label: "Telemetry & Pulse",
-				path: "/monitor",
-				iconKey: "activity",
-			},
-		],
-	},
-	{
-		id: "resources",
-		title: "Compute & Models",
-		items: [
-			{
-				id: "models",
-				label: "LLM Models",
-				path: "/models",
-				iconKey: "sparkles",
-				badge: "Token-Free",
-			},
-			{
-				id: "compute-mesh",
-				label: "Compute Mesh",
-				path: "/compute-mesh",
-				iconKey: "cpu",
-			},
-			{
-				id: "mcp-skills",
-				label: "MCP Tools",
-				path: "/mcp-skills",
-				iconKey: "layers",
-			},
-			{
-				id: "hivebear",
-				label: "HiveBear Mesh",
-				path: "/hivebear",
-				iconKey: "git-branch",
-			},
-		],
-	},
-	{
-		id: "intelligence",
-		title: "Intelligence",
-		items: [
-			{
-				id: "knowledge",
-				label: "Knowledge Graph",
-				path: "/knowledge",
-				iconKey: "database",
-			},
-			{
-				id: "verification",
-				label: "Verification",
-				path: "/verification",
-				iconKey: "check-circle",
-			},
-			{
-				id: "search",
-				label: "Mesh Search",
-				path: "/search",
-				iconKey: "search",
-			},
-			{
-				id: "semantic-vote",
-				label: "Semantic Vote",
-				path: "/semantic-vote",
-				iconKey: "vote",
-			},
-			{
-				id: "federation",
-				label: "Federation",
-				path: "/federation",
-				iconKey: "git-merge",
-			},
-		],
-	},
-	{
-		id: "marketplace",
-		title: "Marketplace",
-		items: [
-			{
-				id: "agents-market",
-				label: "Agent Hub",
-				path: "/marketplace/agents",
-				iconKey: "bot",
-			},
-			{
-				id: "human-experts",
-				label: "Human Experts",
-				path: "/marketplace/human-experts",
-				iconKey: "users",
-			},
-			{
-				id: "compute-market",
-				label: "Compute Market",
-				path: "/marketplace/compute",
-				iconKey: "cpu",
-			},
-			{
-				id: "mcp-market",
-				label: "MCP Marketplace",
-				path: "/marketplace/mcp",
-				iconKey: "layers",
-			},
-			{
-				id: "knowledge-market",
-				label: "Knowledge Market",
-				path: "/marketplace/knowledge",
-				iconKey: "book-open",
-			},
-		],
-	},
-	{
-		id: "economy",
-		title: "Economy",
-		items: [
-			{
-				id: "token-bank",
-				label: "Token Bank",
-				path: "/token-bank",
-				iconKey: "coins",
-			},
-			{
-				id: "contributions",
-				label: "Contributions",
-				path: "/contributions",
-				iconKey: "activity",
-			},
-			{
-				id: "reputation",
-				label: "Reputation",
-				path: "/reputation",
-				iconKey: "star",
-			},
-		],
-	},
-	{
-		id: "workspace",
-		title: "Workspace",
-		items: [
-			{
-				id: "projects",
-				label: "Projects",
-				path: "/projects",
-				iconKey: "folder-git",
-			},
-			{
-				id: "tasks",
-				label: "Tasks",
-				path: "/tasks",
-				iconKey: "list-todo",
-			},
-			{
-				id: "workflows",
-				label: "Workflows",
-				path: "/workflows",
-				iconKey: "git-branch",
-			},
-		],
-	},
-	{
-		id: "system",
-		title: "Settings",
-		items: [
-			{
-				id: "settings",
-				label: "Security & Keys",
-				path: "/settings",
-				iconKey: "settings",
-			},
-			{
-				id: "happy",
-				label: "Happy Coder",
-				path: "/happy",
-				iconKey: "smartphone",
-				badge: "NEW",
-			},
-		],
-	},
-];
+
+const GROUP_TITLES: Record<string, string> = {
+	core: "Core & Chat",
+	network: "P2P Network",
+	resources: "Compute & Models",
+	knowledge: "Knowledge & Intelligence",
+	marketplace: "Marketplace",
+	economy: "Economy",
+	workspace: "Workspace",
+	system: "Settings",
+};
+
+/** Sidebar groups are derived from the route registry, not maintained separately. */
+export const NAV_GROUPS: NavGroup[] = Object.entries(
+	ROUTES.reduce<Record<string, NavItem[]>>((groups, route) => {
+		(groups[route.group] ??= []).push({
+			id: route.id,
+			label: route.label,
+			path: route.path,
+			iconKey: route.iconKey,
+			badge: route.badge,
+		});
+		return groups;
+	}, {}),
+).map(([id, items]) => ({ id, title: GROUP_TITLES[id] ?? id, items }));
 
 /**
  * Decide whether a nav item is the "currently active" one for a given URL.

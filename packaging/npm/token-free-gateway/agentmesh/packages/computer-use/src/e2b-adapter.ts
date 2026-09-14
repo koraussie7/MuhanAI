@@ -186,6 +186,19 @@ export class E2bBrowserAdapter implements BrowserAdapter {
 	async callBrowserTool(toolName: string, args: Record<string, unknown>): Promise<unknown> {
 		const sandbox = await this.ensureSandbox();
 
+		// Alias the @agentmesh/browser-use tool names so an E2bBrowserAdapter
+		// is a drop-in replacement for PlaywrightBrowserAdapter (and vice versa).
+		switch (toolName) {
+			case 'browser_navigate':
+				return this.callBrowserTool('browser_open', args);
+			case 'browser_press_key':
+				return this.callBrowserTool('browser_press', args);
+			case 'browser_click_at':
+				return this.callBrowserTool('browser_coordinate_click', args);
+			case 'browser_take_screenshot':
+				return this.callBrowserTool('browser_snapshot', args);
+		}
+
 		switch (toolName) {
 			case 'browser_snapshot':
 				return runSnapshot(this, sandbox);

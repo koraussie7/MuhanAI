@@ -1,0 +1,171 @@
+# =============================================================================
+# Robust Multi-stage Dockerfile for nanos (Rust + llama.cpp)
+# =============================================================================
+# Build: docker build -t nanos:latest --target runtime .
+# Run:   docker run -d -p 8080:8080 -v /path/to/models:/models nanos:latest
+# =============================================================================
+
+# =============================================================================
+# STAGE 1: Base builder with all native dependencies
+# =============================================================================
+FROM rust:latest AS builder
+
+# Install ALL native dependencies for llama-cpp-sys / nanos
+# llvm/clang for bindgen, cmake for building, OpenMP for llama.cpp
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    pkg-config \
+    clang \
+    libclang-dev \
+    libopenblas-dev \
+    libomp-dev \
+    libssl-dev \
+    protobuf-compiler \
+    git \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set up libclang for bindgen (llama-cpp-sys needs this)
+# Debian's libclang package version can vary; discover the actual shared library path during build.
+ENV LIBCLANG_STATIC=0
+
+
+# Create build user (non-root for security)
+RUN useradd -m -u 1000 -s /bin/bash builder
+USER builder
+WORKDIR /home/builder
+
+# =============================================================================
+# STAGE 2: Cache cargo dependencies (separate layer for caching)
+# =============================================================================
+FROM builder AS cargo-cache
+
+WORKDIR /home/builder/src
+
+# Copy only manifests first for dependency caching
+COPY --chown=builder:builder Cargo.toml Cargo.lock* ./
+# Copy .cargo only when the build context provides it; Cargo defaults are sufficient here.
+
+# Create dummy source to cache dependencies
+RUN mkdir -p src && echo "fn main() {}" > src/main.rs
+
+# Pre-fetch and cache dependencies (this layer caches unless Cargo.toml changes)
+RUN cargo fetch --locked
+
+# =============================================================================
+# STAGE 3: Actual build with source code
+# =============================================================================
+FROM cargo-cache AS build
+
+# Copy actual source code
+COPY --chown=builder:builder . .
+
+# Build with optimizations
+# CARGO_BUILD_JOBS=1 prevents OOM on memory-constrained systems
+ENV CARGO_BUILD_JOBS=1
+ENV RUSTFLAGS="-C target-cpu=native -C link-arg=-s"
+
+# Build with all features needed for OpenAI-compatible server
+RUN export LIBCLANG_PATH="$(dirname "$(find /usr/lib -type f \( -name 'libclang.so' -o -name 'libclang.so.*' \) | head -1)")" \
+    && test -n "$LIBCLANG_PATH" \
+    && test -f "$LIBCLANG_PATH/libclang.so" -o -n "$(find "$LIBCLANG_PATH" -maxdepth 1 -name 'libclang.so.*' -print -quit)" \
+    && cargo build --release --locked 2>&1 | tee build.log
+
+# Verify binary exists and is executable
+RUN test -x target/release/nanos && strip target/release/nanos
+
+# =============================================================================
+# STAGE 4: Runtime image (minimal, no build tools)
+# =============================================================================
+FROM debian:bookworm-slim AS runtime
+
+# Install ONLY runtime dependencies (no build tools)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libopenblas0 \
+    libomp5 \
+    libssl3 \
+    ca-certificates \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create runtime user
+RUN useradd -m -u 1000 -s /bin/bash nanos
+USER nanos
+WORKDIR /home/nanos
+
+# Copy binary from build stage. Models and manifests are mounted at runtime.
+COPY --from=build /home/builder/src/target/release/nanos /usr/local/bin/nanos
+# Create directories
+RUN mkdir -p /home/nanos/models /home/nanos/manifests /home/nanos/logs
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD curl -f http://127.0.0.1:8080/health || exit 1
+
+# Expose port
+EXPOSE 8080
+
+# Environment variables
+ENV RUST_LOG=info
+ENV NANOS_HOST=127.0.0.1
+ENV NANOS_PORT=8080
+ENV NANOS_MODEL_PATH=/home/nanos/models
+
+# Default command
+ENTRYPOINT ["nanos"]
+CMD ["serve", "--manifest", "/home/nanos/manifests/bitterbot.yaml", "--host", "127.0.0.1", "--port", "8080"]
+
+
+# =============================================================================
+# ALTERNATIVE: GPU-enabled build (uncomment for CUDA support)
+# =============================================================================
+# FROM nvidia/cuda:12.4-devel-ubuntu22.04 AS builder-cuda
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#     build-essential cmake pkg-config clang libclang-dev libopenblas-dev libomp-dev \
+#     && rm -rf /var/lib/apt/lists/*
+#
+# ENV CUDA_PATH=/usr/local/cuda
+# ENV PATH="${CUDA_PATH}/bin:${PATH}"
+# ENV LD_LIBRARY_PATH="${CUDA_PATH}/lib64:${LD_LIBRARY_PATH}"
+# ENV CMAKE_ARGS="-DGGML_CUDA=ON"
+#
+# # ... rest same as builder but with CUDA toolkit
+#
+# # Final runtime would use nvidia/cuda:12.4-runtime-ubuntu22.04
+# FROM nvidia/cuda:12.4-runtime-ubuntu22.04 AS runtime-cuda
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#     libopenblas0 libomp5 libssl3 ca-certificates curl \
+#     && rm -rf /var/lib/apt/lists/*
+# COPY --from=build /home/builder/src/target/release/nanos /usr/local/bin/nanos
+# # ... same runtime config
+
+
+# =============================================================================
+# BUILD COMMANDS
+# =============================================================================
+# Build CPU version:
+#   docker build -t nanos:latest --target runtime .
+#
+# Build GPU version (requires NVIDIA Docker):
+#   docker build -t nanos:cuda --target runtime-cuda --build-arg BASE_IMAGE=nvidia/cuda:12.4-devel-ubuntu22.04 .
+#
+# Run:
+#   docker run -d \
+#     --name nanos \
+#     -p 8080:8080 \
+#     -v /host/path/to/models:/home/nanos/models:ro \
+#     -v /host/path/to/manifests:/home/nanos/manifests:ro \
+#     -v /host/path/to/logs:/home/nanos/logs \
+#     --restart unless-stopped \
+#     --health-cmd="curl -f http://127.0.0.1:8080/health || exit 1" \
+#     --health-interval=30s \
+#     --health-timeout=10s \
+#     --health-retries=3 \
+#     nanos:latest
+#
+# GPU run (requires nvidia-docker):
+#   docker run -d --gpus all --name nanos-gpu nanos:cuda
+#
+# Check logs: docker logs -f nanos
+# Check health: docker inspect nanos | grep Health -A 10
