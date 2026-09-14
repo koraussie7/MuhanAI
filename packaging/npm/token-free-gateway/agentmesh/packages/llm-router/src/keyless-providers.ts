@@ -2,11 +2,11 @@
  * Keyless LLM providers pool — Tier 3 of the muhanai.com LLM gateway.
  *
  * These providers require NO API key, NO account, and NO setup.
- * They are polled in parallel and the best response is returned.
  *
- * Inspired by:
- *   - TierMux (keyless providers: Kilo Gateway, OpenCode Zen, OVH AI, Pollinations)
- *   - FreeLLMAPI (OpenRouter free tier, Cloudflare Workers AI)
+ * Only providers verified to actually work without credentials are kept here.
+ * As of the last full sweep the pollinations OpenAI-compatible POST API is the
+ * sole live keyless provider; the GET text endpoint and openrouter-free /
+ * cloudflare-worker-ai / HF-inference paths were removed as non-functional.
  *
  * Usage:
  *   import { callKeylessProviders } from "./keyless-providers.js";
@@ -31,7 +31,6 @@ export interface KeylessResponse {
 interface KeylessProviderConfig {
 	name: string;
 	endpoint: string;
-	method: "GET" | "POST";
 	headers: Record<string, string>;
 	body: (req: KeylessRequest) => Record<string, unknown>;
 	parse: (data: any) => string;
@@ -39,19 +38,8 @@ interface KeylessProviderConfig {
 
 const KEYLESS_PROVIDERS: KeylessProviderConfig[] = [
 	{
-		name: "pollinations",
-		endpoint: "https://text.pollinations.ai/prompt/",
-		method: "GET",
-		// GET providers URL-encode the prompt directly into the endpoint;
-		// config.body is intentionally unused here (see callProvider's GET branch).
-		headers: { "Content-Type": "application/json" },
-		body: () => ({}),
-		parse: (data) => (typeof data === "string" ? data : JSON.stringify(data)),
-	},
-	{
 		name: "pollinations-api",
 		endpoint: "https://api.pollinations.ai/v1/chat/completions",
-		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: (req) => ({
 			messages: [
@@ -64,68 +52,7 @@ const KEYLESS_PROVIDERS: KeylessProviderConfig[] = [
 		}),
 		parse: (data) => data?.choices?.[0]?.message?.content ?? "",
 	},
-	{
-		name: "openrouter-free",
-		endpoint: "https://openrouter.ai/api/v1/chat/completions",
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-			"HTTP-Referer": "https://muhanai.com",
-			"X-Title": "MuhanAI Token-Free Gateway",
-		},
-		body: (req) => ({
-			model: req.model ?? "meta-llama/llama-3.2-3b-instruct",
-			messages: [
-				...(req.system ? [{ role: "system", content: req.system }] : []),
-				{ role: "user", content: req.prompt },
-			],
-			temperature: req.temperature ?? 0.3,
-			max_tokens: req.maxTokens ?? 1024,
-		}),
-		parse: (data) => data?.choices?.[0]?.message?.content ?? "",
-	},
-	{
-		name: "cloudflare-wr-ai",
-		endpoint: "https://api.cloudflare.com/client/v4/ai/run",
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: (req) => ({
-			model: req.model ?? "@cf/meta/llama-3.2-3b-instruct",
-			messages: [
-				...(req.system ? [{ role: "system", content: req.system }] : []),
-				{ role: "user", content: req.prompt },
-			],
-		}),
-		parse: (data) => data?.result?.response ?? "",
-	},
-	{
-		name: "hf-inference",
-		endpoint: "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-0.5B-Instruct",
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: (req) => ({
-			// Qwen2.5-Instruct requires the chat-template markers; without them the
-			// model treats system + user as one input and ignores the system message.
-			inputs: formatQwenChat(req.system, req.prompt),
-			options: { wait_for_model: true },
-		}),
-		parse: (data) => (Array.isArray(data) ? data[0]?.generated_text : data?.generated_text) ?? "",
-	},
 ];
-
-/**
- * Format a prompt using the Qwen2.5-Instruct chat template.
- *
- * The HF Inference API's `inputs` field is a single string, so chat role markers
- * must be inlined. Without these markers Qwen ignores system instructions and
- * treats the whole string as a single user turn.
- */
-export function formatQwenChat(system: string | undefined, prompt: string): string {
-	const IM = "<|im_start|>";
-	const END = "<|im_end|>";
-	const sysBlock = system ? `${IM}system\n${system}${END}\n` : "";
-	return `${sysBlock}${IM}user\n${prompt}${END}\n${IM}assistant\n`;
-}
 
 /**
  * Call a single keyless provider with a timeout.
@@ -140,25 +67,12 @@ async function callProvider(
 	const timer = setTimeout(() => controller.abort(), timeoutMs);
 
 	try {
-		let response: Response;
-
-		if (config.method === "POST") {
-			response = await fetch(config.endpoint, {
-				method: "POST",
-				headers: config.headers,
-				body: JSON.stringify(config.body(req)),
-				signal: controller.signal,
-			});
-		} else {
-			// GET: URL-encode the prompt into the endpoint
-			const promptText = req.system ? `${req.system}\n\n${req.prompt}` : req.prompt;
-			const url = `${config.endpoint}${encodeURIComponent(promptText)}`;
-			response = await fetch(url, {
-				method: "GET",
-				headers: config.headers,
-				signal: controller.signal,
-			});
-		}
+		const response = await fetch(config.endpoint, {
+			method: "POST",
+			headers: config.headers,
+			body: JSON.stringify(config.body(req)),
+			signal: controller.signal,
+		});
 
 		if (!response.ok) {
 			throw new Error(`${config.name} returned ${response.status}`);

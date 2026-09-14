@@ -13,10 +13,10 @@ import { defineConfig, type Plugin } from "vite";
  * through to the offline mock.
  *
  * This plugin replicates the server-side `callKeylessProviders` chain
- * (pollinations POST, pollinations GET, openrouter-free, hf-inference,
- * cloudflare-wr-ai) and races them in parallel, returning the first success.
- * Because each provider has an independent quota, at least one usually
- * responds 2xx even when one is queue-blocked.
+ * (omniroute, oauth-gateway, pollinations POST) and races them in parallel,
+ * returning the first success. Dead providers (pollinations GET, openrouter
+ * free tier, HF-inference, cloudflare-workers-ai) were removed after probing
+ * confirmed they cannot answer without credentials.
  *
  * The route only activates when the api backend on :3001 is unreachable,
  * so production builds still flow through the real gateway.
@@ -41,9 +41,6 @@ async function fetchWithTimeout(url: string, init: RequestInit, ms: number): Pro
 }
 
 function buildAttempts(prompt: string, system: string, authToken?: string | null): KeylessAttempt[] {
-	const SYSTEM_PREFIX = system
-		? `${system}\n\n`
-		: "You are MuhanAI, a helpful multilingual assistant. Answer concisely and accurately in the same language as the user's question.\n\n";
 	const attempts: KeylessAttempt[] = [];
 
 	// 1. OmniRoute Mesh daemon (port 20128)
@@ -109,38 +106,7 @@ function buildAttempts(prompt: string, system: string, authToken?: string | null
 		},
 	});
 
-	// 3. OpenRouter Free Tier (TierMux free models)
-	attempts.push({
-		name: "openrouter-free",
-		fetch: () =>
-			fetchWithTimeout(
-				"https://openrouter.ai/api/v1/chat/completions",
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						"HTTP-Referer": "https://muhanai.com",
-						"X-Title": "MuhanAI Token-Free Gateway",
-					},
-					body: JSON.stringify({
-						model: "meta-llama/llama-3.3-70b-instruct:free",
-						messages: [
-							...(system ? [{ role: "system", content: system }] : []),
-							{ role: "user", content: prompt },
-						],
-						temperature: 0.7,
-						max_tokens: 1024,
-					}),
-				},
-				TIMEOUT_MS,
-			),
-		parse: async (res) => {
-			const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-			return data?.choices?.[0]?.message?.content ?? "";
-		},
-	});
-
-	// 4. Pollinations POST (Keyless free LLM)
+	// 3. Pollinations POST (Keyless free LLM)
 	attempts.push({
 		name: "pollinations-post",
 		fetch: () =>
@@ -167,20 +133,6 @@ function buildAttempts(prompt: string, system: string, authToken?: string | null
 			};
 			return data?.choices?.[0]?.message?.content ?? "";
 		},
-	});
-
-	// 5. Pollinations GET (Keyless free LLM)
-	attempts.push({
-		name: "pollinations-get",
-		fetch: () =>
-			fetchWithTimeout(
-				`https://text.pollinations.ai/prompt/${encodeURIComponent(
-					SYSTEM_PREFIX + prompt,
-				)}?model=openai-fast`,
-				{ method: "GET" },
-				TIMEOUT_MS,
-			),
-		parse: async (res) => res.text(),
 	});
 
 	return attempts;

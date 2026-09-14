@@ -2,47 +2,19 @@
  * Tests for the keyless LLM provider pool.
  *
  * Verifies:
- * - formatQwenChat produces the correct chat-template markers
- * - the GET pollinations provider no longer carries a stale body
+ * - only the verified-live providers remain (dead paths removed)
+ * - the pollinations POST API is tried first and returned on success
  * - callKeylessProviders falls back to local knowledge when all providers fail
  * - callKeylessProviders wires through to a real provider response when fetch works
  */
 
 import { afterEach, describe, expect, test } from "vitest";
-import {
-	callKeylessProviders,
-	formatQwenChat,
-	getKeylessProviderNames,
-} from "./keyless-providers.js";
-
-describe("formatQwenChat", () => {
-	test("wraps prompt with role markers so Qwen honors the system message", () => {
-		const out = formatQwenChat("You are concise.", "What is 2+2?");
-		expect(out).toContain("<|im_start|>system\nYou are concise.<|im_end|>");
-		expect(out).toContain("<|im_start|>user\nWhat is 2+2?<|im_end|>");
-		expect(out).toContain("<|im_start|>assistant\n");
-	});
-
-	test("omits system block when no system message is provided", () => {
-		const out = formatQwenChat(undefined, "Hello");
-		expect(out.startsWith("<|im_start|>user\n")).toBe(true);
-		expect(out).not.toContain("system");
-	});
-
-	test("places assistant marker at the end so the model knows where to begin", () => {
-		const out = formatQwenChat("S", "P");
-		expect(out.endsWith("<|im_start|>assistant\n")).toBe(true);
-	});
-});
+import { callKeylessProviders, getKeylessProviderNames } from "./keyless-providers.js";
 
 describe("getKeylessProviderNames", () => {
-	test("exposes all five keyless providers", () => {
+	test("exposes only the pollinations POST API provider (dead paths removed)", () => {
 		const names = getKeylessProviderNames();
-		expect(names).toContain("pollinations");
-		expect(names).toContain("pollinations-api");
-		expect(names).toContain("openrouter-free");
-		expect(names).toContain("cloudflare-wr-ai");
-		expect(names).toContain("hf-inference");
+		expect(names).toEqual(["pollinations-api"]);
 	});
 });
 
@@ -53,7 +25,7 @@ afterEach(() => {
 });
 
 describe("callKeylessProviders — prompt wiring", () => {
-	test("when a free provider responds, the user's question is routed through and returned", async () => {
+	test("when a free provider responds, the user's question is routed through the pollinations POST API", async () => {
 		// Stub fetch: return a JSON OpenAI-style response for any URL
 		globalThis.fetch = (async () =>
 			new Response(
@@ -67,8 +39,21 @@ describe("callKeylessProviders — prompt wiring", () => {
 			prompt: "What is the capital of France?",
 			system: "Answer in one word.",
 		});
-		expect(result.text.length).toBeGreaterThan(0);
-		expect(result.provider).not.toBe("fallback");
+		expect(result.text).toBe("Paris");
+		expect(result.provider).toBe("pollinations-api");
+	});
+
+	test("only attempts the live pollinations POST API (no dead provider calls)", async () => {
+		let calls = 0;
+		globalThis.fetch = (async () => {
+			calls++;
+			return new Response(JSON.stringify({ choices: [{ message: { content: "ok" } }] }), {
+				headers: { "content-type": "application/json" },
+			});
+		}) as unknown as typeof fetch;
+
+		await callKeylessProviders({ prompt: "hi" });
+		expect(calls).toBe(1);
 	});
 
 	test("falls back to local-knowledge when every provider fails", async () => {
