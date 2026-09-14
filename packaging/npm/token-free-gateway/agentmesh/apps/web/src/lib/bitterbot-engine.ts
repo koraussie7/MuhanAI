@@ -72,7 +72,7 @@ async function getSippEngine(): Promise<SippEngine | null> {
 	try {
 	const engine = AIEngineFactory.createDefault();
 	await engine.init();
-	await engine.loadModel("llama-3-8b-q4");
+	await engine.loadModel("phi-3-mini-q4"); // 2.3GB — 첫 자동 다운로드가 빠른 기본 모델
 		sippEngine = engine;
 	return engine;
 	} catch {
@@ -162,4 +162,9 @@ export async function answerWithBitterbot(
 
 	if (options.allowOffline === false) return null;
 	return offlineResponse(messages);
+}
+
+/** WebGPU 엔진을 미리 초기화/다운로드한다. 앱 마운트 시 호출하면 첫 질의 응답 지연이 사라진다. */
+export function preloadBitterbotEngine(): void {
+	void getSippEngine();
 }
