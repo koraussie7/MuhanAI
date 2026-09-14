@@ -137,7 +137,7 @@ export async function answerWithBitterbot(
 	const lastUser = [...messages].reverse().find((message) => message.role === "user")?.content ?? "";
 	const text = await engine.chat(lastUser, { stream: false });
 	if (validText(text)) {
-	return { text, provider: "bitterbot-webgpu", model: "llama-3-8b-q4", tier: "local-webgpu", latencyMs: Math.round(now() - started) };
+	return { text, provider: "bitterbot-webgpu", model: "phi-3-mini-q4", tier: "local-webgpu", latencyMs: Math.round(now() - started) };
 	}
 	}
 	}
@@ -167,4 +167,17 @@ export async function answerWithBitterbot(
 /** WebGPU 엔진을 미리 초기화/다운로드한다. 앱 마운트 시 호출하면 첫 질의 응답 지연이 사라진다. */
 export function preloadBitterbotEngine(): void {
 	void getSippEngine();
+}
+
+/** 로컬 SippEngine으로 직접 채팅한다. 엔진이 없거나 실패하면 null을 반환한다.
+ *  CosmicPromptBar의 Multi-Agent Quorum이 동일 엔진을 재사용하도록 export한다. */
+export async function chatWithSippEngine(message: string): Promise<string | null> {
+	const engine = await getSippEngine();
+	if (!engine) return null;
+	try {
+		const text = await engine.chat(message, { stream: false });
+		return validText(text) ? text : null;
+	} catch {
+		return null;
+	}
 }

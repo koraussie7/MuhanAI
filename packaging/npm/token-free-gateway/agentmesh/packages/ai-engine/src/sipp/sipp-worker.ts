@@ -68,7 +68,17 @@ export class SippWorker {
 			onError: options.onError,
 		});
 
-		this.postMessage("generate", { id, messages, options });
+		// onToken/onComplete/onError 함수와 AbortSignal은 structured-clone이
+		// 불가능하다. 콜백은 위 pending 맵에서 라우팅되므로 전송 페이로드에는
+		// 복제 가능한 값만 담는다. (DataCloneError 수정)
+		const wireOptions = {
+			maxTokens: options.maxTokens,
+			temperature: options.temperature,
+			topP: options.topP,
+			topK: options.topK,
+			stream: options.stream,
+		};
+		this.postMessage("generate", { id, messages, options: wireOptions });
 	}
 
 	async unloadModel(): Promise<void> {
