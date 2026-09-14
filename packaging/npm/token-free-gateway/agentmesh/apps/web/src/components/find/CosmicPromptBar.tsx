@@ -33,7 +33,6 @@ interface ResolvedAnswer {
 
 type FreeLlmProviderId =
 	| "pollinations"
-	| "pollinations-get"
 	| "api-llm-chat"
 	| "local-oauth"
 	| "omniroute"
@@ -45,7 +44,6 @@ interface FreeLlmConfig {
 
 const DEFAULT_FREE_LLM_PROVIDERS: FreeLlmProviderId[] = [
 	"pollinations",
-	"pollinations-get",
 	"api-llm-chat",
 	"local-oauth",
 	"omniroute",
@@ -551,42 +549,29 @@ async function resolveAnswerFromPollinations(query: string): Promise<ResolvedAns
 	const start = (typeof performance !== "undefined" ? performance.now() : Date.now());
 
 	const candidates: Array<{ provider: string; model: string; tryFetch: () => Promise<Response> }> = [
-		{
-			provider: "pollinations-post",
-			model: "openai-fast",
-			tryFetch: () =>
-				fetchWithTimeout(
-					"https://text.pollinations.ai/v1/chat/completions",
-					{
-						method: "POST",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify({
-							model: "openai-fast",
-							messages: [
-								{ role: "system", content: POLLINATIONS_SYSTEM },
-								{ role: "user", content: query },
-							],
-							stream: false,
-							max_tokens: 512,
-						}),
-					},
-					10000,
-				),
-		},
-		{
-			provider: "pollinations-get",
-			model: "openai-fast",
-			tryFetch: () => {
-				// GET /prompt/:text — URL-encoded prompt. The system prompt is folded
-				// into the user turn because the GET endpoint is single-string.
-				const promptText = `${POLLINATIONS_SYSTEM}\n\n${query}`;
-				const url = `https://text.pollinations.ai/prompt/${encodeURIComponent(
-					promptText,
-				)}?model=openai-fast`;
-				return fetchWithTimeout(url, { method: "GET" }, 10000);
-			},
-		},
-	];
+{
+		provider: "pollinations-post",
+		model: "openai-fast",
+		tryFetch: () =>
+			fetchWithTimeout(
+				"https://text.pollinations.ai/v1/chat/completions",
+				{
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						model: "openai-fast",
+						messages: [
+							{ role: "system", content: POLLINATIONS_SYSTEM },
+							{ role: "user", content: query },
+						],
+						stream: false,
+						max_tokens: 512,
+					}),
+				},
+				10000,
+			),
+	},
+];
 
 	for (const c of candidates) {
 		try {
@@ -934,9 +919,7 @@ async function resolveAnswerFromMultiAgentQuorum(query: string, config: FreeLlmC
 	try { bitterbotResponse = await chatWithSippEngine(query); } catch { /* continue */ }
 	// 2. Pollination POST
 	if (!bitterbotResponse && config.enabledProviders.includes("pollinations")) { try { const res = await fetchWithTimeout("https://text.pollinations.ai/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "openai-fast", messages: [{ role: "system", content: "You are MuhanAI, a helpful multilingual assistant." }, { role: "user", content: query }], stream: false, max_tokens: 300 }) }, 6000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (isValidLlmText(text)) { bitterbotResponse = (text as string).trim(); bitterbotProvider = "Pollination (Free)"; } } } catch { /* continue */ } }
-	// 3. Pollination GET
-	if (!bitterbotResponse && config.enabledProviders.includes("pollinations-get")) { try { const promptText = `You are MuhanAI, a helpful assistant. User: ${query}`; const url = `https://text.pollinations.ai/prompt/${encodeURIComponent(promptText)}?model=openai-fast`; const res = await fetchWithTimeout(url, { method: "GET" }, 6000); if (res.ok) { const text = await res.text(); if (isValidLlmText(text)) { bitterbotResponse = text.trim(); bitterbotProvider = "Pollination GET (Free)"; } } } catch { /* continue */ } }
-	// 4. /api/llm/chat
+	// 3. /api/llm/chat
 	if (!bitterbotResponse && config.enabledProviders.includes("api-llm-chat")) { try { const res = await fetchWithTimeout("/api/llm/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt: query, system: "You are MuhanAI, a helpful assistant." }) }, 8000); if (res.ok) { const data = (await res.json()) as { text?: string; provider?: string }; if (data.text && data.text.trim().length > 0) { bitterbotResponse = data.text.trim(); bitterbotProvider = data.provider || "MuhanAI LLM"; } } } catch { /* continue */ } }
 	// 5. Local OAuth Gateway
 	if (!bitterbotResponse && config.enabledProviders.includes("local-oauth")) { try { const res = await fetchWithTimeout("http://127.0.0.1:3456/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "claude-3-7-sonnet", messages: [{ role: "system", content: "You are MuhanAI." }, { role: "user", content: query }] }) }, 4000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (text && text.trim().length > 0) { bitterbotResponse = text.trim(); bitterbotProvider = "Local OAuth"; } } } catch { /* continue */ } }
@@ -1306,8 +1289,6 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 				return "Pollinations Direct";
 			case "pollinations-post":
 				return "Pollinations · POST";
-			case "pollinations-get":
-				return "Pollinations · GET";
 			case "pollinations-api":
 				return "Pollinations API";
 			case "openrouter-free":
@@ -1348,7 +1329,6 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 
 	const freeLlmProviderLabels: Record<FreeLlmProviderId, string> = {
 		pollinations: t.freeLlm.pollinations,
-		"pollinations-get": t.freeLlm.pollinationsGet,
 		"api-llm-chat": t.freeLlm.apiLlmChat,
 		"local-oauth": t.freeLlm.localOauth,
 		omniroute: t.freeLlm.omniroute,

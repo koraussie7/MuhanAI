@@ -1,5 +1,6 @@
 import { AIEngineFactory } from "@agentmesh/ai-engine/factory";
 import type { SippEngine } from "@agentmesh/ai-engine";
+import { answerOffline, type BitterbotMessage as OfflineMessage } from "./offline-brain.js";
 
 export type BitterbotRole = "system" | "user" | "assistant";
 
@@ -85,14 +86,12 @@ async function getSippEngine(): Promise<SippEngine | null> {
 }
 
 function offlineResponse(messages: BitterbotMessage[]): BitterbotResponse {
-	const last = [...messages].reverse().find((message) => message.role === "user");
-	const query = last?.content ?? "your request";
 	return {
-	text: `Bitterbot is ready to help with “${query}”. Local inference providers are currently unavailable, so this is an offline response. Start SippEngine/WebGPU or a local OpenAI-compatible runtime to receive a model-generated answer.`,
-	provider: "bitterbot-offline",
-	model: "offline-fallback",
+		text: answerOffline(messages as OfflineMessage[]),
+		provider: "bitterbot-offline",
+		model: "offline-fallback",
 		tier: "offline",
-	latencyMs: 0,
+		latencyMs: 0,
 	};
 }
 
