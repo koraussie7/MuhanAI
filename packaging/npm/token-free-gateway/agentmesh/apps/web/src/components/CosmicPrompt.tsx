@@ -309,8 +309,31 @@ export function CosmicPrompt() {
 
   const handleLoadModel = async (modelId: string) => {
     setSelectedModel(modelId);
+    try {
+      localStorage.setItem("muhanai:webllm-model", modelId);
+    } catch {
+      /* ignore */
+    }
     await loadModel(modelId);
   };
+
+  // 자동 모델 로드: 패널을 처음 열면 저장된 모델(없으면 기본 모델)을 자동 다운로드
+  // WebLLM은 Cache API에 모델을 저장하므로 최초 1회만 다운로드, 이후 즉시 로드됨
+  const autoLoadAttempted = useRef(false);
+  useEffect(() => {
+    if (!isOpen || !webGPUSupported || isReady || isLoading || isLoadingMsg) return;
+    if (autoLoadAttempted.current) return;
+    autoLoadAttempted.current = true;
+    let saved: string | null = null;
+    try {
+      saved = localStorage.getItem("muhanai:webllm-model");
+    } catch {
+      /* ignore */
+    }
+    const modelId = saved ?? selectedModel;
+    setSelectedModel(modelId);
+    void loadModel(modelId);
+  }, [isOpen, webGPUSupported, isReady, isLoading, isLoadingMsg, selectedModel, loadModel, setSelectedModel]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoadingMsg) return;
@@ -416,8 +439,11 @@ export function CosmicPrompt() {
 
         {!isReady && !isLoading && webGPUSupported && (
           <div className="cosmic-setup">
-            <p className="setup-title">Select a local AI model</p>
-            <p className="setup-sub">Runs in browser via WebGPU. No API key needed.</p>
+            <p className="setup-title">Local AI auto-downloading…</p>
+            <p className="setup-sub">
+              Default model downloads on first open via WebGPU. No API key needed.
+              Cached after first download — subsequent loads are instant.
+            </p>
             <div className="model-list">
               {models.map((m) => (
                 <button key={m.id} className={`model-btn ${selectedModel === m.id ? "sel" : ""}`} onClick={() => handleLoadModel(m.id)}>
