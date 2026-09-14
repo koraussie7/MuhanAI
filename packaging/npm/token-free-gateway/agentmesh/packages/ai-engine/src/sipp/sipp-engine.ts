@@ -102,15 +102,10 @@ export class SippEngine extends EventEmitter {
 		this.emit("status", { ...this.status, loading: true });
 
 		try {
-			// 모델 다운로드 (필요시)
-			if (!model.downloaded) {
-				this.logger.info(`Downloading model: ${modelId}`);
-				await this.modelManager.downloadModel(modelId, (progress) => {
-					this.emit("downloadProgress", { modelId, progress });
-				});
-			}
-
-			// 모델 로드
+			// WebLLM(@mlc-ai/web-llm)이 모델 다운로드와 캐싱을 자체 처리하므로
+			// OPFS 사전 다운로드는 생략한다. 이전에는 존재하지 않는 HF GGUF URL을
+			// fetch해 전체 loadModel이 실패했었다.
+			this.logger.info(`Loading model via WebLLM: ${modelId}`);
 			const modelPath = await this.modelManager.getModelPath(modelId);
 			await this.worker.loadModel({
 				path: modelPath,

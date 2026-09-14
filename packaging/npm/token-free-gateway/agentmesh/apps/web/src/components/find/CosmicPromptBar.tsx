@@ -23,7 +23,7 @@ import { useI18n } from "../../i18n";
 import { ComputerUsePanel } from "../ComputerUsePanel";
 import { AIEngineFactory } from "@agentmesh/ai-engine/factory";
 import type { SippEngine } from "@agentmesh/ai-engine";
-import { answerWithBitterbot } from "../../lib/bitterbot-engine.js";
+import { answerWithBitterbot, preloadBitterbotEngine } from "../../lib/bitterbot-engine.js";
 
 interface ResolvedAnswer {
 	text: string;
@@ -1103,6 +1103,14 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 	const [showComputerUsePanel, setShowComputerUsePanel] = useState(false);
 	const [freeLlmEnabled, setFreeLlmEnabled] = useState<Set<FreeLlmProviderId>>(new Set(DEFAULT_FREE_LLM_PROVIDERS));
 	const [showFreeLlmPanel, setShowFreeLlmPanel] = useState(false);
+
+	// WebGPU 로컬 엔진 자동 프리로드: 페이지 마운트 시 백그라운드에서 기본 모델을
+	// 다운로드/로드한다. WebLLM이 Cache API에 저장하므로 최초 1회만 다운로드되고
+	// 이후 방문에서는 즉시 로드된다.
+	useEffect(() => {
+		if (typeof navigator === "undefined" || !("gpu" in navigator)) return;
+		void preloadBitterbotEngine();
+	}, []);
 
 	// Load BYOK from localStorage on mount; if absent, seed the draft with the OpenAI defaults.
 	useEffect(() => {
