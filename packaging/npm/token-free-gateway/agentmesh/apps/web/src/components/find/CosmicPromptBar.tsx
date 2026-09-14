@@ -21,9 +21,7 @@ import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "../../i18n";
 import { ComputerUsePanel } from "../ComputerUsePanel";
-import { AIEngineFactory } from "@agentmesh/ai-engine/factory";
-import type { SippEngine } from "@agentmesh/ai-engine";
-import { answerWithBitterbot, preloadBitterbotEngine } from "../../lib/bitterbot-engine.js";
+import { answerWithBitterbot, chatWithSippEngine, preloadBitterbotEngine } from "../../lib/bitterbot-engine.js";
 
 interface ResolvedAnswer {
 	text: string;
@@ -911,10 +909,6 @@ Supported providers: OpenAI · OpenRouter · Google AI Studio · Groq · Mistral
 	};
 }
 
-// Singleton SippEngine instance for Bitterbot local inference
-let sippEngineInstance: SippEngine | null = null;
-let sippEngineInitPromise: Promise<SippEngine | null> | null = null;
-
 /**
  * Multi-Agent Quorum Consensus Engine with Bitterbot Integration
  *
@@ -937,7 +931,7 @@ async function resolveAnswerFromMultiAgentQuorum(query: string, config: FreeLlmC
 	let bitterbotResponse: string | null = null;
 	let bitterbotProvider = "Local WebGPU (SippEngine)";
 	// 1. Bitterbot (local WebGPU)
-	try { const engine = await getSippEngine(); if (engine) { bitterbotResponse = await engine.chat(query, { stream: false }); } } catch { /* continue */ }
+	try { bitterbotResponse = await chatWithSippEngine(query); } catch { /* continue */ }
 	// 2. Pollination POST
 	if (!bitterbotResponse && config.enabledProviders.includes("pollinations")) { try { const res = await fetchWithTimeout("https://text.pollinations.ai/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "openai-fast", messages: [{ role: "system", content: "You are MuhanAI, a helpful multilingual assistant." }, { role: "user", content: query }], stream: false, max_tokens: 300 }) }, 6000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (isValidLlmText(text)) { bitterbotResponse = (text as string).trim(); bitterbotProvider = "Pollination (Free)"; } } } catch { /* continue */ } }
 	// 3. Pollination GET
@@ -1028,23 +1022,6 @@ mcp-quorum
 —`;
 	}
 	return { text, provider: bitterbotProvider, model: "multi-agent-quorum", latencyMs: 0, tier: "zero-token" };
-}
-
-async function getSippEngine(): Promise<SippEngine | null> {
-	if (sippEngineInstance) return sippEngineInstance;
-	if (sippEngineInitPromise) return sippEngineInitPromise;
-	sippEngineInitPromise = (async () => {
-		try {
-			const engine = AIEngineFactory.createDefault();
-			await engine.init();
-			await engine.loadModel("llama-3-8b-q4");
-			sippEngineInstance = engine;
-			return engine;
-		} catch {
-			return null;
-		}
-	})();
-	return sippEngineInitPromise;
 }
 
 /** Resolve local Bitterbot providers without allowing an offline placeholder here. */
@@ -1359,6 +1336,8 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 				return "BYOK · Groq";
 			case "byok-mistral":
 				return "BYOK · Mistral";
+			case "bitterbot-webgpu":
+				return "Local WebGPU · Phi-3 Mini";
 			case "fallback-template":
 			case "no-llm-available":
 				return "No LLM Available";
@@ -1677,6 +1656,9 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 							<span className="cosmic-ai-model-pill">{providerDisplay(answerMeta.provider)}</span>
 							{answerMeta.tier === "keyless" && (
 								<span className="cosmic-ai-model-pill">Zero-Token</span>
+							)}
+							{answerMeta.tier === "local-webgpu" && (
+								<span className="cosmic-ai-model-pill bg-emerald-900/60 text-emerald-300 border border-emerald-500/40">Local WebGPU · Zero-Token</span>
 							)}
 							{answerMeta.tier === "omniroute" && (
 								<span className="cosmic-ai-model-pill bg-cyan-900/60 text-cyan-300 border border-cyan-500/40">OmniRoute Mesh</span>
