@@ -94,6 +94,7 @@ export interface PeerTransport {
   send(message: P2PMessage): Promise<MessageReceipt>;
   broadcast(message: P2PMessage, exclude?: string[]): Promise<MessageReceipt>;
   stats(): TransportStats;
+  stop(): Promise<void>;
   onMessage: (message: P2PMessage) => void;
   onConnectionChange: (info: ConnectionInfo) => void;
 }

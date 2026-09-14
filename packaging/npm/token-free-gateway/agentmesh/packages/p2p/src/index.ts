@@ -37,6 +37,7 @@ export type {
   MessageReceipt,
   DiscoveryEvent,
   DiscoveryProvider,
+  PeerTransport,
   TransportStats,
   TopologyNode,
   NetworkTopology,

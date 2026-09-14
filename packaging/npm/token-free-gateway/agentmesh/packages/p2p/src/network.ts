@@ -2,6 +2,7 @@ import type {
   PeerDescriptor, PeerProtocol, P2PMessage, P2PMeshEvent, toMeshEvent,
   NetworkTopology,
 } from "./types.ts";
+import type { PeerTransport } from "./types.ts";
 import { PeerRegistry } from "./peer-registry.ts";
 import { MessageRouter } from "./message-router.ts";
 import { MemoryTransport } from "./transports/memory-transport.ts";
@@ -11,6 +12,13 @@ export interface P2PNetworkOptions {
   localPeer?: PeerDescriptor;
   /** Message TTL in seconds (default 60). */
   messageTtlSec?: number;
+  /**
+   * Pluggable peer transport. Defaults to in-memory (single-process).
+   * Pass a SocietyTransport (@agentmesh/society) to route messages over
+   * the society P2P network (protocol: "libp2p"). The transport must
+   * already be constructed before start().
+   */
+  transport?: PeerTransport;
 }
 
 export type P2PNetworkEvent =
@@ -35,7 +43,7 @@ export type P2PNetworkEvent =
 export class P2PNetwork {
   private registry: PeerRegistry;
   private router: MessageRouter;
-  private transport: MemoryTransport;
+  private transport: PeerTransport;
   private listeners = new Map<string, Set<(event: P2PNetworkEvent) => void>>();
   private started = false;
   private localPeerId = "";
@@ -43,7 +51,8 @@ export class P2PNetwork {
   constructor(options: P2PNetworkOptions = {}) {
     this.registry = new PeerRegistry();
     this.router = new MessageRouter(this.registry, options.messageTtlSec ?? 60);
-    this.transport = new MemoryTransport(this.registry, this.router);
+    // Default to in-memory transport when none supplied (backward compatible).
+    this.transport = options.transport ?? new MemoryTransport(this.registry, this.router);
 
     // Wire transport messages → event emission
     this.transport.onMessage = (msg: P2PMessage) => {
@@ -52,7 +61,7 @@ export class P2PNetwork {
 
     this.transport.onConnectionChange = (info) => {
       if (info.state === "connected") {
-        this.emit("p2p.peer.connected", { peerId: info.peerId, protocol: "memory", timestamp: Date.now() });
+        this.emit("p2p.peer.connected", { peerId: info.peerId, protocol: this.transport.protocol, timestamp: Date.now() });
       } else if (info.state === "disconnected") {
         this.emit("p2p.peer.disconnected", { peerId: info.peerId, timestamp: Date.now() });
       }
