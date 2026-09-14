@@ -189,6 +189,7 @@ export interface I18nContent {
 		omniroute: string;
 		geminiProxy?: string;
 		geminiCli?: string;
+		meshLlm?: string;
 		noneSelected: string;
 		expand: string;
 		collapse: string;
@@ -310,6 +311,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			omniroute: "OmniRoute 메쉬",
 			geminiProxy: "Gemini 프록시 (무료)",
 			geminiCli: "Gemini CLI (무료 · 1,000건/일)",
+			meshLlm: "Mesh-LLM (로컬 메시, 9337)",
 			noneSelected: "선택된 공급자 없음",
 			expand: "열기",
 			collapse: "닫기",
@@ -495,6 +497,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			omniroute: "OmniRoute Mesh",
 			geminiProxy: "Gemini Proxy (Free)",
 			geminiCli: "Gemini CLI (Free · 1,000/day)",
+			meshLlm: "Mesh-LLM (Local Mesh, 9337)",
 			noneSelected: "No providers selected",
 			expand: "Expand",
 			collapse: "Collapse",
@@ -679,6 +682,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			omniroute: "OmniRouteメッシュ",
 			geminiProxy: "Geminiプロキシ（無料）",
 			geminiCli: "Gemini CLI（無料 · 1,000/日）",
+			meshLlm: "Mesh-LLM（ローカルメッシュ・9337）",
 			noneSelected: "選択されたプロバイダーなし",
 			expand: "展開",
 			collapse: "折りたたみ",
@@ -862,6 +866,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			omniroute: "OmniRoute网格",
 			geminiProxy: "Gemini 代理（免费）",
 			geminiCli: "Gemini CLI（免费 · 1,000/天）",
+			meshLlm: "Mesh-LLM（本地网格 · 9337）",
 			noneSelected: "未选择提供商",
 			expand: "展开",
 			collapse: "收起",
@@ -1047,6 +1052,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			omniroute: "Malla OmniRoute",
 			geminiProxy: "Proxy Gemini (gratis)",
 			geminiCli: "Gemini CLI (gratis · 1.000/día)",
+			meshLlm: "Mesh-LLM (Mesh local · 9337)",
 			noneSelected: "Sin proveedores seleccionados",
 			expand: "Expandir",
 			collapse: "Contraer",
@@ -1232,6 +1238,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			omniroute: "OmniRoute-Mesh",
 			geminiProxy: "Gemini-Proxy (kostenlos)",
 			geminiCli: "Gemini CLI (kostenlos · 1.000/Tag)",
+			meshLlm: "Mesh-LLM (Lokales Mesh · 9337)",
 			noneSelected: "Keine Anbieter ausgewählt",
 			expand: "Erweitern",
 			collapse: "Einklappen",
@@ -1418,6 +1425,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			omniroute: "Maillage OmniRoute",
 			geminiProxy: "Proxy Gemini (gratuit)",
 			geminiCli: "Gemini CLI (gratuit · 1 000/jour)",
+			meshLlm: "Mesh-LLM (Mesh local · 9337)",
 			noneSelected: "Aucun fournisseur sélectionné",
 			expand: "Développer",
 			collapse: "Réduire",
@@ -1602,6 +1610,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			omniroute: "Malha OmniRoute",
 			geminiProxy: "Proxy Gemini (grátis)",
 			geminiCli: "Gemini CLI (grátis · 1.000/dia)",
+			meshLlm: "Mesh-LLM (Mesh local · 9337)",
 			noneSelected: "Nenhum provedor selecionado",
 			expand: "Expandir",
 			collapse: "Recuar",

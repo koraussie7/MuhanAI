@@ -2,8 +2,8 @@
  * Tests for the keyless LLM provider pool.
  *
  * Verifies:
- * - only the verified-live providers remain (dead paths removed)
- * - the pollinations POST API is tried first and returned on success
+ * - the local mesh-llm node (localhost:9337) is the highest-priority provider
+ * - the pollinations POST API is tried next and returned on success
  * - callKeylessProviders falls back to local knowledge when all providers fail
  * - callKeylessProviders wires through to a real provider response when fetch works
  */
@@ -12,9 +12,9 @@ import { afterEach, describe, expect, test } from "vitest";
 import { callKeylessProviders, getKeylessProviderNames } from "./keyless-providers.js";
 
 describe("getKeylessProviderNames", () => {
-	test("exposes only the pollinations POST API provider (dead paths removed)", () => {
+	test("exposes mesh-llm first, then the pollinations POST API", () => {
 		const names = getKeylessProviderNames();
-		expect(names).toEqual(["pollinations-api"]);
+		expect(names).toEqual(["mesh-llm", "pollinations-api"]);
 	});
 });
 
@@ -25,7 +25,7 @@ afterEach(() => {
 });
 
 describe("callKeylessProviders — prompt wiring", () => {
-	test("when a free provider responds, the user's question is routed through the pollinations POST API", async () => {
+	test("when a provider responds, the local mesh-llm node answers first", async () => {
 		// Stub fetch: return a JSON OpenAI-style response for any URL
 		globalThis.fetch = (async () =>
 			new Response(
@@ -40,10 +40,26 @@ describe("callKeylessProviders — prompt wiring", () => {
 			system: "Answer in one word.",
 		});
 		expect(result.text).toBe("Paris");
+		expect(result.provider).toBe("mesh-llm");
+	});
+
+	test("falls back to the pollinations POST API when mesh-llm is offline", async () => {
+		globalThis.fetch = (async (input: RequestInfo | URL) => {
+			const url = String(input);
+			if (url.includes("9337")) {
+				throw new Error("mesh-llm not running");
+			}
+			return new Response(JSON.stringify({ choices: [{ message: { content: "Madrid" } }] }), {
+				headers: { "content-type": "application/json" },
+			});
+		}) as unknown as typeof fetch;
+
+		const result = await callKeylessProviders({ prompt: "Capital of Spain?" });
+		expect(result.text).toBe("Madrid");
 		expect(result.provider).toBe("pollinations-api");
 	});
 
-	test("only attempts the live pollinations POST API (no dead provider calls)", async () => {
+	test("races both live providers in parallel but returns the mesh-llm result (array order)", async () => {
 		let calls = 0;
 		globalThis.fetch = (async () => {
 			calls++;
@@ -52,8 +68,10 @@ describe("callKeylessProviders — prompt wiring", () => {
 			});
 		}) as unknown as typeof fetch;
 
-		await callKeylessProviders({ prompt: "hi" });
-		expect(calls).toBe(1);
+		const result = await callKeylessProviders({ prompt: "hi" });
+		// both configured providers are raced; the first in the array wins
+		expect(calls).toBe(2);
+		expect(result.provider).toBe("mesh-llm");
 	});
 
 	test("falls back to local-knowledge when every provider fails", async () => {

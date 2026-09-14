@@ -32,6 +32,7 @@ interface ResolvedAnswer {
 }
 
 type FreeLlmProviderId =
+	| "mesh-llm"
 	| "pollinations"
 	| "api-llm-chat"
 	| "local-oauth"
@@ -43,6 +44,7 @@ interface FreeLlmConfig {
 }
 
 const DEFAULT_FREE_LLM_PROVIDERS: FreeLlmProviderId[] = [
+	"mesh-llm",
 	"pollinations",
 	"api-llm-chat",
 	"local-oauth",
@@ -917,9 +919,11 @@ async function resolveAnswerFromMultiAgentQuorum(query: string, config: FreeLlmC
 	let bitterbotProvider = "Local WebGPU (SippEngine)";
 	// 1. Bitterbot (local WebGPU)
 	try { bitterbotResponse = await chatWithSippEngine(query); } catch { /* continue */ }
-	// 2. Pollination POST
+	// 2. Mesh-LLM (local mesh node, port 9337)
+	if (!bitterbotResponse && config.enabledProviders.includes("mesh-llm")) { try { const res = await fetchWithTimeout("http://127.0.0.1:9337/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "auto", messages: [{ role: "system", content: "You are MuhanAI, a helpful multilingual assistant." }, { role: "user", content: query }], stream: false, max_tokens: 512 }) }, 6000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (isValidLlmText(text)) { bitterbotResponse = (text as string).trim(); bitterbotProvider = "Mesh-LLM (Local)"; } } } catch { /* continue */ } }
+	// 3. Pollination POST
 	if (!bitterbotResponse && config.enabledProviders.includes("pollinations")) { try { const res = await fetchWithTimeout("https://text.pollinations.ai/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "openai-fast", messages: [{ role: "system", content: "You are MuhanAI, a helpful multilingual assistant." }, { role: "user", content: query }], stream: false, max_tokens: 300 }) }, 6000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (isValidLlmText(text)) { bitterbotResponse = (text as string).trim(); bitterbotProvider = "Pollination (Free)"; } } } catch { /* continue */ } }
-	// 3. /api/llm/chat
+	// 4. /api/llm/chat
 	if (!bitterbotResponse && config.enabledProviders.includes("api-llm-chat")) { try { const res = await fetchWithTimeout("/api/llm/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt: query, system: "You are MuhanAI, a helpful assistant." }) }, 8000); if (res.ok) { const data = (await res.json()) as { text?: string; provider?: string }; if (data.text && data.text.trim().length > 0) { bitterbotResponse = data.text.trim(); bitterbotProvider = data.provider || "MuhanAI LLM"; } } } catch { /* continue */ } }
 	// 5. Local OAuth Gateway
 	if (!bitterbotResponse && config.enabledProviders.includes("local-oauth")) { try { const res = await fetchWithTimeout("http://127.0.0.1:3456/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "claude-3-7-sonnet", messages: [{ role: "system", content: "You are MuhanAI." }, { role: "user", content: query }] }) }, 4000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (text && text.trim().length > 0) { bitterbotResponse = text.trim(); bitterbotProvider = "Local OAuth"; } } } catch { /* continue */ } }
@@ -1285,6 +1289,8 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 		switch (name) {
 			case "pollinations":
 				return "Pollinations";
+			case "mesh-llm":
+				return "Mesh-LLM (Local)";
 			case "pollinations-direct":
 				return "Pollinations Direct";
 			case "pollinations-post":
@@ -1328,6 +1334,7 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 	};
 
 	const freeLlmProviderLabels: Record<FreeLlmProviderId, string> = {
+		"mesh-llm": t.freeLlm?.meshLlm || "Mesh-LLM (Local Mesh, 9337)",
 		pollinations: t.freeLlm.pollinations,
 		"api-llm-chat": t.freeLlm.apiLlmChat,
 		"local-oauth": t.freeLlm.localOauth,
