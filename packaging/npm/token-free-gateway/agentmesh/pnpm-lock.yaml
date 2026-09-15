@@ -45,6 +45,9 @@ importers:
       '@agentmesh/bitterbot':
         specifier: workspace:*
         version: link:../../packages/bitterbot
+      '@agentmesh/web':
+        specifier: workspace:*
+        version: link:../web
       lucide-react:
         specifier: ^0.457.0
         version: 0.457.0(react@19.2.8)
@@ -82,6 +85,15 @@ importers:
       '@agentmesh/ai-engine':
         specifier: workspace:*
         version: link:../../packages/ai-engine
+      '@agentmesh/knowledge-base':
+        specifier: workspace:*
+        version: link:../../packages/knowledge-base
+      '@agentmesh/personal-mcp':
+        specifier: workspace:*
+        version: link:../../packages/personal-mcp
+      '@agentmesh/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       '@tailwindcss/vite':
         specifier: ^4.0.0
         version: 4.3.3(vite@6.4.3(@types/node@22.20.1)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.13)(yaml@2.9.0))
@@ -117,9 +129,27 @@ importers:
         specifier: ^22.0.0
         version: 22.20.1
 
-  packages/agent-cast: {}
+  packages/agent-cast:
+    dependencies:
+      '@agentmesh/llm-router':
+        specifier: workspace:*
+        version: link:../llm-router
+      '@agentmesh/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
 
-  packages/agent-core: {}
+  packages/agent-core:
+    dependencies:
+      '@agentmesh/database':
+        specifier: workspace:*
+        version: link:../database
+      '@agentmesh/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.20.1
 
   packages/agent-daemon:
     dependencies:
@@ -177,13 +207,20 @@ importers:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.20.1)(lightningcss@1.32.0)
 
-  packages/agent-mesh: {}
+  packages/agent-mesh:
+    dependencies:
+      '@agentmesh/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
 
   packages/agent-router:
     dependencies:
       '@agentmesh/credit-system':
         specifier: workspace:*
         version: link:../credit-system
+      '@agentmesh/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
     devDependencies:
       typescript:
         specifier: ^5.7.2
@@ -198,6 +235,9 @@ importers:
         specifier: ^0.2.78
         version: 0.2.85
     devDependencies:
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.20.1
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
@@ -211,6 +251,9 @@ importers:
         specifier: workspace:*
         version: link:../ai-engine
     devDependencies:
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.20.1
       '@types/react':
         specifier: ^19.0.0
         version: 19.2.18
@@ -259,7 +302,11 @@ importers:
         specifier: ^1.40.0
         version: 1.63.0
 
-  packages/category-engine: {}
+  packages/category-engine:
+    dependencies:
+      '@agentmesh/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
 
   packages/compute-market:
     devDependencies:
@@ -272,6 +319,9 @@ importers:
 
   packages/computer-use:
     devDependencies:
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.20.1
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
@@ -304,6 +354,10 @@ importers:
       '@prisma/client':
         specifier: ^5.22.0
         version: 5.22.0(prisma@5.22.0)
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.20.1
 
   packages/federation:
     dependencies:
@@ -387,6 +441,9 @@ importers:
         specifier: workspace:*
         version: link:../shared-types
     devDependencies:
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.20.1
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
@@ -396,6 +453,9 @@ importers:
 
   packages/knowledge-base:
     dependencies:
+      '@agentmesh/database':
+        specifier: workspace:*
+        version: link:../database
       '@agentmesh/federation':
         specifier: workspace:*
         version: link:../federation
@@ -478,6 +538,9 @@ importers:
         specifier: ^0.18.5
         version: 0.18.5
     devDependencies:
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.20.1
       '@types/xlsx':
         specifier: ^0.0.36
         version: 0.0.36
@@ -557,6 +620,9 @@ importers:
         specifier: ^4.0.0
         version: 4.104.0(ws@8.21.3)(zod@3.25.76)
     devDependencies:
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.20.1
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
@@ -667,12 +733,19 @@ importers:
 
   packages/personal-mcp:
     dependencies:
+      '@agentmesh/database':
+        specifier: workspace:*
+        version: link:../database
       '@agentmesh/knowledge-base':
         specifier: workspace:*
         version: link:../knowledge-base
       '@agentmesh/shared-types':
         specifier: workspace:*
         version: link:../shared-types
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.20.1
 
   packages/semantic-vote:
     dependencies:
@@ -692,6 +765,10 @@ importers:
       pino:
         specifier: ^10.3.1
         version: 10.3.1
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.20.1
 
   services/api:
     dependencies:
@@ -728,6 +805,9 @@ importers:
       '@agentmesh/noema':
         specifier: workspace:*
         version: link:../../packages/noema
+      '@agentmesh/payment':
+        specifier: workspace:*
+        version: link:../../packages/payment
       '@agentmesh/peer-mesh':
         specifier: workspace:*
         version: link:../../packages/peer-mesh
@@ -762,6 +842,9 @@ importers:
         specifier: ^3.23.8
         version: 3.25.76
     devDependencies:
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.20.1
       pino:
         specifier: ^10.3.1
         version: 10.3.1

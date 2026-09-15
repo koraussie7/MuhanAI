@@ -11,7 +11,8 @@
 		"lint": "tsc -p tsconfig.json --noEmit",
 		"test": "vitest run"
 	},
-		"dependencies": {
+	"dependencies": {
+		"@agentmesh/database": "workspace:*",
 		"@agentmesh/federation": "workspace:*",
 		"@agentmesh/shared-types": "workspace:*",
 		"@libp2p/interface": "^3.2.0",
@@ -40,7 +41,8 @@
 		"unpdf": "^1.8.1",
 		"xlsx": "^0.18.5"
 	},
-		"devDependencies": {
+	"devDependencies": {
+		"@types/node": "^22.10.0",
 		"@types/xlsx": "^0.0.36",
 		"typescript": "^5.7.2",
 		"vitest": "^2.1.8"
