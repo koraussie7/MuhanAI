@@ -83,7 +83,13 @@ jobs:
           cache: pnpm
           cache-dependency-path: packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec biome ci --changed --since=${{ github.event.pull_request.base.sha || github.event.before }}
+      - run: |
+          BASE=${{ github.event.pull_request.base.sha || github.event.before }}
+          if git diff --name-only "$BASE" HEAD -- packaging/npm/token-free-gateway/agentmesh/ | grep -q .; then
+            pnpm exec biome ci --changed --since=$BASE
+          else
+            echo "No workspace changes — skipping biome"
+          fi
 
   nx-affect:
     name: Nx affected (typecheck, test, lint, build)
@@ -109,9 +115,11 @@ jobs:
       - run: pnpm exec prisma generate
 
       - name: Set Nx SHAs
-        uses: nrwl/nx-set-shas@v4
-        with:
-          main-branch-name: main
+        env:
+          EVENT_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          echo "NX_BASE=$EVENT_BASE" >> $GITHUB_ENV
+          echo "NX_HEAD=$GITHUB_SHA" >> $GITHUB_ENV
 
       - name: Debug affected base
         run: echo "NX_BASE=$NX_BASE NX_HEAD=$NX_HEAD"
@@ -123,7 +131,7 @@ jobs:
         run: pnpm exec nx affected -t typecheck
 
       - name: Affected test
-        run: pnpm exec nx affected -t test --skip-nx-cache --verbose
+        run: pnpm exec nx affected -t test
 
       - name: Affected lint
         run: pnpm exec nx affected -t lint
