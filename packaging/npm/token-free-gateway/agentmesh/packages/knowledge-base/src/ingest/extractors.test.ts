@@ -156,7 +156,7 @@ describe("extractFileContent — yaml", () => {
 		expect(out.text.startsWith("```yaml")).toBe(true);
 		expect(out.text).toContain("key: value");
 		expect(out.text.trim().endsWith("```")).toBe(true);
-		expect(out.metadata.wordCount).toBe(6); // counts raw, not fence-wrapped
+		expect(out.metadata.wordCount).toBe(7); // counts raw (incl. "-" bullets), not fence-wrapped
 	});
 
 	it("handles .yml the same as .yaml", async () => {
@@ -182,25 +182,19 @@ describe("extractFileContent — rtf", () => {
 
 describe("extractFileContent — size cap", () => {
 	it("throws when the file is larger than 50MB", async () => {
-		// Use a sparse stat-read mock to avoid actually writing 50MB to disk.
+		// Grow the file logically (sparse) so statSync reports >50MB without
+		// writing 50MB to disk. vi.spyOn cannot redefine node:fs exports.
 		const p = writeFixture("huge.bin", "x");
-		const statSync = await import("node:fs").then((m) => m.statSync);
-		const spy = vi.spyOn(await import("node:fs"), "statSync").mockImplementation(((fp: string) => {
-			if (fp === p) return { size: 51 * 1024 * 1024 } as ReturnType<typeof statSync>;
-			return statSync(fp);
-		}) as typeof statSync);
-		try {
-			await expect(extractFileContent(p)).rejects.toThrow(/File too large/);
-		} finally {
-			spy.mockRestore();
-		}
+		const { truncateSync } = await import("node:fs");
+		truncateSync(p, 51 * 1024 * 1024);
+		await expect(extractFileContent(p)).rejects.toThrow(/File too large/);
 	});
 });
 
-describe("extractFileContent — binary fallback (no parser installed)", () => {
-	// unpdf / mammoth / officeparser / xlsx are not declared in package.json
-	// dependencies, so the dynamic import in this environment rejects and the
-	// extractor must degrade to a placeholder rather than throwing.
+describe("extractFileContent — binary formats", () => {
+	// Malformed/corrupt binary files (invalid zip/PDF OLE headers) must never
+	// crash ingestion — the extractor degrades to a placeholder rather than
+	// throwing. Real .xls (CFB magic) parses because xlsx is declared.
 	beforeEach(() => {
 		// Silence the error logs that the fallback path emits
 		vi.spyOn(console, "error").mockImplementation(() => {});
@@ -238,11 +232,14 @@ describe("extractFileContent — binary fallback (no parser installed)", () => {
 		expect(out.sourceFormat).toBe("xlsx");
 	});
 
-	it("preserves .xls → xls format in the fallback", async () => {
+	it("extracts .xls content as xls format", async () => {
+		// The xlsx parser is declared in package.json, so a legacy .xls (CFB
+		// magic) is parsed into sheet tables instead of falling back.
 		const p = writeFixture("legacy.xls", "D0CF11E0");
 		const out = await extractFileContent(p);
 		expect(out.sourceFormat).toBe("xls");
-		expect(out.text).toMatch(/Failed to extract text from legacy\.xls/);
+		expect(out.text).not.toMatch(/Failed to extract text from legacy\.xls/);
+		expect(out.text.trim().length).toBeGreaterThan(0);
 	});
 });
 

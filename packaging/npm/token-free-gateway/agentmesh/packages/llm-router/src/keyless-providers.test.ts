@@ -44,7 +44,7 @@ describe("callKeylessProviders — prompt wiring", () => {
 	});
 
 	test("falls back to the pollinations POST API when mesh-llm is offline", async () => {
-		globalThis.fetch = (async (input: RequestInfo | URL) => {
+		globalThis.fetch = (async (input: string | URL) => {
 			const url = String(input);
 			if (url.includes("9337")) {
 				throw new Error("mesh-llm not running");

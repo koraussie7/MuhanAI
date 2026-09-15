@@ -268,7 +268,7 @@ function extractCsv(filePath: string): ExtractedContent {
 	const lines = raw.split("\n").filter((l) => l.trim());
 	const headers = (lines[0] ?? "").split(",").map((h) => h.trim());
 	const mdLines = [`| ${headers.join(" | ")} |`, `| ${headers.map(() => "---").join(" | ")} |`];
-	for (const line of lines.slice(1, 200)) {
+	for (const line of lines.slice(1, 201)) {
 		const cells = line.split(",").map((c) => c.trim());
 		mdLines.push(`| ${cells.join(" | ")} |`);
 	}
@@ -286,7 +286,13 @@ function extractCsv(filePath: string): ExtractedContent {
 function extractXml(filePath: string): ExtractedContent {
 	const raw = readFileSync(filePath, "utf-8");
 	const text = raw
-		.replace(/<[^>]+>/g, " ")
+		.replace(/<\?xml[^>]*\?>/gi, "")
+		.replace(/<!DOCTYPE[^>]*>/gi, "")
+		.replace(/<!--[\s\S]*?-->/g, "")
+		.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
+		.replace(/<(\/?)([\w.-]+)([^>]*?)(\/?)>/g, (_, closeTag: string, name: string) =>
+			closeTag ? " " : `${name} `,
+		)
 		.replace(/\s+/g, " ")
 		.trim()
 		.slice(0, 50_000);
@@ -336,8 +342,7 @@ function extractYaml(filePath: string): ExtractedContent {
 function extractRtf(filePath: string): ExtractedContent {
 	const raw = readFileSync(filePath, "utf-8");
 	const text = raw
-		.replace(/\{\\[^}]*\}/g, "")
-		.replace(/\\[a-z]+\d*\s?/gi, "")
+		.replace(/\\[a-z]+-?\d* ?/gi, "")
 		.replace(/[{}]/g, "")
 		.trim()
 		.slice(0, 50_000);
