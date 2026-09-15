@@ -74,13 +74,53 @@ export default {
 			if (feedResponse) return feedResponse;
 
 			if (!env.API_ORIGIN) {
-				return new Response(JSON.stringify({ error: "Origin not configured" }), {
-					status: 502,
-					headers: { "content-type": "application/json" },
-				});
+				return new Response(
+					JSON.stringify({
+						error: "origin-not-configured",
+						message: "API_ORIGIN is unset. Deploy api.muhanai.com and Caddy first.",
+						help: "Run deploy/setup-caddy-muhanai.sh on the origin host, then set API_ORIGIN=https://api.muhanai.com",
+					}),
+					{
+						status: 503,
+						headers: { "content-type": "application/json" },
+					},
+				);
 			}
 
-			const origin = new URL(env.API_ORIGIN);
+			let origin: URL;
+			try {
+				origin = new URL(env.API_ORIGIN);
+			} catch {
+				return new Response(
+					JSON.stringify({
+						error: "origin-malformed",
+						message: "API_ORIGIN is not a valid URL",
+						value: env.API_ORIGIN,
+					}),
+					{
+						status: 503,
+						headers: { "content-type": "application/json" },
+					},
+				);
+			}
+
+			// Cloudflare Workers (error 1003) and most WAFs reject fetch() to raw IP
+			// origins. Force callers to use a hostname. The intended setup is
+			// https://api.muhanai.com behind Caddy on port 110.
+			if (/^\d+\.\d+\.\d+\.\d+$/.test(origin.hostname)) {
+				return new Response(
+					JSON.stringify({
+						error: "origin-is-raw-ip",
+						message: "API_ORIGIN must be a hostname, not a raw IP (CF WAF error 1003).",
+						help: "Set API_ORIGIN=https://api.muhanai.com after deploying Caddy on the origin host.",
+					}),
+					{
+						status: 503,
+						headers: { "content-type": "application/json" },
+					},
+				);
+			}
+
 			origin.pathname = url.pathname;
 			origin.search = url.search;
 
@@ -99,7 +139,7 @@ export default {
 			} catch (err: any) {
 				return new Response(
 					JSON.stringify({
-						error: "Upstream origin unavailable",
+						error: "upstream-unavailable",
 						message: err?.message,
 					}),
 					{
