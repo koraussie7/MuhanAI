@@ -17,6 +17,7 @@ import { hivebearRoutes } from "./hivebear-routes.js";
 import { knowledgeRoutes } from "./knowledge-routes.js";
 import { llmMeshRoutes } from "./llm-mesh-routes.js";
 import { llmRoutes } from "./llm-routes.js";
+import { mcpRoutes } from "./mcp-routes.js";
 import { networkRoutes } from "./network-routes.js";
 import { noemaRoutes } from "./noema-routes.js";
 import { omniRouteRoutes } from "./omniroute-routes.js";
@@ -43,8 +44,9 @@ const PUBLIC_PATH_PREFIXES = [
 	"/api/agents",
 	"/api/auth",
 	"/api/health",
+	"/api/mcp",
 ];
-const PUBLIC_PATH_EXACT = new Set(["/health"]);
+const PUBLIC_PATH_EXACT = new Set(["/health", "/.well-known/mcp.json"]);
 
 function isPublicPath(rawUrl: string | undefined): boolean {
 	if (!rawUrl) return false;
@@ -192,6 +194,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	await app.register(omniRouteRoutes);
 	await app.register(paymentRoutes);
 	await app.register(routerRoutes);
+	await app.register(mcpRoutes);
 
 	// Wire the libp2p transport into the bridge. Best-effort: any failure here
 	// (mDNS unavailable on Docker bridge, identity write denied, etc.) keeps
