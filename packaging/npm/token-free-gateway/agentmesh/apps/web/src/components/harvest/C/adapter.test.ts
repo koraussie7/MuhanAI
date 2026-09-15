@@ -1,14 +1,33 @@
-import { describe, expect, it, type Mock, vi } from "vitest";
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import { createHttpAdapter, createStubAdapter, type ResourceAdapter } from "./adapter.js";
 
-function mockFetch(impl: Parameters<Mock>[0]): {
-	fetcher: typeof fetch;
-	fn: Mock;
+type FetchLike = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+
+interface FetchCall {
+	args: Parameters<FetchLike>;
+}
+
+function createFetchSpy(impl: (...args: Parameters<FetchLike>) => unknown): {
+	fn: FetchLike;
+	calls: FetchCall[];
 } {
-	const fn = vi.fn(impl);
+	const calls: FetchCall[] = [];
+	const fn: FetchLike = (...args) => {
+		calls.push({ args });
+		return impl(...args) as ReturnType<FetchLike>;
+	};
+	return { fn, calls };
+}
+
+function mockFetch(impl: (...args: Parameters<FetchLike>) => unknown): {
+	fetcher: typeof fetch;
+	calls: FetchCall[];
+} {
+	const { fn, calls } = createFetchSpy(impl);
 	return {
 		fetcher: fn as unknown as typeof fetch,
-		fn,
+		calls,
 	};
 }
 
@@ -16,29 +35,29 @@ describe("harvest/C adapter primitives", () => {
 	describe("createStubAdapter", () => {
 		it("returns whatever the producer yields", async () => {
 			const a = createStubAdapter(() => ({ routes: ["a"], vault: 1 }));
-			expect(await a.loadSnapshot()).toEqual({ routes: ["a"], vault: 1 });
+			assert.deepEqual(await a.loadSnapshot(), { routes: ["a"], vault: 1 });
 		});
 
 		it("calls the producer on every load (live stub semantics)", async () => {
 			let n = 0;
 			const a = createStubAdapter(() => ({ ts: ++n }));
-			expect(await a.loadSnapshot()).toEqual({ ts: 1 });
-			expect(await a.loadSnapshot()).toEqual({ ts: 2 });
-			expect(await a.loadSnapshot()).toEqual({ ts: 3 });
+			assert.deepEqual(await a.loadSnapshot(), { ts: 1 });
+			assert.deepEqual(await a.loadSnapshot(), { ts: 2 });
+			assert.deepEqual(await a.loadSnapshot(), { ts: 3 });
 		});
 
 		it("conforms to ResourceAdapter<T> shape", async () => {
 			const a: ResourceAdapter<{ ok: true }> = createStubAdapter(() => ({
 				ok: true as const,
 			}));
-			expect(a.loadSnapshot).toBeTypeOf("function");
-			expect(await a.loadSnapshot()).toEqual({ ok: true });
+			assert.equal(typeof a.loadSnapshot, "function");
+			assert.deepEqual(await a.loadSnapshot(), { ok: true });
 		});
 	});
 
 	describe("createHttpAdapter", () => {
 		it("parses a 200 JSON response into a snapshot", async () => {
-			const { fetcher, fn } = mockFetch(() =>
+			const { fetcher, calls } = mockFetch(() =>
 				Promise.resolve({
 					ok: true,
 					status: 200,
@@ -50,15 +69,12 @@ describe("harvest/C adapter primitives", () => {
 				fetcher,
 			});
 			const snap = await a.loadSnapshot();
-			expect(snap).toEqual({ gateways: [], vault: [] });
-			expect(fn).toHaveBeenCalledOnce();
-			expect(fn).toHaveBeenCalledWith(
-				"/api/llm-mesh",
-				expect.objectContaining({
-					method: "GET",
-					headers: expect.objectContaining({ Accept: "application/json" }),
-				}),
-			);
+			assert.deepEqual(snap, { gateways: [], vault: [] });
+			assert.equal(calls.length, 1);
+			assert.equal(calls[0]!.args[0], "/api/llm-mesh");
+			const init = calls[0]!.args[1] as RequestInit;
+			assert.equal(init.method, "GET");
+			assert.deepEqual(init.headers, { Accept: "application/json" });
 		});
 
 		it("throws on non-2xx with URL and status in the message", async () => {
@@ -70,12 +86,12 @@ describe("harvest/C adapter primitives", () => {
 				}),
 			);
 			const a = createHttpAdapter("/api/security", { fetcher });
-			await expect(a.loadSnapshot()).rejects.toThrow("/api/security -> 503 Service Unavailable");
+			await assert.rejects(a.loadSnapshot(), "/api/security -> 503 Service Unavailable");
 		});
 
 		it("forwards AbortSignal to the fetcher", async () => {
 			const controller = new AbortController();
-			const { fetcher, fn } = mockFetch(() =>
+			const { fetcher, calls } = mockFetch(() =>
 				Promise.resolve({
 					ok: true,
 					status: 200,
@@ -88,13 +104,13 @@ describe("harvest/C adapter primitives", () => {
 				signal: controller.signal,
 			});
 			await a.loadSnapshot();
-			const callArgs = fn.mock.calls[0]?.[1] as RequestInit | undefined;
-			expect(callArgs?.signal).toBe(controller.signal);
+			const init = calls[0]!.args[1] as RequestInit;
+			assert.equal(init.signal, controller.signal);
 		});
 
 		it("uses global fetch when no fetcher is injected", async () => {
 			const original = globalThis.fetch;
-			const { fetcher, fn } = mockFetch(() =>
+			const { fetcher, calls } = mockFetch(() =>
 				Promise.resolve({
 					ok: true,
 					status: 200,
@@ -106,7 +122,7 @@ describe("harvest/C adapter primitives", () => {
 			try {
 				const a = createHttpAdapter("/api/x");
 				await a.loadSnapshot();
-				expect(fn).toHaveBeenCalledOnce();
+				assert.equal(calls.length, 1);
 			} finally {
 				(globalThis as { fetch: typeof fetch }).fetch = original;
 			}
@@ -124,8 +140,8 @@ describe("harvest/C adapter primitives", () => {
 				values: [1, 2, 3],
 			}));
 			const snap = await a.loadSnapshot();
-			expect(snap.id).toBe("x");
-			expect(snap.values).toHaveLength(3);
+			assert.equal(snap.id, "x");
+			assert.equal(snap.values.length, 3);
 		});
 	});
 });

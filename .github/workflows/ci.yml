@@ -83,7 +83,7 @@ jobs:
           cache: pnpm
           cache-dependency-path: packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec biome ci --changed --since=${{ github.event.pull_request.base.sha || github.event.push.before }}
+      - run: pnpm exec biome ci --changed --since=${{ github.event.pull_request.base.sha || github.event.before }}
 
   nx-affect:
     name: Nx affected (typecheck, test, lint, build)
