@@ -6,6 +6,7 @@ routes = [
   { pattern = "muhanai.com/*", zone_name = "muhanai.com" },
   { pattern = "www.muhanai.com/*", zone_name = "muhanai.com" },
   { pattern = "find.muhanai.com/*", zone_name = "muhanai.com" },
+  { pattern = "api.muhanai.com/*", zone_name = "muhanai.com" },
 ]
 workers_dev = false
 
