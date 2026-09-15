@@ -108,17 +108,7 @@ describe("POST /api/quorum/ask", () => {
 
 		expect(res?.statusCode).toBe(200);
 		expect(mockCast).toHaveBeenCalledTimes(1);
-		expect(mockCast).toHaveBeenCalledWith(
-			"What is CRDT?",
-			expect.arrayContaining([
-				expect.objectContaining({
-					agentId: "user-query",
-					output: "",
-					confidence: 1,
-					latencyMs: 0,
-				}),
-			]),
-		);
+		expect(mockCast).toHaveBeenCalledWith("What is CRDT?", []);
 
 		const body = res?.json() as {
 			question: string;

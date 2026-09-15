@@ -37,7 +37,7 @@ describe("POST /api/llm/chat — user prompt wiring", () => {
 		process.env.NODE_ENV = "test";
 	});
 
-	it("routes a Korean question through the keyless pool and returns the LLM text", async () => {
+	it("routes a question through the OmniRoute-free tier (priority) and returns the LLM text", async () => {
 		// Mock every fetch to return a successful OpenAI-style chat completion.
 		globalThis.fetch = (async () =>
 			new Response(
@@ -70,7 +70,7 @@ describe("POST /api/llm/chat — user prompt wiring", () => {
 		expect(typeof body.text).toBe("string");
 		expect((body.text ?? "").length).toBeGreaterThan(0);
 		expect(body.provider).not.toBe("fallback");
-		expect(body.tier).toBe("keyless");
+		expect(body.tier).toBe("omniroute");
 	});
 
 	it("passes the system prompt through to the keyless provider body", async () => {
