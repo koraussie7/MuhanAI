@@ -1257,12 +1257,9 @@ function renderAppContent(appId: string): ReactNode {
 					</div>
 					<textarea
 						readOnly
-						value={`// MuhanAI Token-Free Autonomous Agent Node
-import { MuhanMesh } from "@agentmesh/mesh";
-
-export async function run() {
-  const mesh = new MuhanMesh();
-  console.log("Connected to DaedalOS local runtime!");
+						value={`// Agent node entry (sample)
+export async function start() {
+  console.log("DaedalOS local runtime ready");
 }`}
 						style={{
 							flex: 1,

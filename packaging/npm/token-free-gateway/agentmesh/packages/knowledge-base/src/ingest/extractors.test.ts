@@ -192,9 +192,9 @@ describe("extractFileContent — size cap", () => {
 });
 
 describe("extractFileContent — binary formats", () => {
-	// unpdf / mammoth / officeparser / xlsx are not declared in package.json
-	// dependencies, so the dynamic import in this environment rejects and the
-	// extractor must degrade to a placeholder rather than throwing.
+	// Malformed/corrupt binary files (invalid zip/PDF OLE headers) must never
+	// crash ingestion — the extractor degrades to a placeholder rather than
+	// throwing. Real .xls (CFB magic) parses because xlsx is declared.
 	beforeEach(() => {
 		// Silence the error logs that the fallback path emits
 		vi.spyOn(console, "error").mockImplementation(() => {});

@@ -237,7 +237,7 @@ export function BrowserApp() {
           className="p-1 rounded hover:bg-white/10 text-gray-400"
           onClick={() => {
             if (iframeRef.current) {
-              iframeRef.current.src = iframeRef.current.src;
+              iframeRef.current.src = currentUrl;
             }
           }}
           title="새로고침"
@@ -258,6 +258,7 @@ export function BrowserApp() {
         <iframe
           ref={iframeRef}
           src={currentUrl}
+          title="MuhanAI Browser"
           className="w-full h-full border-0"
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals"
           onLoad={() => setIsLoading(false)}
@@ -335,13 +336,9 @@ export function EngineMonitorApp({ engineStatus }: { engineStatus?: string }) {
 export function CodeStudioApp() {
   const { lang } = useI18n();
   const menuI18n = getMenuTranslation(lang);
-  const [code, setCode] = useState(`// MuhanAI Token-Free Autonomous Agent
-import { MuhanMesh } from "@agentmesh/mesh";
-
+  const [code, setCode] = useState(`// Agent scratchpad
 async function main() {
-  const mesh = new MuhanMesh({ tokenFree: true });
-  await mesh.connect();
-  console.log("Connected to P2P Quorum!");
+  console.log("Scratchpad ready");
 }
 
 main();`);
