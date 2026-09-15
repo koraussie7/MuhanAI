@@ -1,6 +1,6 @@
 import type React from "react";
 import { useState } from "react";
-import { ModelSearch, type ModelManifest } from "./noema/ModelSearch.js";
+import { type ModelManifest, ModelSearch } from "./noema/ModelSearch.js";
 
 interface AskNetworkProps {
 	onSubmit?: (question: string, targets: string[], model?: ModelManifest) => void;
@@ -31,7 +31,8 @@ const TARGETS = [
 		label: "Browse Use",
 		icon: "🌐",
 		description: "Browser Automation — Noema 모델 검색/다운로드와 연동",
-		codeLink: "https://github.com/koraussie7/MuhanAI/tree/main/packaging/npm/token-free-gateway/agentmesh/packages/browser-use",
+		codeLink:
+			"https://github.com/koraussie7/MuhanAI/tree/main/packaging/npm/token-free-gateway/agentmesh/packages/browser-use",
 	},
 ];
 
@@ -74,9 +75,7 @@ export const AskNetwork: React.FC<AskNetworkProps> = ({ onSubmit }) => {
 	const handleModelSelect = (manifest: ModelManifest) => {
 		setSelectedModel(manifest);
 		setIsModelSearchOpen(false);
-		setSelectedTargets((prev) =>
-			prev.includes("browser-use") ? prev : [...prev, "browser-use"],
-		);
+		setSelectedTargets((prev) => (prev.includes("browser-use") ? prev : [...prev, "browser-use"]));
 	};
 
 	return (
@@ -118,7 +117,9 @@ export const AskNetwork: React.FC<AskNetworkProps> = ({ onSubmit }) => {
 								className={`target-chip ${selectedTargets.includes(target.id) ? "selected" : ""} ${
 									target.id === "browser-use" ? "with-model" : ""
 								}`}
-								onClick={target.id === "browser-use" ? openModelSearch : () => toggleTarget(target.id)}
+								onClick={
+									target.id === "browser-use" ? openModelSearch : () => toggleTarget(target.id)
+								}
 								title={target.description}
 							>
 								<span className="chip-icon">{target.icon}</span>
@@ -145,18 +146,28 @@ export const AskNetwork: React.FC<AskNetworkProps> = ({ onSubmit }) => {
 									</span>
 								) : null;
 							})}
-							{selectedModel && (
-								<span className="preview-model-chip">
-									🤖 {selectedModel.name}
-								</span>
-							)}
+							{selectedModel && <span className="preview-model-chip">🤖 {selectedModel.name}</span>}
 						</div>
 					</div>
 				)}
 
 				{isModelSearchOpen && (
-					<div className="model-search-overlay" onClick={closeModelSearch}>
-						<div className="model-search-modal" onClick={(e) => e.stopPropagation()}>
+					<div
+						className="model-search-overlay"
+						onClick={closeModelSearch}
+						onKeyDown={(e) => {
+							if (e.key === "Escape") closeModelSearch();
+						}}
+						role="button"
+						tabIndex={0}
+					>
+						<div
+							className="model-search-modal"
+							onClick={(e) => e.stopPropagation()}
+							onKeyDown={(e) => e.stopPropagation()}
+							role="button"
+							tabIndex={0}
+						>
 							<div className="modal-header">
 								<h3>Noema 모델 검색</h3>
 								<button type="button" className="modal-close" onClick={closeModelSearch}>

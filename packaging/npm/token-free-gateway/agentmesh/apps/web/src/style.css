@@ -2,78 +2,78 @@
 
 /* DaedalOS Download Banner */
 .download-banner {
-  padding: 0.6rem 1rem;
-  background: linear-gradient(90deg, rgba(251, 191, 36, 0.08) 0%, rgba(251, 191, 36, 0.03) 100%);
-  border-bottom: 1px solid rgba(251, 191, 36, 0.15);
-  display: flex;
-  justify-content: center;
+	padding: 0.6rem 1rem;
+	background: linear-gradient(90deg, rgba(251, 191, 36, 0.08) 0%, rgba(251, 191, 36, 0.03) 100%);
+	border-bottom: 1px solid rgba(251, 191, 36, 0.15);
+	display: flex;
+	justify-content: center;
 }
 
 .download-banner-content {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  max-width: 900px;
-  width: 100%;
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	max-width: 900px;
+	width: 100%;
 }
 
 .download-banner-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+	flex: 1;
 }
 
 .download-banner-title {
-  font-size: 11px;
-  font-weight: 600;
-  color: #fbbf24;
+	font-size: 11px;
+	font-weight: 600;
+	color: #fbbf24;
 }
 
 .download-banner-desc {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.5);
+	font-size: 10px;
+	color: rgba(255, 255, 255, 0.5);
 }
 
 .download-banner-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.35rem 0.75rem;
-  background: rgba(251, 191, 36, 0.15);
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  border-radius: 20px;
-  color: #fbbf24;
-  font-size: 11px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-decoration: none;
-  white-space: nowrap;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	padding: 0.35rem 0.75rem;
+	background: rgba(251, 191, 36, 0.15);
+	border: 1px solid rgba(251, 191, 36, 0.3);
+	border-radius: 20px;
+	color: #fbbf24;
+	font-size: 11px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	text-decoration: none;
+	white-space: nowrap;
 }
 
 .download-banner-btn:hover {
-  background: rgba(251, 191, 36, 0.25);
-  border-color: rgba(251, 191, 36, 0.5);
+	background: rgba(251, 191, 36, 0.25);
+	border-color: rgba(251, 191, 36, 0.5);
 }
 
 .download-banner-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.4);
-  cursor: pointer;
-  transition: all 0.2s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+	border: none;
+	background: rgba(255, 255, 255, 0.05);
+	color: rgba(255, 255, 255, 0.4);
+	cursor: pointer;
+	transition: all 0.2s ease;
 }
 
 .download-banner-close:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.7);
+	background: rgba(255, 255, 255, 0.1);
+	color: rgba(255, 255, 255, 0.7);
 }
 
 /* Global Styles */
@@ -171,7 +171,9 @@ a {
 
 .status-pill,
 .section-label {
-	font: 500 11px "DM Mono", monospace;
+	font:
+		500 11px "DM Mono",
+		monospace;
 	letter-spacing: 0.1em;
 	color: #aeb1a3;
 	text-transform: uppercase;
@@ -319,7 +321,9 @@ h2 em {
 	border-radius: 50%;
 	background: #191a16;
 	color: #e6ff87;
-	font: 500 12px "DM Mono", monospace;
+	font:
+		500 12px "DM Mono",
+		monospace;
 }
 
 .node-a {
@@ -690,7 +694,9 @@ footer {
 	border-radius: 50%;
 	background: #191a16;
 	color: #e6ff87;
-	font: 500 12px "DM Mono", monospace;
+	font:
+		500 12px "DM Mono",
+		monospace;
 }
 
 .node-a {
@@ -1657,4 +1663,65 @@ footer {
 	margin: 4px 0 0 0;
 }
 
-/* -------------------------------------------------\n * AskNetwork Modal (Noema Model Search)\n * ------------------------------------------------- */\n\n.model-search-overlay {\n\tposition: fixed;\n\tinset: 0;\n\tbackground: rgba(0, 0, 0, 0.7);\n\tz-index: 1000;\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: center;\n\tpadding: 20px;\n}\n\n.model-search-modal {\n\tbackground: #1e1e1e;\n\tborder: 1px solid #333;\n\tborder-radius: 12px;\n\twidth: 100%;\n\tmax-width: 600px;\n\tmax-height: 80vh;\n\toverflow: hidden;\n\tdisplay: flex;\n\tflex-direction: column;\n}\n\n.modal-header {\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: space-between;\n\tpadding: 16px 20px;\n\tborder-bottom: 1px solid #333;\n}\n\n.modal-header h3 {\n\tmargin: 0;\n\tfont-size: 16px;\n\tfont-weight: 600;\n\tcolor: #f4f5ed;\n}\n\n.modal-close {\n\tbackground: transparent;\n\tborder: none;\n\tcolor: #9c9d94;\n\tcursor: pointer;\n\tfont-size: 20px;\n\tpadding: 4px;\n\tline-height: 1;\n\tborder-radius: 4px;\n}\n\n.modal-close:hover {\n\tcolor: #f4f5ed;\n\tbackground: rgba(255, 255, 255, 0.05);\n}\n\n.modal-body {\n\tpadding: 20px;\n\toverflow-y: auto;\n}\n
+/* -------------------------------------------------
+ * AskNetwork Modal (Noema Model Search)
+ * ------------------------------------------------- */
+
+.model-search-overlay {
+	\tposition: fixed;
+	\tinset: 0;
+	\tbackground: rgba(0, 0, 0, 0.7);
+	\tz-index: 1000;
+	\tdisplay: flex;
+	\talign-items: center;
+	\tjustify-content: center;
+	\tpadding: 20px;
+}
+
+.model-search-modal {
+	\tbackground: #1e1e1e;
+	\tborder: 1px solid #333;
+	\tborder-radius: 12px;
+	\twidth: 100%;
+	\tmax-width: 600px;
+	\tmax-height: 80vh;
+	\toverflow: hidden;
+	\tdisplay: flex;
+	\tflex-direction: column;
+}
+
+.modal-header {
+	\tdisplay: flex;
+	\talign-items: center;
+	\tjustify-content: space-between;
+	\tpadding: 16px 20px;
+	\tborder-bottom: 1px solid #333;
+}
+
+.modal-header h3 {
+	\tmargin: 0;
+	\tfont-size: 16px;
+	\tfont-weight: 600;
+	\tcolor: #f4f5ed;
+}
+
+.modal-close {
+	\tbackground: transparent;
+	\tborder: none;
+	\tcolor: #9c9d94;
+	\tcursor: pointer;
+	\tfont-size: 20px;
+	\tpadding: 4px;
+	\tline-height: 1;
+	\tborder-radius: 4px;
+}
+
+.modal-close:hover {
+	\tcolor: #f4f5ed;
+	\tbackground: rgba(255, 255, 255, 0.05);
+}
+
+.modal-body {
+	\tpadding: 20px;
+	\toverflow-y: auto;
+}
