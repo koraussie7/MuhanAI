@@ -113,6 +113,9 @@ jobs:
         with:
           main-branch-name: main
 
+      - name: Debug affected base
+        run: echo "NX_BASE=$NX_BASE NX_HEAD=$NX_HEAD"
+
       - name: Show projects
         run: pnpm exec nx show projects
 
@@ -120,7 +123,7 @@ jobs:
         run: pnpm exec nx affected -t typecheck
 
       - name: Affected test
-        run: pnpm exec nx affected -t test
+        run: pnpm exec nx affected -t test --skip-nx-cache --verbose
 
       - name: Affected lint
         run: pnpm exec nx affected -t lint
