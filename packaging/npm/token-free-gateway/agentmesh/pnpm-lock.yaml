@@ -117,9 +117,20 @@ importers:
         specifier: ^22.0.0
         version: 22.20.1
 
-  packages/agent-cast: {}
+  packages/agent-cast:
+    dependencies:
+      '@agentmesh/llm-router':
+        specifier: workspace:*
+        version: link:../llm-router
+      '@agentmesh/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
 
-  packages/agent-core: {}
+  packages/agent-core:
+    dependencies:
+      '@agentmesh/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
 
   packages/agent-daemon:
     dependencies:
@@ -177,7 +188,11 @@ importers:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.20.1)(lightningcss@1.32.0)
 
-  packages/agent-mesh: {}
+  packages/agent-mesh:
+    dependencies:
+      '@agentmesh/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
 
   packages/agent-router:
     dependencies:
@@ -259,7 +274,11 @@ importers:
         specifier: ^1.40.0
         version: 1.63.0
 
-  packages/category-engine: {}
+  packages/category-engine:
+    dependencies:
+      '@agentmesh/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
 
   packages/compute-market:
     devDependencies:
@@ -692,6 +711,15 @@ importers:
       pino:
         specifier: ^10.3.1
         version: 10.3.1
+
+  packages/vickrey-market:
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)(lightningcss@1.32.0)
 
   services/api:
     dependencies:
