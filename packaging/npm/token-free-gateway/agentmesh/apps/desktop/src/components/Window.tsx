@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, ReactNode } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 interface WindowProps {
 	id: string;
@@ -75,29 +75,19 @@ export function Window({
 				zIndex,
 			}}
 		>
-			<div
-				className="window-header"
-				ref={headerRef}
-				onMouseDown={() => setIsDragging(true)}
-			>
+			<div className="window-header" ref={headerRef} onMouseDown={() => setIsDragging(true)}>
 				<span className="window-title flex items-center gap-2">
 					{icon}
 					{title}
 				</span>
 				<div className="window-controls">
-					<button
-						className="window-close-btn"
-						onClick={onClose}
-					>
+					<button type="button" className="window-close-btn" onClick={onClose}>
 						×
 					</button>
 				</div>
 			</div>
 			<div className="window-content">{children}</div>
-			<div
-				className="window-resize-handle"
-				onMouseDown={() => setIsResizing(true)}
-			/>
+			<div className="window-resize-handle" onMouseDown={() => setIsResizing(true)} />
 		</div>
 	);
 }
