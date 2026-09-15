@@ -11,6 +11,10 @@
 		"lint": "tsc -p tsconfig.json --noEmit"
 	},
 	"dependencies": {
+		"@agentmesh/database": "workspace:*",
 		"@agentmesh/shared-types": "workspace:*"
+	},
+	"devDependencies": {
+		"@types/node": "^22.10.0"
 	}
 }

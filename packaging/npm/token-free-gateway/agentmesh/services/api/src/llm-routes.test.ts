@@ -37,7 +37,7 @@ describe("POST /api/llm/chat — user prompt wiring", () => {
 		process.env.NODE_ENV = "test";
 	});
 
-	it("routes a question through the OmniRoute-free tier (priority) and returns the LLM text", async () => {
+	it("routes a question through the keyless free tier and returns the LLM text", async () => {
 		// Mock every fetch to return a successful OpenAI-style chat completion.
 		globalThis.fetch = (async () =>
 			new Response(
@@ -70,7 +70,7 @@ describe("POST /api/llm/chat — user prompt wiring", () => {
 		expect(typeof body.text).toBe("string");
 		expect((body.text ?? "").length).toBeGreaterThan(0);
 		expect(body.provider).not.toBe("fallback");
-		expect(body.tier).toBe("omniroute");
+		expect(body.tier).toBe("keyless");
 	});
 
 	it("passes the system prompt through to the keyless provider body", async () => {
@@ -101,8 +101,8 @@ describe("POST /api/llm/chat — user prompt wiring", () => {
 		// and the hf-inference provider receives it via the Qwen chat template.
 		const allMessages = seenBodies.flatMap((b) => (b?.messages ?? []) as any[]);
 		const sys = allMessages.find((m) => m?.role === "system");
-		const qwenSys = seenBodies.some((b) =>
-			typeof b?.inputs === "string" && b.inputs.includes("Answer in one word."),
+		const qwenSys = seenBodies.some(
+			(b) => typeof b?.inputs === "string" && b.inputs.includes("Answer in one word."),
 		);
 		expect(sys?.content === "Answer in one word." || qwenSys).toBe(true);
 	});

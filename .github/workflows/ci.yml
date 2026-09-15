@@ -36,6 +36,7 @@ jobs:
           cache: pnpm
           cache-dependency-path: packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
+      - run: pnpm exec prisma generate
       - run: pnpm typecheck
 
   test:
@@ -53,8 +54,9 @@ jobs:
           cache: pnpm
           cache-dependency-path: packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
+      - run: pnpm exec prisma generate
       - name: Run vitest with junit reporter
-        run: pnpm test -- --reporter=junit --outputFile=junit.xml
+        run: pnpm test
       - uses: dorny/test-reporter@v1
         if: always()
         with:
@@ -70,6 +72,8 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
           version: 10
@@ -79,7 +83,13 @@ jobs:
           cache: pnpm
           cache-dependency-path: packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm biome ci .
+      - run: |
+          BASE=${{ github.event.pull_request.base.sha || github.event.before }}
+          if git diff --name-only "$BASE" HEAD -- packaging/npm/token-free-gateway/agentmesh/ | grep -q .; then
+            pnpm exec biome ci --changed --since=$BASE
+          else
+            echo "No workspace changes — skipping biome"
+          fi
 
   nx-affect:
     name: Nx affected (typecheck, test, lint, build)
@@ -102,11 +112,17 @@ jobs:
           cache-dependency-path: packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml
 
       - run: pnpm install --frozen-lockfile
+      - run: pnpm exec prisma generate
 
       - name: Set Nx SHAs
-        uses: nrwl/nx-set-shas@v4
-        with:
-          main-branch-name: main
+        env:
+          EVENT_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          echo "NX_BASE=$EVENT_BASE" >> $GITHUB_ENV
+          echo "NX_HEAD=$GITHUB_SHA" >> $GITHUB_ENV
+
+      - name: Debug affected base
+        run: echo "NX_BASE=$NX_BASE NX_HEAD=$NX_HEAD"
 
       - name: Show projects
         run: pnpm exec nx show projects

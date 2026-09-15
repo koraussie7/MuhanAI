@@ -7,6 +7,7 @@ import rateLimit from "@fastify/rate-limit";
 import Fastify from "fastify";
 import { agentsRoutes } from "./agents-routes.js";
 import { authRoutes } from "./auth-routes.js";
+import { catalogRoutes } from "./catalog-routes.js";
 import { computeRoutes } from "./compute-routes.js";
 import { computerUseRoutes } from "./computer-use-routes.js";
 import { creditsRoutes } from "./credits-routes.js";
@@ -21,9 +22,9 @@ import { mcpRoutes } from "./mcp-routes.js";
 import { networkRoutes } from "./network-routes.js";
 import { noemaRoutes } from "./noema-routes.js";
 import { omniRouteRoutes } from "./omniroute-routes.js";
+import { paymentRoutes } from "./payment-routes.js";
 import pulseRoutes from "./pulse-routes.js";
 import { quorumRoutes } from "./quorum-routes.js";
-import { paymentRoutes } from "./payment-routes.js";
 import { routerRoutes } from "./router-routes.js";
 import { securityRoutes } from "./security-routes.js";
 import { semanticRoutes } from "./semantic-routes.js";
@@ -195,6 +196,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	await app.register(paymentRoutes);
 	await app.register(routerRoutes);
 	await app.register(mcpRoutes);
+	await app.register(catalogRoutes);
 
 	// Wire the libp2p transport into the bridge. Best-effort: any failure here
 	// (mDNS unavailable on Docker bridge, identity write denied, etc.) keeps

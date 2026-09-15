@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface SearchResult {
 	title: string;
@@ -8,35 +8,35 @@ interface SearchResult {
 	confidence: number;
 }
 
-const FILTERS = ["All", "MCP", "P2P", "Verified", "Knowledge", "Web"];
-
-const DEMO_RESULTS: SearchResult[] = [
-	{
-		title: "베트남 비자 런 규정 2025",
-		snippet: "최근 변경된 비자 규정에 대한 요약...",
-		verified: true,
-		source: "gov.vn",
-		confidence: 92,
-	},
-	{
-		title: "USDT P2P 거래 안전 가이드",
-		snippet: "미얀마 현지 P2P 거래 시 주의사항...",
-		verified: false,
-		source: "community",
-		confidence: 74,
-	},
-	{
-		title: "다낭 장기 거주 팁",
-		snippet: "다낭에서 장기 거주를 위한 정보...",
-		verified: true,
-		source: "local-guide",
-		confidence: 88,
-	},
-];
+const FILTERS = ["All", "MCP", "P2P", "Verified", "Knowledge", "Web"] as const;
+type Filter = (typeof FILTERS)[number];
 
 export function FederatedSearch() {
 	const [query, setQuery] = useState("");
-	const [activeFilter, setActiveFilter] = useState("All");
+	const [activeFilter, setActiveFilter] = useState<Filter>("All");
+	const [results, setResults] = useState<SearchResult[]>([]);
+	const [loading, setLoading] = useState(false);
+
+	useEffect(() => {
+		const q = query.trim();
+		if (!q) {
+			setResults([]);
+			return;
+		}
+		const controller = new AbortController();
+		setLoading(true);
+		const handle = setTimeout(() => {
+			fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal: controller.signal })
+				.then((res) => (res.ok ? res.json() : []))
+				.then((data: SearchResult[]) => setResults(Array.isArray(data) ? data : []))
+				.catch(() => setResults([]))
+				.finally(() => setLoading(false));
+		}, 300);
+		return () => {
+			clearTimeout(handle);
+			controller.abort();
+		};
+	}, [query]);
 
 	return (
 		<section className="panel">
@@ -54,13 +54,16 @@ export function FederatedSearch() {
 					onChange={(e) => setQuery(e.target.value)}
 					placeholder="Search across P2P network, MCP tools, and knowledge base..."
 				/>
-				<button className="ask-btn">Search</button>
+				<button type="button" className="ask-btn">
+					Search
+				</button>
 			</div>
 
 			<div className="policy-row" style={{ marginBottom: 16 }}>
 				{FILTERS.map((f) => (
 					<button
 						key={f}
+						type="button"
 						className={f === activeFilter ? "policy-chip active" : "policy-chip"}
 						onClick={() => setActiveFilter(f)}
 					>
@@ -70,20 +73,33 @@ export function FederatedSearch() {
 			</div>
 
 			<div className="trend-list">
-				{DEMO_RESULTS.map((r, i) => (
-					<div key={i} className="trend-row">
-						<div>
-							<div className="trend-question">{r.title}</div>
-							<div className="trend-bar-wrap" style={{ marginTop: 6 }}>
-								<div className="trend-bar" style={{ width: `${r.confidence}%` }} />
-							</div>
-						</div>
-						<span className="trend-score">{r.confidence}%</span>
-						<span className={`agent-badge ${r.verified ? "Agent" : "Human"}`}>
-							{r.verified ? "Verified" : "Unverified"}
-						</span>
+				{loading ? (
+					<div className="trend-row">Searching…</div>
+				) : !query.trim() ? (
+					<div className="trend-row">Enter a query to search the federated network.</div>
+				) : results.length === 0 ? (
+					<div className="trend-row">
+						No matches. Wire an info-mesh index or knowledge base to populate results.
 					</div>
-				))}
+				) : (
+					results.map((r) => (
+						<div key={r.title} className="trend-row">
+							<div>
+								<div className="trend-question">{r.title}</div>
+								<div className="trend-bar-wrap" style={{ marginTop: 6 }}>
+									<div className="trend-bar" style={{ width: `${r.confidence}%` }} />
+								</div>
+								<div className="trend-snippet" style={{ marginTop: 4, opacity: 0.7 }}>
+									{r.snippet}
+								</div>
+							</div>
+							<span className="trend-score">{r.confidence}%</span>
+							<span className={`agent-badge ${r.verified ? "Agent" : "Human"}`}>
+								{r.verified ? "Verified" : "Unverified"}
+							</span>
+						</div>
+					))
+				)}
 			</div>
 		</section>
 	);

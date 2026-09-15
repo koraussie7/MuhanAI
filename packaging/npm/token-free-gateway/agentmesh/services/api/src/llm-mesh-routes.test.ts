@@ -1,8 +1,23 @@
 import { pino } from "pino";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildApp } from "./server.js";
 
 const originalEnv = { ...process.env };
+
+function sleep(ms: number): Promise<void> {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function stubGatewayHealthFetch(): ReturnType<typeof vi.fn> {
+	return vi.fn(async (input: string | URL | Request) => {
+		if (String(input).includes("api.groq.com")) {
+			await sleep(250);
+			return new Response(null, { status: 429 });
+		}
+		await sleep(5);
+		return new Response(null, { status: 200 });
+	});
+}
 
 describe("GET /api/llm-mesh", () => {
 	let app: Awaited<ReturnType<typeof buildApp>> | undefined;
@@ -10,6 +25,7 @@ describe("GET /api/llm-mesh", () => {
 	beforeEach(async () => {
 		process.env.DISABLE_AUTH = "true";
 		process.env.NODE_ENV = "development";
+		vi.stubGlobal("fetch", stubGatewayHealthFetch());
 		app = await buildApp({
 			logger: pino({ level: "silent" }),
 			enableTransport: false,
@@ -21,6 +37,7 @@ describe("GET /api/llm-mesh", () => {
 			await app.close();
 			app = undefined;
 		}
+		vi.unstubAllGlobals();
 		process.env = { ...originalEnv };
 	});
 
