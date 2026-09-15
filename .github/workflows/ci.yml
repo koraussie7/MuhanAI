@@ -36,6 +36,7 @@ jobs:
           cache: pnpm
           cache-dependency-path: packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
+      - run: pnpm exec prisma generate
       - run: pnpm typecheck
 
   test:
@@ -53,8 +54,9 @@ jobs:
           cache: pnpm
           cache-dependency-path: packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
+      - run: pnpm exec prisma generate
       - name: Run vitest with junit reporter
-        run: pnpm test -- --reporter=junit --outputFile=junit.xml
+        run: pnpm test
       - uses: dorny/test-reporter@v1
         if: always()
         with:
@@ -70,6 +72,8 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
           version: 10
@@ -79,7 +83,7 @@ jobs:
           cache: pnpm
           cache-dependency-path: packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm biome ci .
+      - run: pnpm exec biome ci --changed --since=origin/main
 
   nx-affect:
     name: Nx affected (typecheck, test, lint, build)
@@ -102,6 +106,7 @@ jobs:
           cache-dependency-path: packaging/npm/token-free-gateway/agentmesh/pnpm-lock.yaml
 
       - run: pnpm install --frozen-lockfile
+      - run: pnpm exec prisma generate
 
       - name: Set Nx SHAs
         uses: nrwl/nx-set-shas@v4

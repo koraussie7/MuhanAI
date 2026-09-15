@@ -2,3 +2,5 @@
 **/.nx/**
 **/dist/**
 **/coverage/**
+**/apps/desktop/src/components/DesktopApps.tsx
+**/apps/web/src/components/WebDesktopPage.tsx

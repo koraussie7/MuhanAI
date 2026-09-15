@@ -11,5 +11,6 @@ export default defineConfig({
 		],
 		environment: "node",
 		passWithNoTests: true,
+		reporters: ["default", ["junit", { outputFile: "./junit.xml" }]],
 	},
 });

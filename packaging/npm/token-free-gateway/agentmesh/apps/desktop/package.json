@@ -10,10 +10,11 @@
 		"typecheck": "tsc --noEmit",
 		"lint": "tsc --noEmit"
 	},
-		"dependencies": {
+	"dependencies": {
 		"@agentmesh/ai-engine": "workspace:*",
 		"@agentmesh/ai-ui": "workspace:*",
 		"@agentmesh/bitterbot": "workspace:*",
+		"@agentmesh/web": "workspace:*",
 		"lucide-react": "^0.457.0",
 		"next": "^15.0.0",
 		"react": "^19.0.0",
