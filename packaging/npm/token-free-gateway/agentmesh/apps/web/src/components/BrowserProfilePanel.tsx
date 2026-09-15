@@ -58,7 +58,7 @@ function stubAdapter(): BrowserProfileSettings {
 					seed: 7777,
 					label: "EU Investigations",
 					fingerprintPreview: "9b41f02a6e7c",
-					proxy: "socks5://proxy.example.com:1080",
+					proxy: null,
 					lastUsed: now - 2 * 3_600_000,
 				},
 				{

@@ -37,44 +37,15 @@ function PageShell({
 
 // 1. /agents (ISEK + Society Protocol: Agent Directory)
 export function AgentsPage() {
-	const agents = [
-		{
-			id: "agent-gemini",
-			name: "Gemini 1.5 Pro Research",
-			did: "did:muhan:agent:gemini",
-			role: "LLM Agent",
-			rating: 99.2,
-			tasks: 1420,
-			tags: ["Research", "Search", "Fast"],
-		},
-		{
-			id: "agent-claude",
-			name: "Claude 3.5 Sonnet Engineer",
-			did: "did:muhan:agent:claude",
-			role: "Coding Agent",
-			rating: 99.8,
-			tasks: 2890,
-			tags: ["TypeScript", "Rust", "Review"],
-		},
-		{
-			id: "agent-deepseek",
-			name: "DeepSeek R1 Reasoner",
-			did: "did:muhan:agent:r1",
-			role: "Reasoning Node",
-			rating: 97.4,
-			tasks: 810,
-			tags: ["Logic", "Math", "Chain"],
-		},
-		{
-			id: "agent-local",
-			name: "Llama-3.3 Local Node",
-			did: "did:muhan:agent:local-01",
-			role: "Edge Agent",
-			rating: 94.6,
-			tasks: 420,
-			tags: ["Privacy", "Offline", "No-Token"],
-		},
-	];
+	const agents: Array<{
+		id: string;
+		name: string;
+		did: string;
+		role: string;
+		rating: number;
+		tasks: number;
+		tags: string[];
+	}> = [];
 	return (
 		<PageShell
 			iconKey="bot"
@@ -114,32 +85,14 @@ export function AgentsPage() {
 
 // 2. /human-agents (Human-in-the-Loop Experts)
 export function HumanAgentsPage() {
-	const humans = [
-		{
-			id: "h-01",
-			name: "Dr. Yeon (AI System)",
-			specialty: "분산 라우팅 & 합의",
-			rep: 994,
-			reviews: 312,
-			status: "Available",
-		},
-		{
-			id: "h-02",
-			name: "Sarah K. (Security)",
-			specialty: "Zero-Trust & Vault 검증",
-			rep: 981,
-			reviews: 184,
-			status: "Busy",
-		},
-		{
-			id: "h-03",
-			name: "Alex Chen (Data)",
-			specialty: "지식 그래프 온톨로지",
-			rep: 975,
-			reviews: 240,
-			status: "Available",
-		},
-	];
+	const humans: Array<{
+		id: string;
+		name: string;
+		specialty: string;
+		rep: number;
+		reviews: number;
+		status: string;
+	}> = [];
 	return (
 		<PageShell
 			iconKey="users"
@@ -271,26 +224,12 @@ export function ReputationPage() {
 
 // 7. /projects, /tasks, /workflows (AgentFM Workspaces)
 export function ProjectsPage() {
-	const projects = [
-		{
-			id: "p-1",
-			title: "MuhanAI Gateway Core",
-			desc: "Token-Free Web Session Gateway v0.5.2",
-			progress: 92,
-		},
-		{
-			id: "p-2",
-			title: "Decentralized DID Mesh",
-			desc: "ISEK A2A 디스커버리 계층 연동",
-			progress: 68,
-		},
-		{
-			id: "p-3",
-			title: "Local P2P Search Engine",
-			desc: "InfoMesh 기반 분산 지식 색인",
-			progress: 45,
-		},
-	];
+	const projects: Array<{
+		id: string;
+		title: string;
+		desc: string;
+		progress: number;
+	}> = [];
 	return (
 		<PageShell
 			iconKey="folder-git"

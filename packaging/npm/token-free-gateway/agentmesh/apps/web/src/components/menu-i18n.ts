@@ -82,6 +82,7 @@ export const MENU_TRANSLATIONS: Record<SupportedLanguage, NavI18n> = {
 			DaedalOS: "DaedalOS",
 			"Token-Free": "토큰 프리",
 			NEW: "신규",
+			Beta: "Beta",
 		},
 		footer: {
 			peerMesh: "P2P 메쉬",
@@ -189,6 +190,7 @@ export const MENU_TRANSLATIONS: Record<SupportedLanguage, NavI18n> = {
 			DaedalOS: "DaedalOS",
 			"Token-Free": "Token-Free",
 			NEW: "NEW",
+			Beta: "Beta",
 		},
 		footer: {
 			peerMesh: "P2P Mesh",

@@ -28,44 +28,15 @@ const DEFAULT_HUMAN = {
 	specialties: undefined,
 };
 
-const DEFAULT_AGENTS = [
-	{
-		id: "agent-gemini",
-		name: "Gemini Research Node",
-		type: "research",
-		online: true,
-		capabilities: ["Search", "Summarize", "Reasoning"],
-		reputation: 99.2,
-		success: 99.8,
-	},
-	{
-		id: "agent-claude",
-		name: "Claude Sonnet Coder",
-		type: "coding",
-		online: true,
-		capabilities: ["TypeScript", "Rust", "Architecture"],
-		reputation: 99.8,
-		success: 99.9,
-	},
-	{
-		id: "agent-deepseek",
-		name: "DeepSeek R1 Logic",
-		type: "reasoning",
-		online: true,
-		capabilities: ["Math", "Logic Chain", "Verification"],
-		reputation: 98.4,
-		success: 98.7,
-	},
-	{
-		id: "agent-local",
-		name: "Llama 3.3 Edge Peer",
-		type: "edge",
-		online: true,
-		capabilities: ["Offline", "Privacy", "Token-Free"],
-		reputation: 95.1,
-		success: 96.3,
-	},
-];
+const DEFAULT_AGENTS: Array<{
+	id: string;
+	name: string;
+	type: string;
+	online: boolean;
+	capabilities: string[];
+	reputation: number;
+	success: number;
+}> = [];
 
 export function RightPanel() {
 	const { t } = useI18n();
