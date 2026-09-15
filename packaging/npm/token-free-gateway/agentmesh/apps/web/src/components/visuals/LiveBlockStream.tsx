@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useVisibilityAwareInterval } from "../../hooks/useVisibilityAwareInterval";
 
 // Visual from p2ptokens + PinkyBrain: Live Horizontal Block & Transaction Ledger Stream
 export interface LedgerBlock {
@@ -53,40 +54,39 @@ const INITIAL_BLOCKS: LedgerBlock[] = [
 export function LiveBlockStream() {
 	const [blocks, setBlocks] = useState<LedgerBlock[]>(INITIAL_BLOCKS);
 
-	// New Block Mine Simulator
-	useEffect(() => {
-		const timer = setInterval(() => {
-			const actions: LedgerBlock["action"][] = [
-				"compute_inference",
-				"knowledge_verify",
-				"webrtc_relay",
-				"mcp_tool_exec",
-			];
-			const contributors = [
-				"Seoul-Node-Alpha",
-				"Claude-Engineer",
-				"Sarah-K-Security",
-				"Gemini-Researcher",
-				"Edge-Worker-SG",
-			];
-			const randAction = actions[Math.floor(Math.random() * actions.length)] ?? "compute_inference";
-			const randContrib =
-				contributors[Math.floor(Math.random() * contributors.length)] ?? "Peer-Node";
+	// New Block Mine Simulator — paused while the tab is hidden (MEMORY-TESTING.md)
+	const mineNewBlock = () => {
+		const actions: LedgerBlock["action"][] = [
+			"compute_inference",
+			"knowledge_verify",
+			"webrtc_relay",
+			"mcp_tool_exec",
+		];
+		const contributors = [
+			"Seoul-Node-Alpha",
+			"Claude-Engineer",
+			"Sarah-K-Security",
+			"Gemini-Researcher",
+			"Edge-Worker-SG",
+		];
+		const randAction = actions[Math.floor(Math.random() * actions.length)] ?? "compute_inference";
+		const randContrib =
+			contributors[Math.floor(Math.random() * contributors.length)] ?? "Peer-Node";
 
-			const newBlock: LedgerBlock = {
-				blockNumber: 48922 + Math.floor(Math.random() * 100),
-				hash: `0x${Math.random().toString(16).slice(2, 8)}...${Math.random().toString(16).slice(2, 5)}`,
-				contributor: randContrib,
-				action: randAction,
-				reward: Math.floor(40 + Math.random() * 200),
-				gasTokens: 0,
-				timeAgo: "방금",
-			};
+		const newBlock: LedgerBlock = {
+			blockNumber: 48922 + Math.floor(Math.random() * 100),
+			hash: `0x${Math.random().toString(16).slice(2, 8)}...${Math.random().toString(16).slice(2, 5)}`,
+			contributor: randContrib,
+			action: randAction,
+			reward: Math.floor(40 + Math.random() * 200),
+			gasTokens: 0,
+			timeAgo: "방금",
+		};
 
-			setBlocks((prev) => [newBlock, ...prev.slice(0, 5)]);
-		}, 4000);
-		return () => clearInterval(timer);
-	}, []);
+		setBlocks((prev) => [newBlock, ...prev.slice(0, 5)]);
+	};
+
+	useVisibilityAwareInterval(mineNewBlock, 4000);
 
 	const getActionBadge = (action: LedgerBlock["action"]) => {
 		switch (action) {

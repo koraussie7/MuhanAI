@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useVisibilityAwareInterval } from "../../hooks/useVisibilityAwareInterval";
 
 // Visual from tkngate + peerd: Real-Time Latency & Failover Waterfall Chart
 export interface RouteLatency {
@@ -53,17 +54,14 @@ export function LatencyVisualizer() {
 	const [routes, setRoutes] = useState<RouteLatency[]>(INITIAL_ROUTES);
 
 	// Live Jitter
-	useEffect(() => {
-		const timer = setInterval(() => {
-			setRoutes((prev) =>
-				prev.map((r) => ({
-					...r,
-					latencyMs: Math.max(8, r.latencyMs + Math.floor((Math.random() - 0.5) * 8)),
-				})),
-			);
-		}, 1500);
-		return () => clearInterval(timer);
-	}, []);
+	useVisibilityAwareInterval(() => {
+		setRoutes((prev) =>
+			prev.map((r) => ({
+				...r,
+				latencyMs: Math.max(8, r.latencyMs + Math.floor((Math.random() - 0.5) * 8)),
+			})),
+		);
+	}, 1500);
 
 	const maxLatency = 1000;
 

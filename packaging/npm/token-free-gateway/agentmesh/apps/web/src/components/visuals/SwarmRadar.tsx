@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useVisibilityAwareInterval } from "../../hooks/useVisibilityAwareInterval";
 
 // Visual from ISEK + LLMesh: 360-degree P2P Swarm Radar with sweeping scanner
 export interface RadarNode {
@@ -73,12 +74,9 @@ export function SwarmRadar() {
 	const [selectedNode, setSelectedNode] = useState<RadarNode | null>(INITIAL_NODES[0] ?? null);
 	const [sweepAngle, setSweepAngle] = useState(0);
 
-	useEffect(() => {
-		const timer = setInterval(() => {
-			setSweepAngle((prev) => (prev + 3) % 360);
-		}, 50);
-		return () => clearInterval(timer);
-	}, []);
+	useVisibilityAwareInterval(() => {
+		setSweepAngle((prev) => (prev + 3) % 360);
+	}, 50);
 
 	const center = 160;
 	const radius = 135;
