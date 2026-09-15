@@ -73,6 +73,22 @@ export const ROUTES: readonly RouteDefinition[] = [
 		page: "bitterbot",
 	},
 	{
+		id: "agents",
+		path: "/agents",
+		group: "core",
+		label: "Agents",
+		iconKey: "bot",
+		page: "agents",
+	},
+	{
+		id: "human-agents",
+		path: "/human-agents",
+		group: "core",
+		label: "Human Agents",
+		iconKey: "users",
+		page: "human-agents",
+	},
+	{
 		id: "p2p-network",
 		path: "/network",
 		group: "network",

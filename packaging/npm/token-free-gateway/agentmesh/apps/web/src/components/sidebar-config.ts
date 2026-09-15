@@ -33,7 +33,7 @@ const GROUP_TITLES: Record<string, string> = {
 	core: "Core & Chat",
 	network: "P2P Network",
 	resources: "Compute & Models",
-	knowledge: "Knowledge & Intelligence",
+	knowledge: "Knowledge Lake",
 	marketplace: "Marketplace",
 	economy: "Economy",
 	workspace: "Workspace",
