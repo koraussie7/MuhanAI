@@ -692,6 +692,20 @@ html {
 	box-shadow: 0 0 6px var(--cline-green);
 }
 
+.agent-header .offline {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--cline-text-muted);
+	opacity: 0.5;
+}
+
+.agent-id {
+	font-size: 10px;
+	font-family: var(--cline-font-mono);
+	color: var(--cline-text-muted);
+}
+
 .agent-name {
 	font-size: 12px;
 	font-weight: 600;

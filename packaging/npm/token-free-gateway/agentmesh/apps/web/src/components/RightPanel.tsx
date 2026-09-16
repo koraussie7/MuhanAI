@@ -41,6 +41,7 @@ const DEFAULT_AGENTS: Array<{
 export function RightPanel() {
 	const { t } = useI18n();
 	const [agents, setAgents] = useState<any[]>(DEFAULT_AGENTS);
+	const [nodes, setNodes] = useState<any[]>([]);
 	const [compute, setCompute] = useState<any>(DEFAULT_COMPUTE);
 	const [llm, setLlm] = useState<any>(DEFAULT_LLM);
 	const [mcp, setMcp] = useState<any>(DEFAULT_MCP);
@@ -52,11 +53,14 @@ export function RightPanel() {
 
 		const loadData = async () => {
 			try {
-				const [networkRes, agentsRes] = await Promise.all([
+				const [networkRes, agentsRes, nodesRes] = await Promise.all([
 					fetch(`${API}/api/network`, { signal: controller.signal })
 						.then((r) => (r.ok ? r.json() : null))
 						.catch(() => null),
 					fetch(`${API}/api/agents`, { signal: controller.signal })
+						.then((r) => (r.ok ? r.json() : null))
+						.catch(() => null),
+					fetch(`${API}/api/nodes`, { signal: controller.signal })
 						.then((r) => (r.ok ? r.json() : null))
 						.catch(() => null),
 				]);
@@ -69,6 +73,9 @@ export function RightPanel() {
 				}
 				if (agentsRes && Array.isArray(agentsRes) && agentsRes.length > 0) {
 					setAgents(agentsRes);
+				}
+				if (Array.isArray(nodesRes)) {
+					setNodes(nodesRes);
 				}
 			} catch {
 				// Fallback defaults already in state
@@ -111,6 +118,34 @@ export function RightPanel() {
 							</div>
 						</div>
 					))}
+				</div>
+
+				<h3>Registered Nodes</h3>
+				<div className="agent-list">
+					{nodes.length === 0 && <div className="dash-note">등록된 노드 없음</div>}
+					{nodes.map((node: any) => {
+						const online = Date.now() - (node.lastSeen ?? 0) < 90_000;
+						return (
+							<div key={node.id} className="agent-card">
+								<div className="agent-header">
+									<span className={`agent-type ${node.type}`}>{node.type}</span>
+									<span className={online ? "online" : "offline"} />
+								</div>
+								<div className="agent-name">
+									{node.name}
+									{node.hostname ? <span className="agent-id"> ({node.hostname})</span> : null}
+								</div>
+								<div className="agent-capabilities">
+									{node.tailscaleIp && <span className="cap-tag">{node.tailscaleIp}</span>}
+									<span className="cap-tag">{node.role ?? "node"}</span>
+								</div>
+								<div className="agent-stats">
+									<span>{online ? "● online" : "◌ offline"}</span>
+									<span>{new Date(node.lastSeen ?? 0).toLocaleTimeString()}</span>
+								</div>
+							</div>
+						);
+					})}
 				</div>
 
 				<h3>{t.rightPanel.compute}</h3>

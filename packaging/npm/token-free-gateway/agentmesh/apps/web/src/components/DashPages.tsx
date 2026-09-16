@@ -135,6 +135,33 @@ const HARVEST_AGENTS: AgentIdentity[] = [
 	},
 ];
 
+interface RegisteredNode {
+	id: string;
+	name: string;
+	type: string;
+	role?: string;
+	tailscaleIp?: string;
+	hostname?: string;
+	lastSeen: number;
+	registeredAt: number;
+}
+
+function nodeToIdentity(node: RegisteredNode): AgentIdentity {
+	const age = Date.now() - node.lastSeen;
+	const online = age < 90_000;
+	return {
+		id: node.id,
+		name: node.name,
+		did: `did:muhan:node:${node.id}`,
+		status: online ? "online" : "offline",
+		capabilities: [node.type, node.role ?? "node", node.hostname ?? ""].filter(Boolean),
+		reputation: online ? 100 : 0,
+		latency: online ? `${Math.round(age / 1000)}s ago` : "—",
+		success: online ? 100 : 0,
+		a2a: { peers: 0, verified: false },
+	};
+}
+
 const MESH_TOPOLOGY_NODES: MeshNode[] = [
 	{
 		id: "router",
@@ -173,6 +200,34 @@ const MESH_TOPOLOGY_EDGES: MeshEdge[] = [
 export function AgentMeshPage() {
 	const [filter, setFilter] = useState("");
 	const [view, setView] = useState<"cards" | "topology">("cards");
+	const [liveNodes, setLiveNodes] = useState<AgentIdentity[]>([]);
+
+	useEffect(() => {
+		const ctrl = new AbortController();
+		const timeout = setTimeout(() => ctrl.abort(), 5000);
+		fetch(`${API}/api/nodes`, { signal: ctrl.signal })
+			.then((r) => (r.ok ? r.json() : null))
+			.then((data: RegisteredNode[] | null) => {
+				if (Array.isArray(data)) setLiveNodes(data.map(nodeToIdentity));
+			})
+			.catch(() => {})
+			.finally(() => clearTimeout(timeout));
+		const iv = setInterval(() => {
+			fetch(`${API}/api/nodes`, { signal: AbortSignal.timeout(5000) })
+				.then((r) => (r.ok ? r.json() : null))
+				.then((data: RegisteredNode[] | null) => {
+					if (Array.isArray(data)) setLiveNodes(data.map(nodeToIdentity));
+				})
+				.catch(() => {});
+		}, 30_000);
+		return () => {
+			clearTimeout(timeout);
+			clearInterval(iv);
+			ctrl.abort();
+		};
+	}, []);
+
+	const allAgents = [...liveNodes, ...HARVEST_AGENTS];
 	return (
 		<Page
 			iconKey="bot"
@@ -182,12 +237,12 @@ export function AgentMeshPage() {
 			<SwarmRadar />
 			<div className="peer-canvas-toolbar" style={{ marginBottom: 12 }}>
 				<div className="peer-filter-row">
-					<button
-						className={`policy-chip ${view === "cards" ? "active" : ""}`}
-						onClick={() => setView("cards")}
-					>
-						Identity Cards ({HARVEST_AGENTS.length})
-					</button>
+						<button
+							className={`policy-chip ${view === "cards" ? "active" : ""}`}
+							onClick={() => setView("cards")}
+						>
+							Identity Cards ({allAgents.length})
+						</button>
 					<button
 						className={`policy-chip ${view === "topology" ? "active" : ""}`}
 						onClick={() => setView("topology")}
@@ -207,7 +262,7 @@ export function AgentMeshPage() {
 			</div>
 
 			{view === "cards" ? (
-				<AgentIdentityGrid agents={HARVEST_AGENTS} filter={filter} />
+				<AgentIdentityGrid agents={allAgents} filter={filter} />
 			) : (
 				<>
 					<MeshStats nodes={MESH_TOPOLOGY_NODES} edges={MESH_TOPOLOGY_EDGES} />

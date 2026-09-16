@@ -30,6 +30,8 @@ jobs:
 
       - name: Build web
         run: pnpm --filter @agentmesh/web run build
+        env:
+          VITE_API_BASE: https://api.muhanai.com
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
