@@ -8,6 +8,7 @@ import Fastify from "fastify";
 import { agentsRoutes } from "./agents-routes.js";
 import { authRoutes } from "./auth-routes.js";
 import { catalogRoutes } from "./catalog-routes.js";
+import { resonanceRoutes } from "./integrations/resonance/routes.js";
 import { computeRoutes } from "./compute-routes.js";
 import { computerUseRoutes } from "./computer-use-routes.js";
 import { creditsRoutes } from "./credits-routes.js";
@@ -197,6 +198,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	await app.register(routerRoutes);
 	await app.register(mcpRoutes);
 	await app.register(catalogRoutes);
+	await app.register(resonanceRoutes);
 
 	// Wire the libp2p transport into the bridge. Best-effort: any failure here
 	// (mDNS unavailable on Docker bridge, identity write denied, etc.) keeps
