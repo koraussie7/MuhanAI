@@ -1,3 +1,4 @@
+export * from "./folklore-mcp-client";
 export * from "./hound-mcp-client";
 export * from "./hotel-mcp-client";
 export * from "./knowledge";

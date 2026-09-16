@@ -1,58 +1,235 @@
 {
   "version": "6.0",
   "nxVersion": "20.8.4",
-  "pathMappings": {},
+  "pathMappings": {
+    "@agentmesh/ai-engine": [
+      "./packages/ai-engine/src/index.ts"
+    ],
+    "@agentmesh/ai-engine/factory": [
+      "./packages/ai-engine/src/factory.ts"
+    ],
+    "@agentmesh/ai-engine/*": [
+      "./packages/ai-engine/src/*"
+    ]
+  },
   "nxJsonPlugins": [],
   "fileMap": {
     "projectFileMap": {
-      "@agentmesh/agent-cast": [
+      "@agentmesh/ai-ui": [
         {
-          "file": "packages/agent-cast/package.json",
-          "hash": "12506696236521877"
+          "file": "packages/ai-ui/package.json",
+          "hash": "2543227536229744677",
+          "deps": [
+            "@agentmesh/ai-engine"
+          ]
         },
         {
-          "file": "packages/agent-cast/src/hierarchy.ts",
-          "hash": "16851776931606557064",
+          "file": "packages/ai-ui/src/ChatWidget.tsx",
+          "hash": "1128642867778833939"
+        },
+        {
+          "file": "packages/ai-ui/src/hooks/useAIEngine.ts",
+          "hash": "6347362358516811682",
           "deps": [
+            "@agentmesh/ai-engine"
+          ]
+        },
+        {
+          "file": "packages/ai-ui/src/index.ts",
+          "hash": "3787532477824525219"
+        },
+        {
+          "file": "packages/ai-ui/tsconfig.json",
+          "hash": "6707849435351833197"
+        }
+      ],
+      "@agentmesh/agent-daemon": [
+        {
+          "file": "packages/agent-daemon/package.json",
+          "hash": "8887442340154275843",
+          "deps": [
+            "@agentmesh/agent-gateway",
+            "@agentmesh/peer-mesh",
             "@agentmesh/llm-router",
+            "@agentmesh/credit-system",
+            "@agentmesh/shared-types",
+            "@agentmesh/personal-mcp"
+          ]
+        },
+        {
+          "file": "packages/agent-daemon/src/computer-use-router.ts",
+          "hash": "15662833566254146602"
+        },
+        {
+          "file": "packages/agent-daemon/src/credentials-vault.ts",
+          "hash": "1217668477870886342"
+        },
+        {
+          "file": "packages/agent-daemon/src/daemon.ts",
+          "hash": "15646501051723592110",
+          "deps": [
+            "@agentmesh/agent-gateway",
+            "@agentmesh/personal-mcp"
+          ]
+        },
+        {
+          "file": "packages/agent-daemon/src/device-node-daemon.ts",
+          "hash": "11795513045510030970",
+          "deps": [
+            "@agentmesh/peer-mesh",
+            "@agentmesh/llm-router"
+          ]
+        },
+        {
+          "file": "packages/agent-daemon/src/e2b-adapter.ts",
+          "hash": "9785746910091831955"
+        },
+        {
+          "file": "packages/agent-daemon/src/e2b-byok-vision.ts",
+          "hash": "10461394259179927250"
+        },
+        {
+          "file": "packages/agent-daemon/src/e2b-computer-use.ts",
+          "hash": "6419105817522484162"
+        },
+        {
+          "file": "packages/agent-daemon/src/index.ts",
+          "hash": "8468886134506800623"
+        },
+        {
+          "file": "packages/agent-daemon/src/machine-identity.ts",
+          "hash": "10059366270813598677",
+          "deps": [
+            "@agentmesh/peer-mesh"
+          ]
+        },
+        {
+          "file": "packages/agent-daemon/src/mcp-router.ts",
+          "hash": "1905541669257697159",
+          "deps": [
+            "@agentmesh/personal-mcp"
+          ]
+        },
+        {
+          "file": "packages/agent-daemon/src/session-decrypt.ts",
+          "hash": "731440670427659789",
+          "deps": [
+            "@agentmesh/agent-gateway"
+          ]
+        },
+        {
+          "file": "packages/agent-daemon/src/session-runner.ts",
+          "hash": "10191363700549222479"
+        },
+        {
+          "file": "packages/agent-daemon/src/tests/computer-use-router.test.ts",
+          "hash": "5908936939305767386"
+        },
+        {
+          "file": "packages/agent-daemon/src/tests/daemon.test.ts",
+          "hash": "11596598564283147669",
+          "deps": [
+            "@agentmesh/agent-gateway"
+          ]
+        },
+        {
+          "file": "packages/agent-daemon/src/tests/e2b-adapter.test.ts",
+          "hash": "17450653731935002440"
+        },
+        {
+          "file": "packages/agent-daemon/src/tests/e2b-byok-vision.test.ts",
+          "hash": "10067396544188902394"
+        },
+        {
+          "file": "packages/agent-daemon/src/tests/e2b-computer-use.test.ts",
+          "hash": "5503045084113879660"
+        },
+        {
+          "file": "packages/agent-daemon/src/tests/e2e.test.ts",
+          "hash": "11107400989788413532",
+          "deps": [
+            "@agentmesh/agent-gateway"
+          ]
+        },
+        {
+          "file": "packages/agent-daemon/src/tests/muhan-agent.test.ts",
+          "hash": "3663081232471193845",
+          "deps": [
+            "@agentmesh/agent-gateway"
+          ]
+        },
+        {
+          "file": "packages/agent-daemon/tsconfig.json",
+          "hash": "3117218783717132829"
+        },
+        {
+          "file": "packages/agent-daemon/vitest.config.ts",
+          "hash": "14322829971621188420"
+        }
+      ],
+      "@agentmesh/hivebear": [
+        {
+          "file": "packages/hivebear/package.json",
+          "hash": "13919176010745562048",
+          "deps": [
             "@agentmesh/shared-types"
           ]
         },
         {
-          "file": "packages/agent-cast/src/index.ts",
-          "hash": "1968287580726996802",
+          "file": "packages/hivebear/src/client.ts",
+          "hash": "11623767667422027208",
           "deps": [
-            "@agentmesh/llm-router",
             "@agentmesh/shared-types"
           ]
         },
         {
-          "file": "packages/agent-cast/tsconfig.json",
-          "hash": "16568283178550900376"
+          "file": "packages/hivebear/src/index.ts",
+          "hash": "902696247257602603"
+        },
+        {
+          "file": "packages/hivebear/src/ollama-proxy.test.ts",
+          "hash": "10397721010630549638"
+        },
+        {
+          "file": "packages/hivebear/src/ollama-proxy.ts",
+          "hash": "7830975274310737325"
+        },
+        {
+          "file": "packages/hivebear/src/types.ts",
+          "hash": "14888330254173567936"
+        },
+        {
+          "file": "packages/hivebear/tsconfig.json",
+          "hash": "16442069115668418952"
+        },
+        {
+          "file": "packages/hivebear/vitest.config.ts",
+          "hash": "3397554330952093802"
         }
       ],
       "@agentmesh/agent-router": [
         {
           "file": "packages/agent-router/package.json",
-          "hash": "3247177264633594214",
+          "hash": "3768251274139190834",
           "deps": [
-            "@agentmesh/credit-system"
+            "@agentmesh/credit-system",
+            "@agentmesh/shared-types"
           ]
         },
         {
           "file": "packages/agent-router/src/credits.ts",
-          "hash": "16853047995168092404",
+          "hash": "13668476273983421439",
           "deps": [
             "@agentmesh/credit-system"
           ]
         },
         {
           "file": "packages/agent-router/src/index.ts",
-          "hash": "15938008622681130254"
+          "hash": "200225747617003272"
         },
         {
           "file": "packages/agent-router/src/pipeline.ts",
-          "hash": "6782027925708102659",
+          "hash": "699360167740832125",
           "deps": [
             "@agentmesh/agent-cast",
             "@agentmesh/agent-core",
@@ -65,20 +242,58 @@
         },
         {
           "file": "packages/agent-router/tests/credits.test.ts",
-          "hash": "6685259871375523927",
+          "hash": "14110642916808418429",
           "deps": [
             "@agentmesh/credit-system"
           ]
         },
         {
           "file": "packages/agent-router/tsconfig.json",
-          "hash": "16568283178550900376"
+          "hash": "3742272272448644116"
+        }
+      ],
+      "@agentmesh/computer-use": [
+        {
+          "file": "packages/computer-use/package.json",
+          "hash": "3524610437667589180"
+        },
+        {
+          "file": "packages/computer-use/src/computer-use-router.ts",
+          "hash": "17470330264010093591"
+        },
+        {
+          "file": "packages/computer-use/src/e2b-adapter.ts",
+          "hash": "2892961298768079580"
+        },
+        {
+          "file": "packages/computer-use/src/e2b-byok-vision.ts",
+          "hash": "11845290267781504034"
+        },
+        {
+          "file": "packages/computer-use/src/e2b-computer-use.ts",
+          "hash": "15910541041187224408"
+        },
+        {
+          "file": "packages/computer-use/src/index.ts",
+          "hash": "10160933068320283918"
+        },
+        {
+          "file": "packages/computer-use/src/mcp-router.ts",
+          "hash": "1612379989480014880"
+        },
+        {
+          "file": "packages/computer-use/src/session-runner.ts",
+          "hash": "2747196079445489435"
+        },
+        {
+          "file": "packages/computer-use/tsconfig.json",
+          "hash": "9812304438731571633"
         }
       ],
       "@agentmesh/federation": [
         {
           "file": "packages/federation/package.json",
-          "hash": "3859096720198264186",
+          "hash": "1077834814304918323",
           "deps": [
             "@agentmesh/peer-mesh",
             "@agentmesh/shared-types",
@@ -87,37 +302,37 @@
         },
         {
           "file": "packages/federation/src/crypto/ecdsa-p256.test.ts",
-          "hash": "8973269421712992037"
+          "hash": "5505970074915561450"
         },
         {
           "file": "packages/federation/src/crypto/ecdsa-p256.ts",
-          "hash": "12072206073529956336"
+          "hash": "2664737498936392526"
         },
         {
           "file": "packages/federation/src/crypto/ed25519.ts",
-          "hash": "10620310634292065982"
+          "hash": "9398340444404707479"
         },
         {
           "file": "packages/federation/src/handlers.ts",
-          "hash": "11300077293213526963",
+          "hash": "3812938755634938432",
           "deps": [
             "@agentmesh/shared-types"
           ]
         },
         {
           "file": "packages/federation/src/http-transport.ts",
-          "hash": "1437782697082168789",
+          "hash": "16738386254940365449",
           "deps": [
             "@agentmesh/shared-types"
           ]
         },
         {
           "file": "packages/federation/src/index.ts",
-          "hash": "11641690120371907411"
+          "hash": "4538319533386882779"
         },
         {
           "file": "packages/federation/src/libp2p-transport.ts",
-          "hash": "6572517389575731813",
+          "hash": "18072613772463977434",
           "deps": [
             "@agentmesh/peer-mesh",
             "@agentmesh/shared-types"
@@ -125,446 +340,93 @@
         },
         {
           "file": "packages/federation/src/loopback-transport.ts",
-          "hash": "4850298533201361970",
+          "hash": "9389342674406329736",
           "deps": [
             "@agentmesh/shared-types"
           ]
         },
         {
           "file": "packages/federation/src/protocols/folklore.ts",
-          "hash": "15010665666819868692"
+          "hash": "146141095183705802"
         },
         {
           "file": "packages/federation/src/transport-manager.ts",
-          "hash": "5325715125283714589"
+          "hash": "9319519925711305527"
         },
         {
           "file": "packages/federation/src/types.ts",
-          "hash": "11146330730345757102",
+          "hash": "9049651216169096350",
           "deps": [
             "@agentmesh/shared-types"
           ]
         },
         {
           "file": "packages/federation/tsconfig.json",
-          "hash": "1782639995464554572"
-        }
-      ],
-      "@agentmesh/personal-mcp": [
-        {
-          "file": "packages/personal-mcp/index.ts",
-          "hash": "15488727802819661288"
-        },
-        {
-          "file": "packages/personal-mcp/package.json",
-          "hash": "807393235645643222",
-          "deps": [
-            "@agentmesh/knowledge-base",
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/personal-mcp/src/hound-mcp-client.test.ts",
-          "hash": "15825598419457487474"
-        },
-        {
-          "file": "packages/personal-mcp/src/hound-mcp-client.ts",
-          "hash": "8659090733813982594"
-        },
-        {
-          "file": "packages/personal-mcp/src/index.ts",
-          "hash": "2131271509992047933"
-        },
-        {
-          "file": "packages/personal-mcp/src/knowledge.ts",
-          "hash": "12326328483538213621",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/personal-mcp/src/memory.ts",
-          "hash": "1855656455188048722",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/personal-mcp/src/omniroute-mcp-client.test.ts",
-          "hash": "17819976667757634383"
-        },
-        {
-          "file": "packages/personal-mcp/src/omniroute-mcp-client.ts",
-          "hash": "12592386849139688458"
-        },
-        {
-          "file": "packages/personal-mcp/src/permissions.ts",
-          "hash": "10889761289218482440",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/personal-mcp/src/prisma-store.ts",
-          "hash": "15082852847093015531",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/personal-mcp/src/server.ts",
-          "hash": "5961392689280847390",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/personal-mcp/src/service.ts",
-          "hash": "7374241082376801137",
-          "deps": [
-            "@agentmesh/shared-types",
-            [
-              "@agentmesh/knowledge-base",
-              "dynamic"
-            ]
-          ]
-        },
-        {
-          "file": "packages/personal-mcp/src/skills.ts",
-          "hash": "10127950347608469222",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/personal-mcp/src/store-factory.ts",
-          "hash": "3826115807078267822",
-          "deps": [
-            [
-              "@agentmesh/database",
-              "dynamic"
-            ]
-          ]
-        },
-        {
-          "file": "packages/personal-mcp/src/store-types.ts",
-          "hash": "2772830246088757914",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/personal-mcp/src/tools.ts",
-          "hash": "8094910933538514414",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/personal-mcp/src/user-object.ts",
-          "hash": "2467710581198995758",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/personal-mcp/src/weknora-mcp-client.test.ts",
-          "hash": "7487629456449954574"
-        },
-        {
-          "file": "packages/personal-mcp/src/weknora-mcp-client.ts",
-          "hash": "10024932492375173530"
-        },
-        {
-          "file": "packages/personal-mcp/src/weknora-memory-sync.ts",
-          "hash": "3677389114788071973"
-        },
-        {
-          "file": "packages/personal-mcp/tsconfig.json",
-          "hash": "3141464146861082496"
-        },
-        {
-          "file": "packages/personal-mcp/vitest.config.ts",
-          "hash": "4108539707509630207"
-        }
-      ],
-      "@agentmesh/agent-daemon": [
-        {
-          "file": "packages/agent-daemon/package.json",
-          "hash": "7598096131570622309",
-          "deps": [
-            "@agentmesh/agent-gateway",
-            "@agentmesh/peer-mesh",
-            "@agentmesh/llm-router",
-            "@agentmesh/credit-system",
-            "@agentmesh/shared-types",
-            "@agentmesh/personal-mcp"
-          ]
-        },
-        {
-          "file": "packages/agent-daemon/src/computer-use-router.ts",
-          "hash": "7752922648165879501"
-        },
-        {
-          "file": "packages/agent-daemon/src/credentials-vault.ts",
-          "hash": "6923116839103414972"
-        },
-        {
-          "file": "packages/agent-daemon/src/daemon.ts",
-          "hash": "5830530229773290326",
-          "deps": [
-            "@agentmesh/agent-gateway",
-            "@agentmesh/personal-mcp"
-          ]
-        },
-        {
-          "file": "packages/agent-daemon/src/device-node-daemon.ts",
-          "hash": "8491717956422903971",
-          "deps": [
-            "@agentmesh/peer-mesh",
-            "@agentmesh/llm-router"
-          ]
-        },
-        {
-          "file": "packages/agent-daemon/src/e2b-adapter.ts",
-          "hash": "3202368623366954956"
-        },
-        {
-          "file": "packages/agent-daemon/src/e2b-byok-vision.ts",
-          "hash": "714159948838024705"
-        },
-        {
-          "file": "packages/agent-daemon/src/e2b-computer-use.ts",
-          "hash": "8533017482988416991"
-        },
-        {
-          "file": "packages/agent-daemon/src/index.ts",
-          "hash": "7684738805905225342"
-        },
-        {
-          "file": "packages/agent-daemon/src/machine-identity.ts",
-          "hash": "13334366126513775995",
-          "deps": [
-            "@agentmesh/peer-mesh"
-          ]
-        },
-        {
-          "file": "packages/agent-daemon/src/mcp-router.ts",
-          "hash": "13351037573587056391",
-          "deps": [
-            "@agentmesh/personal-mcp"
-          ]
-        },
-        {
-          "file": "packages/agent-daemon/src/session-decrypt.ts",
-          "hash": "7977732847455737817",
-          "deps": [
-            "@agentmesh/agent-gateway"
-          ]
-        },
-        {
-          "file": "packages/agent-daemon/src/session-runner.ts",
-          "hash": "474220599762970287"
-        },
-        {
-          "file": "packages/agent-daemon/src/tests/computer-use-router.test.ts",
-          "hash": "8555902264259210961"
-        },
-        {
-          "file": "packages/agent-daemon/src/tests/daemon.test.ts",
-          "hash": "15889533326953081896",
-          "deps": [
-            "@agentmesh/agent-gateway"
-          ]
-        },
-        {
-          "file": "packages/agent-daemon/src/tests/e2b-adapter.test.ts",
-          "hash": "14527085172809431107"
-        },
-        {
-          "file": "packages/agent-daemon/src/tests/e2b-byok-vision.test.ts",
-          "hash": "7960129795249032460"
-        },
-        {
-          "file": "packages/agent-daemon/src/tests/e2b-computer-use.test.ts",
-          "hash": "11178775471772837916"
-        },
-        {
-          "file": "packages/agent-daemon/src/tests/e2e.test.ts",
-          "hash": "13801204617636249044",
-          "deps": [
-            "@agentmesh/agent-gateway"
-          ]
-        },
-        {
-          "file": "packages/agent-daemon/src/tests/muhan-agent.test.ts",
-          "hash": "6324343832036365386",
-          "deps": [
-            "@agentmesh/agent-gateway"
-          ]
-        },
-        {
-          "file": "packages/agent-daemon/tsconfig.json",
-          "hash": "11413894618179116714"
-        },
-        {
-          "file": "packages/agent-daemon/vitest.config.ts",
-          "hash": "4467228811035035091"
-        }
-      ],
-      "@agentmesh/payment": [
-        {
-          "file": "packages/payment/package.json",
-          "hash": "15573836523856923727",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/payment/src/hyperswitch-prism.ts",
-          "hash": "17896383330017159574"
-        },
-        {
-          "file": "packages/payment/src/index.ts",
-          "hash": "8958066522402279319"
-        },
-        {
-          "file": "packages/payment/src/payment-service.ts",
-          "hash": "11989771313495866083"
-        },
-        {
-          "file": "packages/payment/src/prisma.ts",
-          "hash": "16655852128778072731"
-        },
-        {
-          "file": "packages/payment/src/types.ts",
-          "hash": "4417109320012303486"
-        },
-        {
-          "file": "packages/payment/tsconfig.json",
-          "hash": "16568283178550900376"
+          "hash": "16442069115668418952"
         }
       ],
       "@agentmesh/credit-system": [
         {
           "file": "packages/credit-system/package.json",
-          "hash": "14242211096371727116"
+          "hash": "12834360776081769982"
         },
         {
           "file": "packages/credit-system/src/co-receipt.test.ts",
-          "hash": "10942212981968932749"
+          "hash": "749262935037508707"
         },
         {
           "file": "packages/credit-system/src/co-receipt.ts",
-          "hash": "16732163860309353762"
+          "hash": "6427862135605490472"
         },
         {
           "file": "packages/credit-system/src/constants.test.ts",
-          "hash": "6516506235279302442"
+          "hash": "12242847065246198460"
         },
         {
           "file": "packages/credit-system/src/credit-account.test.ts",
-          "hash": "18385919323675095194"
+          "hash": "10457670024650870291"
         },
         {
           "file": "packages/credit-system/src/credit-account.ts",
-          "hash": "18314430976739837319"
+          "hash": "2700998310166585305"
         },
         {
           "file": "packages/credit-system/src/index.ts",
-          "hash": "17929184176099983705"
+          "hash": "12340932800951979996"
         },
         {
           "file": "packages/credit-system/src/reputation.test.ts",
-          "hash": "8367603348951215375"
+          "hash": "4430537400053129135"
         },
         {
           "file": "packages/credit-system/src/reputation.ts",
-          "hash": "17905150890297007091"
+          "hash": "16367154125202928205"
         },
         {
           "file": "packages/credit-system/tsconfig.json",
-          "hash": "7279253723789414627"
-        }
-      ],
-      "@agentmesh/hivebear": [
-        {
-          "file": "packages/hivebear/package.json",
-          "hash": "2196156742658309560",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/hivebear/src/client.ts",
-          "hash": "643837032942049002",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/hivebear/src/index.ts",
-          "hash": "13512086369719093405"
-        },
-        {
-          "file": "packages/hivebear/src/ollama-proxy.test.ts",
-          "hash": "11235818930695393850"
-        },
-        {
-          "file": "packages/hivebear/src/ollama-proxy.ts",
-          "hash": "14816342827991338102"
-        },
-        {
-          "file": "packages/hivebear/src/types.ts",
-          "hash": "469783189091670121"
-        },
-        {
-          "file": "packages/hivebear/tsconfig.json",
-          "hash": "1782639995464554572"
-        },
-        {
-          "file": "packages/hivebear/vitest.config.ts",
-          "hash": "1858845835356223462"
-        }
-      ],
-      "@agentmesh/semantic-vote": [
-        {
-          "file": "packages/semantic-vote/package.json",
-          "hash": "5566980399096221148"
-        },
-        {
-          "file": "packages/semantic-vote/src/index.test.ts",
-          "hash": "12879869235617061232"
-        },
-        {
-          "file": "packages/semantic-vote/src/index.ts",
-          "hash": "15133475190386470363"
-        },
-        {
-          "file": "packages/semantic-vote/src/types.ts",
-          "hash": "8170480487995096936"
-        },
-        {
-          "file": "packages/semantic-vote/tsconfig.json",
-          "hash": "1782639995464554572"
+          "hash": "3796015117724401963"
         }
       ],
       "@agentmesh/agent-core": [
         {
           "file": "packages/agent-core/index.ts",
-          "hash": "2930323441049086597"
+          "hash": "17907040519831580200"
         },
         {
           "file": "packages/agent-core/package.json",
-          "hash": "4099052421196068028"
+          "hash": "16641714956533860664",
+          "deps": [
+            "@agentmesh/database",
+            "@agentmesh/shared-types"
+          ]
         },
         {
           "file": "packages/agent-core/src/registry.ts",
-          "hash": "4775574835521372775"
+          "hash": "1646435720802899369"
         },
         {
           "file": "packages/agent-core/src/run-store.ts",
-          "hash": "8773519912543115394",
+          "hash": "17966391155349720138",
           "deps": [
             "@agentmesh/shared-types",
             [
@@ -575,24 +437,549 @@
         },
         {
           "file": "packages/agent-core/src/types.ts",
-          "hash": "7626268958282486310",
+          "hash": "16646047819531293020",
           "deps": [
             "@agentmesh/shared-types"
           ]
         },
         {
           "file": "packages/agent-core/tsconfig.json",
-          "hash": "3141464146861082496"
+          "hash": "17947915467284184458"
+        }
+      ],
+      "@agentmesh/category-engine": [
+        {
+          "file": "packages/category-engine/index.ts",
+          "hash": "9844021305838267040"
+        },
+        {
+          "file": "packages/category-engine/package.json",
+          "hash": "2551913595907878782",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/category-engine/src/category.ts",
+          "hash": "7302242512146594989",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/category-engine/src/classifier.ts",
+          "hash": "12205415525041699954",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/category-engine/src/index.ts",
+          "hash": "10284944045188063212"
+        },
+        {
+          "file": "packages/category-engine/src/jurisdiction.ts",
+          "hash": "6397625859627217162"
+        },
+        {
+          "file": "packages/category-engine/src/router.ts",
+          "hash": "16911168277662003099",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/category-engine/src/taxonomy.ts",
+          "hash": "12603580433140444037"
+        },
+        {
+          "file": "packages/category-engine/tsconfig.json",
+          "hash": "17947915467284184458"
+        }
+      ],
+      "@agentmesh/desktop": [
+        {
+          "file": "apps/desktop/next-env.d.ts",
+          "hash": "2079576359933084494"
+        },
+        {
+          "file": "apps/desktop/next.config.js",
+          "hash": "11767139638590265977"
+        },
+        {
+          "file": "apps/desktop/package.json",
+          "hash": "13518926804467573290",
+          "deps": [
+            "@agentmesh/ai-engine",
+            "@agentmesh/ai-ui",
+            "@agentmesh/bitterbot",
+            "@agentmesh/web"
+          ]
+        },
+        {
+          "file": "apps/desktop/postcss.config.js",
+          "hash": "5517232228756382165"
+        },
+        {
+          "file": "apps/desktop/public/manifest.json",
+          "hash": "2662591634753533621"
+        },
+        {
+          "file": "apps/desktop/public/sw.js",
+          "hash": "5715414832350375225"
+        },
+        {
+          "file": "apps/desktop/src/app/globals.css",
+          "hash": "10435169091403855244"
+        },
+        {
+          "file": "apps/desktop/src/app/layout.tsx",
+          "hash": "8725143395695550106"
+        },
+        {
+          "file": "apps/desktop/src/app/page.tsx",
+          "hash": "7704454975600119115",
+          "deps": [
+            "@agentmesh/ai-ui",
+            "@agentmesh/ai-engine",
+            "@agentmesh/web"
+          ]
+        },
+        {
+          "file": "apps/desktop/src/components/Desktop.tsx",
+          "hash": "8294899492098620098"
+        },
+        {
+          "file": "apps/desktop/src/components/DesktopApps.tsx",
+          "hash": "2558062019038095887",
+          "deps": [
+            "@agentmesh/bitterbot",
+            "@agentmesh/ai-engine",
+            "@agentmesh/web"
+          ]
+        },
+        {
+          "file": "apps/desktop/src/components/StartMenu.tsx",
+          "hash": "10343157428235003941",
+          "deps": [
+            "@agentmesh/web"
+          ]
+        },
+        {
+          "file": "apps/desktop/src/components/Taskbar.tsx",
+          "hash": "16148489012952381796",
+          "deps": [
+            "@agentmesh/web"
+          ]
+        },
+        {
+          "file": "apps/desktop/src/components/Window.tsx",
+          "hash": "7209226811517019264"
+        },
+        {
+          "file": "apps/desktop/tsconfig.json",
+          "hash": "1475245952577315767"
+        }
+      ],
+      "@agentmesh/ai-engine": [
+        {
+          "file": "packages/ai-engine/package.json",
+          "hash": "10396927218171102322"
+        },
+        {
+          "file": "packages/ai-engine/src/cloud/cloud-engine.ts",
+          "hash": "1096503182767235831"
+        },
+        {
+          "file": "packages/ai-engine/src/factory.ts",
+          "hash": "1418014983877722282"
+        },
+        {
+          "file": "packages/ai-engine/src/index.ts",
+          "hash": "691400009303602592"
+        },
+        {
+          "file": "packages/ai-engine/src/ollama/ollama-engine.ts",
+          "hash": "1461679967197526554"
+        },
+        {
+          "file": "packages/ai-engine/src/sipp/model-manager.ts",
+          "hash": "652408379625076715"
+        },
+        {
+          "file": "packages/ai-engine/src/sipp/sipp-engine.ts",
+          "hash": "14791214945296477660"
+        },
+        {
+          "file": "packages/ai-engine/src/sipp/sipp-worker-impl.ts",
+          "hash": "11803421203878680323"
+        },
+        {
+          "file": "packages/ai-engine/src/sipp/sipp-worker.ts",
+          "hash": "12281792292200577702"
+        },
+        {
+          "file": "packages/ai-engine/src/types.ts",
+          "hash": "12605499088585876901"
+        },
+        {
+          "file": "packages/ai-engine/src/utils/events.ts",
+          "hash": "11104363827778858714"
+        },
+        {
+          "file": "packages/ai-engine/src/utils/logger.ts",
+          "hash": "2632317176209795294"
+        },
+        {
+          "file": "packages/ai-engine/tests/sipp.test.ts",
+          "hash": "7813367194778388617"
+        },
+        {
+          "file": "packages/ai-engine/tsconfig.json",
+          "hash": "5745893197055267099"
+        }
+      ],
+      "@agentmesh/personal-mcp": [
+        {
+          "file": "packages/personal-mcp/index.ts",
+          "hash": "9844021305838267040"
+        },
+        {
+          "file": "packages/personal-mcp/package.json",
+          "hash": "8135621859269260615",
+          "deps": [
+            "@agentmesh/database",
+            "@agentmesh/knowledge-base",
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/hotel-mcp-client.ts",
+          "hash": "10076670500157511072"
+        },
+        {
+          "file": "packages/personal-mcp/src/hound-mcp-client.test.ts",
+          "hash": "15929073737496659523"
+        },
+        {
+          "file": "packages/personal-mcp/src/hound-mcp-client.ts",
+          "hash": "9066366949478875615"
+        },
+        {
+          "file": "packages/personal-mcp/src/index.ts",
+          "hash": "3552078889059248206"
+        },
+        {
+          "file": "packages/personal-mcp/src/knowledge.ts",
+          "hash": "8163706216753160405",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/memory.ts",
+          "hash": "2158582987428924146",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/omniroute-mcp-client.test.ts",
+          "hash": "13365943918785171492"
+        },
+        {
+          "file": "packages/personal-mcp/src/omniroute-mcp-client.ts",
+          "hash": "14318108374263472213"
+        },
+        {
+          "file": "packages/personal-mcp/src/permissions.ts",
+          "hash": "15206932672066507024",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/prisma-store.ts",
+          "hash": "11180187372202974828",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/server.ts",
+          "hash": "2531105803452933071",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/service.ts",
+          "hash": "2530545672226787685",
+          "deps": [
+            "@agentmesh/shared-types",
+            [
+              "@agentmesh/knowledge-base",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/skills.ts",
+          "hash": "5184120323915745206",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/store-factory.ts",
+          "hash": "7961233479781820381",
+          "deps": [
+            [
+              "@agentmesh/database",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/store-types.ts",
+          "hash": "1126167841016629405",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/tools.ts",
+          "hash": "11467595395882395163",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/user-object.ts",
+          "hash": "3421227505542327298",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/personal-mcp/src/weknora-mcp-client.test.ts",
+          "hash": "16221927273310589645"
+        },
+        {
+          "file": "packages/personal-mcp/src/weknora-mcp-client.ts",
+          "hash": "18411788376657347841"
+        },
+        {
+          "file": "packages/personal-mcp/src/weknora-memory-sync.ts",
+          "hash": "9406171402973332881"
+        },
+        {
+          "file": "packages/personal-mcp/tsconfig.json",
+          "hash": "17947915467284184458"
+        },
+        {
+          "file": "packages/personal-mcp/vitest.config.ts",
+          "hash": "7818490857089877944"
+        }
+      ],
+      "@agentmesh/browser-use": [
+        {
+          "file": "packages/browser-use/package.json",
+          "hash": "4864682167470377762"
+        },
+        {
+          "file": "packages/browser-use/src/browser-adapter.ts",
+          "hash": "14945827795775012695"
+        },
+        {
+          "file": "packages/browser-use/src/browser-capabilities.ts",
+          "hash": "13036884922065907516"
+        },
+        {
+          "file": "packages/browser-use/src/browser-profile.ts",
+          "hash": "13659717917561698449"
+        },
+        {
+          "file": "packages/browser-use/src/index.ts",
+          "hash": "5612306353856010461"
+        },
+        {
+          "file": "packages/browser-use/src/playwright-adapter.ts",
+          "hash": "4736247997848919686"
+        },
+        {
+          "file": "packages/browser-use/tsconfig.json",
+          "hash": "9812304438731571633"
+        }
+      ],
+      "@agentmesh/shared-types": [
+        {
+          "file": "packages/shared-types/package.json",
+          "hash": "8554452522053382363"
+        },
+        {
+          "file": "packages/shared-types/runtime.test.ts",
+          "hash": "5049397346679277959"
+        },
+        {
+          "file": "packages/shared-types/runtime.ts",
+          "hash": "11060875151481249674"
+        },
+        {
+          "file": "packages/shared-types/tsconfig.json",
+          "hash": "6697312481771155118"
+        },
+        {
+          "file": "packages/shared-types/types/index.ts",
+          "hash": "11092863551371654920"
+        },
+        {
+          "file": "packages/shared-types/types/logger.ts",
+          "hash": "3784808800026430783"
+        },
+        {
+          "file": "packages/shared-types/types/user-knowledge.ts",
+          "hash": "16412002756168307279"
+        }
+      ],
+      "@agentmesh/agent-gateway": [
+        {
+          "file": "packages/agent-gateway/package.json",
+          "hash": "917601286380680982",
+          "deps": [
+            "@agentmesh/peer-mesh",
+            "@agentmesh/credit-system",
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/agent-gateway/src/index.ts",
+          "hash": "15414305201639151151"
+        },
+        {
+          "file": "packages/agent-gateway/src/protocol-types.ts",
+          "hash": "14398380238903733186"
+        },
+        {
+          "file": "packages/agent-gateway/src/protocol.ts",
+          "hash": "12332178616823007223"
+        },
+        {
+          "file": "packages/agent-gateway/src/routing.ts",
+          "hash": "17416852458288472237"
+        },
+        {
+          "file": "packages/agent-gateway/src/tests/protocol.test.ts",
+          "hash": "6023753014682738038"
+        },
+        {
+          "file": "packages/agent-gateway/src/tests/routing.test.ts",
+          "hash": "3233961010284552883"
+        },
+        {
+          "file": "packages/agent-gateway/tsconfig.json",
+          "hash": "3117218783717132829"
+        },
+        {
+          "file": "packages/agent-gateway/vitest.config.ts",
+          "hash": "14322829971621188420"
+        }
+      ],
+      "@agentmesh/payment": [
+        {
+          "file": "packages/payment/package.json",
+          "hash": "7372625126624113185",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/payment/src/hyperswitch-prism.ts",
+          "hash": "16903177935225049232"
+        },
+        {
+          "file": "packages/payment/src/index.ts",
+          "hash": "17972467108731692682"
+        },
+        {
+          "file": "packages/payment/src/payment-service.ts",
+          "hash": "15922348412467285381"
+        },
+        {
+          "file": "packages/payment/src/prisma.ts",
+          "hash": "8831226147480535475"
+        },
+        {
+          "file": "packages/payment/src/types.ts",
+          "hash": "7428799606014402186"
+        },
+        {
+          "file": "packages/payment/tsconfig.json",
+          "hash": "3742272272448644116"
+        }
+      ],
+      "@agentmesh/agent-mesh": [
+        {
+          "file": "packages/agent-mesh/package.json",
+          "hash": "4060719388912862255",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/agent-mesh/src/index.ts",
+          "hash": "14528197274743184593",
+          "deps": [
+            "@agentmesh/agent-core",
+            "@agentmesh/llm-router",
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/agent-mesh/src/transports/axl-client.test.ts",
+          "hash": "297787955145877841"
+        },
+        {
+          "file": "packages/agent-mesh/src/transports/axl-client.ts",
+          "hash": "14056116117477739787"
+        },
+        {
+          "file": "packages/agent-mesh/src/transports/hybrid-transport.test.ts",
+          "hash": "3114949423715807639"
+        },
+        {
+          "file": "packages/agent-mesh/src/transports/hybrid-transport.ts",
+          "hash": "4594399501869504484"
+        },
+        {
+          "file": "packages/agent-mesh/src/transports/identity-bridge.test.ts",
+          "hash": "9410338403306169853"
+        },
+        {
+          "file": "packages/agent-mesh/src/transports/identity-bridge.ts",
+          "hash": "13486541395581369155"
+        },
+        {
+          "file": "packages/agent-mesh/src/transports/index.ts",
+          "hash": "12251338763048856933"
+        },
+        {
+          "file": "packages/agent-mesh/src/transports/types.ts",
+          "hash": "15658847022578858415"
+        },
+        {
+          "file": "packages/agent-mesh/tsconfig.json",
+          "hash": "3742272272448644116"
         }
       ],
       "@agentmesh/api": [
         {
           "file": "services/api/openapi.yaml",
-          "hash": "1940822975568725586"
+          "hash": "7462584440756653588"
         },
         {
           "file": "services/api/package.json",
-          "hash": "8019419470360049947",
+          "hash": "13309143077389647509",
           "deps": [
             "@agentmesh/agent-router",
             "@agentmesh/noema",
@@ -608,23 +995,24 @@
             "@agentmesh/database",
             "@agentmesh/llm-router",
             "@agentmesh/agent-daemon",
-            "@agentmesh/personal-mcp"
+            "@agentmesh/personal-mcp",
+            "@agentmesh/payment"
           ]
         },
         {
           "file": "services/api/src/agents-routes.ts",
-          "hash": "4187958506278174052",
+          "hash": "8517036011902797859",
           "deps": [
             "@agentmesh/knowledge-base"
           ]
         },
         {
           "file": "services/api/src/auth-routes.test.ts",
-          "hash": "2650092284180813"
+          "hash": "14970190347213597916"
         },
         {
           "file": "services/api/src/auth-routes.ts",
-          "hash": "5093014277767076637",
+          "hash": "6147099309798137285",
           "deps": [
             [
               "@agentmesh/database",
@@ -634,55 +1022,55 @@
         },
         {
           "file": "services/api/src/auth.ts",
-          "hash": "7324195610103559394"
+          "hash": "16534446988854606852"
         },
         {
           "file": "services/api/src/compute-routes.ts",
-          "hash": "17910953985577605545",
+          "hash": "12543401400426218607",
           "deps": [
             "@agentmesh/compute-market"
           ]
         },
         {
           "file": "services/api/src/computer-use-routes.test.ts",
-          "hash": "17132463402614710278"
+          "hash": "14422787105104963761"
         },
         {
           "file": "services/api/src/computer-use-routes.ts",
-          "hash": "8836740897698623519",
+          "hash": "1046840138708750006",
           "deps": [
             "@agentmesh/agent-daemon"
           ]
         },
         {
           "file": "services/api/src/credits-aggregate.test.ts",
-          "hash": "2318406835502573943"
+          "hash": "15288507282275143879"
         },
         {
           "file": "services/api/src/credits-routes.ts",
-          "hash": "12122792032966284981",
+          "hash": "14805233714900059897",
           "deps": [
             "@agentmesh/credit-system"
           ]
         },
         {
           "file": "services/api/src/db.ts",
-          "hash": "5786808582953682811",
+          "hash": "15392531288690128449",
           "deps": [
             "@agentmesh/shared-types"
           ]
         },
         {
           "file": "services/api/src/error-shapes.test.ts",
-          "hash": "4905918100451960089"
+          "hash": "18285288616672546125"
         },
         {
           "file": "services/api/src/error-shapes.ts",
-          "hash": "1590829834528768142"
+          "hash": "16598051788861686648"
         },
         {
           "file": "services/api/src/feed-routes.ts",
-          "hash": "8400024364688141106",
+          "hash": "7035366967945593187",
           "deps": [
             [
               "@agentmesh/database",
@@ -692,32 +1080,32 @@
         },
         {
           "file": "services/api/src/gossip-bridge.test.ts",
-          "hash": "6440985799180928931"
+          "hash": "17561641807945290546"
         },
         {
           "file": "services/api/src/gossip-bridge.ts",
-          "hash": "15341180437890170849",
+          "hash": "16982922883420572343",
           "deps": [
             "@agentmesh/peer-mesh"
           ]
         },
         {
           "file": "services/api/src/happy-routes.ts",
-          "hash": "14800128066494242025",
+          "hash": "17830725262558213756",
           "deps": [
             "@agentmesh/llm-router"
           ]
         },
         {
           "file": "services/api/src/hivebear-routes.ts",
-          "hash": "15797802045831025621",
+          "hash": "8772723505819453817",
           "deps": [
             "@agentmesh/hivebear"
           ]
         },
         {
           "file": "services/api/src/knowledge-routes.ts",
-          "hash": "11338037739945943807",
+          "hash": "6602249974921617088",
           "deps": [
             "@agentmesh/federation",
             "@agentmesh/knowledge-base"
@@ -725,26 +1113,34 @@
         },
         {
           "file": "services/api/src/llm-mesh-routes.test.ts",
-          "hash": "4648038056618704196"
+          "hash": "1319631395857405574"
         },
         {
           "file": "services/api/src/llm-mesh-routes.ts",
-          "hash": "17162243958100740116"
+          "hash": "3915321547351265724"
         },
         {
           "file": "services/api/src/llm-routes.test.ts",
-          "hash": "7193363132685316583"
+          "hash": "7818779256693544496"
         },
         {
           "file": "services/api/src/llm-routes.ts",
-          "hash": "13098926576790996248",
+          "hash": "1965813320815759500",
           "deps": [
             "@agentmesh/llm-router"
           ]
         },
         {
+          "file": "services/api/src/mcp-routes.test.ts",
+          "hash": "324783607232217170"
+        },
+        {
+          "file": "services/api/src/mcp-routes.ts",
+          "hash": "16740397924690229790"
+        },
+        {
           "file": "services/api/src/network-routes.ts",
-          "hash": "14015356052546489731",
+          "hash": "6645781868749882909",
           "deps": [
             "@agentmesh/compute-market",
             "@agentmesh/knowledge-base"
@@ -752,11 +1148,11 @@
         },
         {
           "file": "services/api/src/noema-routes.ts",
-          "hash": "13452908360333854918"
+          "hash": "18190408219341928661"
         },
         {
           "file": "services/api/src/noema-service.ts",
-          "hash": "16843000721829379505",
+          "hash": "6091790094709944149",
           "deps": [
             "@agentmesh/noema",
             [
@@ -767,11 +1163,11 @@
         },
         {
           "file": "services/api/src/omniroute-routes.test.ts",
-          "hash": "11131302431468312418"
+          "hash": "14231115999459521949"
         },
         {
           "file": "services/api/src/omniroute-routes.ts",
-          "hash": "1449890820392517222",
+          "hash": "4623786100984854556",
           "deps": [
             [
               "@agentmesh/personal-mcp",
@@ -781,36 +1177,36 @@
         },
         {
           "file": "services/api/src/payment-routes.ts",
-          "hash": "15218157650712554210",
+          "hash": "13011777229693244853",
           "deps": [
             "@agentmesh/payment"
           ]
         },
         {
           "file": "services/api/src/pulse-routes.ts",
-          "hash": "3409631186905156866"
+          "hash": "343304613250941360"
         },
         {
           "file": "services/api/src/pulse-stream.test.ts",
-          "hash": "6553043032954846572",
+          "hash": "4698402651329146527",
           "deps": [
             "@agentmesh/peer-mesh"
           ]
         },
         {
           "file": "services/api/src/pulse-stream.ts",
-          "hash": "16351136973223229649",
+          "hash": "17248771174709407033",
           "deps": [
             "@agentmesh/peer-mesh"
           ]
         },
         {
           "file": "services/api/src/quorum-routes.test.ts",
-          "hash": "2526054720431462424"
+          "hash": "7988230686361791638"
         },
         {
           "file": "services/api/src/quorum-routes.ts",
-          "hash": "490228395810848327",
+          "hash": "9141161064683131189",
           "deps": [
             "@agentmesh/agent-cast",
             "@agentmesh/shared-types"
@@ -818,7 +1214,7 @@
         },
         {
           "file": "services/api/src/router-routes.ts",
-          "hash": "1653413728850628144",
+          "hash": "4609279651479767672",
           "deps": [
             "@agentmesh/credit-system",
             "@agentmesh/agent-router"
@@ -826,26 +1222,26 @@
         },
         {
           "file": "services/api/src/security-routes.test.ts",
-          "hash": "5923024565598062173"
+          "hash": "3792905874960683175"
         },
         {
           "file": "services/api/src/security-routes.ts",
-          "hash": "14854865427518980101"
+          "hash": "18114229565913852115"
         },
         {
           "file": "services/api/src/semantic-routes.ts",
-          "hash": "2944290478401006370",
+          "hash": "9789732875111025410",
           "deps": [
             "@agentmesh/semantic-vote"
           ]
         },
         {
           "file": "services/api/src/server.test.ts",
-          "hash": "12668196175538619406"
+          "hash": "17933000347791566051"
         },
         {
           "file": "services/api/src/server.ts",
-          "hash": "7377048871424828664",
+          "hash": "6235765415011936173",
           "deps": [
             "@agentmesh/federation",
             "@agentmesh/shared-types"
@@ -853,688 +1249,111 @@
         },
         {
           "file": "services/api/tsconfig.json",
-          "hash": "5702983329602939783"
+          "hash": "586625282570524598"
         },
         {
           "file": "services/api/vitest.config.ts",
-          "hash": "11931585540920739253"
+          "hash": "1868889679850624971"
         }
       ],
-      "@agentmesh/browser-use": [
+      "@agentmesh/noema": [
         {
-          "file": "packages/browser-use/package.json",
-          "hash": "8906554509945566121"
-        },
-        {
-          "file": "packages/browser-use/src/browser-adapter.ts",
-          "hash": "9406363263785826493"
-        },
-        {
-          "file": "packages/browser-use/src/browser-capabilities.ts",
-          "hash": "11305455068651656664"
-        },
-        {
-          "file": "packages/browser-use/src/browser-profile.ts",
-          "hash": "14049627335339155536"
-        },
-        {
-          "file": "packages/browser-use/src/index.ts",
-          "hash": "17830490404970332147"
-        },
-        {
-          "file": "packages/browser-use/src/playwright-adapter.ts",
-          "hash": "10352691007055930340"
-        },
-        {
-          "file": "packages/browser-use/tsconfig.json",
-          "hash": "9516585843114805170"
-        }
-      ],
-      "@agentmesh/database": [
-        {
-          "file": "packages/database/package.json",
-          "hash": "10903139636371697777"
-        },
-        {
-          "file": "packages/database/src/client.ts",
-          "hash": "14241800101878818367"
-        },
-        {
-          "file": "packages/database/src/index.ts",
-          "hash": "10426207540916383750"
-        },
-        {
-          "file": "packages/database/tsconfig.json",
-          "hash": "2338884011979130339"
-        }
-      ],
-      "@agentmesh/shared-types": [
-        {
-          "file": "packages/shared-types/package.json",
-          "hash": "8162992920056284388"
-        },
-        {
-          "file": "packages/shared-types/runtime.test.ts",
-          "hash": "11596154957093687127"
-        },
-        {
-          "file": "packages/shared-types/runtime.ts",
-          "hash": "340201312399105135"
-        },
-        {
-          "file": "packages/shared-types/tsconfig.json",
-          "hash": "3783707432932068578"
-        },
-        {
-          "file": "packages/shared-types/types/index.ts",
-          "hash": "2977286103649906439"
-        },
-        {
-          "file": "packages/shared-types/types/logger.ts",
-          "hash": "17017475960093908318"
-        },
-        {
-          "file": "packages/shared-types/types/user-knowledge.ts",
-          "hash": "16802635377724458127"
-        }
-      ],
-      "@agentmesh/compute-market": [
-        {
-          "file": "packages/compute-market/package.json",
-          "hash": "6015899689382342489"
-        },
-        {
-          "file": "packages/compute-market/src/index.ts",
-          "hash": "3611662004331312718"
-        },
-        {
-          "file": "packages/compute-market/src/tribute.test.ts",
-          "hash": "3601343880187008726"
-        },
-        {
-          "file": "packages/compute-market/src/tribute.ts",
-          "hash": "12142573711217119858"
-        },
-        {
-          "file": "packages/compute-market/tsconfig.json",
-          "hash": "1782639995464554572"
-        }
-      ],
-      "@agentmesh/desktop": [
-        {
-          "file": "apps/desktop/.next/BUILD_ID",
-          "hash": "9166580568648346118"
-        },
-        {
-          "file": "apps/desktop/.next/app-build-manifest.json",
-          "hash": "11251078499571124896"
-        },
-        {
-          "file": "apps/desktop/.next/app-path-routes-manifest.json",
-          "hash": "3814386187472197989"
-        },
-        {
-          "file": "apps/desktop/.next/build-manifest.json",
-          "hash": "12215454159094879272"
-        },
-        {
-          "file": "apps/desktop/.next/cache/.previewinfo",
-          "hash": "7749277638883566541"
-        },
-        {
-          "file": "apps/desktop/.next/cache/.rscinfo",
-          "hash": "4415836328962702973"
-        },
-        {
-          "file": "apps/desktop/.next/cache/webpack/client-production/0.pack",
-          "hash": "18368624079359289438"
-        },
-        {
-          "file": "apps/desktop/.next/cache/webpack/client-production/1.pack",
-          "hash": "15477458154548792606"
-        },
-        {
-          "file": "apps/desktop/.next/cache/webpack/client-production/2.pack",
-          "hash": "625748655101690508"
-        },
-        {
-          "file": "apps/desktop/.next/cache/webpack/client-production/3.pack",
-          "hash": "17623252678884673762"
-        },
-        {
-          "file": "apps/desktop/.next/cache/webpack/client-production/4.pack",
-          "hash": "9337743976748621207"
-        },
-        {
-          "file": "apps/desktop/.next/cache/webpack/client-production/index.pack",
-          "hash": "1588132192749771676"
-        },
-        {
-          "file": "apps/desktop/.next/cache/webpack/client-production/index.pack.old",
-          "hash": "14088782181034833161"
-        },
-        {
-          "file": "apps/desktop/.next/cache/webpack/edge-server-production/0.pack",
-          "hash": "471599872138982288"
-        },
-        {
-          "file": "apps/desktop/.next/cache/webpack/edge-server-production/index.pack",
-          "hash": "5911758406982372340"
-        },
-        {
-          "file": "apps/desktop/.next/cache/webpack/edge-server-production/index.pack.old",
-          "hash": "6630737347548834404"
-        },
-        {
-          "file": "apps/desktop/.next/cache/webpack/server-production/0.pack",
-          "hash": "17040520999116045088"
-        },
-        {
-          "file": "apps/desktop/.next/cache/webpack/server-production/1.pack",
-          "hash": "5624472565022727352"
-        },
-        {
-          "file": "apps/desktop/.next/cache/webpack/server-production/2.pack",
-          "hash": "6391287722799517086"
-        },
-        {
-          "file": "apps/desktop/.next/cache/webpack/server-production/3.pack",
-          "hash": "16466569917262074750"
-        },
-        {
-          "file": "apps/desktop/.next/cache/webpack/server-production/index.pack",
-          "hash": "708669094863394657"
-        },
-        {
-          "file": "apps/desktop/.next/cache/webpack/server-production/index.pack.old",
-          "hash": "15627734359508307379"
-        },
-        {
-          "file": "apps/desktop/.next/diagnostics/build-diagnostics.json",
-          "hash": "14616169667565587216"
-        },
-        {
-          "file": "apps/desktop/.next/diagnostics/framework.json",
-          "hash": "6463597840858563517"
-        },
-        {
-          "file": "apps/desktop/.next/export-marker.json",
-          "hash": "18178783900034545031"
-        },
-        {
-          "file": "apps/desktop/.next/images-manifest.json",
-          "hash": "11951124907846841097"
-        },
-        {
-          "file": "apps/desktop/.next/next-minimal-server.js.nft.json",
-          "hash": "7299964061643959489"
-        },
-        {
-          "file": "apps/desktop/.next/next-server.js.nft.json",
-          "hash": "8446602650086950192"
-        },
-        {
-          "file": "apps/desktop/.next/package.json",
-          "hash": "11338307439248427064"
-        },
-        {
-          "file": "apps/desktop/.next/prerender-manifest.json",
-          "hash": "5461178172101508957"
-        },
-        {
-          "file": "apps/desktop/.next/react-loadable-manifest.json",
-          "hash": "1389868326933519382"
-        },
-        {
-          "file": "apps/desktop/.next/required-server-files.json",
-          "hash": "2676488831206781416"
-        },
-        {
-          "file": "apps/desktop/.next/routes-manifest.json",
-          "hash": "901480024338527250"
-        },
-        {
-          "file": "apps/desktop/.next/server/app-paths-manifest.json",
-          "hash": "5767582002542074040"
-        },
-        {
-          "file": "apps/desktop/.next/server/app/_not-found.html",
-          "hash": "13008270203528173190"
-        },
-        {
-          "file": "apps/desktop/.next/server/app/_not-found.meta",
-          "hash": "3752621688040224300"
-        },
-        {
-          "file": "apps/desktop/.next/server/app/_not-found.rsc",
-          "hash": "10720411341097651666"
-        },
-        {
-          "file": "apps/desktop/.next/server/app/_not-found/page.js",
-          "hash": "4949949057733251766"
-        },
-        {
-          "file": "apps/desktop/.next/server/app/_not-found/page.js.nft.json",
-          "hash": "2812380699969126897"
-        },
-        {
-          "file": "apps/desktop/.next/server/app/_not-found/page_client-reference-manifest.js",
-          "hash": "2715841278324030981"
-        },
-        {
-          "file": "apps/desktop/.next/server/app/index.html",
-          "hash": "3950484398049355488"
-        },
-        {
-          "file": "apps/desktop/.next/server/app/index.meta",
-          "hash": "3414423732052082643"
-        },
-        {
-          "file": "apps/desktop/.next/server/app/index.rsc",
-          "hash": "5840746782382399440"
-        },
-        {
-          "file": "apps/desktop/.next/server/app/page.js",
-          "hash": "2972600623507853883"
-        },
-        {
-          "file": "apps/desktop/.next/server/app/page.js.nft.json",
-          "hash": "8556758473426661572"
-        },
-        {
-          "file": "apps/desktop/.next/server/app/page_client-reference-manifest.js",
-          "hash": "7146022612516261580"
-        },
-        {
-          "file": "apps/desktop/.next/server/chunks/153.js",
-          "hash": "8607493657625072799"
-        },
-        {
-          "file": "apps/desktop/.next/server/chunks/258.js",
-          "hash": "17172613826787537196"
-        },
-        {
-          "file": "apps/desktop/.next/server/chunks/897.js",
-          "hash": "1574099903583560215"
-        },
-        {
-          "file": "apps/desktop/.next/server/functions-config-manifest.json",
-          "hash": "18417749098027325250"
-        },
-        {
-          "file": "apps/desktop/.next/server/interception-route-rewrite-manifest.js",
-          "hash": "10135913824388381780"
-        },
-        {
-          "file": "apps/desktop/.next/server/middleware-build-manifest.js",
-          "hash": "14669351043273436199"
-        },
-        {
-          "file": "apps/desktop/.next/server/middleware-manifest.json",
-          "hash": "9889576824779923310"
-        },
-        {
-          "file": "apps/desktop/.next/server/middleware-react-loadable-manifest.js",
-          "hash": "13961083300434990301"
-        },
-        {
-          "file": "apps/desktop/.next/server/next-font-manifest.js",
-          "hash": "1232773246202868513"
-        },
-        {
-          "file": "apps/desktop/.next/server/next-font-manifest.json",
-          "hash": "11891788324563068681"
-        },
-        {
-          "file": "apps/desktop/.next/server/pages-manifest.json",
-          "hash": "13198325409882448453"
-        },
-        {
-          "file": "apps/desktop/.next/server/pages/404.html",
-          "hash": "13008270203528173190"
-        },
-        {
-          "file": "apps/desktop/.next/server/pages/500.html",
-          "hash": "2079176773845257241"
-        },
-        {
-          "file": "apps/desktop/.next/server/pages/_app.js",
-          "hash": "12776828829021816500"
-        },
-        {
-          "file": "apps/desktop/.next/server/pages/_app.js.nft.json",
-          "hash": "18153748127921946453"
-        },
-        {
-          "file": "apps/desktop/.next/server/pages/_document.js",
-          "hash": "1274133848701593349"
-        },
-        {
-          "file": "apps/desktop/.next/server/pages/_document.js.nft.json",
-          "hash": "14528609493904416584"
-        },
-        {
-          "file": "apps/desktop/.next/server/pages/_error.js",
-          "hash": "9335067710368437982"
-        },
-        {
-          "file": "apps/desktop/.next/server/pages/_error.js.nft.json",
-          "hash": "12387717447230975065"
-        },
-        {
-          "file": "apps/desktop/.next/server/server-reference-manifest.js",
-          "hash": "17886416551195172472"
-        },
-        {
-          "file": "apps/desktop/.next/server/server-reference-manifest.json",
-          "hash": "4474677179150562951"
-        },
-        {
-          "file": "apps/desktop/.next/server/webpack-runtime.js",
-          "hash": "18354454003264182860"
-        },
-        {
-          "file": "apps/desktop/.next/static/Lcwp_WiHnTB-L5ss0DzaR/_buildManifest.js",
-          "hash": "11931122170013989311"
-        },
-        {
-          "file": "apps/desktop/.next/static/Lcwp_WiHnTB-L5ss0DzaR/_ssgManifest.js",
-          "hash": "2285259522902979167"
-        },
-        {
-          "file": "apps/desktop/.next/static/chunks/226.1403177615a599d5.js",
-          "hash": "6982970332310771634"
-        },
-        {
-          "file": "apps/desktop/.next/static/chunks/540-1a72ca2a1f6e1367.js",
-          "hash": "2496379149719961218"
-        },
-        {
-          "file": "apps/desktop/.next/static/chunks/579-82f34a1246d1ff81.js",
-          "hash": "506100320258312348"
-        },
-        {
-          "file": "apps/desktop/.next/static/chunks/app/_not-found/page-fb73722735551654.js",
-          "hash": "16887128014552068173"
-        },
-        {
-          "file": "apps/desktop/.next/static/chunks/app/layout-a5111b31eb9dace2.js",
-          "hash": "16271510089338936314"
-        },
-        {
-          "file": "apps/desktop/.next/static/chunks/app/page-697c072a9810b284.js",
-          "hash": "15178251531137560838"
-        },
-        {
-          "file": "apps/desktop/.next/static/chunks/ee859942-ba9be6be46269066.js",
-          "hash": "2101348170999290217"
-        },
-        {
-          "file": "apps/desktop/.next/static/chunks/framework-daf90eccf2f1d00c.js",
-          "hash": "1228820076815533950"
-        },
-        {
-          "file": "apps/desktop/.next/static/chunks/main-app-a07b3791ef2932ec.js",
-          "hash": "18740568148435619"
-        },
-        {
-          "file": "apps/desktop/.next/static/chunks/main-fc5e0147b1f77355.js",
-          "hash": "5555975924576278313"
-        },
-        {
-          "file": "apps/desktop/.next/static/chunks/pages/_app-c8f99142444a4396.js",
-          "hash": "13154193137743193674"
-        },
-        {
-          "file": "apps/desktop/.next/static/chunks/pages/_error-770a3b1b629aa959.js",
-          "hash": "7072861461125598711"
-        },
-        {
-          "file": "apps/desktop/.next/static/chunks/polyfills-42372ed130431b0a.js",
-          "hash": "8152964857117933876"
-        },
-        {
-          "file": "apps/desktop/.next/static/chunks/webpack-5f45ef2e9e08110f.js",
-          "hash": "12179536602015805209"
-        },
-        {
-          "file": "apps/desktop/.next/static/css/ff062ceb49f8e23f.css",
-          "hash": "4007567917937276714"
-        },
-        {
-          "file": "apps/desktop/.next/trace",
-          "hash": "6839524819136107385"
-        },
-        {
-          "file": "apps/desktop/.next/types/app/layout.ts",
-          "hash": "7778878772244912523"
-        },
-        {
-          "file": "apps/desktop/.next/types/app/page.ts",
-          "hash": "15444357819318665407"
-        },
-        {
-          "file": "apps/desktop/.next/types/cache-life.d.ts",
-          "hash": "4146217227981141382"
-        },
-        {
-          "file": "apps/desktop/.next/types/package.json",
-          "hash": "6094546126370684104"
-        },
-        {
-          "file": "apps/desktop/.next/types/routes.d.ts",
-          "hash": "7572951765112880588"
-        },
-        {
-          "file": "apps/desktop/.next/types/validator.ts",
-          "hash": "6790554708089780613"
-        },
-        {
-          "file": "apps/desktop/next-env.d.ts",
-          "hash": "2517811901510882550"
-        },
-        {
-          "file": "apps/desktop/next.config.js",
-          "hash": "16190550848642567877"
-        },
-        {
-          "file": "apps/desktop/package.json",
-          "hash": "6532664844132030238",
+          "file": "packages/noema/package.json",
+          "hash": "15355936867300608898",
           "deps": [
-            "@agentmesh/ai-engine",
-            "@agentmesh/ai-ui"
+            "@agentmesh/shared-types"
           ]
         },
         {
-          "file": "apps/desktop/public/manifest.json",
-          "hash": "1331154553290179045"
-        },
-        {
-          "file": "apps/desktop/public/sw.js",
-          "hash": "7655570373915035016"
-        },
-        {
-          "file": "apps/desktop/src/app/globals.css",
-          "hash": "15618592575063534503"
-        },
-        {
-          "file": "apps/desktop/src/app/layout.tsx",
-          "hash": "10212918574857857046"
-        },
-        {
-          "file": "apps/desktop/src/app/page.tsx",
-          "hash": "1248051164752050719",
+          "file": "packages/noema/src/client.ts",
+          "hash": "15337904261585925670",
           "deps": [
-            "@agentmesh/ai-ui",
-            "@agentmesh/ai-engine"
+            "@agentmesh/shared-types"
           ]
         },
         {
-          "file": "apps/desktop/src/components/Desktop.tsx",
-          "hash": "2402838219837647077"
+          "file": "packages/noema/src/index.ts",
+          "hash": "9369012322372695468"
         },
         {
-          "file": "apps/desktop/src/components/DesktopApps.tsx",
-          "hash": "15909719322547806753"
+          "file": "packages/noema/src/types.ts",
+          "hash": "17005872344635345660"
         },
         {
-          "file": "apps/desktop/src/components/StartMenu.tsx",
-          "hash": "4376955210791628817"
-        },
-        {
-          "file": "apps/desktop/src/components/Taskbar.tsx",
-          "hash": "12274385738851316471"
-        },
-        {
-          "file": "apps/desktop/src/components/Window.tsx",
-          "hash": "16018014820581225555"
-        },
-        {
-          "file": "apps/desktop/tsconfig.json",
-          "hash": "11992250798357272024"
-        }
-      ],
-      "@agentmesh/peer-mesh": [
-        {
-          "file": "packages/peer-mesh/README.md",
-          "hash": "12467073700761811855"
-        },
-        {
-          "file": "packages/peer-mesh/package.json",
-          "hash": "12640679546370034198",
-          "deps": [
-            "@agentmesh/shared-types",
-            "@agentmesh/credit-system"
-          ]
-        },
-        {
-          "file": "packages/peer-mesh/src/bandwidth.ts",
-          "hash": "4361556170059578477"
-        },
-        {
-          "file": "packages/peer-mesh/src/device-capabilities.ts",
-          "hash": "15558872407046259368"
-        },
-        {
-          "file": "packages/peer-mesh/src/error.ts",
-          "hash": "11322570445963259864"
-        },
-        {
-          "file": "packages/peer-mesh/src/identity.ts",
-          "hash": "6286726910600459297"
-        },
-        {
-          "file": "packages/peer-mesh/src/index.ts",
-          "hash": "8714960127883553505"
-        },
-        {
-          "file": "packages/peer-mesh/src/peer-catalog.ts",
-          "hash": "8663108660998122214"
-        },
-        {
-          "file": "packages/peer-mesh/src/peer-reputation.ts",
-          "hash": "15586173873811606348",
-          "deps": [
-            "@agentmesh/credit-system"
-          ]
-        },
-        {
-          "file": "packages/peer-mesh/src/pubsub.ts",
-          "hash": "9477162607514023520"
-        },
-        {
-          "file": "packages/peer-mesh/src/tests/bandwidth.test.ts",
-          "hash": "8172813404647851519"
-        },
-        {
-          "file": "packages/peer-mesh/src/tests/error.test.ts",
-          "hash": "538759501141745784"
-        },
-        {
-          "file": "packages/peer-mesh/src/tests/identity.test.ts",
-          "hash": "11629434921634973161"
-        },
-        {
-          "file": "packages/peer-mesh/src/tests/peer-catalog.test.ts",
-          "hash": "11784936898501347054"
-        },
-        {
-          "file": "packages/peer-mesh/src/tests/peer-reputation.test.ts",
-          "hash": "4782867454535301456"
-        },
-        {
-          "file": "packages/peer-mesh/src/tests/pubsub.test.ts",
-          "hash": "13306666465719082707"
-        },
-        {
-          "file": "packages/peer-mesh/src/tests/trust-verifier.test.ts",
-          "hash": "11435406834584527499"
-        },
-        {
-          "file": "packages/peer-mesh/src/transport.ts",
-          "hash": "12537458628825218846"
-        },
-        {
-          "file": "packages/peer-mesh/src/trust-verifier.ts",
-          "hash": "4532482108152302442"
-        },
-        {
-          "file": "packages/peer-mesh/tsconfig.json",
-          "hash": "12734214144056352426"
-        },
-        {
-          "file": "packages/peer-mesh/vitest.config.ts",
-          "hash": "1858845835356223462"
+          "file": "packages/noema/tsconfig.json",
+          "hash": "8330880666913497771"
         }
       ],
       "@agentmesh/web": [
         {
           "file": "apps/web/index.html",
-          "hash": "12633376350459590610"
+          "hash": "15035863503043554419"
         },
         {
           "file": "apps/web/package.json",
-          "hash": "1759182421447721502"
+          "hash": "10043713948675916157",
+          "deps": [
+            "@agentmesh/ai-engine",
+            "@agentmesh/knowledge-base",
+            "@agentmesh/personal-mcp",
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "apps/web/scripts/memory-probe.mjs",
+          "hash": "17352613485369047962"
+        },
+        {
+          "file": "apps/web/scripts/probe-free-llm-detail.mjs",
+          "hash": "14350966227447155718"
+        },
+        {
+          "file": "apps/web/scripts/probe-free-llm.mjs",
+          "hash": "9548920830261265652"
         },
         {
           "file": "apps/web/src/App.tsx",
-          "hash": "15839280331845206640"
+          "hash": "11287712344153895959"
         },
         {
           "file": "apps/web/src/components/AgentCast.tsx",
-          "hash": "10265528188323880330"
+          "hash": "8444350749859248526"
         },
         {
           "file": "apps/web/src/components/AiVsHuman.tsx",
-          "hash": "15449484748155246611"
+          "hash": "9007620273903039396"
         },
         {
           "file": "apps/web/src/components/AskNetwork.tsx",
-          "hash": "9973650231713844989"
+          "hash": "8496713717631460864"
         },
         {
           "file": "apps/web/src/components/BrowserProfilePanel.tsx",
-          "hash": "11469236375813167760"
+          "hash": "13702902807973847881"
         },
         {
           "file": "apps/web/src/components/ComputerUsePanel.tsx",
-          "hash": "13183916421739141487"
+          "hash": "380253787999238842"
+        },
+        {
+          "file": "apps/web/src/components/ContributionsPage.tsx",
+          "hash": "8456255159943311369"
         },
         {
           "file": "apps/web/src/components/CreditBalance.tsx",
-          "hash": "16855558595868811477"
+          "hash": "16369463892688085317"
         },
         {
           "file": "apps/web/src/components/DashPages.tsx",
-          "hash": "9990737455504122375"
+          "hash": "5247095682636552608"
         },
         {
           "file": "apps/web/src/components/Dashboard.tsx",
-          "hash": "5408217032620174307"
+          "hash": "17219686993326704433"
         },
         {
           "file": "apps/web/src/components/DocumentUploadPanel.tsx",
-          "hash": "11023487868770468335",
+          "hash": "9433034926187159486",
           "deps": [
             [
               "@agentmesh/knowledge-base",
@@ -1543,616 +1362,457 @@
           ]
         },
         {
+          "file": "apps/web/src/components/DownloadBanner.tsx",
+          "hash": "15577493273751043119"
+        },
+        {
           "file": "apps/web/src/components/FederationPanel.tsx",
-          "hash": "9264961093630699173"
+          "hash": "11292841444277897911"
         },
         {
           "file": "apps/web/src/components/FreeTierQuota.tsx",
-          "hash": "3163912945086424783"
+          "hash": "17690133114782685744"
         },
         {
           "file": "apps/web/src/components/HappyPage.tsx",
-          "hash": "13191668455628724549"
+          "hash": "11808742524611024976"
         },
         {
           "file": "apps/web/src/components/HelpNeeded.tsx",
-          "hash": "3902476898911927363"
+          "hash": "5102087112884578967"
         },
         {
           "file": "apps/web/src/components/HiveBearPanel.tsx",
-          "hash": "17558264941361497176"
+          "hash": "440437011387214091"
         },
         {
           "file": "apps/web/src/components/HumanKnowledgeWanted.tsx",
-          "hash": "8522826637930592880"
+          "hash": "16796207417687571755"
+        },
+        {
+          "file": "apps/web/src/components/McpSkillsPage.tsx",
+          "hash": "14200525479728749159"
         },
         {
           "file": "apps/web/src/components/MuhanSettingsPanel.tsx",
-          "hash": "2159039745856884241"
+          "hash": "5441495520280174311"
         },
         {
           "file": "apps/web/src/components/NetworkPanel.tsx",
-          "hash": "11594023832351649581"
+          "hash": "10332785099604065354"
         },
         {
           "file": "apps/web/src/components/NetworkPulse.tsx",
-          "hash": "4077773095191485278"
+          "hash": "13977764273646743709"
         },
         {
           "file": "apps/web/src/components/NetworkSections.tsx",
-          "hash": "13217533750718896323"
+          "hash": "1965064233796653956"
+        },
+        {
+          "file": "apps/web/src/components/PageBox.tsx",
+          "hash": "10904571000544051951"
+        },
+        {
+          "file": "apps/web/src/components/ProjectsPage.tsx",
+          "hash": "4699246906403826773"
+        },
+        {
+          "file": "apps/web/src/components/ReputationPage.tsx",
+          "hash": "11718644224687851680"
         },
         {
           "file": "apps/web/src/components/RewardsDisplay.tsx",
-          "hash": "8264040346654244608"
+          "hash": "17511754771457376864"
         },
         {
           "file": "apps/web/src/components/RightPanel.tsx",
-          "hash": "481468861675364115"
+          "hash": "801391221213348705"
+        },
+        {
+          "file": "apps/web/src/components/SearchPage.tsx",
+          "hash": "9563550681498878006"
         },
         {
           "file": "apps/web/src/components/SemanticVote.tsx",
-          "hash": "1577000878415504848"
+          "hash": "7222678511459270810"
+        },
+        {
+          "file": "apps/web/src/components/SettingsPage.tsx",
+          "hash": "17636030661079883287"
         },
         {
           "file": "apps/web/src/components/Sidebar.test.ts",
-          "hash": "12460179929686582728"
+          "hash": "4269745000094246830"
         },
         {
           "file": "apps/web/src/components/Sidebar.tsx",
-          "hash": "17765987599472174429"
+          "hash": "17141383052017245442"
         },
         {
           "file": "apps/web/src/components/SpecPages.tsx",
-          "hash": "5580440379270534853"
+          "hash": "16048264700648837907"
+        },
+        {
+          "file": "apps/web/src/components/TasksPage.tsx",
+          "hash": "15176668233689652336"
         },
         {
           "file": "apps/web/src/components/TeachAI.tsx",
-          "hash": "11474148424243063375"
+          "hash": "15120788546583384949"
         },
         {
           "file": "apps/web/src/components/TrendingQuestions.tsx",
-          "hash": "2101284719909729486"
+          "hash": "6591295626775423340"
         },
         {
           "file": "apps/web/src/components/UnsolvedProblems.tsx",
-          "hash": "4090283080082296451"
+          "hash": "8115738067338482380"
         },
         {
           "file": "apps/web/src/components/VerifyMe.tsx",
-          "hash": "9354916438313837849"
+          "hash": "1818634799419426811"
         },
         {
           "file": "apps/web/src/components/WebDesktopPage.tsx",
-          "hash": "12236880800049416788"
+          "hash": "14508441184037020613"
         },
         {
           "file": "apps/web/src/components/WelcomeCreditsBanner.tsx",
-          "hash": "15292986120721630808"
+          "hash": "6430700079780209178"
+        },
+        {
+          "file": "apps/web/src/components/WorkflowsPage.tsx",
+          "hash": "9906339312682583530"
+        },
+        {
+          "file": "apps/web/src/components/bitterbot/BitterbotChat.tsx",
+          "hash": "13583722736877276972"
         },
         {
           "file": "apps/web/src/components/find/CosmicCanvas.tsx",
-          "hash": "8478097512774120715"
+          "hash": "12905307874198254468"
         },
         {
           "file": "apps/web/src/components/find/CosmicHud.tsx",
-          "hash": "16566512330009787892"
+          "hash": "16005664566503905185"
         },
         {
           "file": "apps/web/src/components/find/CosmicPromptBar.tsx",
-          "hash": "838344820723930616"
+          "hash": "14164651060650469291"
         },
         {
           "file": "apps/web/src/components/find/FindPage.tsx",
-          "hash": "13012009312663411042"
+          "hash": "15958688952762525816"
         },
         {
           "file": "apps/web/src/components/find/ObsidianInspector.tsx",
-          "hash": "8627800875930892939"
+          "hash": "17328078004337886459"
         },
         {
           "file": "apps/web/src/components/find/cosmic-prompt.css",
-          "hash": "11125538388159628840"
+          "hash": "15026218318005793248"
         },
         {
           "file": "apps/web/src/components/find/cosmic.css",
-          "hash": "12724089841476439487"
+          "hash": "16687588490672488139"
         },
         {
           "file": "apps/web/src/components/find/find.css",
-          "hash": "15008357600242585321"
+          "hash": "8901868481483321783"
         },
         {
           "file": "apps/web/src/components/find/initialData.ts",
-          "hash": "16545433611539664220"
+          "hash": "5152708436933007855"
         },
         {
           "file": "apps/web/src/components/find/physics.test.ts",
-          "hash": "9631537960998829960"
+          "hash": "16140104134052333105"
         },
         {
           "file": "apps/web/src/components/find/physics.ts",
-          "hash": "10702092013225167587"
+          "hash": "9597264175127314238"
         },
         {
           "file": "apps/web/src/components/find/physicsLoop.test.ts",
-          "hash": "1337828896031706562"
+          "hash": "15779982212806250539"
         },
         {
           "file": "apps/web/src/components/find/physicsLoop.ts",
-          "hash": "17163983166666206206"
+          "hash": "11058321876973027013"
         },
         {
           "file": "apps/web/src/components/find/renderLoop.test.ts",
-          "hash": "8936468300625364901"
+          "hash": "1731709152144586721"
         },
         {
           "file": "apps/web/src/components/find/renderLoop.ts",
-          "hash": "7829467688027579246"
+          "hash": "10535106569666875481"
         },
         {
           "file": "apps/web/src/components/find/types.ts",
-          "hash": "8789790530146647224"
+          "hash": "3312692608955648463"
         },
         {
           "file": "apps/web/src/components/harvest/A/AgentIdentityCard.tsx",
-          "hash": "10422954837444593007"
+          "hash": "9178914121600700304"
         },
         {
           "file": "apps/web/src/components/harvest/A/MeshTopology.tsx",
-          "hash": "12737837979022075297"
+          "hash": "15133098817945899157"
         },
         {
           "file": "apps/web/src/components/harvest/A/PeerCanvas.tsx",
-          "hash": "16145281667529163083"
+          "hash": "14759357235952168365"
         },
         {
           "file": "apps/web/src/components/harvest/A/PersonalNode.tsx",
-          "hash": "13720947212600595548"
+          "hash": "12586740155298305302"
         },
         {
           "file": "apps/web/src/components/harvest/A/TaskDispatchBoard.tsx",
-          "hash": "16769568255868218086"
+          "hash": "5263185047112817629"
         },
         {
           "file": "apps/web/src/components/harvest/A/WorkflowDAG.tsx",
-          "hash": "7088326742983481323"
+          "hash": "3982654459844636234"
         },
         {
           "file": "apps/web/src/components/harvest/A/WorkflowPipeline.tsx",
-          "hash": "14611959173647332770"
+          "hash": "14354286155002296269"
         },
         {
           "file": "apps/web/src/components/harvest/B/ConsensusView.tsx",
-          "hash": "15313017352312563272"
+          "hash": "16614018461163953414"
         },
         {
           "file": "apps/web/src/components/harvest/B/FederatedSearch.tsx",
-          "hash": "6665168182960257"
+          "hash": "4308934322362791160"
         },
         {
           "file": "apps/web/src/components/harvest/B/KnowledgePool.tsx",
-          "hash": "18054083343210943177"
+          "hash": "8478701676252763699"
         },
         {
           "file": "apps/web/src/components/harvest/B/ModelMesh.tsx",
-          "hash": "11031939510735757797"
+          "hash": "292935424180656626"
         },
         {
           "file": "apps/web/src/components/harvest/B2/KnowledgeGraphCanvas.tsx",
-          "hash": "6379585522367573288"
+          "hash": "17554619426863620778"
         },
         {
           "file": "apps/web/src/components/harvest/B2/McpSkills.tsx",
-          "hash": "9730594463010322581"
+          "hash": "1173215538550179663"
         },
         {
           "file": "apps/web/src/components/harvest/B2/ModelHub.tsx",
-          "hash": "16939376146183519134"
+          "hash": "2572400358825343777"
         },
         {
           "file": "apps/web/src/components/harvest/C/ClusterView.tsx",
-          "hash": "17333432022101165821"
+          "hash": "530660484098456858"
         },
         {
           "file": "apps/web/src/components/harvest/C/ContributionHistory.tsx",
-          "hash": "2115275642814973299"
+          "hash": "10027331287790451947"
         },
         {
           "file": "apps/web/src/components/harvest/C/GatewayPanel.tsx",
-          "hash": "18214864976940696099"
+          "hash": "17565487003283157065"
         },
         {
           "file": "apps/web/src/components/harvest/C/GpuPool.tsx",
-          "hash": "6921185998100526676"
+          "hash": "1700762158693034780"
         },
         {
           "file": "apps/web/src/components/harvest/C/LedgerTable.tsx",
-          "hash": "3062905489293579404"
+          "hash": "4997373992783198485"
         },
         {
           "file": "apps/web/src/components/harvest/C/LlmMeshPage.tsx",
-          "hash": "5974418449879023070"
+          "hash": "1422108358808413385"
         },
         {
           "file": "apps/web/src/components/harvest/C/MarketplaceGrid.tsx",
-          "hash": "12527028557051117785"
+          "hash": "17342023602701315657"
         },
         {
           "file": "apps/web/src/components/harvest/C/ReputationMatrix.tsx",
-          "hash": "2521106027219802453"
+          "hash": "2082487002935509237"
         },
         {
           "file": "apps/web/src/components/harvest/C/SecuritySettings.tsx",
-          "hash": "7615271917055097062"
+          "hash": "1207191550574324781"
         },
         {
           "file": "apps/web/src/components/harvest/C/TrustRing.tsx",
-          "hash": "15500222611059822156"
+          "hash": "1032373299737681436"
         },
         {
           "file": "apps/web/src/components/harvest/C/WorkerPool.tsx",
-          "hash": "11419678367019929465"
+          "hash": "8675962606166578608"
         },
         {
           "file": "apps/web/src/components/harvest/C/adapter.test.ts",
-          "hash": "3814282855311457358"
+          "hash": "10403491556228333001"
         },
         {
           "file": "apps/web/src/components/harvest/C/adapter.ts",
-          "hash": "5032308589120054537"
+          "hash": "3951993152734205047"
         },
         {
           "file": "apps/web/src/components/harvest/C/harvest-c.css",
-          "hash": "16252888786045357783"
+          "hash": "11272818926604109644"
         },
         {
           "file": "apps/web/src/components/harvest/C/index.ts",
-          "hash": "7975197751833454569"
+          "hash": "16840106899514745020"
+        },
+        {
+          "file": "apps/web/src/components/i18n-ui.test.ts",
+          "hash": "5253829673368290324"
+        },
+        {
+          "file": "apps/web/src/components/menu-i18n.test.ts",
+          "hash": "11089051032625633794"
+        },
+        {
+          "file": "apps/web/src/components/menu-i18n.ts",
+          "hash": "5148067296487564322"
         },
         {
           "file": "apps/web/src/components/noema/ModelSearch.tsx",
-          "hash": "6648131174317638090"
+          "hash": "4101103086984263652"
         },
         {
           "file": "apps/web/src/components/sidebar-config.ts",
-          "hash": "5364868408456262509"
+          "hash": "16592072086726514174"
         },
         {
           "file": "apps/web/src/components/visuals/ConsensusDial.tsx",
-          "hash": "536059424257345031"
+          "hash": "17634290253386295560"
         },
         {
           "file": "apps/web/src/components/visuals/GpuRackVisualizer.tsx",
-          "hash": "15754574957148549449"
+          "hash": "15462341362607263399"
         },
         {
           "file": "apps/web/src/components/visuals/InteractiveKnowledgeGraph.tsx",
-          "hash": "12023564162086594556"
+          "hash": "4442994836912431663"
         },
         {
           "file": "apps/web/src/components/visuals/LatencyVisualizer.tsx",
-          "hash": "12360266103880436198"
+          "hash": "1938606844113709754"
         },
         {
           "file": "apps/web/src/components/visuals/LiveBlockStream.tsx",
-          "hash": "4273207382587865165"
+          "hash": "17478749208964966134"
         },
         {
           "file": "apps/web/src/components/visuals/P2PConnectionGraph.tsx",
-          "hash": "8524011541177502811"
+          "hash": "13146745404126805776"
         },
         {
           "file": "apps/web/src/components/visuals/SwarmRadar.tsx",
-          "hash": "15535385778070710795"
+          "hash": "12788329660216893640"
         },
         {
           "file": "apps/web/src/components/visuals/visuals.css",
-          "hash": "12676085153636632899"
+          "hash": "7154177315506244315"
         },
         {
           "file": "apps/web/src/data/mockData.ts",
-          "hash": "13080720318045985309"
+          "hash": "208591977372283413"
         },
         {
           "file": "apps/web/src/hooks/pulse-subscriber.test.ts",
-          "hash": "16111932655954738162"
+          "hash": "974290246612388835"
         },
         {
           "file": "apps/web/src/hooks/pulse-subscriber.ts",
-          "hash": "4434542636617601359"
+          "hash": "15107795125999391641"
         },
         {
           "file": "apps/web/src/hooks/useGossipPulse.ts",
-          "hash": "8175713512893571134"
+          "hash": "2900523875342104192"
+        },
+        {
+          "file": "apps/web/src/hooks/useVisibilityAwareInterval.ts",
+          "hash": "385176703013330909"
         },
         {
           "file": "apps/web/src/i18n.ts",
-          "hash": "9363722379779617791"
+          "hash": "3493610955068101379"
         },
         {
           "file": "apps/web/src/index.css",
-          "hash": "13491778151094543167"
+          "hash": "18300587498730775235"
+        },
+        {
+          "file": "apps/web/src/lib/bitterbot-engine.test.ts",
+          "hash": "5181024107970919640"
+        },
+        {
+          "file": "apps/web/src/lib/bitterbot-engine.ts",
+          "hash": "14003205694037073137",
+          "deps": [
+            "@agentmesh/ai-engine"
+          ]
         },
         {
           "file": "apps/web/src/lib/mesh-stats.ts",
-          "hash": "18410605732060413794"
+          "hash": "17417642548623164254"
+        },
+        {
+          "file": "apps/web/src/lib/offline-brain.test.ts",
+          "hash": "662505515189694275"
+        },
+        {
+          "file": "apps/web/src/lib/offline-brain.ts",
+          "hash": "7454568740700138235"
         },
         {
           "file": "apps/web/src/main.tsx",
-          "hash": "12342440174494974546"
+          "hash": "4802262982906013627"
+        },
+        {
+          "file": "apps/web/src/routes.test.ts",
+          "hash": "4902781294980844016"
+        },
+        {
+          "file": "apps/web/src/routes.ts",
+          "hash": "11185441281005218018"
         },
         {
           "file": "apps/web/src/style.css",
-          "hash": "16828051796911680995"
+          "hash": "9390867846470040580"
         },
         {
           "file": "apps/web/src/styles/cline-theme.css",
-          "hash": "3606036206454036432"
+          "hash": "6830226625949309220"
         },
         {
           "file": "apps/web/src/styles/mobile.css",
-          "hash": "14193749639337647891"
+          "hash": "1819056516611385080"
         },
         {
           "file": "apps/web/src/vite-env.d.ts",
-          "hash": "18084207208532214325"
+          "hash": "15413666007274435733"
         },
         {
           "file": "apps/web/tsconfig.json",
-          "hash": "10872208876793500895"
+          "hash": "17580242387758597393"
         },
         {
           "file": "apps/web/vite.config.ts",
-          "hash": "5264487757885972709"
-        }
-      ],
-      "@agentmesh/computer-use": [
-        {
-          "file": "packages/computer-use/package.json",
-          "hash": "12651948012879450546"
-        },
-        {
-          "file": "packages/computer-use/src/computer-use-router.ts",
-          "hash": "6644954068001786730"
-        },
-        {
-          "file": "packages/computer-use/src/e2b-adapter.ts",
-          "hash": "6147426869385658660"
-        },
-        {
-          "file": "packages/computer-use/src/e2b-byok-vision.ts",
-          "hash": "9694840559615998844"
-        },
-        {
-          "file": "packages/computer-use/src/e2b-computer-use.ts",
-          "hash": "3523069000292925339"
-        },
-        {
-          "file": "packages/computer-use/src/index.ts",
-          "hash": "10796584520087236310"
-        },
-        {
-          "file": "packages/computer-use/src/mcp-router.ts",
-          "hash": "9752379312018635870"
-        },
-        {
-          "file": "packages/computer-use/src/session-runner.ts",
-          "hash": "11700212798147279765"
-        },
-        {
-          "file": "packages/computer-use/tsconfig.json",
-          "hash": "9516585843114805170"
-        }
-      ],
-      "@agentmesh/ai-ui": [
-        {
-          "file": "packages/ai-ui/package.json",
-          "hash": "17013411292107791536",
-          "deps": [
-            "@agentmesh/ai-engine"
-          ]
-        },
-        {
-          "file": "packages/ai-ui/src/ChatWidget.tsx",
-          "hash": "8497342584694367161"
-        },
-        {
-          "file": "packages/ai-ui/src/hooks/useAIEngine.ts",
-          "hash": "817233740392243970",
-          "deps": [
-            "@agentmesh/ai-engine"
-          ]
-        },
-        {
-          "file": "packages/ai-ui/src/index.ts",
-          "hash": "3265134009521550093"
-        },
-        {
-          "file": "packages/ai-ui/tsconfig.json",
-          "hash": "8475525656297923533"
-        }
-      ],
-      "@agentmesh/ai-engine": [
-        {
-          "file": "packages/ai-engine/package.json",
-          "hash": "13429159789034490956"
-        },
-        {
-          "file": "packages/ai-engine/src/cloud/cloud-engine.ts",
-          "hash": "7134834622094178358"
-        },
-        {
-          "file": "packages/ai-engine/src/factory.ts",
-          "hash": "12786429797777815605"
-        },
-        {
-          "file": "packages/ai-engine/src/index.ts",
-          "hash": "9962151880665892903"
-        },
-        {
-          "file": "packages/ai-engine/src/ollama/ollama-engine.ts",
-          "hash": "16323954636582994161"
-        },
-        {
-          "file": "packages/ai-engine/src/sipp/model-manager.ts",
-          "hash": "10918536247712833617"
-        },
-        {
-          "file": "packages/ai-engine/src/sipp/sipp-engine.ts",
-          "hash": "8942265469406151946"
-        },
-        {
-          "file": "packages/ai-engine/src/sipp/sipp-worker-impl.ts",
-          "hash": "8107710093039864230"
-        },
-        {
-          "file": "packages/ai-engine/src/sipp/sipp-worker.ts",
-          "hash": "9025673873200284518"
-        },
-        {
-          "file": "packages/ai-engine/src/types.ts",
-          "hash": "2984004284940645756"
-        },
-        {
-          "file": "packages/ai-engine/src/utils/events.ts",
-          "hash": "6671447345058167022"
-        },
-        {
-          "file": "packages/ai-engine/src/utils/logger.ts",
-          "hash": "15925275528183640336"
-        },
-        {
-          "file": "packages/ai-engine/tests/sipp.test.ts",
-          "hash": "15924173541347611666"
-        },
-        {
-          "file": "packages/ai-engine/tsconfig.json",
-          "hash": "5364665957122694377"
-        }
-      ],
-      "@agentmesh/agent-gateway": [
-        {
-          "file": "packages/agent-gateway/package.json",
-          "hash": "7117854136691038154",
-          "deps": [
-            "@agentmesh/peer-mesh",
-            "@agentmesh/credit-system",
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/agent-gateway/src/index.ts",
-          "hash": "7617497474440081420"
-        },
-        {
-          "file": "packages/agent-gateway/src/protocol-types.ts",
-          "hash": "17677373261326642798"
-        },
-        {
-          "file": "packages/agent-gateway/src/protocol.ts",
-          "hash": "3975698440911938364"
-        },
-        {
-          "file": "packages/agent-gateway/src/routing.ts",
-          "hash": "796893437020821184"
-        },
-        {
-          "file": "packages/agent-gateway/src/tests/protocol.test.ts",
-          "hash": "8893414093158537573"
-        },
-        {
-          "file": "packages/agent-gateway/src/tests/routing.test.ts",
-          "hash": "1034412256687990084"
-        },
-        {
-          "file": "packages/agent-gateway/tsconfig.json",
-          "hash": "11413894618179116714"
-        },
-        {
-          "file": "packages/agent-gateway/vitest.config.ts",
-          "hash": "4467228811035035091"
-        }
-      ],
-      "@agentmesh/llm-router": [
-        {
-          "file": "packages/llm-router/package.json",
-          "hash": "5552820445688754782",
-          "deps": [
-            "@agentmesh/peer-mesh",
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/llm-router/src/index.ts",
-          "hash": "16107149592364810868",
-          "deps": [
-            "@agentmesh/peer-mesh"
-          ]
-        },
-        {
-          "file": "packages/llm-router/src/keyless-providers.test.ts",
-          "hash": "10288906251284920669"
-        },
-        {
-          "file": "packages/llm-router/src/keyless-providers.ts",
-          "hash": "18236322586649001332"
-        },
-        {
-          "file": "packages/llm-router/src/llm-router.test.ts",
-          "hash": "3746056010090548946"
-        },
-        {
-          "file": "packages/llm-router/src/p2p-load-balancer.ts",
-          "hash": "14053481203083216364",
-          "deps": [
-            "@agentmesh/peer-mesh"
-          ]
-        },
-        {
-          "file": "packages/llm-router/src/p2p-node-registry.ts",
-          "hash": "961856808241823630",
-          "deps": [
-            "@agentmesh/peer-mesh"
-          ]
-        },
-        {
-          "file": "packages/llm-router/tsconfig.json",
-          "hash": "9691421123385178322"
-        }
-      ],
-      "@agentmesh/noema": [
-        {
-          "file": "packages/noema/package.json",
-          "hash": "17794699263708403803",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/noema/src/client.ts",
-          "hash": "3707461181287385602",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/noema/src/index.ts",
-          "hash": "1128720425976141736"
-        },
-        {
-          "file": "packages/noema/src/types.ts",
-          "hash": "6291822701268281966"
-        },
-        {
-          "file": "packages/noema/tsconfig.json",
-          "hash": "18257708711840789333"
+          "hash": "13211880957375183014"
         }
       ],
       "@agentmesh/bitterbot": [
         {
           "file": "packages/bitterbot/package.json",
-          "hash": "5511676748279170278",
+          "hash": "15567007308661797731",
           "deps": [
             "@agentmesh/peer-mesh",
             "@agentmesh/personal-mcp",
@@ -2160,99 +1820,339 @@
           ]
         },
         {
+          "file": "packages/bitterbot/src/index.ts",
+          "hash": "14178397099468574584",
+          "deps": [
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
           "file": "packages/bitterbot/src/types.ts",
-          "hash": "11839576192216524219",
+          "hash": "12015371051228811913",
           "deps": [
             "@agentmesh/shared-types"
           ]
         },
         {
           "file": "packages/bitterbot/tsconfig.json",
-          "hash": "2338884011979130339"
+          "hash": "16198328825220499259"
+        }
+      ],
+      "@agentmesh/semantic-vote": [
+        {
+          "file": "packages/semantic-vote/package.json",
+          "hash": "18239394643825248409"
+        },
+        {
+          "file": "packages/semantic-vote/src/index.test.ts",
+          "hash": "13805027038808029217"
+        },
+        {
+          "file": "packages/semantic-vote/src/index.ts",
+          "hash": "14681529834466641487"
+        },
+        {
+          "file": "packages/semantic-vote/src/types.ts",
+          "hash": "13142997087151611605"
+        },
+        {
+          "file": "packages/semantic-vote/tsconfig.json",
+          "hash": "16442069115668418952"
+        }
+      ],
+      "@agentmesh/agent-cast": [
+        {
+          "file": "packages/agent-cast/package.json",
+          "hash": "12379113011722813131",
+          "deps": [
+            "@agentmesh/llm-router",
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/agent-cast/src/hierarchy.ts",
+          "hash": "13104220142022218212",
+          "deps": [
+            "@agentmesh/llm-router",
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/agent-cast/src/index.ts",
+          "hash": "13274868498173980173",
+          "deps": [
+            "@agentmesh/llm-router",
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/agent-cast/tsconfig.json",
+          "hash": "3742272272448644116"
+        }
+      ],
+      "@agentmesh/compute-market": [
+        {
+          "file": "packages/compute-market/package.json",
+          "hash": "15363051112947991565"
+        },
+        {
+          "file": "packages/compute-market/src/index.ts",
+          "hash": "13796525732156441213"
+        },
+        {
+          "file": "packages/compute-market/src/tribute.test.ts",
+          "hash": "1774058576443839006"
+        },
+        {
+          "file": "packages/compute-market/src/tribute.ts",
+          "hash": "5580743100494148663"
+        },
+        {
+          "file": "packages/compute-market/tsconfig.json",
+          "hash": "16442069115668418952"
+        }
+      ],
+      "@agentmesh/peer-mesh": [
+        {
+          "file": "packages/peer-mesh/README.md",
+          "hash": "12005201328344861414"
+        },
+        {
+          "file": "packages/peer-mesh/package.json",
+          "hash": "3044479418767164160",
+          "deps": [
+            "@agentmesh/shared-types",
+            "@agentmesh/credit-system"
+          ]
+        },
+        {
+          "file": "packages/peer-mesh/src/bandwidth.ts",
+          "hash": "5931029490658217988"
+        },
+        {
+          "file": "packages/peer-mesh/src/device-capabilities.ts",
+          "hash": "6062505020904524023"
+        },
+        {
+          "file": "packages/peer-mesh/src/error.ts",
+          "hash": "5846754000172972355"
+        },
+        {
+          "file": "packages/peer-mesh/src/identity.ts",
+          "hash": "17451698231821542262"
+        },
+        {
+          "file": "packages/peer-mesh/src/index.ts",
+          "hash": "14749715916882530296"
+        },
+        {
+          "file": "packages/peer-mesh/src/peer-catalog.ts",
+          "hash": "9830508367199614583"
+        },
+        {
+          "file": "packages/peer-mesh/src/peer-reputation.ts",
+          "hash": "5161242258044921408",
+          "deps": [
+            "@agentmesh/credit-system"
+          ]
+        },
+        {
+          "file": "packages/peer-mesh/src/pubsub.ts",
+          "hash": "1194807700404327268"
+        },
+        {
+          "file": "packages/peer-mesh/src/tests/bandwidth.test.ts",
+          "hash": "4352369368092627559"
+        },
+        {
+          "file": "packages/peer-mesh/src/tests/error.test.ts",
+          "hash": "226823447856408352"
+        },
+        {
+          "file": "packages/peer-mesh/src/tests/identity.test.ts",
+          "hash": "11919698933733599227"
+        },
+        {
+          "file": "packages/peer-mesh/src/tests/peer-catalog.test.ts",
+          "hash": "11380113309538967157"
+        },
+        {
+          "file": "packages/peer-mesh/src/tests/peer-reputation.test.ts",
+          "hash": "6069529673191571964"
+        },
+        {
+          "file": "packages/peer-mesh/src/tests/pubsub.test.ts",
+          "hash": "8271858796065565880"
+        },
+        {
+          "file": "packages/peer-mesh/src/tests/trust-verifier.test.ts",
+          "hash": "12506786060634992755"
+        },
+        {
+          "file": "packages/peer-mesh/src/transport.ts",
+          "hash": "1228634929371031325"
+        },
+        {
+          "file": "packages/peer-mesh/src/trust-verifier.ts",
+          "hash": "12166984582859848308"
+        },
+        {
+          "file": "packages/peer-mesh/tsconfig.json",
+          "hash": "15818377649770264388"
+        },
+        {
+          "file": "packages/peer-mesh/vitest.config.ts",
+          "hash": "3397554330952093802"
+        }
+      ],
+      "@agentmesh/llm-router": [
+        {
+          "file": "packages/llm-router/package.json",
+          "hash": "6295329765805708569",
+          "deps": [
+            "@agentmesh/peer-mesh",
+            "@agentmesh/shared-types"
+          ]
+        },
+        {
+          "file": "packages/llm-router/src/index.ts",
+          "hash": "5668663627776866448",
+          "deps": [
+            "@agentmesh/peer-mesh"
+          ]
+        },
+        {
+          "file": "packages/llm-router/src/keyless-providers.test.ts",
+          "hash": "16929973272119039942"
+        },
+        {
+          "file": "packages/llm-router/src/keyless-providers.ts",
+          "hash": "1632915932747550625"
+        },
+        {
+          "file": "packages/llm-router/src/llm-router.test.ts",
+          "hash": "17734625461804222687"
+        },
+        {
+          "file": "packages/llm-router/src/p2p-load-balancer.ts",
+          "hash": "2228646219324149003",
+          "deps": [
+            "@agentmesh/peer-mesh"
+          ]
+        },
+        {
+          "file": "packages/llm-router/src/p2p-node-registry.ts",
+          "hash": "2818436622008487594",
+          "deps": [
+            "@agentmesh/peer-mesh"
+          ]
+        },
+        {
+          "file": "packages/llm-router/tsconfig.json",
+          "hash": "10903884079836345606"
+        }
+      ],
+      "@agentmesh/database": [
+        {
+          "file": "packages/database/package.json",
+          "hash": "901791855829511948"
+        },
+        {
+          "file": "packages/database/src/client.ts",
+          "hash": "9472626807894127041"
+        },
+        {
+          "file": "packages/database/src/index.ts",
+          "hash": "12126092819156727706"
+        },
+        {
+          "file": "packages/database/tsconfig.json",
+          "hash": "16198328825220499259"
         }
       ],
       "@agentmesh/knowledge-base": [
         {
           "file": "packages/knowledge-base/index.ts",
-          "hash": "15488727802819661288"
+          "hash": "9844021305838267040"
         },
         {
           "file": "packages/knowledge-base/package.json",
-          "hash": "3112341895259831216",
+          "hash": "10985201324051769707",
           "deps": [
+            "@agentmesh/database",
             "@agentmesh/federation",
             "@agentmesh/shared-types"
           ]
         },
         {
           "file": "packages/knowledge-base/src/chunking.ts",
-          "hash": "10065781606993574104"
+          "hash": "16911995547510516158"
         },
         {
           "file": "packages/knowledge-base/src/decay/engine.test.ts",
-          "hash": "1505033287593960795"
+          "hash": "16433441946753971301"
         },
         {
           "file": "packages/knowledge-base/src/decay/engine.ts",
-          "hash": "204981453255875606"
+          "hash": "977156663977594505"
         },
         {
           "file": "packages/knowledge-base/src/decay/fsrs.test.ts",
-          "hash": "5469500190748251550"
+          "hash": "17339009666992825355"
         },
         {
           "file": "packages/knowledge-base/src/decay/fsrs.ts",
-          "hash": "16121845112561328454"
+          "hash": "3564019047010992447"
         },
         {
           "file": "packages/knowledge-base/src/doc-parser.ts",
-          "hash": "2676918597308956089",
+          "hash": "1299353335587770723",
           "deps": [
             "@agentmesh/shared-types"
           ]
         },
         {
           "file": "packages/knowledge-base/src/embeddings.ts",
-          "hash": "9298815231967566840"
+          "hash": "15947095602601031531"
         },
         {
           "file": "packages/knowledge-base/src/folklore-federation.ts",
-          "hash": "5977679589018908360",
+          "hash": "13840783807805964938",
           "deps": [
             "@agentmesh/shared-types"
           ]
         },
         {
           "file": "packages/knowledge-base/src/folklore-types.ts",
-          "hash": "16381247570191162333",
+          "hash": "7602654974139590023",
           "deps": [
             "@agentmesh/shared-types"
           ]
         },
         {
           "file": "packages/knowledge-base/src/graph.ts",
-          "hash": "7580230265644360291",
+          "hash": "6160505146113025988",
           "deps": [
             "@agentmesh/shared-types"
           ]
         },
         {
           "file": "packages/knowledge-base/src/hybrid-search.test.ts",
-          "hash": "14426320103561683013",
+          "hash": "16881105924733784368",
           "deps": [
             "@agentmesh/shared-types"
           ]
         },
         {
           "file": "packages/knowledge-base/src/hybrid-search.ts",
-          "hash": "5261825810463764028",
+          "hash": "9236664500614770034",
           "deps": [
             "@agentmesh/shared-types"
           ]
         },
         {
           "file": "packages/knowledge-base/src/identity.ts",
-          "hash": "7638733751967079361",
+          "hash": "6759259636803407193",
           "deps": [
             "@agentmesh/federation",
             "@agentmesh/shared-types"
@@ -2260,37 +2160,37 @@
         },
         {
           "file": "packages/knowledge-base/src/index-pipeline.ts",
-          "hash": "14734980307837180047",
+          "hash": "1935690994974420972",
           "deps": [
             "@agentmesh/shared-types"
           ]
         },
         {
           "file": "packages/knowledge-base/src/index.ts",
-          "hash": "9266875524961620373"
+          "hash": "3147666954668529744"
         },
         {
           "file": "packages/knowledge-base/src/ingest/extractors.pdf-security.test.ts",
-          "hash": "16828904503344142677"
+          "hash": "16100452521878211592"
         },
         {
           "file": "packages/knowledge-base/src/ingest/extractors.test.ts",
-          "hash": "3567479069725009256"
+          "hash": "6533013526971766710"
         },
         {
           "file": "packages/knowledge-base/src/ingest/extractors.ts",
-          "hash": "1595346288228820482"
+          "hash": "9206327141611948032"
         },
         {
           "file": "packages/knowledge-base/src/ingestion.ts",
-          "hash": "12344237383544831980",
+          "hash": "16131433314155678521",
           "deps": [
             "@agentmesh/shared-types"
           ]
         },
         {
           "file": "packages/knowledge-base/src/pgvector-store.ts",
-          "hash": "5259594821205297614",
+          "hash": "14970972819167243271",
           "deps": [
             "@agentmesh/shared-types",
             [
@@ -2301,386 +2201,316 @@
         },
         {
           "file": "packages/knowledge-base/src/retrieval.ts",
-          "hash": "10939303293859445691",
+          "hash": "16872630299540169578",
           "deps": [
             "@agentmesh/shared-types"
           ]
         },
         {
           "file": "packages/knowledge-base/src/search/entity.test.ts",
-          "hash": "18271468859103407960"
+          "hash": "15952480754134877481"
         },
         {
           "file": "packages/knowledge-base/src/search/entity.ts",
-          "hash": "1653291230305821778"
+          "hash": "16016198846329202122"
         },
         {
           "file": "packages/knowledge-base/src/search/rrf.test.ts",
-          "hash": "7731595594943377430"
+          "hash": "17584487352354128287"
         },
         {
           "file": "packages/knowledge-base/src/search/rrf.ts",
-          "hash": "2048000634629599139"
+          "hash": "6633291277833796767"
         },
         {
           "file": "packages/knowledge-base/src/sources.ts",
-          "hash": "9595017594556649743"
+          "hash": "2875421952322592652"
         },
         {
           "file": "packages/knowledge-base/src/weknora-client.ts",
-          "hash": "4968518424582795288"
+          "hash": "15935727558169043539"
         },
         {
           "file": "packages/knowledge-base/src/wheel.ts",
-          "hash": "4704348977659681851"
+          "hash": "7283121000047529947"
         },
         {
           "file": "packages/knowledge-base/src/wiki-sync.test.ts",
-          "hash": "3391508666733143663"
+          "hash": "8998334556547031500"
         },
         {
           "file": "packages/knowledge-base/src/wiki-sync.ts",
-          "hash": "9286478789028017501",
+          "hash": "4360332491362937814",
           "deps": [
             "@agentmesh/shared-types"
           ]
         },
         {
           "file": "packages/knowledge-base/tsconfig.json",
-          "hash": "3141464146861082496"
-        }
-      ],
-      "@agentmesh/category-engine": [
-        {
-          "file": "packages/category-engine/index.ts",
-          "hash": "15488727802819661288"
-        },
-        {
-          "file": "packages/category-engine/package.json",
-          "hash": "13280664426133843316"
-        },
-        {
-          "file": "packages/category-engine/src/category.ts",
-          "hash": "16693966220784135804",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/category-engine/src/classifier.ts",
-          "hash": "2151318359258973828",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/category-engine/src/index.ts",
-          "hash": "1870754052260121760"
-        },
-        {
-          "file": "packages/category-engine/src/jurisdiction.ts",
-          "hash": "14131908878658898360"
-        },
-        {
-          "file": "packages/category-engine/src/router.ts",
-          "hash": "9069906589285376619",
-          "deps": [
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/category-engine/src/taxonomy.ts",
-          "hash": "13444892544205648598"
-        },
-        {
-          "file": "packages/category-engine/tsconfig.json",
-          "hash": "3141464146861082496"
-        }
-      ],
-      "@agentmesh/agent-mesh": [
-        {
-          "file": "packages/agent-mesh/package.json",
-          "hash": "8240880426463580799"
-        },
-        {
-          "file": "packages/agent-mesh/src/index.ts",
-          "hash": "6697183430973331665",
-          "deps": [
-            "@agentmesh/agent-core",
-            "@agentmesh/llm-router",
-            "@agentmesh/shared-types"
-          ]
-        },
-        {
-          "file": "packages/agent-mesh/src/transports/axl-client.test.ts",
-          "hash": "11691456360150053711"
-        },
-        {
-          "file": "packages/agent-mesh/src/transports/axl-client.ts",
-          "hash": "12383593511823012320"
-        },
-        {
-          "file": "packages/agent-mesh/src/transports/hybrid-transport.test.ts",
-          "hash": "4508352664620801490"
-        },
-        {
-          "file": "packages/agent-mesh/src/transports/hybrid-transport.ts",
-          "hash": "17082014411544289063"
-        },
-        {
-          "file": "packages/agent-mesh/src/transports/identity-bridge.test.ts",
-          "hash": "4828344131490527144"
-        },
-        {
-          "file": "packages/agent-mesh/src/transports/identity-bridge.ts",
-          "hash": "338032861328185132"
-        },
-        {
-          "file": "packages/agent-mesh/src/transports/index.ts",
-          "hash": "2365681788181418028"
-        },
-        {
-          "file": "packages/agent-mesh/src/transports/types.ts",
-          "hash": "13825097303624138354"
-        },
-        {
-          "file": "packages/agent-mesh/tsconfig.json",
-          "hash": "16568283178550900376"
+          "hash": "17947915467284184458"
         }
       ]
     },
     "nonProjectFiles": [
       {
+        "file": ".biomeignore",
+        "hash": "1403050147124827936"
+      },
+      {
         "file": ".env.example",
-        "hash": "17675895616245062535"
+        "hash": "17642812390829692014"
       },
       {
         "file": ".github/workflows/ci.yml",
-        "hash": "2228746961663418874"
+        "hash": "15294596340134476275"
       },
       {
         "file": ".github/workflows/deploy.yml",
-        "hash": "785258540526860996"
+        "hash": "14226080330401635492"
       },
       {
         "file": ".github/workflows/pr-check.yml",
-        "hash": "12410264182277020585"
+        "hash": "11184478694102578689"
       },
       {
         "file": ".github/workflows/release.yml",
-        "hash": "5608591464240194373"
+        "hash": "14593139523463285148"
       },
       {
         "file": ".github/workflows/test-reporter.yml",
-        "hash": "5080661879773831856"
+        "hash": "2558769733621764245"
       },
       {
         "file": ".gitignore",
-        "hash": "12569615504931048931"
+        "hash": "14745001069740454983"
+      },
+      {
+        "file": "Dockerfile.nanos",
+        "hash": "6098501431544592846"
       },
       {
         "file": "README.md",
-        "hash": "1955341599445144252"
+        "hash": "10367071478259211904"
       },
       {
         "file": "THIRD_PARTY_LICENSES.md",
-        "hash": "7606950875824820275"
+        "hash": "7904413517438088117"
       },
       {
         "file": "biome.json",
-        "hash": "2108829337605442912"
+        "hash": "3937266767332518772"
+      },
+      {
+        "file": "deploy/CADDY_FIX_README.md",
+        "hash": "5988214731826913669"
+      },
+      {
+        "file": "deploy/Caddyfile.muhanai",
+        "hash": "12726037187748329365"
+      },
+      {
+        "file": "deploy/DEPLOYMENT_STATUS.md",
+        "hash": "10456265487205128602"
       },
       {
         "file": "deploy/docker-compose.yml",
-        "hash": "17595804256916607616"
+        "hash": "11740009048493429778"
       },
       {
         "file": "deploy/fediverse.ts",
-        "hash": "3586707112131919382"
+        "hash": "13990928251289952718"
       },
       {
         "file": "deploy/feed-api.ts",
-        "hash": "1996004708396589819"
+        "hash": "7203097785761952575"
       },
       {
         "file": "deploy/feed-store.ts",
-        "hash": "11922449137582064499"
+        "hash": "17943969529043626303"
       },
       {
         "file": "deploy/mcp-server.ts",
-        "hash": "11121392199842593"
+        "hash": "9244746878632463122"
       },
       {
         "file": "deploy/muhanai.com.nginx.conf",
-        "hash": "3678583265566720542"
+        "hash": "17949924931768860491"
+      },
+      {
+        "file": "deploy/setup-caddy-muhanai.sh",
+        "hash": "1984213817042489345"
       },
       {
         "file": "deploy/worker.ts",
-        "hash": "13689862003388494371"
+        "hash": "18226360808356689278"
       },
       {
         "file": "docs/CODE-INTEGRATION-PLAN.md",
-        "hash": "14102288521167426674"
+        "hash": "11605036312395005763"
       },
       {
         "file": "docs/HAPPY-INTEGRATION-ANALYSIS.md",
-        "hash": "16893242356571898049"
+        "hash": "6737560092900423270"
       },
       {
         "file": "docs/IMPORTABLE-SOURCE-MAP.md",
-        "hash": "4107346036833949335"
+        "hash": "17157460793025608361"
       },
       {
         "file": "docs/INTEGRATED-CODE-PLAN.md",
-        "hash": "11654302309406543140"
+        "hash": "9945931200870497581"
+      },
+      {
+        "file": "docs/MEMORY-TESTING.md",
+        "hash": "7957604820108997816"
       },
       {
         "file": "docs/OMNIROUTE_CLIENT.md",
-        "hash": "8029109201344220259"
+        "hash": "298606529017354328"
       },
       {
         "file": "docs/OMNIROUTE_INTEGRATION.md",
-        "hash": "13969805902620069022"
+        "hash": "8016587904227767625"
       },
       {
         "file": "docs/PRISMA.md",
-        "hash": "6768337078268218303"
+        "hash": "5262862839368090301"
       },
       {
         "file": "docs/STELLAVAULT-INTEGRATION-ANALYSIS.md",
-        "hash": "1792172971733374333"
+        "hash": "16618824117820478880"
       },
       {
         "file": "docs/USER-GUIDE-CODE-PLAN.md",
-        "hash": "10016798386815296637"
+        "hash": "4265890784082354685"
       },
       {
         "file": "docs/WEKNORA_INTEGRATION.md",
-        "hash": "10183023495736476236"
+        "hash": "5087066258906685708"
       },
       {
         "file": "docs/WORKTREE-PLAN.md",
-        "hash": "6426555705375618502"
+        "hash": "1236348966748686455"
       },
       {
         "file": "docs/adr/0001-m1-pulse-mesh.md",
-        "hash": "2342775856238732133"
+        "hash": "1815527342340452166"
       },
       {
         "file": "docs/adr/0002-libp2p-floodsub-swap.md",
-        "hash": "4443381589062914225"
+        "hash": "13739227271261324123"
       },
       {
         "file": "docs/adr/0003-eight-repo-lineage.md",
-        "hash": "7876231328383916665"
+        "hash": "3529841837089292300"
       },
       {
         "file": "docs/adr/0004-pulse-sse-bridge.md",
-        "hash": "7860128779236535033"
+        "hash": "8782361628403583641"
       },
       {
         "file": "docs/adr/0005-use-gossip-pulse-hook.md",
-        "hash": "16751717760245037016"
+        "hash": "12863322505015451750"
       },
       {
         "file": "docs/adr/0006-adaptive-render-loop.md",
-        "hash": "17641957825676811956"
+        "hash": "10064556614260805088"
       },
       {
         "file": "docs/adr/0007-peer-identity-rotation.md",
-        "hash": "7103836862850284494"
+        "hash": "13615479151764941866"
       },
       {
         "file": "docs/adr/0008-ssh-commit-signing.md",
-        "hash": "11015901578914982336"
+        "hash": "6115811083315784911"
       },
       {
         "file": "docs/adr/0009-harvest-c-api-contract.md",
-        "hash": "15451766306260550078"
+        "hash": "7721231516587799357"
       },
       {
         "file": "docs/agent-cast.md",
-        "hash": "8462212104273585823"
+        "hash": "14901990116502184844"
       },
       {
         "file": "docs/agent-mesh.md",
-        "hash": "7835051127726222688"
+        "hash": "700133887064384272"
       },
       {
         "file": "docs/architecture.md",
-        "hash": "9262802968529768094"
+        "hash": "13377991113393661272"
       },
       {
         "file": "docs/knowledge.md",
-        "hash": "14980542522681949882"
+        "hash": "1135342671150101834"
       },
       {
         "file": "docs/protocol.md",
-        "hash": "7569686734989110916"
+        "hash": "16178919555228413395"
       },
       {
         "file": "docs/user-guide.md",
-        "hash": "18262551655037076914"
+        "hash": "16385164597971891016"
       },
       {
         "file": "nx.json",
-        "hash": "1240503441031668736"
+        "hash": "4271472950835178101"
       },
       {
         "file": "package.json",
-        "hash": "13514484623183031974"
+        "hash": "10980213219798450606"
       },
       {
         "file": "pnpm-workspace.yaml",
-        "hash": "17803296953936907715"
+        "hash": "9184080510270669334"
       },
       {
         "file": "prisma/migrations/20260906000000_init_pgvector/migration.sql",
-        "hash": "2049945614331345715"
+        "hash": "3005697481216534116"
       },
       {
         "file": "prisma/migrations/20260906110000_welcome_credits/migration.sql",
-        "hash": "6801782292477626996"
+        "hash": "271225438015266615"
       },
       {
         "file": "prisma/schema.prisma",
-        "hash": "6407830091536750477"
+        "hash": "1920134049736850583"
       },
       {
         "file": "scripts/create-personal-mcp.ts",
-        "hash": "12555507456616482834"
+        "hash": "15411616246972971555"
       },
       {
         "file": "scripts/demo.ts",
-        "hash": "15884818378442330222"
+        "hash": "13740636054925069205"
       },
       {
         "file": "scripts/integrated-demo.ts",
-        "hash": "3895082118662914078"
+        "hash": "18446112955926084316"
       },
       {
         "file": "scripts/prisma-personal-mcp.ts",
-        "hash": "8110061317098944082"
+        "hash": "311963946847813567"
       },
       {
         "file": "tests/incident-rotate.test.ts",
-        "hash": "12351464712987130823"
+        "hash": "3636285649299368453"
       },
       {
         "file": "tsconfig.base.json",
-        "hash": "6206507207168413285"
+        "hash": "6516893268514711443"
       },
       {
         "file": "tsconfig.json",
-        "hash": "6973439525669482264"
+        "hash": "5567629943926389051"
       },
       {
         "file": "vitest.config.ts",
-        "hash": "13104627891363754342"
+        "hash": "16408839163224601923"
       },
       {
         "file": "wrangler.toml",
-        "hash": "5872740323857928365"
+        "hash": "11777644526478942821"
       }
     ]
   }

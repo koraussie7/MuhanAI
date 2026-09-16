@@ -1,4 +1,5 @@
 import type { Tool } from "@agentmesh/shared-types";
+import { getFolkloreMcpClient, FolkloreUnavailableError } from "./folklore-mcp-client";
 import { getHoundMcpClient, HoundUnavailableError } from "./hound-mcp-client";
 import { personalKnowledgeService } from "./knowledge";
 import { personalMemoryService } from "./memory";
@@ -329,6 +330,105 @@ export const PERSONAL_MCP_TOOLS: Tool[] = [
 			required: ["hotelId"],
 		},
 	},
+	{
+		id: "folklore_search",
+		name: "folkloreSearch",
+		description:
+			"Semantic search over the local Folklore knowledge graph (P2P agent memory). Returns top-k matches with scores. Falls back to folklore_unavailable when the Folklore package is not installed.",
+		inputSchema: {
+			type: "object",
+			properties: {
+				query: { type: "string" },
+				k: { type: "number" },
+			},
+			required: ["query"],
+		},
+	},
+	{
+		id: "folklore_ask",
+		name: "folkloreAsk",
+		description:
+			"Ask the Folklore knowledge graph for a context block suitable for feeding to an LLM. Answers from local memory before any web call — cite source_uri fields when used.",
+		inputSchema: {
+			type: "object",
+			properties: {
+				query: { type: "string" },
+				k: { type: "number" },
+			},
+			required: ["query"],
+		},
+	},
+	{
+		id: "folklore_recall",
+		name: "folkloreRecall",
+		description:
+			"Recall prior LLM output / reasoning from the Folklore graph by prompt or nonce. Returns hits + whether the answer was reused.",
+		inputSchema: {
+			type: "object",
+			properties: {
+				query: { type: "string" },
+			},
+			required: ["query"],
+		},
+	},
+	{
+		id: "folklore_federated_search",
+		name: "folkloreFederatedSearch",
+		description:
+			"Search the Folklore graph across connected peers (libp2p federation). Falls back when no peers are online.",
+		inputSchema: {
+			type: "object",
+			properties: {
+				query: { type: "string" },
+				k: { type: "number" },
+			},
+			required: ["query"],
+		},
+	},
+	{
+		id: "folklore_get_node",
+		name: "folkloreGetNode",
+		description: "Retrieve a single Folklore graph node by ID.",
+		inputSchema: {
+			type: "object",
+			properties: {
+				id: { type: "string" },
+			},
+			required: ["id"],
+		},
+	},
+	{
+		id: "folklore_deep_search",
+		name: "folkloreDeepSearch",
+		description:
+			"Multi-hop reasoning search over the Folklore graph. Slower but surfaces second-order connections.",
+		inputSchema: {
+			type: "object",
+			properties: {
+				query: { type: "string" },
+				k: { type: "number" },
+			},
+			required: ["query"],
+		},
+	},
+	{
+		id: "folklore_graph_stats",
+		name: "folkloreGraphStats",
+		description: "Report Folklore graph size: node/edge counts and per-type breakdown.",
+		inputSchema: {
+			type: "object",
+			properties: {},
+		},
+	},
+	{
+		id: "folklore_sources_list",
+		name: "folkloreSourcesList",
+		description: "List ingestion sources configured for the Folklore graph.",
+		inputSchema: {
+			type: "object",
+			properties: {},
+		},
+	},
 ];
 
 export async function executePersonalTool(
@@ -599,6 +699,65 @@ case "hotel_search": {
 			}
 		}
 
+		case "folkloreSearch": {
+			const client = getFolkloreClient();
+			if (!client) return { results: [], fallback: "folklore_unavailable" };
+			const results = await client.search(String(args.query ?? ""), {
+				k: typeof args.k === "number" ? args.k : undefined,
+			});
+			return { results };
+		}
+
+		case "folkloreAsk": {
+			const client = getFolkloreClient();
+			if (!client) return { context: "", fallback: "folklore_unavailable" };
+			return client.ask(String(args.query ?? ""), {
+				k: typeof args.k === "number" ? args.k : undefined,
+			});
+		}
+
+		case "folkloreRecall": {
+			const client = getFolkloreClient();
+			if (!client) return { hits: [], reused: false, fallback: "folklore_unavailable" };
+			return client.recall(String(args.query ?? ""));
+		}
+
+		case "folkloreFederatedSearch": {
+			const client = getFolkloreClient();
+			if (!client) return { results: [], fallback: "folklore_unavailable" };
+			const results = await client.federatedSearch(String(args.query ?? ""), {
+				k: typeof args.k === "number" ? args.k : undefined,
+			});
+			return { results };
+		}
+
+		case "folkloreGetNode": {
+			const client = getFolkloreClient();
+			if (!client) return { node: null, fallback: "folklore_unavailable" };
+			return { node: await client.getNode(String(args.id ?? "")) };
+		}
+
+		case "folkloreDeepSearch": {
+			const client = getFolkloreClient();
+			if (!client) return { results: [], fallback: "folklore_unavailable" };
+			const results = await client.deepSearch(String(args.query ?? ""), {
+				k: typeof args.k === "number" ? args.k : undefined,
+			});
+			return { results };
+		}
+
+		case "folkloreGraphStats": {
+			const client = getFolkloreClient();
+			if (!client) return { nodes: 0, fallback: "folklore_unavailable" };
+			return client.graphStats();
+		}
+
+		case "folkloreSourcesList": {
+			const client = getFolkloreClient();
+			if (!client) return { sources: [], fallback: "folklore_unavailable" };
+			return { sources: await client.sourcesList() };
+		}
+
 		default:
 			throw new Error(`Unknown personal tool: ${toolName}`);
 	}
@@ -645,5 +804,20 @@ function getOmniRouteClient(): ReturnType<typeof getOmniRouteMcpClient> | null {
 
 function isOmniRouteDisabled(): boolean {
 	const flag = globalThis.process?.env?.OMNIROUTE_DISABLED;
+	return typeof flag === "string" && flag !== "" && flag !== "0" && flag !== "false";
+}
+
+function getFolkloreClient(): ReturnType<typeof getFolkloreMcpClient> | null {
+	if (isFolkloreDisabled()) return null;
+	try {
+		return getFolkloreMcpClient();
+	} catch (err) {
+		if (err instanceof FolkloreUnavailableError) return null;
+		throw err;
+	}
+}
+
+function isFolkloreDisabled(): boolean {
+	const flag = globalThis.process?.env?.FOLKLORE_DISABLED;
 	return typeof flag === "string" && flag !== "" && flag !== "0" && flag !== "false";
 }

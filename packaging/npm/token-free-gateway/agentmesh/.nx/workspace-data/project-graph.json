@@ -2869,7 +2869,7 @@
               "script": "lint"
             },
             "metadata": {
-              "scriptContent": "next lint",
+              "scriptContent": "tsc --noEmit",
               "runCommand": "pnpm run lint"
             },
             "configurations": {},
@@ -2904,6 +2904,10 @@
           },
           "js": {
             "packageName": "@agentmesh/web",
+            "packageExports": {
+              "./i18n.js": "./src/i18n.ts",
+              "./components/menu-i18n.js": "./src/components/menu-i18n.ts"
+            },
             "isInPackageManagerWorkspaces": true
           }
         },
@@ -2986,7 +2990,7 @@
               "script": "test"
             },
             "metadata": {
-              "scriptContent": "tsx --test src/**/*.test.ts",
+              "scriptContent": "tsx --test src/**/*.test.ts src/*.test.ts",
               "runCommand": "pnpm run test"
             },
             "configurations": {},
@@ -3021,6 +3025,16 @@
     "@agentmesh/knowledge-base": [
       {
         "source": "@agentmesh/knowledge-base",
+        "target": "@agentmesh/database",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/knowledge-base",
+        "target": "@agentmesh/database",
+        "type": "dynamic"
+      },
+      {
+        "source": "@agentmesh/knowledge-base",
         "target": "@agentmesh/federation",
         "type": "static"
       },
@@ -3028,11 +3042,6 @@
         "source": "@agentmesh/knowledge-base",
         "target": "@agentmesh/shared-types",
         "type": "static"
-      },
-      {
-        "source": "@agentmesh/knowledge-base",
-        "target": "@agentmesh/database",
-        "type": "dynamic"
       }
     ],
     "@agentmesh/agent-gateway": [
@@ -3094,6 +3103,11 @@
       },
       {
         "source": "@agentmesh/agent-router",
+        "target": "@agentmesh/shared-types",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/agent-router",
         "target": "@agentmesh/agent-cast",
         "type": "static"
       },
@@ -3121,17 +3135,22 @@
         "source": "@agentmesh/agent-router",
         "target": "@agentmesh/personal-mcp",
         "type": "static"
-      },
-      {
-        "source": "@agentmesh/agent-router",
-        "target": "@agentmesh/shared-types",
-        "type": "static"
       }
     ],
     "@agentmesh/computer-use": [],
     "@agentmesh/personal-mcp": [
       {
         "source": "@agentmesh/personal-mcp",
+        "target": "@agentmesh/database",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/personal-mcp",
+        "target": "@agentmesh/database",
+        "type": "dynamic"
+      },
+      {
+        "source": "@agentmesh/personal-mcp",
         "target": "@agentmesh/knowledge-base",
         "type": "static"
       },
@@ -3144,11 +3163,6 @@
         "source": "@agentmesh/personal-mcp",
         "target": "@agentmesh/shared-types",
         "type": "static"
-      },
-      {
-        "source": "@agentmesh/personal-mcp",
-        "target": "@agentmesh/database",
-        "type": "dynamic"
       }
     ],
     "@agentmesh/shared-types": [],
@@ -3168,16 +3182,26 @@
     "@agentmesh/agent-core": [
       {
         "source": "@agentmesh/agent-core",
-        "target": "@agentmesh/shared-types",
+        "target": "@agentmesh/database",
         "type": "static"
       },
       {
         "source": "@agentmesh/agent-core",
         "target": "@agentmesh/database",
         "type": "dynamic"
+      },
+      {
+        "source": "@agentmesh/agent-core",
+        "target": "@agentmesh/shared-types",
+        "type": "static"
       }
     ],
     "@agentmesh/agent-mesh": [
+      {
+        "source": "@agentmesh/agent-mesh",
+        "target": "@agentmesh/shared-types",
+        "type": "static"
+      },
       {
         "source": "@agentmesh/agent-mesh",
         "target": "@agentmesh/agent-core",
@@ -3186,11 +3210,6 @@
       {
         "source": "@agentmesh/agent-mesh",
         "target": "@agentmesh/llm-router",
-        "type": "static"
-      },
-      {
-        "source": "@agentmesh/agent-mesh",
-        "target": "@agentmesh/shared-types",
         "type": "static"
       }
     ],
@@ -3389,17 +3408,47 @@
         "source": "@agentmesh/desktop",
         "target": "@agentmesh/ai-ui",
         "type": "static"
+      },
+      {
+        "source": "@agentmesh/desktop",
+        "target": "@agentmesh/bitterbot",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/desktop",
+        "target": "@agentmesh/web",
+        "type": "static"
       }
     ],
     "@agentmesh/web": [
       {
         "source": "@agentmesh/web",
+        "target": "@agentmesh/ai-engine",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/web",
+        "target": "@agentmesh/knowledge-base",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/web",
         "target": "@agentmesh/knowledge-base",
         "type": "dynamic"
+      },
+      {
+        "source": "@agentmesh/web",
+        "target": "@agentmesh/personal-mcp",
+        "type": "static"
+      },
+      {
+        "source": "@agentmesh/web",
+        "target": "@agentmesh/shared-types",
+        "type": "static"
       }
     ]
   },
   "version": "6.0",
   "errors": [],
-  "computedAt": 1789179279607
+  "computedAt": 1789481856061
 }

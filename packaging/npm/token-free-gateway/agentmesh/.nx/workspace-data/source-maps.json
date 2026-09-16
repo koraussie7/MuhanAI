@@ -302,6 +302,10 @@
       "apps/web/package.json",
       "nx/core/package-json"
     ],
+    "metadata.js.packageExports": [
+      "apps/web/package.json",
+      "nx/core/package-json"
+    ],
     "metadata.js.isInPackageManagerWorkspaces": [
       "apps/web/package.json",
       "nx/core/package-json"
