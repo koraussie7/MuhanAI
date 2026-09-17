@@ -25,6 +25,7 @@
 		"@agentmesh/peer-mesh": "workspace:*",
 		"@agentmesh/database": "workspace:*",
 		"@agentmesh/llm-router": "workspace:*",
+		"@agentmesh/mcp": "workspace:*",
 		"@agentmesh/agent-daemon": "workspace:*",
 		"@agentmesh/personal-mcp": "workspace:*",
 		"@agentmesh/payment": "workspace:*",

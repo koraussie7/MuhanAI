@@ -4,7 +4,7 @@ import { NAV_GROUPS } from "./components/sidebar-config.js";
 import { ROUTE_COUNT, ROUTES, routeByPath } from "./routes.js";
 
 test("route registry has unique ids and paths", () => {
-	assert.equal(ROUTE_COUNT, 32);
+	assert.equal(ROUTE_COUNT, 33);
 	assert.equal(new Set(ROUTES.map((route) => route.id)).size, ROUTE_COUNT);
 	assert.equal(new Set(ROUTES.map((route) => route.path)).size, ROUTE_COUNT);
 	assert.equal(new Set(ROUTES.map((route) => route.page)).size, ROUTE_COUNT);

@@ -6,6 +6,7 @@ import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import Fastify from "fastify";
 import { agentsRoutes } from "./agents-routes.js";
+import { a2uiRoutes } from "./a2ui-routes.js";
 import { authRoutes } from "./auth-routes.js";
 import { catalogRoutes } from "./catalog-routes.js";
 import { resonanceRoutes } from "./integrations/resonance/routes.js";
@@ -14,7 +15,9 @@ import { computerUseRoutes } from "./computer-use-routes.js";
 import { creditsRoutes } from "./credits-routes.js";
 import { feedRoutes } from "./feed-routes.js";
 import { PulseBridge } from "./gossip-bridge.js";
+import { ghostRoutes } from "./ghost-routes.js";
 import { happyRoutes } from "./happy-routes.js";
+import { pythiaRoutes } from "./pythia-routes.js";
 import { hivebearRoutes } from "./hivebear-routes.js";
 import { knowledgeRoutes } from "./knowledge-routes.js";
 import { llmMeshRoutes } from "./llm-mesh-routes.js";
@@ -176,6 +179,8 @@ export async function buildApp(options: BuildAppOptions = {}) {
 		return payload;
 	});
 
+	await app.register(a2uiRoutes);
+	await app.register(ghostRoutes);
 	await app.register(noemaRoutes);
 	await app.register(semanticRoutes);
 	await app.register(hivebearRoutes);
@@ -187,6 +192,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	await app.register(llmRoutes);
 	await app.register(computerUseRoutes);
 	await app.register(happyRoutes);
+	await app.register(pythiaRoutes);
 	await app.register(creditsRoutes);
 	await app.register(securityRoutes);
 	await app.register(feedRoutes);

@@ -86,6 +86,7 @@ test("cosmetic — every NAV_GROUPS item has a valid iconKey", () => {
 		"coins",
 		"settings",
 		"smartphone",
+		"python",
 		"monitor",
 		"package",
 		"git-branch",

@@ -1,4 +1,5 @@
 import {
+	Code2,
 	Activity,
 	BookOpen,
 	Bot,
@@ -111,6 +112,8 @@ function renderIcon(key: string): React.ReactNode {
 			return <Star size={18} />;
 		case "git-branch":
 			return <GitBranch size={18} />;
+		case "python":
+			return <Code2 size={18} />;
 		default:
 			return null;
 	}

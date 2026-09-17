@@ -282,6 +282,15 @@ export const ROUTES: readonly RouteDefinition[] = [
 		badge: "NEW",
 		page: "happy",
 	},
+	{
+		id: "pythia",
+		path: "/pythia",
+		group: "system",
+		label: "Pythia",
+		iconKey: "python",
+		badge: "NEW",
+		page: "pythia",
+	},
 ];
 
 export const ROUTE_COUNT = ROUTES.length;

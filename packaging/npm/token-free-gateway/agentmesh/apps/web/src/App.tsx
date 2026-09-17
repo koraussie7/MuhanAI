@@ -144,6 +144,9 @@ const SettingsPageLazy = React.lazy(() =>
 const HiveBearPanelLazy = React.lazy(() =>
 	import("./components/HiveBearPanel").then((m) => ({ default: m.HiveBearPanel })),
 );
+const PythiaPageLazy = React.lazy(() =>
+import("./components/PythiaPage").then((m) => ({ default: m.PythiaPage })),
+);
 const HappyPageLazy = React.lazy(() =>
 	import("./components/HappyPage").then((m) => ({ default: m.HappyPage })),
 );
@@ -615,6 +618,12 @@ export function App() {
 								<HappyPageLazy />
 							</Suspense>
 						)}
+							{/* Pythia */}
+							{activeSection === "pythia" && (
+								<Suspense fallback={<PageSkeleton />}>
+									<PythiaPageLazy />
+								</Suspense>
+							)}
 
 						{!IMPLEMENTED_SECTIONS.has(activeSection) && (
 							<div className="placeholder-page" style={{ padding: 40, textAlign: "center" }}>
