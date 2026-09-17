@@ -1,7 +1,7 @@
 import type React from "react";
-import { PageBox } from "./PageBox.js";
 import { useEffect, useState } from "react";
 import { useI18n } from "../i18n";
+import { PageBox } from "./PageBox.js";
 
 interface VersusItem {
 	id: string;
@@ -17,9 +17,7 @@ interface AiVsHumanProps {
 	maxItems?: number;
 }
 
-export const AiVsHuman: React.FC<AiVsHumanProps> = ({
-	maxItems = 3,
-}) => {
+export const AiVsHuman: React.FC<AiVsHumanProps> = ({ maxItems = 3 }) => {
 	const { t } = useI18n();
 	const [items, setItems] = useState<VersusItem[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -73,29 +71,29 @@ export const AiVsHuman: React.FC<AiVsHumanProps> = ({
 							<div className="vs-bar-row">
 								<span className="vs-label">🤖 AI</span>
 								<div className="vs-bar-container">
-									<div
-										className="vs-bar ai"
-										style={{ width: `${item.aiConsensus}%` }}
-									></div>
+									<div className="vs-bar ai" style={{ width: `${item.aiConsensus}%` }}></div>
 								</div>
 								<span className="vs-percent">{item.aiConsensus}%</span>
 							</div>
 							<div className="vs-bar-row">
 								<span className="vs-label">👤 Human</span>
 								<div className="vs-bar-container">
-									<div
-										className="vs-bar human"
-										style={{ width: `${item.humanConsensus}%` }}
-									></div>
+									<div className="vs-bar human" style={{ width: `${item.humanConsensus}%` }}></div>
 								</div>
 								<span className="vs-percent">{item.humanConsensus}%</span>
 							</div>
 						</div>
 						<div className="vs-winner">
 							<span className={`winner-badge ${item.winner.toLowerCase()}`}>
-								{item.winner === "AI" ? "🤖 AI Wins" : item.winner === "HUMAN" ? "👤 Human Wins" : "⏳ Undecided"}
+								{item.winner === "AI"
+									? "🤖 AI Wins"
+									: item.winner === "HUMAN"
+										? "👤 Human Wins"
+										: "⏳ Undecided"}
 							</span>
-							<span className="participants">🤖 {item.participants.ai} · 👤 {item.participants.human}</span>
+							<span className="participants">
+								🤖 {item.participants.ai} · 👤 {item.participants.human}
+							</span>
 						</div>
 					</div>
 				))}

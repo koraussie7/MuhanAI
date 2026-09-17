@@ -68,10 +68,7 @@ export function axlPeerIdFromDid(did: string, candidatePeerIds: PeerId[]): PeerI
  * short prefixes (8+ hex chars) that uniquely identify a peer within
  * the topology. Returns the full 64-char hex form or null.
  */
-export function normalizePeerId(
-	input: string,
-	candidatePeerIds: PeerId[] = [],
-): PeerId | null {
+export function normalizePeerId(input: string, candidatePeerIds: PeerId[] = []): PeerId | null {
 	const trimmed = input.trim();
 	if (!trimmed) return null;
 

@@ -336,13 +336,17 @@ export class LLMRouter {
 
 export const llmRouter = new LLMRouter();
 
-export { p2pNodeRegistry, P2pNodeRegistry, type P2pNodesChangeCallback } from "./p2p-node-registry.js";
-export { p2pLoadBalancer, P2pLoadBalancer } from "./p2p-load-balancer.js";
 export type {
-	DeviceNodeInfo,
+	ClusterConfig,
 	DeviceCapabilities,
 	DeviceMetrics,
-	ClusterConfig,
-	LoadBalancingStrategy,
+	DeviceNodeInfo,
 	InferenceResult,
+	LoadBalancingStrategy,
 } from "@agentmesh/peer-mesh";
+export { P2pLoadBalancer, p2pLoadBalancer } from "./p2p-load-balancer.js";
+export {
+	P2pNodeRegistry,
+	type P2pNodesChangeCallback,
+	p2pNodeRegistry,
+} from "./p2p-node-registry.js";

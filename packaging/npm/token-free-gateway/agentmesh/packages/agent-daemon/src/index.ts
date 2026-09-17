@@ -7,6 +7,11 @@
  */
 
 export {
+	buildComputerUseRunHandler,
+	COMPUTER_USE_RUN_CAPABILITY,
+	type ComputerUseRunArgs,
+} from "./computer-use-router.js";
+export {
 	createVault,
 	unlockVault,
 	VaultAuthError,
@@ -21,6 +26,12 @@ export type {
 	MessageTransport,
 } from "./daemon.js";
 export { createDaemon } from "./daemon.js";
+export {
+	DEVICE_HEARTBEAT_INTERVAL_MS,
+	DEVICE_NODE_TIMEOUT_MS,
+	DeviceNodeDaemon,
+	type DeviceNodeDaemonOptions,
+} from "./device-node-daemon.js";
 export {
 	E2bBrowserAdapter,
 	type E2bBrowserAdapterOptions,
@@ -42,11 +53,6 @@ export {
 	E2bStreamSession,
 	runComputerUseLoop,
 } from "./e2b-computer-use.js";
-export {
-	buildComputerUseRunHandler,
-	type ComputerUseRunArgs,
-	COMPUTER_USE_RUN_CAPABILITY,
-} from "./computer-use-router.js";
 export type { MachineIdentity } from "./machine-identity.js";
 export { loadMachineIdentity } from "./machine-identity.js";
 export {
@@ -71,9 +77,3 @@ export {
 	type SessionResponse,
 	type SessionRunner,
 } from "./session-runner.js";
-export {
-	DeviceNodeDaemon,
-	DEVICE_HEARTBEAT_INTERVAL_MS,
-	DEVICE_NODE_TIMEOUT_MS,
-	type DeviceNodeDaemonOptions,
-} from "./device-node-daemon.js";

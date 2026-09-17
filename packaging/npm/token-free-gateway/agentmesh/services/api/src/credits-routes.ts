@@ -142,7 +142,7 @@ export async function creditsRoutes(app: FastifyInstance) {
 		userId: z.string().min(1).max(256).optional(),
 	});
 
-  const dailyLimitCredits = 5000;
+	const dailyLimitCredits = 5000;
 	const isDemo = process.env.NODE_ENV === "development" || process.env.DEMO_MODE === "true";
 	const dailyUsedCredits = isDemo ? 1416 : undefined;
 	const quota = [

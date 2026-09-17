@@ -31,8 +31,8 @@ import {
 	DEFAULT_MCAST_PORT,
 	DEFAULT_PEER_TIMEOUT_MS,
 	type DiscoveredPeer,
-	UdpDiscovery,
 	type DiscoveryEnvelope,
+	UdpDiscovery,
 } from "./udp-discovery.js";
 import type { RtcSessionDescriptionLike, WebRtcTransport } from "./webrtc-transport.js";
 
@@ -72,7 +72,9 @@ export class UdpWebRtcBridge {
 	private readonly requiredCapabilities: string[];
 	private readonly maxConcurrentDials: number;
 	private readonly onPeerConnected: ((peerId: PeerId) => void) | undefined;
-	private readonly onPeerLost: ((peerId: PeerId, reason: "timeout" | "handshake-failed") => void) | undefined;
+	private readonly onPeerLost:
+		| ((peerId: PeerId, reason: "timeout" | "handshake-failed") => void)
+		| undefined;
 
 	private readonly inFlight = new Map<PeerId, HandshakeState>();
 	private readonly observedSdp = new Map<PeerId, Set<string>>();

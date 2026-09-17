@@ -17,7 +17,7 @@
  *   5. If no valid bid, winner = null (no sale).
  */
 
-import { verifyReveal, type BidCommitment } from "./commitment.js";
+import { type BidCommitment, verifyReveal } from "./commitment.js";
 
 export type AuctionPhase = "open" | "reveal" | "settled" | "cancelled";
 
@@ -147,12 +147,7 @@ export class VickreyAuction {
 	 * committed hash. Records the reveal; settlement happens later
 	 * (or immediately if deadlines allow).
 	 */
-	reveal(
-		bidderId: string,
-		amount: number,
-		nonce: string,
-		now: number = Date.now(),
-	): PostedReveal {
+	reveal(bidderId: string, amount: number, nonce: string, now: number = Date.now()): PostedReveal {
 		// Allow reveals once the auction has entered the reveal phase.
 		// Calling advancePhase() moves us there; if the caller hasn't,
 		// do it implicitly based on time.
@@ -322,9 +317,7 @@ export class VickreyAuction {
 
 	private assertPhase(expected: AuctionPhase, op: string): void {
 		if (this.phase !== expected) {
-			throw new AuctionError(
-				`${op}: auction is in phase ${this.phase}, expected ${expected}`,
-			);
+			throw new AuctionError(`${op}: auction is in phase ${this.phase}, expected ${expected}`);
 		}
 	}
 

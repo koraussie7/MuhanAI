@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { FSRS_PARAMS, computeRetrievability } from "./fsrs.js";
 import { DecayEngine } from "./engine.js";
+import { computeRetrievability, FSRS_PARAMS } from "./fsrs.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 

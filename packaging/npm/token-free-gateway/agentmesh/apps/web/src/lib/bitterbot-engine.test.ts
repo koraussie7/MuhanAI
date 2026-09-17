@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
 	answerWithBitterbot,
+	type BitterbotMessage,
 	clearBitterbotHistory,
 	loadBitterbotHistory,
 	saveBitterbotHistory,
-	type BitterbotMessage,
 } from "./bitterbot-engine.js";
 
 const userMessage: BitterbotMessage = {
@@ -55,7 +55,9 @@ test("Bitterbot history storage is bounded and clearable", () => {
 		},
 	});
 	try {
-		saveBitterbotHistory(Array.from({ length: 50 }, (_, index) => ({ ...userMessage, id: `user-${index}` })));
+		saveBitterbotHistory(
+			Array.from({ length: 50 }, (_, index) => ({ ...userMessage, id: `user-${index}` })),
+		);
 		assert.equal(loadBitterbotHistory().length, 40);
 		clearBitterbotHistory();
 		assert.deepEqual(loadBitterbotHistory(), []);

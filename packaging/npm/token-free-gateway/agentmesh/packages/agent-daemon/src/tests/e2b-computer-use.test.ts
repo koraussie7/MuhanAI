@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { E2bBrowserAdapter, type E2bSandboxLike, type VisionClient } from "../e2b-adapter.js";
 import {
 	type ComputerUseAction,
 	type ComputerUseStep,
 	E2bStreamSession,
 	runComputerUseLoop,
 } from "../e2b-computer-use.js";
-import { E2bBrowserAdapter, type E2bSandboxLike, type VisionClient } from "../e2b-adapter.js";
 
 type MockSandbox = E2bSandboxLike & {
 	screenshot: ReturnType<typeof vi.fn>;
@@ -251,7 +251,10 @@ describe("runComputerUseLoop", () => {
 describe("ComputerUseStep shape", () => {
 	it("records index, action, screenshotBefore, durationMs, modelRaw", async () => {
 		const sandbox = makeSandbox();
-		const vision = makeVision([{ type: "press", key: "Escape" }, { type: "done", reason: "ok" }]);
+		const vision = makeVision([
+			{ type: "press", key: "Escape" },
+			{ type: "done", reason: "ok" },
+		]);
 		const result = await runComputerUseLoop({
 			goal: "press escape",
 			sandbox,

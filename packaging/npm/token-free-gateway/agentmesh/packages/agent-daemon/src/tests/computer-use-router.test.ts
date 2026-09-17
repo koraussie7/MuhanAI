@@ -1,15 +1,18 @@
-import { describe, expect, it, vi } from "vitest";
 import type { Mock } from "vitest";
-import { E2bBrowserAdapter, type E2bSandboxLike } from "../e2b-adapter.js";
-import type { ByokVisionProvider, PlanActionFn } from "../e2b-byok-vision.js";
+import { describe, expect, it, vi } from "vitest";
 import {
 	buildComputerUseRunHandler,
-	type ComputerUseRunArgs,
 	COMPUTER_USE_RUN_CAPABILITY,
+	type ComputerUseRunArgs,
 } from "../computer-use-router.js";
+import { E2bBrowserAdapter, type E2bSandboxLike } from "../e2b-adapter.js";
+import type { ByokVisionProvider, PlanActionFn } from "../e2b-byok-vision.js";
 import type { SessionRequest } from "../session-runner.js";
 
-type VisionLocateFn = (opts: { imageBase64: string; prompt: string }) => Promise<{ x: number; y: number } | null>;
+type VisionLocateFn = (opts: {
+	imageBase64: string;
+	prompt: string;
+}) => Promise<{ x: number; y: number } | null>;
 
 type MockSandbox = E2bSandboxLike & {
 	screenshot: ReturnType<typeof vi.fn>;
@@ -45,7 +48,8 @@ function makeVision(): VisionMock {
 	};
 }
 
-const identityFactory = (vision: ReturnType<typeof makeVision>) => (_args: ComputerUseRunArgs) => vision;
+const identityFactory = (vision: ReturnType<typeof makeVision>) => (_args: ComputerUseRunArgs) =>
+	vision;
 
 function base64(size = 100): string {
 	return "A".repeat(size);

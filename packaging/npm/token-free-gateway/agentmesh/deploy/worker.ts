@@ -53,10 +53,13 @@ export default {
 				});
 				const orData = (await orRes.json()) as { key?: string };
 				if (!orRes.ok || !orData.key) {
-					return new Response(JSON.stringify({ error: "OpenRouter exchange failed", status: orRes.status }), {
-						status: 502,
-						headers: { "content-type": "application/json" },
-					});
+					return new Response(
+						JSON.stringify({ error: "OpenRouter exchange failed", status: orRes.status }),
+						{
+							status: 502,
+							headers: { "content-type": "application/json" },
+						},
+					);
 				}
 				return new Response(JSON.stringify({ key: orData.key }), {
 					headers: { "content-type": "application/json" },

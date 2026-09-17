@@ -1,7 +1,7 @@
 import type React from "react";
-import { PageBox } from "./PageBox.js";
 import { useEffect, useState } from "react";
 import { useI18n } from "../i18n";
+import { PageBox } from "./PageBox.js";
 
 interface TrendingQuestion {
 	id: string;

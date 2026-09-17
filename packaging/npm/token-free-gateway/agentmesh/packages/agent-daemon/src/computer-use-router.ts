@@ -10,13 +10,14 @@
  * daemon injects an `E2bBrowserAdapter` (which owns the sandbox)
  * when wiring the runner; tests inject a stub.
  */
+
+import type { E2bBrowserAdapter } from "./e2b-adapter.js";
 import {
-	createByokVisionProvider,
 	type ByokProviderId,
 	type ByokVisionProvider,
+	createByokVisionProvider,
 } from "./e2b-byok-vision.js";
-import { runComputerUseLoop, type ComputerUseLoopResult } from "./e2b-computer-use.js";
-import type { E2bBrowserAdapter } from "./e2b-adapter.js";
+import { type ComputerUseLoopResult, runComputerUseLoop } from "./e2b-computer-use.js";
 import type { SessionHandler, SessionRequest, SessionResponse } from "./session-runner.js";
 
 export const COMPUTER_USE_RUN_CAPABILITY = "computer-use.run";

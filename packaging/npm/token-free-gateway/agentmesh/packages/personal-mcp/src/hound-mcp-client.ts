@@ -13,8 +13,8 @@
  * is missing — agents should never crash because of an optional tool.
  */
 
-import type { Readable, Writable } from "node:stream";
 import { spawn as defaultChildSpawn } from "node:child_process";
+import type { Readable, Writable } from "node:stream";
 
 export type HoundChildProcess = ReturnType<typeof defaultChildSpawn>;
 
@@ -119,7 +119,11 @@ export class HoundMcpClient {
 	/** Pending responses keyed by request id (counter). */
 	private readonly pending = new Map<
 		number,
-		{ resolve: (value: unknown) => void; reject: (err: unknown) => void; timer: ReturnType<typeof setTimeout> }
+		{
+			resolve: (value: unknown) => void;
+			reject: (err: unknown) => void;
+			timer: ReturnType<typeof setTimeout>;
+		}
 	>();
 	private nextId = 1;
 	private initialized = false;
@@ -149,7 +153,10 @@ export class HoundMcpClient {
 		return this.command.length > 0;
 	}
 
-	async search(query: string, opts: { limit?: number; engines?: string[] } = {}): Promise<HoundSearchResult[]> {
+	async search(
+		query: string,
+		opts: { limit?: number; engines?: string[] } = {},
+	): Promise<HoundSearchResult[]> {
 		const args: Record<string, unknown> = { query, limit: opts.limit ?? 10 };
 		if (opts.engines?.length) args.engines = opts.engines;
 		const raw = await this.callTool("mcp_smart_search", args);
@@ -167,7 +174,10 @@ export class HoundMcpClient {
 		return parseFetch(raw);
 	}
 
-	async crawl(url: string, opts: { depth?: number; maxPages?: number } = {}): Promise<HoundCrawlResult> {
+	async crawl(
+		url: string,
+		opts: { depth?: number; maxPages?: number } = {},
+	): Promise<HoundCrawlResult> {
 		const args: Record<string, unknown> = { url };
 		if (typeof opts.depth === "number") args.depth = opts.depth;
 		if (typeof opts.maxPages === "number") args.max_pages = opts.maxPages;
@@ -297,7 +307,10 @@ export class HoundMcpClient {
 		}
 	}
 
-	private async sendRequest<T>(method: string, params: Record<string, unknown> | undefined): Promise<T> {
+	private async sendRequest<T>(
+		method: string,
+		params: Record<string, unknown> | undefined,
+	): Promise<T> {
 		const proc = await this.ensureProc();
 		const id = this.nextId++;
 		const msg = { jsonrpc: "2.0", id, method, params };
@@ -362,11 +375,7 @@ export class HoundMcpClient {
 				arguments: arguments_,
 			});
 		} catch (err) {
-			throw new HoundCallError(
-				`Hound ${name} failed: ${(err as Error).message}`,
-				name,
-				err,
-			);
+			throw new HoundCallError(`Hound ${name} failed: ${(err as Error).message}`, name, err);
 		}
 	}
 }
@@ -376,14 +385,14 @@ export class HoundMcpClient {
 // ---------------------------------------------------------------------------
 
 function defaultCommandFromEnv(): string {
-	const fromEnv = (globalThis as { process?: { env?: Record<string, string | undefined> } })
-		.process?.env?.HOUND_COMMAND;
+	const fromEnv = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
+		?.env?.HOUND_COMMAND;
 	return typeof fromEnv === "string" && fromEnv.length > 0 ? fromEnv : "hound";
 }
 
 function defaultArgsFromEnv(): string[] {
-	const fromEnv = (globalThis as { process?: { env?: Record<string, string | undefined> } })
-		.process?.env?.HOUND_ARGS;
+	const fromEnv = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
+		?.env?.HOUND_ARGS;
 	if (!fromEnv) return [];
 	return fromEnv.split(/\s+/).filter((s) => s.length > 0);
 }
@@ -418,12 +427,16 @@ function parseSearch(raw: unknown): HoundSearchResult[] {
 			? (parsed as HoundSearchResult[])
 			: ((parsed as { results?: HoundSearchResult[] }).results ?? []);
 		return items
-			.filter((r): r is HoundSearchResult => r && typeof r === "object" && typeof r.url === "string")
+			.filter(
+				(r): r is HoundSearchResult => r && typeof r === "object" && typeof r.url === "string",
+			)
 			.map((r) => ({
 				title: typeof r.title === "string" ? r.title : "",
 				url: r.url,
 				snippet: typeof r.snippet === "string" ? r.snippet : "",
-				engines: Array.isArray(r.engines) ? r.engines.filter((e) => typeof e === "string") : undefined,
+				engines: Array.isArray(r.engines)
+					? r.engines.filter((e) => typeof e === "string")
+					: undefined,
 				consensus: typeof r.consensus === "number" ? r.consensus : undefined,
 			}));
 	} catch {
@@ -476,7 +489,11 @@ function parseScreenshot(raw: unknown): { bytes: Uint8Array; mimeType: string } 
 function parseVersion(raw: unknown): HoundVersionResult {
 	const text = readTextBlocks(raw as McpCallResult);
 	try {
-		const parsed = JSON.parse(text) as { version?: string; uptime?: number; uptime_seconds?: number };
+		const parsed = JSON.parse(text) as {
+			version?: string;
+			uptime?: number;
+			uptime_seconds?: number;
+		};
 		return {
 			version: typeof parsed.version === "string" ? parsed.version : "unknown",
 			uptimeSeconds: numberOr(parsed.uptime ?? parsed.uptime_seconds, undefined),

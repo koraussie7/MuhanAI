@@ -21,10 +21,7 @@ const THANKS_ANSWERS = [
 	"별말씀을요. 도움이 되었다니 기쁘네요!",
 ];
 
-const GOODBYE_ANSWERS = [
-	"안녕히 가세요! 다음에 또 뵈어요.",
-	"잘 가요! 언제든 다시 찾아와 주세요.",
-];
+const GOODBYE_ANSWERS = ["안녕히 가세요! 다음에 또 뵈어요.", "잘 가요! 언제든 다시 찾아와 주세요."];
 
 function stripTags(text: string): string {
 	return text.trim().replace(/\s+/g, " ");
@@ -32,9 +29,7 @@ function stripTags(text: string): string {
 
 export function answerOffline(messages: BitterbotMessage[]): string {
 	const lastUser =
-		[...messages]
-			.reverse()
-			.find((message) => message.role === "user")?.content ?? "";
+		[...messages].reverse().find((message) => message.role === "user")?.content ?? "";
 	const text = stripTags(lastUser);
 
 	if (!text) {

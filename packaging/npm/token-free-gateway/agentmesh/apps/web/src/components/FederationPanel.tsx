@@ -89,11 +89,7 @@ export function FederationPanel() {
 	};
 
 	return (
-		<PageBox
-			iconKey="git-merge"
-			title="Federation"
-			subtitle="페더레이션"
-		>
+		<PageBox iconKey="git-merge" title="Federation" subtitle="페더레이션">
 			<section className="panel">
 				<div className="section-heading compact">
 					<span className="section-label">FOLKLORE FEDERATION</span>

@@ -1,4 +1,33 @@
-import { Flame, ListTodo, Network, Radio, ShieldCheck, Sparkles, Coins, FolderGit, LayoutDashboard, Bot, Monitor, Package, Network as NetworkIcon, Cpu, Layers, Database, CheckCircle, Search, Vote, GitMerge, Bot as BotIcon, Users, Coins as CoinsIcon, Activity, Star, FolderGit as FolderGitIcon, ListTodo as ListTodoIcon, GitBranch } from "lucide-react";
+import {
+	Activity,
+	Bot,
+	Bot as BotIcon,
+	CheckCircle,
+	Coins,
+	Coins as CoinsIcon,
+	Cpu,
+	Database,
+	Flame,
+	FolderGit,
+	FolderGit as FolderGitIcon,
+	GitBranch,
+	GitMerge,
+	Layers,
+	LayoutDashboard,
+	ListTodo,
+	ListTodo as ListTodoIcon,
+	Monitor,
+	Network,
+	Network as NetworkIcon,
+	Package,
+	Radio,
+	Search,
+	ShieldCheck,
+	Sparkles,
+	Star,
+	Users,
+	Vote,
+} from "lucide-react";
 import type React from "react";
 import { lazy, Suspense, useState } from "react";
 import { useI18n } from "../i18n.js";
@@ -12,7 +41,11 @@ import { HelpNeeded } from "./HelpNeeded";
 import { HumanKnowledgeWanted } from "./HumanKnowledgeWanted";
 import { NetworkPulse } from "./NetworkPulse";
 import { TeachAI } from "./TeachAI";
-const TokenBankPageLazy = lazy(() => import("./DashPages").then((module) => ({ default: module.TokenBankPage })));
+
+const TokenBankPageLazy = lazy(() =>
+	import("./DashPages").then((module) => ({ default: module.TokenBankPage })),
+);
+
 import { TrendingQuestions } from "./TrendingQuestions";
 import { UnsolvedProblems } from "./UnsolvedProblems";
 import { VerifyMe } from "./VerifyMe";
@@ -41,7 +74,9 @@ interface WorkstreamTab {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
-	const [activeTab, setActiveTab] = useState<"tasks" | "verify" | "knowledge" | "economy" | "workspace">("tasks");
+	const [activeTab, setActiveTab] = useState<
+		"tasks" | "verify" | "knowledge" | "economy" | "workspace"
+	>("tasks");
 	const { t } = useI18n();
 
 	const navigate = (path: string) => {
@@ -167,20 +202,58 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 			render: () => (
 				<div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 					<Suspense fallback={<div style={{ minHeight: 180 }} />}>
-	<TokenBankPageLazy />
-	</Suspense>
-					<div style={{ padding: 20, background: "var(--cline-surface)", borderRadius: 12, border: "1px solid var(--cline-border)" }}>
+						<TokenBankPageLazy />
+					</Suspense>
+					<div
+						style={{
+							padding: 20,
+							background: "var(--cline-surface)",
+							borderRadius: 12,
+							border: "1px solid var(--cline-border)",
+						}}
+					>
 						<h3 style={{ marginBottom: 12, color: "var(--cline-text)" }}>Economy Overview</h3>
-						<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12 }}>
-							<div style={{ padding: 12, background: "var(--cline-bg)", borderRadius: 8, border: "1px solid var(--cline-border)" }}>
-								<div style={{ fontSize: 24, fontWeight: 700, color: "var(--cline-amber)" }}>1,234</div>
+						<div
+							style={{
+								display: "grid",
+								gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+								gap: 12,
+							}}
+						>
+							<div
+								style={{
+									padding: 12,
+									background: "var(--cline-bg)",
+									borderRadius: 8,
+									border: "1px solid var(--cline-border)",
+								}}
+							>
+								<div style={{ fontSize: 24, fontWeight: 700, color: "var(--cline-amber)" }}>
+									1,234
+								</div>
 								<div style={{ fontSize: 12, color: "var(--cline-text-muted)" }}>Contributions</div>
 							</div>
-							<div style={{ padding: 12, background: "var(--cline-bg)", borderRadius: 8, border: "1px solid var(--cline-border)" }}>
-								<div style={{ fontSize: 24, fontWeight: 700, color: "var(--cline-green)" }}>98.7%</div>
+							<div
+								style={{
+									padding: 12,
+									background: "var(--cline-bg)",
+									borderRadius: 8,
+									border: "1px solid var(--cline-border)",
+								}}
+							>
+								<div style={{ fontSize: 24, fontWeight: 700, color: "var(--cline-green)" }}>
+									98.7%
+								</div>
 								<div style={{ fontSize: 12, color: "var(--cline-text-muted)" }}>Trust Score</div>
 							</div>
-							<div style={{ padding: 12, background: "var(--cline-bg)", borderRadius: 8, border: "1px solid var(--cline-border)" }}>
+							<div
+								style={{
+									padding: 12,
+									background: "var(--cline-bg)",
+									borderRadius: 8,
+									border: "1px solid var(--cline-border)",
+								}}
+							>
 								<div style={{ fontSize: 24, fontWeight: 700, color: "var(--cline-sky)" }}>56</div>
 								<div style={{ fontSize: 12, color: "var(--cline-text-muted)" }}>Active Peers</div>
 							</div>
@@ -196,38 +269,128 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 			icon: <FolderGitIcon size={15} />,
 			render: () => (
 				<div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-					<div style={{ padding: 20, background: "var(--cline-surface)", borderRadius: 12, border: "1px solid var(--cline-border)" }}>
+					<div
+						style={{
+							padding: 20,
+							background: "var(--cline-surface)",
+							borderRadius: 12,
+							border: "1px solid var(--cline-border)",
+						}}
+					>
 						<h3 style={{ marginBottom: 12, color: "var(--cline-text)" }}>Projects</h3>
-						<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
-							<div style={{ padding: 16, background: "var(--cline-bg)", borderRadius: 8, border: "1px solid var(--cline-border)" }}>
+						<div
+							style={{
+								display: "grid",
+								gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+								gap: 12,
+							}}
+						>
+							<div
+								style={{
+									padding: 16,
+									background: "var(--cline-bg)",
+									borderRadius: 8,
+									border: "1px solid var(--cline-border)",
+								}}
+							>
 								<div style={{ fontWeight: 600, color: "var(--cline-text)" }}>MuhanAI Core</div>
-								<div style={{ fontSize: 12, color: "var(--cline-text-muted)", marginTop: 4 }}>Core protocol & SDK</div>
-								<div style={{ fontSize: 11, color: "var(--cline-green)", marginTop: 8 }}>Active · 12 contributors</div>
+								<div style={{ fontSize: 12, color: "var(--cline-text-muted)", marginTop: 4 }}>
+									Core protocol & SDK
+								</div>
+								<div style={{ fontSize: 11, color: "var(--cline-green)", marginTop: 8 }}>
+									Active · 12 contributors
+								</div>
 							</div>
-							<div style={{ padding: 16, background: "var(--cline-bg)", borderRadius: 8, border: "1px solid var(--cline-border)" }}>
+							<div
+								style={{
+									padding: 16,
+									background: "var(--cline-bg)",
+									borderRadius: 8,
+									border: "1px solid var(--cline-border)",
+								}}
+							>
 								<div style={{ fontWeight: 600, color: "var(--cline-text)" }}>Web Desktop</div>
-								<div style={{ fontSize: 12, color: "var(--cline-text-muted)", marginTop: 4 }}>DaedalOS environment</div>
-								<div style={{ fontSize: 11, color: "var(--cline-sky)", marginTop: 8 }}>Active · 8 contributors</div>
+								<div style={{ fontSize: 12, color: "var(--cline-text-muted)", marginTop: 4 }}>
+									DaedalOS environment
+								</div>
+								<div style={{ fontSize: 11, color: "var(--cline-sky)", marginTop: 8 }}>
+									Active · 8 contributors
+								</div>
 							</div>
-							<div style={{ padding: 16, background: "var(--cline-bg)", borderRadius: 8, border: "1px solid var(--cline-border)" }}>
+							<div
+								style={{
+									padding: 16,
+									background: "var(--cline-bg)",
+									borderRadius: 8,
+									border: "1px solid var(--cline-border)",
+								}}
+							>
 								<div style={{ fontWeight: 600, color: "var(--cline-text)" }}>Agent Mesh</div>
-								<div style={{ fontSize: 12, color: "var(--cline-text-muted)", marginTop: 4 }}>P2P agent network</div>
-								<div style={{ fontSize: 11, color: "var(--cline-violet)", marginTop: 8 }}>Active · 15 contributors</div>
+								<div style={{ fontSize: 12, color: "var(--cline-text-muted)", marginTop: 4 }}>
+									P2P agent network
+								</div>
+								<div style={{ fontSize: 11, color: "var(--cline-violet)", marginTop: 8 }}>
+									Active · 15 contributors
+								</div>
 							</div>
 						</div>
 					</div>
-					<div style={{ padding: 20, background: "var(--cline-surface)", borderRadius: 12, border: "1px solid var(--cline-border)" }}>
+					<div
+						style={{
+							padding: 20,
+							background: "var(--cline-surface)",
+							borderRadius: 12,
+							border: "1px solid var(--cline-border)",
+						}}
+					>
 						<h3 style={{ marginBottom: 12, color: "var(--cline-text)" }}>Tasks & Workflows</h3>
-						<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
-							<div style={{ padding: 16, background: "var(--cline-bg)", borderRadius: 8, border: "1px solid var(--cline-border)" }}>
+						<div
+							style={{
+								display: "grid",
+								gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+								gap: 12,
+							}}
+						>
+							<div
+								style={{
+									padding: 16,
+									background: "var(--cline-bg)",
+									borderRadius: 8,
+									border: "1px solid var(--cline-border)",
+								}}
+							>
 								<div style={{ fontWeight: 600, color: "var(--cline-text)" }}>Open Tasks</div>
-								<div style={{ fontSize: 24, fontWeight: 700, color: "var(--cline-amber)", marginTop: 4 }}>23</div>
-								<div style={{ fontSize: 11, color: "var(--cline-text-muted)", marginTop: 4 }}>Ready for contribution</div>
+								<div
+									style={{
+										fontSize: 24,
+										fontWeight: 700,
+										color: "var(--cline-amber)",
+										marginTop: 4,
+									}}
+								>
+									23
+								</div>
+								<div style={{ fontSize: 11, color: "var(--cline-text-muted)", marginTop: 4 }}>
+									Ready for contribution
+								</div>
 							</div>
-							<div style={{ padding: 16, background: "var(--cline-bg)", borderRadius: 8, border: "1px solid var(--cline-border)" }}>
+							<div
+								style={{
+									padding: 16,
+									background: "var(--cline-bg)",
+									borderRadius: 8,
+									border: "1px solid var(--cline-border)",
+								}}
+							>
 								<div style={{ fontWeight: 600, color: "var(--cline-text)" }}>Active Workflows</div>
-								<div style={{ fontSize: 24, fontWeight: 700, color: "var(--cline-sky)", marginTop: 4 }}>7</div>
-								<div style={{ fontSize: 11, color: "var(--cline-text-muted)", marginTop: 4 }}>Running pipelines</div>
+								<div
+									style={{ fontSize: 24, fontWeight: 700, color: "var(--cline-sky)", marginTop: 4 }}
+								>
+									7
+								</div>
+								<div style={{ fontSize: 11, color: "var(--cline-text-muted)", marginTop: 4 }}>
+									Running pipelines
+								</div>
 							</div>
 						</div>
 					</div>
@@ -271,8 +434,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 							<span className="brand-badge">{t.dashboard.gatewayActive}</span>
 						</div>
 						<h1 className="dashboard-hero-title">{t.dashboard.heroTitle}</h1>
-						<p className="dashboard-hero-desc">{t.dashboard.heroDesc}
-						</p>
+						<p className="dashboard-hero-desc">{t.dashboard.heroDesc}</p>
 					</div>
 
 					<div style={{ display: "flex", gap: 10 }}>
@@ -344,7 +506,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
 			{/* Quick Access Grid — 8 cards for top sections */}
 			<section aria-label="Quick Access" style={{ marginBottom: 20 }}>
-				<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12, marginBottom: 8 }}>
+				<div
+					style={{
+						display: "grid",
+						gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+						gap: 12,
+						marginBottom: 8,
+					}}
+				>
 					{quickAccessItems.map((item) => (
 						<button
 							key={item.id}
@@ -408,8 +577,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 			{/* Token Bank — p2ptokens contribution ledger · PinkyBrain Web of Trust */}
 			<section aria-label="Token Bank" style={{ marginBottom: 20 }}>
 				<Suspense fallback={<div style={{ minHeight: 180 }} />}>
-	<TokenBankPageLazy />
-	</Suspense>
+					<TokenBankPageLazy />
+				</Suspense>
 			</section>
 
 			{/* 2. INJECTED: Interactive Open-Source P2P Connection Mesh Topology Graph */}
@@ -435,16 +604,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 						params.set("q", question);
 						params.set("targets", targets.join(","));
 						if (model) {
-						params.set("model-manifest", JSON.stringify(model));
-					}
-					navigate(`/agent-cast?${params.toString()}`);
+							params.set("model-manifest", JSON.stringify(model));
+						}
+						navigate(`/agent-cast?${params.toString()}`);
 					}}
 				/>
 			</section>
 
 			{/* 5. Enhanced Tabbed Workstreams: Tasks / Verify / Knowledge / Economy / Workspace */}
 			<section className="dash-workstream-container" style={{ marginTop: 8 }}>
-				<div className="dash-workstream-tabs" style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 16 }}>
+				<div
+					className="dash-workstream-tabs"
+					style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 16 }}
+				>
 					{workstreamTabs.map((tab) => (
 						<button
 							key={tab.id}
@@ -458,7 +630,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 								padding: "8px 14px",
 								borderRadius: 8,
 								border: "1px solid var(--cline-border)",
-								background: activeTab === tab.id ? "var(--cline-primary-bg)" : "var(--cline-surface)",
+								background:
+									activeTab === tab.id ? "var(--cline-primary-bg)" : "var(--cline-surface)",
 								color: activeTab === tab.id ? "var(--cline-primary)" : "var(--cline-text)",
 								cursor: "pointer",
 								transition: "all 0.2s ease",
@@ -466,7 +639,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 						>
 							{tab.icon}
 							<span>{tab.label}</span>
-							<span className="dash-tab-count" style={{ fontSize: 10, padding: "2px 6", borderRadius: 10, background: "var(--cline-primary-bg)", color: "var(--cline-primary)" }}>
+							<span
+								className="dash-tab-count"
+								style={{
+									fontSize: 10,
+									padding: "2px 6",
+									borderRadius: 10,
+									background: "var(--cline-primary-bg)",
+									color: "var(--cline-primary)",
+								}}
+							>
 								{tab.count}
 							</span>
 						</button>
@@ -474,19 +656,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 				</div>
 
 				{/* Tab 1: Help Needed & Unsolved Problems */}
-				{activeTab === "tasks" && workstreamTabs.find(t => t.id === "tasks")?.render()}
+				{activeTab === "tasks" && workstreamTabs.find((t) => t.id === "tasks")?.render()}
 
 				{/* Tab 2: Verification Claims & Consensus */}
-				{activeTab === "verify" && workstreamTabs.find(t => t.id === "verify")?.render()}
+				{activeTab === "verify" && workstreamTabs.find((t) => t.id === "verify")?.render()}
 
 				{/* Tab 3: Trending Questions & Teach AI */}
-				{activeTab === "knowledge" && workstreamTabs.find(t => t.id === "knowledge")?.render()}
+				{activeTab === "knowledge" && workstreamTabs.find((t) => t.id === "knowledge")?.render()}
 
 				{/* Tab 4: Economy — Token Bank + Contributions + Reputation */}
-				{activeTab === "economy" && workstreamTabs.find(t => t.id === "economy")?.render()}
+				{activeTab === "economy" && workstreamTabs.find((t) => t.id === "economy")?.render()}
 
 				{/* Tab 5: Workspace — Projects, Tasks, Workflows */}
-				{activeTab === "workspace" && workstreamTabs.find(t => t.id === "workspace")?.render()}
+				{activeTab === "workspace" && workstreamTabs.find((t) => t.id === "workspace")?.render()}
 			</section>
 		</main>
 	);

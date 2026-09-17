@@ -31,7 +31,10 @@ export interface UnsignedProposal {
 }
 
 export class ProposalError extends Error {
-	constructor(message: string, public readonly proposal?: SignedProposal) {
+	constructor(
+		message: string,
+		public readonly proposal?: SignedProposal,
+	) {
 		super(message);
 		this.name = "ProposalError";
 	}
@@ -58,7 +61,8 @@ export function hashPayload(payload: string): string {
 	const nodeCrypto = require("node:crypto") as typeof import("node:crypto");
 	const digest = nodeCrypto.createHash("sha256").update(payload, "utf8").digest();
 	let hex = "";
-	for (let i = 0; i < digest.length; i++) hex += (digest[i]! >>> 4).toString(16) + (digest[i]! & 0xf).toString(16);
+	for (let i = 0; i < digest.length; i++)
+		hex += (digest[i]! >>> 4).toString(16) + (digest[i]! & 0xf).toString(16);
 	return hex;
 }
 
@@ -74,7 +78,9 @@ export function digestFromHex(hash: string): Uint8Array {
 /** Construct a SignedProposal by signing the canonical bytes with the proposer's Signer. */
 export function signProposal(p: UnsignedProposal, signer: Signer): SignedProposal {
 	if (signer.id !== p.proposerId) {
-		throw new ProposalError(`signProposal: signer.id (${signer.id}) ≠ proposerId (${p.proposerId})`);
+		throw new ProposalError(
+			`signProposal: signer.id (${signer.id}) ≠ proposerId (${p.proposerId})`,
+		);
 	}
 	const bytes = canonicalEncode(p);
 	const signature = signer.sign(bytes);

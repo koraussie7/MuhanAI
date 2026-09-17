@@ -16,7 +16,10 @@
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { IDENTITY_FORMAT_CURRENT, loadOrCreateIdentity } from "../packages/peer-mesh/src/identity.js";
+import {
+	IDENTITY_FORMAT_CURRENT,
+	loadOrCreateIdentity,
+} from "../packages/peer-mesh/src/identity.js";
 
 const PATH = "./.agentmesh/identity.json";
 const ROTATE = process.env.AGENTMESH_INCIDENT_ROTATE === "1";

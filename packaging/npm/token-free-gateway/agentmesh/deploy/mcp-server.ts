@@ -115,7 +115,11 @@ export const MUHANAI_MCP_TOOLS: MCPToolDefinition[] = [
 	},
 ];
 
-export async function handleMcpRequest(request: Request, url: URL, env?: { API_ORIGIN?: string }): Promise<Response | null> {
+export async function handleMcpRequest(
+	request: Request,
+	url: URL,
+	env?: { API_ORIGIN?: string },
+): Promise<Response | null> {
 	const pathname = url.pathname;
 
 	// 1. MCP Manifest & Declaration
@@ -443,39 +447,43 @@ export async function handleMcpRequest(request: Request, url: URL, env?: { API_O
 						],
 					});
 				} else if (toolName === "muhanai_ask_quorum") {
-				const question = String(args.question || "");
-				const apiOrigin = env?.API_ORIGIN;
+					const question = String(args.question || "");
+					const apiOrigin = env?.API_ORIGIN;
 
-				let handled = false;
-				if (apiOrigin) {
-					try {
-						const response = await fetch(`${apiOrigin}/api/quorum/ask`, {
-							method: "POST",
-							headers: { "Content-Type": "application/json" },
-							body: JSON.stringify({
-								question,
-								consensus_threshold: args.consensus_threshold,
-							}),
-						});
+					let handled = false;
+					if (apiOrigin) {
+						try {
+							const response = await fetch(`${apiOrigin}/api/quorum/ask`, {
+								method: "POST",
+								headers: { "Content-Type": "application/json" },
+								body: JSON.stringify({
+									question,
+									consensus_threshold: args.consensus_threshold,
+								}),
+							});
 
-						if (response.ok) {
-							const result = (await response.json()) as Record<string, unknown>;
-							content = typeof result.finalAnswer === "string" ? result.finalAnswer : JSON.stringify(result);
-							handled = true;
+							if (response.ok) {
+								const result = (await response.json()) as Record<string, unknown>;
+								content =
+									typeof result.finalAnswer === "string"
+										? result.finalAnswer
+										: JSON.stringify(result);
+								handled = true;
+							}
+						} catch {
+							// Fall through to live multi-agent consensus synthesis
 						}
-					} catch {
-						// Fall through to live multi-agent consensus synthesis
 					}
-				}
 
-				if (!handled) {
-					content = `🤖 [MuhanAI Multi-Agent Quorum Consensus]\n\n` +
-						`Question: "${question}"\n\n` +
-						`• Claude 3.7 Sonnet: Architecture & cognitive intent verified.\n` +
-						`• DeepSeek R1: Logical inference and edge verification complete.\n` +
-						`• Gemini 2.5 Pro: Multilingual consensus validated.\n\n` +
-						`Consensus Agreement: 99.2% | Zero-Token execution verified.`;
-				}
+					if (!handled) {
+						content =
+							`🤖 [MuhanAI Multi-Agent Quorum Consensus]\n\n` +
+							`Question: "${question}"\n\n` +
+							`• Claude 3.7 Sonnet: Architecture & cognitive intent verified.\n` +
+							`• DeepSeek R1: Logical inference and edge verification complete.\n` +
+							`• Gemini 2.5 Pro: Multilingual consensus validated.\n\n` +
+							`Consensus Agreement: 99.2% | Zero-Token execution verified.`;
+					}
 				} else if (toolName === "muhanai_publish_note") {
 					content = `✨ Successfully published [[${args.title}.md]] to MuhanAI cosmic knowledge topology. Node ID: note-${Date.now()}`;
 				} else {

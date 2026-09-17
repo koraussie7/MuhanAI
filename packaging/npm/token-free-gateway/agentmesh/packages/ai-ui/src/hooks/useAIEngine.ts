@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from "react";
 import { AIEngineFactory } from "@agentmesh/ai-engine/factory";
 import type { EngineConfig, EngineStatus, ModelInfo } from "@agentmesh/ai-engine/types";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export function useAIEngine(config: EngineConfig) {
 	const engineRef = useRef<ReturnType<typeof AIEngineFactory.create> | null>(null);
@@ -53,7 +53,7 @@ export function useAIEngine(config: EngineConfig) {
 				engineRef.current!.stream(
 					message,
 					(token) => setOutput((prev) => prev + token),
-					new AbortController().signal
+					new AbortController().signal,
 				);
 			} catch (error) {
 				reject(error);

@@ -13,11 +13,7 @@
  *     iterate (screenshot → tool spec → action → execute) until the
  *     model emits a `done` action or the step budget runs out.
  */
-import {
-	type E2bSandboxLike,
-	type VisionClient,
-	E2bBrowserAdapter,
-} from "./e2b-adapter.js";
+import { E2bBrowserAdapter, type E2bSandboxLike, type VisionClient } from "./e2b-adapter.js";
 
 /** Action the loop may emit on any iteration. Matches AIHawk tool surface. */
 export type ComputerUseAction =
@@ -181,8 +177,7 @@ export async function runComputerUseLoop(
 			return {
 				steps,
 				finishedReason: "error",
-				error:
-					"ComputerUseLoop: vision provider is missing planAction(); cannot drive agent loop.",
+				error: "ComputerUseLoop: vision provider is missing planAction(); cannot drive agent loop.",
 			};
 		}
 
@@ -220,7 +215,11 @@ export async function runComputerUseLoop(
 			step.durationMs = Date.now() - stepStart;
 			steps.push(step);
 			opts.onStep?.(step);
-			return { steps, finishedReason: "error", error: `step ${i} ${action.type} failed: ${reason}` };
+			return {
+				steps,
+				finishedReason: "error",
+				error: `step ${i} ${action.type} failed: ${reason}`,
+			};
 		}
 
 		step.screenshotAfter = toBase64(await opts.sandbox.screenshot());

@@ -88,7 +88,11 @@ function ensurePatchedPdfjs(unpdf: {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const P = Promise as any;
 			if (!P.try) {
-				P.try = function (this: unknown, fn: (...args: unknown[]) => unknown, ...args: unknown[]): Promise<unknown> {
+				P.try = function (
+					this: unknown,
+					fn: (...args: unknown[]) => unknown,
+					...args: unknown[]
+				): Promise<unknown> {
 					return new Promise((resolve, reject) => {
 						try {
 							resolve(fn.apply(this, args));
@@ -130,9 +134,7 @@ async function extractPdf(buffer: Buffer, filePath: string): Promise<ExtractedCo
 			sourceFormat: "pdf",
 		};
 	} catch (err) {
-		console.error(
-			`PDF extraction failed: ${err instanceof Error ? err.message : "unknown"}`,
-		);
+		console.error(`PDF extraction failed: ${err instanceof Error ? err.message : "unknown"}`);
 		return fallback(filePath, "pdf");
 	}
 }
@@ -151,9 +153,7 @@ async function extractDocx(buffer: Buffer, filePath: string): Promise<ExtractedC
 			sourceFormat: "docx",
 		};
 	} catch (err) {
-		console.error(
-			`DOCX extraction failed: ${err instanceof Error ? err.message : "unknown"}`,
-		);
+		console.error(`DOCX extraction failed: ${err instanceof Error ? err.message : "unknown"}`);
 		return fallback(filePath, "docx");
 	}
 }
@@ -171,9 +171,7 @@ async function extractPptx(buffer: Buffer, filePath: string): Promise<ExtractedC
 			sourceFormat: "pptx",
 		};
 	} catch (err) {
-		console.error(
-			`PPTX extraction failed: ${err instanceof Error ? err.message : "unknown"}`,
-		);
+		console.error(`PPTX extraction failed: ${err instanceof Error ? err.message : "unknown"}`);
 		return fallback(filePath, "pptx");
 	}
 }
@@ -205,9 +203,7 @@ async function extractXlsx(buffer: Buffer, filePath: string): Promise<ExtractedC
 			if (rows.length <= 100) {
 				const jsonRows = XLSX.utils.sheet_to_json(sheet);
 				if (jsonRows.length > 0) {
-					parts.push(
-						`<details><summary>Structured Data (${jsonRows.length} rows)</summary>\n`,
-					);
+					parts.push(`<details><summary>Structured Data (${jsonRows.length} rows)</summary>\n`);
 					parts.push("```json");
 					parts.push(JSON.stringify(jsonRows.slice(0, 50), null, 2));
 					parts.push("```");
@@ -225,9 +221,7 @@ async function extractXlsx(buffer: Buffer, filePath: string): Promise<ExtractedC
 			sourceFormat: format,
 		};
 	} catch (err) {
-		console.error(
-			`XLSX extraction failed: ${err instanceof Error ? err.message : "unknown"}`,
-		);
+		console.error(`XLSX extraction failed: ${err instanceof Error ? err.message : "unknown"}`);
 		return fallback(filePath, format);
 	}
 }

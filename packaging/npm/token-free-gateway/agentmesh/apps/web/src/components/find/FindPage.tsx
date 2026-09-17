@@ -1,14 +1,14 @@
+import { Sparkles, X, Zap } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Sparkles, X, Zap } from "lucide-react";
 import { CosmicCanvas } from "./CosmicCanvas";
 import { CosmicHud } from "./CosmicHud";
 import { CosmicPromptBar } from "./CosmicPromptBar";
 import { ObsidianInspector } from "./ObsidianInspector";
 import "./find.css";
+import { useI18n } from "../../i18n.js";
 import { INITIAL_EDGES, INITIAL_NODES, INITIAL_PEERS } from "./initialData";
 import type { CosmicEdge, CosmicNode, CosmicPeer, NodeType, Shockwave } from "./types";
-import { useI18n } from "../../i18n.js";
 
 interface FindPageProps {
 	onNavigateHome: () => void;
@@ -59,14 +59,45 @@ function playCosmicChime() {
 
 export function generateRandomPeerUsername(role: "user" | "peer" | "simulated" = "user"): string {
 	const cosmicAdjectives = [
-		"Cosmic", "Quantum", "Stellar", "Nebula", "Nova", "Cyber",
-		"Astro", "Solar", "Lunar", "Flux", "Vector", "Hyper", "Synapse",
-		"Zenith", "Apex", "Orbit", "Plasma", "Radiant", "Galactic", "Infinite"
+		"Cosmic",
+		"Quantum",
+		"Stellar",
+		"Nebula",
+		"Nova",
+		"Cyber",
+		"Astro",
+		"Solar",
+		"Lunar",
+		"Flux",
+		"Vector",
+		"Hyper",
+		"Synapse",
+		"Zenith",
+		"Apex",
+		"Orbit",
+		"Plasma",
+		"Radiant",
+		"Galactic",
+		"Infinite",
 	];
 	const cosmicNouns = [
-		"Voyager", "Explorer", "Pioneer", "Architect", "Navigator",
-		"Pilot", "Cipher", "Runner", "Guardian", "Scholar", "Weaver",
-		"Coder", "Oracle", "Beacon", "Specter", "Seeker", "Builder"
+		"Voyager",
+		"Explorer",
+		"Pioneer",
+		"Architect",
+		"Navigator",
+		"Pilot",
+		"Cipher",
+		"Runner",
+		"Guardian",
+		"Scholar",
+		"Weaver",
+		"Coder",
+		"Oracle",
+		"Beacon",
+		"Specter",
+		"Seeker",
+		"Builder",
 	];
 	const adj = cosmicAdjectives[Math.floor(Math.random() * cosmicAdjectives.length)];
 	const noun = cosmicNouns[Math.floor(Math.random() * cosmicNouns.length)];
@@ -168,7 +199,11 @@ const PeerNameModal: React.FC<PeerNameModalProps> = ({
 								type="text"
 								value={name}
 								onChange={(e) => setName(e.target.value)}
-								placeholder={isUserMode ? t.findPage.peerModalUserPlaceholder : t.findPage.peerModalPeerPlaceholder}
+								placeholder={
+									isUserMode
+										? t.findPage.peerModalUserPlaceholder
+										: t.findPage.peerModalPeerPlaceholder
+								}
 								maxLength={36}
 								className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-950/80 border border-white/15 focus:border-sky-400 focus:ring-1 focus:ring-sky-400 text-sm text-white outline-none font-mono placeholder:text-slate-500"
 							/>
@@ -182,9 +217,7 @@ const PeerNameModal: React.FC<PeerNameModalProps> = ({
 							</button>
 						</div>
 						<p className="mt-1.5 text-[11px] text-slate-400">
-							{isUserMode
-								? t.findPage.peerModalUserHelp
-								: t.findPage.peerModalPeerHelp}
+							{isUserMode ? t.findPage.peerModalUserHelp : t.findPage.peerModalPeerHelp}
 						</p>
 					</div>
 
@@ -217,7 +250,11 @@ const PeerNameModal: React.FC<PeerNameModalProps> = ({
 								className="px-5 py-2 rounded-xl text-xs font-bold text-slate-950 bg-gradient-to-r from-sky-400 to-indigo-400 hover:from-sky-300 hover:to-indigo-300 shadow-md shadow-sky-500/20 transition-all flex items-center gap-1.5"
 							>
 								<Sparkles size={13} />
-								<span>{isUserMode && isConnected ? t.findPage.peerModalApply : t.findPage.peerModalConnect}</span>
+								<span>
+									{isUserMode && isConnected
+										? t.findPage.peerModalApply
+										: t.findPage.peerModalConnect}
+								</span>
 							</button>
 						</div>
 					</div>
@@ -383,8 +420,7 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
 
 	const handleConnectSimulatedPeer = useCallback(
 		(nameInput?: string) => {
-			const finalName =
-				nameInput?.trim() || generateRandomPeerUsername("peer");
+			const finalName = nameInput?.trim() || generateRandomPeerUsername("peer");
 			setConnectedPeerName(finalName);
 			try {
 				localStorage.setItem("muhanai_connected_peer_name", finalName);
@@ -530,7 +566,9 @@ export const FindPage: React.FC<FindPageProps> = ({ onNavigateHome }) => {
 						// Swap the temporary local id for the persistent server id so
 						// the polling refresh won't duplicate this node.
 						setNodes((prev) => prev.map((n) => (n.id === newNoteId ? { ...n, id: serverId } : n)));
-						setEdges((prev) => prev.map((e) => (e.target === newNoteId ? { ...e, target: serverId } : e)));
+						setEdges((prev) =>
+							prev.map((e) => (e.target === newNoteId ? { ...e, target: serverId } : e)),
+						);
 					}
 				}
 			} catch {

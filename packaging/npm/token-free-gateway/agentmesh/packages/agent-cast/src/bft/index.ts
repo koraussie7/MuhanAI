@@ -1,4 +1,3 @@
-export { BftError, BftOverlay, staticProvider } from "./bft-overlay.js";
 export type {
 	BftCastResult,
 	BftOverlayOptions,
@@ -6,20 +5,21 @@ export type {
 	ConsensusOutcome,
 	ValueProvider,
 } from "./bft-overlay.js";
-export { ByzantineDetector, VoteTally } from "./byzantine-detector.js";
+export { BftError, BftOverlay, staticProvider } from "./bft-overlay.js";
 export type { ByzantineReason, ByzantineReport } from "./byzantine-detector.js";
+export { ByzantineDetector, VoteTally } from "./byzantine-detector.js";
+export type { SignedProposal, UnsignedProposal } from "./proposal.js";
 export {
-	ProposalError,
 	canonicalEncode,
 	digestFromHex,
 	hashPayload,
+	ProposalError,
 	proposalKey,
 	signProposal,
-	verifyProposal,
 	valueKey,
+	verifyProposal,
 } from "./proposal.js";
-export type { SignedProposal, UnsignedProposal } from "./proposal.js";
-export { hasQuorum, maxByzantineObserved, quorumFor } from "./quorum.js";
 export type { QuorumSpec } from "./quorum.js";
-export { HmacKeyring, HmacSigner } from "./signatures.js";
+export { hasQuorum, maxByzantineObserved, quorumFor } from "./quorum.js";
 export type { Signer, SignerFactory, SignerKeyring } from "./signatures.js";
+export { HmacKeyring, HmacSigner } from "./signatures.js";

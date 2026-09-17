@@ -16,41 +16,38 @@ export const DEMO_HUMAN_COUNT = 3_821;
 export const PLACEHOLDER = "—";
 
 export const isDemo = (): boolean =>
-  typeof import.meta !== "undefined" &&
-  (import.meta.env?.VITE_DEMO === "true" ||
-    (typeof process !== "undefined" && process.env?.NODE_ENV === "development"));
+	typeof import.meta !== "undefined" &&
+	(import.meta.env?.VITE_DEMO === "true" ||
+		(typeof process !== "undefined" && process.env?.NODE_ENV === "development"));
 
 export function formatPeerCount(n: number | undefined): string {
-  if (n == null) return PLACEHOLDER;
-  if (isDemo()) return `${DEMO_PEER_COUNT.toLocaleString()} (demo)`;
-  return n.toLocaleString();
+	if (n == null) return PLACEHOLDER;
+	if (isDemo()) return `${DEMO_PEER_COUNT.toLocaleString()} (demo)`;
+	return n.toLocaleString();
 }
 
 export function formatHumanCount(n: number | undefined): string {
-  if (n == null) return PLACEHOLDER;
-  if (isDemo()) return `${DEMO_HUMAN_COUNT.toLocaleString()} (demo)`;
-  return n.toLocaleString();
+	if (n == null) return PLACEHOLDER;
+	if (isDemo()) return `${DEMO_HUMAN_COUNT.toLocaleString()} (demo)`;
+	return n.toLocaleString();
 }
 
 export function formatPeerCountBare(n: number | undefined): string {
-  if (n == null) return PLACEHOLDER;
-  if (isDemo()) return DEMO_PEER_COUNT.toLocaleString();
-  return n.toLocaleString();
+	if (n == null) return PLACEHOLDER;
+	if (isDemo()) return DEMO_PEER_COUNT.toLocaleString();
+	return n.toLocaleString();
 }
 
 export interface MeshStats {
-  agentsOnline: number | undefined;
-  humansOnline: number | undefined;
-  demo: boolean;
+	agentsOnline: number | undefined;
+	humansOnline: number | undefined;
+	demo: boolean;
 }
 
-export function getMeshStats(pulse: {
-  agentsOnline?: number;
-  humansOnline?: number;
-}): MeshStats {
-  return {
-    agentsOnline: pulse.agentsOnline,
-    humansOnline: pulse.humansOnline,
-    demo: isDemo(),
-  };
+export function getMeshStats(pulse: { agentsOnline?: number; humansOnline?: number }): MeshStats {
+	return {
+		agentsOnline: pulse.agentsOnline,
+		humansOnline: pulse.humansOnline,
+		demo: isDemo(),
+	};
 }

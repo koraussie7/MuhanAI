@@ -40,7 +40,11 @@ async function fetchWithTimeout(url: string, init: RequestInit, ms: number): Pro
 	}
 }
 
-function buildAttempts(prompt: string, system: string, authToken?: string | null): KeylessAttempt[] {
+function buildAttempts(
+	prompt: string,
+	system: string,
+	authToken?: string | null,
+): KeylessAttempt[] {
 	const attempts: KeylessAttempt[] = [];
 
 	// 1. OmniRoute Mesh daemon (port 20128)
@@ -166,7 +170,11 @@ function buildAttempts(prompt: string, system: string, authToken?: string | null
 	return attempts;
 }
 
-async function callKeylessFromVite(prompt: string, system: string, authToken?: string | null): Promise<{
+async function callKeylessFromVite(
+	prompt: string,
+	system: string,
+	authToken?: string | null,
+): Promise<{
 	text: string;
 	provider: string;
 	model: string;
@@ -179,7 +187,9 @@ async function callKeylessFromVite(prompt: string, system: string, authToken?: s
 		attempts.map(async (a) => {
 			const res = await a.fetch();
 			if (!res.ok) {
-				try { await res.text(); } catch {}
+				try {
+					await res.text();
+				} catch {}
 				throw new Error(`${a.name} ${res.status}`);
 			}
 			const text = (await a.parse(res)).trim();
@@ -193,8 +203,8 @@ async function callKeylessFromVite(prompt: string, system: string, authToken?: s
 				r.value.name === "omniroute"
 					? "omniroute"
 					: r.value.name === "oauth-gateway"
-					? "oauth-gateway"
-					: "keyless-local";
+						? "oauth-gateway"
+						: "keyless-local";
 			return {
 				text: r.value.text,
 				provider: r.value.name,
@@ -285,8 +295,12 @@ function mcpRpcPlugin(): Plugin {
 					if (method === "tools/call" && body.params?.name === "muhanai_ask_quorum") {
 						const question = body.params?.arguments?.question || "";
 						const prompt = `[Multi-Agent Quorum Analysis] Question: ${question}`;
-						const llmResult = await callKeylessFromVite(prompt, "You are MuhanAI Multi-Agent Quorum Consensus. Provide a comprehensive, accurate answer synthesized across multiple agents.");
-						const finalAnswer = llmResult?.text ||
+						const llmResult = await callKeylessFromVite(
+							prompt,
+							"You are MuhanAI Multi-Agent Quorum Consensus. Provide a comprehensive, accurate answer synthesized across multiple agents.",
+						);
+						const finalAnswer =
+							llmResult?.text ||
 							`🤖 [MuhanAI Multi-Agent Quorum Consensus]\n\nQuestion: "${question}"\n\n• Claude 3.7: Multi-agent pipeline initialized.\n• DeepSeek R1: Logical verification complete.\n• Gemini 2.5: Zero-token distributed execution path verified.\n\nConsensus: 99.4% Agreement across all models.`;
 
 						res.statusCode = 200;
@@ -322,7 +336,10 @@ function mcpRpcPlugin(): Plugin {
 						JSON.stringify({
 							jsonrpc: "2.0",
 							id: 1,
-							error: { code: -32603, message: err instanceof Error ? err.message : "Internal error" },
+							error: {
+								code: -32603,
+								message: err instanceof Error ? err.message : "Internal error",
+							},
 						}),
 					);
 				}
@@ -339,8 +356,8 @@ export default defineConfig({
 		rollupOptions: {
 			output: {
 				manualChunks: {
-					'mcp-vendor': ['@agentmesh/personal-mcp', '@agentmesh/shared-types'],
-					'vendor': ['lucide-react'],
+					"mcp-vendor": ["@agentmesh/personal-mcp", "@agentmesh/shared-types"],
+					vendor: ["lucide-react"],
 				},
 			},
 		},

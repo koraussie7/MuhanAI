@@ -1,7 +1,7 @@
 import type React from "react";
-import { PageBox } from "./PageBox.js";
 import { useEffect, useState } from "react";
 import { useI18n } from "../i18n";
+import { PageBox } from "./PageBox.js";
 
 interface HumanWanted {
 	id: string;
@@ -17,9 +17,7 @@ interface HumanKnowledgeWantedProps {
 	maxItems?: number;
 }
 
-export const HumanKnowledgeWanted: React.FC<HumanKnowledgeWantedProps> = ({
-	maxItems = 3,
-}) => {
+export const HumanKnowledgeWanted: React.FC<HumanKnowledgeWantedProps> = ({ maxItems = 3 }) => {
 	const { t } = useI18n();
 	const [items, setItems] = useState<HumanWanted[]>([]);
 	const [loading, setLoading] = useState(true);

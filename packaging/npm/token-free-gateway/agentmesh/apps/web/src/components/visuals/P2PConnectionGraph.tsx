@@ -272,9 +272,7 @@ export const P2PConnectionGraph: React.FC = () => {
 				const peerName = localStorage.getItem("muhanai_connected_peer_name");
 				if (peerName) {
 					setNodes((prev) =>
-						prev.map((n) =>
-							n.id === "peer-edge-4" ? { ...n, name: `${peerName} (You)` } : n,
-						),
+						prev.map((n) => (n.id === "peer-edge-4" ? { ...n, name: `${peerName} (You)` } : n)),
 					);
 				}
 			} catch {}

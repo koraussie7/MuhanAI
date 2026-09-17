@@ -22,11 +22,14 @@ const ChatSchema = z.object({
 
 // === OmniRoute 우선 설정 ===
 // OMNIROUTE_PRIORITY=true 이면 OmniRoute Free LLM을 먼저 시도
-const OMNIROUTE_PRIORITY = process.env.OMNIROUTE_PRIORITY !== 'false';
+const OMNIROUTE_PRIORITY = process.env.OMNIROUTE_PRIORITY !== "false";
 const OMNIROUTE_BASE_URL = process.env.OMNIROUTE_BASE_URL ?? process.env.OPENAI_BASE_URL ?? null;
-const OMNIROUTE_MODEL = process.env.OMNIROUTE_MODEL ?? process.env.OPENAI_DEFAULT_MODEL ?? "openai/gpt-4o-mini";
+const OMNIROUTE_MODEL =
+	process.env.OMNIROUTE_MODEL ?? process.env.OPENAI_DEFAULT_MODEL ?? "openai/gpt-4o-mini";
 
-const OMNIROUTE_CHAT_ROUTE = OMNIROUTE_BASE_URL ? new URL("/chat/completions", OMNIROUTE_BASE_URL) : null;
+const OMNIROUTE_CHAT_ROUTE = OMNIROUTE_BASE_URL
+	? new URL("/chat/completions", OMNIROUTE_BASE_URL)
+	: null;
 
 /**
  * OmniRoute Free LLM 호출
@@ -54,7 +57,8 @@ async function callOmniRouteFree(req: KeylessRequest) {
 
 	// API 키가 있으면 추가 (OpenRouter 등)
 	if (process.env.OMNIROUTE_API_KEY) {
-		(options.headers as Record<string, string>)["Authorization"] = `Bearer ${process.env.OMNIROUTE_API_KEY}`;
+		(options.headers as Record<string, string>)["Authorization"] =
+			`Bearer ${process.env.OMNIROUTE_API_KEY}`;
 	}
 
 	const upstream = await fetch(OMNIROUTE_CHAT_ROUTE.toString(), options);
@@ -92,7 +96,10 @@ export async function llmRoutes(app: FastifyInstance) {
 			try {
 				const result = await callOmniRouteFree(req);
 				if (result) {
-					request.log.info({ provider: result.provider, model: result.model }, "OmniRoute Free LLM 성공");
+					request.log.info(
+						{ provider: result.provider, model: result.model },
+						"OmniRoute Free LLM 성공",
+					);
 					return {
 						text: result.text,
 						provider: result.provider,

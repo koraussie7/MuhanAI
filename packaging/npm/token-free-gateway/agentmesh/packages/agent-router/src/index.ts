@@ -7,16 +7,15 @@
  */
 
 export {
-	routeQuestion,
-	type RouteResult,
-} from "./pipeline.js";
-
-export {
-	computeRouteCost,
-	routeChargeIdempotencyKey,
-	routeQuestionWithCredits,
 	BASE_ROUTE_COST,
 	COST_PER_KNOWLEDGE_NODE,
 	type CreditGateOptions,
+	computeRouteCost,
 	type RoutedWithCredits,
+	routeChargeIdempotencyKey,
+	routeQuestionWithCredits,
 } from "./credits.js";
+export {
+	type RouteResult,
+	routeQuestion,
+} from "./pipeline.js";

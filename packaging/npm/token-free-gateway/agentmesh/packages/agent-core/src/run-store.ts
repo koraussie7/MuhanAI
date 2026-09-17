@@ -3,8 +3,8 @@
  * No-ops gracefully when DB is unavailable / memory mode.
  */
 
-import type { PrismaClient } from "@prisma/client";
 import type { AgentRunResult } from "@agentmesh/shared-types";
+import type { PrismaClient } from "@prisma/client";
 import type { AgentDefinition } from "./types";
 
 export interface PersistAgentRunInput {

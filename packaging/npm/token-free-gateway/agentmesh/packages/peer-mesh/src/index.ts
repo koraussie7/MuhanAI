@@ -7,6 +7,7 @@
  */
 
 export * from "./bandwidth.js";
+export * from "./device-capabilities.js";
 export * from "./error.js";
 export * from "./identity.js";
 export * from "./peer-catalog.js";
@@ -14,4 +15,3 @@ export * from "./peer-reputation.js";
 export * from "./pubsub.js";
 export * from "./transport.js";
 export * from "./trust-verifier.js";
-export * from "./device-capabilities.js";

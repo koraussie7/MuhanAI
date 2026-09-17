@@ -1,11 +1,11 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { InsufficientCreditsError } from "@agentmesh/credit-system";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+	BASE_ROUTE_COST,
+	COST_PER_KNOWLEDGE_NODE,
 	computeRouteCost,
 	routeChargeIdempotencyKey,
 	routeQuestionWithCredits,
-	BASE_ROUTE_COST,
-	COST_PER_KNOWLEDGE_NODE,
 } from "../src/credits.js";
 import * as pipeline from "../src/pipeline.js";
 
@@ -27,8 +27,9 @@ function makePrismaMock(initialBalance: bigint) {
 	};
 
 	const creditLedger = {
-		findUnique: vi.fn(async ({ where }: { where: { idempotencyKey: string } }) =>
-			ledger.get(where.idempotencyKey) ?? null,
+		findUnique: vi.fn(
+			async ({ where }: { where: { idempotencyKey: string } }) =>
+				ledger.get(where.idempotencyKey) ?? null,
 		),
 		create: vi.fn(async ({ data }: { data: { idempotencyKey: string } }) => {
 			ledger.set(data.idempotencyKey, data);

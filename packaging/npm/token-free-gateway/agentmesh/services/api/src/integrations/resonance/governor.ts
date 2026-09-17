@@ -74,7 +74,9 @@ export class ResonanceGovernor {
 	}
 
 	setDial(
-		next: AutonomyLevel | { level: AutonomyLevel; perAction?: Partial<Record<AutonomyAction, AutonomyLevel>> },
+		next:
+			| AutonomyLevel
+			| { level: AutonomyLevel; perAction?: Partial<Record<AutonomyAction, AutonomyLevel>> },
 		updatedBy: string,
 	): AutonomyDial {
 		const nextLevel: AutonomyLevel = typeof next === "string" ? next : next.level;
@@ -146,7 +148,11 @@ export class ResonanceGovernor {
 				(a) => a.action === action && a.subject === subject && a.timestamp >= cutoff,
 			);
 			if (dup) {
-				return this.deny(action, subject, `duplicate within dedup window (${this.config.dedupWindowMs}ms)`);
+				return this.deny(
+					action,
+					subject,
+					`duplicate within dedup window (${this.config.dedupWindowMs}ms)`,
+				);
 			}
 		}
 

@@ -115,7 +115,12 @@ describe("POST /api/quorum/ask", () => {
 			consensusScore: number;
 			finalAnswer: string;
 			selectedAgents: string[];
-			agentResults: Array<{ agentId: string; output: string; confidence: number; latencyMs: number }>;
+			agentResults: Array<{
+				agentId: string;
+				output: string;
+				confidence: number;
+				latencyMs: number;
+			}>;
 		};
 
 		expect(body.question).toBe("What is CRDT?");

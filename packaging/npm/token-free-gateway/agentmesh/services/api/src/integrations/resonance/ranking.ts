@@ -11,7 +11,7 @@
  * can exercise the route surface without an embedding model.
  */
 
-import { RESONANCE_EMBEDDING_DIM, type RankedItem, type RankedResult } from "./types.js";
+import { type RankedItem, type RankedResult, RESONANCE_EMBEDDING_DIM } from "./types.js";
 
 export function isValidEmbedding(value: unknown): value is number[] {
 	if (!Array.isArray(value)) return false;
@@ -96,9 +96,7 @@ export function rankCorpus(
 
 	const scored: RankedResult[] = [];
 	for (const item of corpus) {
-		const itemEmbedding =
-			item.embedding ??
-			(item.text ? deterministicEmbedding(item.text) : null);
+		const itemEmbedding = item.embedding ?? (item.text ? deterministicEmbedding(item.text) : null);
 		if (!itemEmbedding) continue;
 		const score = cosine(queryEmbedding, itemEmbedding);
 		if (score < minScore) continue;

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { WikiSync, type WeKnoraWikiPage } from "./wiki-sync.js";
+import { type WeKnoraWikiPage, WikiSync } from "./wiki-sync.js";
 
 function mockJson(body: unknown, init: ResponseInit = {}): Response {
 	return new Response(JSON.stringify(body), {
@@ -11,11 +11,13 @@ function mockJson(body: unknown, init: ResponseInit = {}): Response {
 
 function makeFetchMock() {
 	const queue: Response[] = [];
-	const fetchMock = vi.fn(async (_url: string | URL | Request, _init?: RequestInit): Promise<Response> => {
-		const next = queue.shift();
-		if (!next) throw new Error("unhandled fetch");
-		return next;
-	}) as unknown as typeof fetch;
+	const fetchMock = vi.fn(
+		async (_url: string | URL | Request, _init?: RequestInit): Promise<Response> => {
+			const next = queue.shift();
+			if (!next) throw new Error("unhandled fetch");
+			return next;
+		},
+	) as unknown as typeof fetch;
 	return { fetchMock, enqueue: (res: Response) => queue.push(res) };
 }
 
@@ -31,7 +33,12 @@ describe("WikiSync", () => {
 		enqueue(
 			mockJson({
 				pages: [
-					{ pageId: "p1", title: "Page 1", content: "Hello [[World]]", updatedAt: "2026-01-01T00:00:00Z" },
+					{
+						pageId: "p1",
+						title: "Page 1",
+						content: "Hello [[World]]",
+						updatedAt: "2026-01-01T00:00:00Z",
+					},
 				],
 			}),
 		);
@@ -69,18 +76,20 @@ describe("WikiSync", () => {
 
 	it("returns empty export when WeKnora is not configured", async () => {
 		const sync = new WikiSync({});
-		await expect(sync.exportKnowledgeNodeToWiki({
-			id: "n1",
-			ownerId: "u1",
-			categoryId: "wiki",
-			title: "t",
-			content: "c",
-			sourceType: "document",
-			visibility: "private",
-			permissions: { readableBy: ["u1"], usableByAgents: true, commercialUse: false },
-			confidence: 0.9,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		})).resolves.toBeUndefined();
+		await expect(
+			sync.exportKnowledgeNodeToWiki({
+				id: "n1",
+				ownerId: "u1",
+				categoryId: "wiki",
+				title: "t",
+				content: "c",
+				sourceType: "document",
+				visibility: "private",
+				permissions: { readableBy: ["u1"], usableByAgents: true, commercialUse: false },
+				confidence: 0.9,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			}),
+		).resolves.toBeUndefined();
 	});
 });

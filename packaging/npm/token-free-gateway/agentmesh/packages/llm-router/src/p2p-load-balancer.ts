@@ -1,9 +1,5 @@
+import type { DeviceNodeInfo, InferenceRequest, LoadBalancingStrategy } from "@agentmesh/peer-mesh";
 import { p2pNodeRegistry } from "./p2p-node-registry.js";
-import type {
-	DeviceNodeInfo,
-	InferenceRequest,
-	LoadBalancingStrategy,
-} from "@agentmesh/peer-mesh";
 
 export class P2pLoadBalancer {
 	private strategy: LoadBalancingStrategy;
@@ -62,7 +58,7 @@ export class P2pLoadBalancer {
 
 	private selectLatencyOptimized(nodes: DeviceNodeInfo[]): DeviceNodeInfo {
 		return nodes.reduce((best, node) =>
-			this.effectiveLatency(node) < this.effectiveLatency(best) ? node : best
+			this.effectiveLatency(node) < this.effectiveLatency(best) ? node : best,
 		);
 	}
 

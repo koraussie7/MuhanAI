@@ -72,10 +72,7 @@ export class ModelManager {
 		return MUHANAI_MODELS.find((m) => m.id === id) || null;
 	}
 
-	async downloadModel(
-		id: string,
-		onProgress?: (progress: number) => void
-	): Promise<string> {
+	async downloadModel(id: string, onProgress?: (progress: number) => void): Promise<string> {
 		await this.init();
 
 		const model = await this.getModel(id);

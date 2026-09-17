@@ -1,17 +1,8 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { Bot, Code, Cpu, Folder, Globe, Package, Settings, Terminal } from "lucide-react";
+import { type ReactNode, useState } from "react";
 import { Window } from "./Window";
-import {
-	Bot,
-	Folder,
-	Terminal,
-	Globe,
-	Cpu,
-	Settings,
-	Code,
-	Package,
-} from "lucide-react";
 
 export interface WindowData {
 	id: string;
@@ -25,12 +16,7 @@ interface DesktopProps {
 	children?: ReactNode;
 	windows?: WindowData[];
 	activeWindowId?: string | null;
-	onOpenWindow?: (
-		id: string,
-		title: string,
-		icon: ReactNode,
-		content: ReactNode
-	) => void;
+	onOpenWindow?: (id: string, title: string, icon: ReactNode, content: ReactNode) => void;
 	onCloseWindow?: (id: string) => void;
 	onFocusWindow?: (id: string) => void;
 }
@@ -59,18 +45,16 @@ export function Desktop({
 	const isControlled = controlledWindows !== undefined;
 	const currentWindows = isControlled ? controlledWindows : internalWindows;
 
-	const handleOpen = (
-		id: string,
-		title: string,
-		icon: ReactNode,
-		content: ReactNode
-	) => {
+	const handleOpen = (id: string, title: string, icon: ReactNode, content: ReactNode) => {
 		if (onOpenWindow) {
 			onOpenWindow(id, title, icon, content);
 			return;
 		}
 		if (internalWindows.find((w) => w.id === id)) return;
-		setInternalWindows((prev) => [...prev, { id, title, icon, content, zIndex: 100 + prev.length }]);
+		setInternalWindows((prev) => [
+			...prev,
+			{ id, title, icon, content, zIndex: 100 + prev.length },
+		]);
 	};
 
 	const handleClose = (id: string) => {
@@ -98,7 +82,7 @@ export function Desktop({
 							"chat",
 							"AI Chat",
 							<Bot size={20} className="text-emerald-400" />,
-							children || <div>Chat Widget</div>
+							children || <div>Chat Widget</div>,
 						)
 					}
 				>
@@ -123,7 +107,7 @@ export function Desktop({
 									<p className="text-sm text-gray-400">
 										DaedalOS {app.name} is running in local sandbox.
 									</p>
-								</div>
+								</div>,
 							)
 						}
 					>
@@ -155,4 +139,3 @@ export function Desktop({
 		</div>
 	);
 }
-

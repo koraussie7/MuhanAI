@@ -1,9 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-	type DiscoveredPeer,
-	type DiscoveryEnvelope,
-	UdpDiscovery,
-} from "./udp-discovery.js";
+import { type DiscoveredPeer, type DiscoveryEnvelope, UdpDiscovery } from "./udp-discovery.js";
+import { UdpWebRtcBridge } from "./udp-webrtc-bridge.js";
 import {
 	type RtcDataChannelLike,
 	type RtcPeerConnectionFactory,
@@ -11,7 +8,6 @@ import {
 	type RtcSessionDescriptionLike,
 	WebRtcTransport,
 } from "./webrtc-transport.js";
-import { UdpWebRtcBridge } from "./udp-webrtc-bridge.js";
 
 const PEER_A = "a".repeat(64);
 const PEER_B = "b".repeat(64);
@@ -75,8 +71,14 @@ function makeMockConn(): MockConn {
 			localDescription = v;
 		},
 		createDataChannel: vi.fn(() => makeMockDataChannel()),
-		createOffer: vi.fn(async () => ({ type: "offer" as const, sdp: `v=0\r\noffer-${Math.random()}` })),
-		createAnswer: vi.fn(async () => ({ type: "answer" as const, sdp: `v=0\r\nanswer-${Math.random()}` })),
+		createOffer: vi.fn(async () => ({
+			type: "offer" as const,
+			sdp: `v=0\r\noffer-${Math.random()}`,
+		})),
+		createAnswer: vi.fn(async () => ({
+			type: "answer" as const,
+			sdp: `v=0\r\nanswer-${Math.random()}`,
+		})),
 		setLocalDescription: vi.fn(async (desc) => {
 			localDescription = desc;
 		}),
@@ -175,7 +177,10 @@ async function makeSide(
 	};
 }
 
-function findEnv(envelopes: DiscoveryEnvelope[], kind: DiscoveryEnvelope["kind"]): DiscoveryEnvelope | undefined {
+function findEnv(
+	envelopes: DiscoveryEnvelope[],
+	kind: DiscoveryEnvelope["kind"],
+): DiscoveryEnvelope | undefined {
 	return envelopes.find((e) => e.kind === kind);
 }
 
@@ -275,7 +280,7 @@ describe("UdpWebRtcBridge", () => {
 		expect(findEnv(a.outbound, "TASK_ANNOUNCE")).toBeUndefined();
 	});
 
- it("ignores self-traffic", async () => {
+	it("ignores self-traffic", async () => {
 		a.listener({
 			v: 1,
 			kind: "HELLO",
@@ -287,7 +292,7 @@ describe("UdpWebRtcBridge", () => {
 		expect(findEnv(a.outbound, "TASK_ANNOUNCE")).toBeUndefined();
 	});
 
- it("ignores malformed SDP envelopes", async () => {
+	it("ignores malformed SDP envelopes", async () => {
 		a.listener({
 			v: 1,
 			kind: "TASK_ANNOUNCE",

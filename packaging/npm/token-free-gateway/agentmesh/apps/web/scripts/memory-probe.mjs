@@ -40,68 +40,68 @@ const MAX_CYCLE_GROWTH_MB = Number(process.env.MAX_CYCLE_GROWTH_MB ?? 10);
 const CDP = `http://localhost:${CDP_PORT}`;
 
 const wsUrl = await (async () => {
-  const list = await (await fetch(`${CDP}/json/list`)).json();
-  const page = list.find((t) => t.type === "page") ?? list[0];
-  return page.webSocketDebuggerUrl;
+	const list = await (await fetch(`${CDP}/json/list`)).json();
+	const page = list.find((t) => t.type === "page") ?? list[0];
+	return page.webSocketDebuggerUrl;
 })();
 
 const ws = new WebSocket(wsUrl);
 await new Promise((res, rej) => {
-  ws.onopen = res;
-  ws.onerror = rej;
+	ws.onopen = res;
+	ws.onerror = rej;
 });
 
 let seq = 0;
 const pending = new Map();
 ws.onmessage = (e) => {
-  const m = JSON.parse(e.data);
-  if (m.id && pending.has(m.id)) {
-    const { res, rej } = pending.get(m.id);
-    pending.delete(m.id);
-    m.error ? rej(new Error(m.error.message)) : res(m.result);
-  }
+	const m = JSON.parse(e.data);
+	if (m.id && pending.has(m.id)) {
+		const { res, rej } = pending.get(m.id);
+		pending.delete(m.id);
+		m.error ? rej(new Error(m.error.message)) : res(m.result);
+	}
 };
 const send = (method, params = {}) =>
-  new Promise((res, rej) => {
-    const id = ++seq;
-    pending.set(id, { res, rej });
-    ws.send(JSON.stringify({ id, method, params }));
-  });
+	new Promise((res, rej) => {
+		const id = ++seq;
+		pending.set(id, { res, rej });
+		ws.send(JSON.stringify({ id, method, params }));
+	});
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function evalJs(expression) {
-  const r = await send("Runtime.evaluate", {
-    expression,
-    returnByValue: true,
-    awaitPromise: true,
-    userGesture: true,
-  });
-  if (r.exceptionDetails) throw new Error("eval failed: " + JSON.stringify(r.exceptionDetails));
-  return r.result.value;
+	const r = await send("Runtime.evaluate", {
+		expression,
+		returnByValue: true,
+		awaitPromise: true,
+		userGesture: true,
+	});
+	if (r.exceptionDetails) throw new Error("eval failed: " + JSON.stringify(r.exceptionDetails));
+	return r.result.value;
 }
 
 async function snap(label) {
-  const s = await evalJs(`(() => {
+	const s = await evalJs(`(() => {
     const pm = globalThis.performance?.memory;
     return {
       jsHeapMB: pm ? +(pm.usedJSHeapSize / 1048576).toFixed(2) : -1,
       domNodes: document.getElementsByTagName('*').length,
     };
   })()`);
-  console.log(JSON.stringify({ label, ...s }));
-  return s;
+	console.log(JSON.stringify({ label, ...s }));
+	return s;
 }
 
 async function gc() {
-  await evalJs(`if (window.gc) { for (let i = 0; i < 3; i++) gc(); }`);
-  await sleep(400);
+	await evalJs(`if (window.gc) { for (let i = 0; i < 3; i++) gc(); }`);
+	await sleep(400);
 }
 
 async function navigate(path) {
-  await evalJs(`history.pushState(null, "", ${JSON.stringify(path)});
+	await evalJs(`history.pushState(null, "", ${JSON.stringify(path)});
 window.dispatchEvent(new PopStateEvent("popstate")); 1;`);
-  await sleep(1200);
+	await sleep(1200);
 }
 
 await send("Page.enable");
@@ -116,9 +116,9 @@ await snap("boot");
 console.log("== scenario A: idle ==");
 const idleSamples = [];
 for (let i = 0; i <= Math.ceil(IDLE_SECONDS / 5); i++) {
-  const s = await snap(`idle-${i * 5}s`);
-  idleSamples.push(s.jsHeapMB);
-  await sleep(5000);
+	const s = await snap(`idle-${i * 5}s`);
+	idleSamples.push(s.jsHeapMB);
+	await sleep(5000);
 }
 await gc();
 const idleGc = await snap("idle+gc");
@@ -126,25 +126,25 @@ const idleGc = await snap("idle+gc");
 // ---- Scenario B: mount/unmount cycles ----
 console.log("== scenario B: cycles ==");
 const CYCLE_PATHS = [
-  "/",
-  "/agent-cast",
-  "/agent-mesh",
-  "/network",
-  "/monitor",
-  "/compute-mesh",
-  "/mcp-skills",
-  "/knowledge",
-  "/verification",
-  "/search",
-  "/token-bank",
-  "/semantic-vote",
+	"/",
+	"/agent-cast",
+	"/agent-mesh",
+	"/network",
+	"/monitor",
+	"/compute-mesh",
+	"/mcp-skills",
+	"/knowledge",
+	"/verification",
+	"/search",
+	"/token-bank",
+	"/semantic-vote",
 ];
 const cycleEnds = [];
 for (let cycle = 1; cycle <= CYCLES; cycle++) {
-  for (const p of CYCLE_PATHS) await navigate(p);
-  await gc();
-  const s = await snap(`cycle-${cycle}-gc`);
-  cycleEnds.push(s.jsHeapMB);
+	for (const p of CYCLE_PATHS) await navigate(p);
+	await gc();
+	const s = await snap(`cycle-${cycle}-gc`);
+	cycleEnds.push(s.jsHeapMB);
 }
 
 const base = idleSamples[0];
@@ -154,21 +154,25 @@ const cycleGrowth = cycleEnds[cycleEnds.length - 1] - cycleEnds[0];
 
 const fail = [];
 if (Math.max(0, idleGc.jsHeapMB - base) > MAX_IDLE_GROWTH_MB) {
-  fail.push(`idle retention ${idleGc.jsHeapMB}MB vs boot ${base}MB (max ${MAX_IDLE_GROWTH_MB}MB)`);
+	fail.push(`idle retention ${idleGc.jsHeapMB}MB vs boot ${base}MB (max ${MAX_IDLE_GROWTH_MB}MB)`);
 }
 if (cycleGrowth > MAX_CYCLE_GROWTH_MB) {
-  fail.push(`cycle retention ${cycleGrowth}MB over ${CYCLES} cycles (max ${MAX_CYCLE_GROWTH_MB}MB)`);
+	fail.push(
+		`cycle retention ${cycleGrowth}MB over ${CYCLES} cycles (max ${MAX_CYCLE_GROWTH_MB}MB)`,
+	);
 }
 
 console.log("\n===== SUMMARY =====");
-console.log(`idle: boot ${base}MB → end ${idleEnd}MB (Δ ${(idleEnd - base).toFixed(2)}MB) → GC ${idleGc.jsHeapMB}MB`);
+console.log(
+	`idle: boot ${base}MB → end ${idleEnd}MB (Δ ${(idleEnd - base).toFixed(2)}MB) → GC ${idleGc.jsHeapMB}MB`,
+);
 console.log(`cycles: ${cycleEnds.join(" → ")} (Δ ${cycleGrowth.toFixed(2)}MB)`);
 
 if (fail.length > 0) {
-  console.error("✗ MEMORY FAIL:");
-  for (const f of fail) console.error(`  - ${f}`);
-  process.exitCode = 1;
+	console.error("✗ MEMORY FAIL:");
+	for (const f of fail) console.error(`  - ${f}`);
+	process.exitCode = 1;
 } else {
-  console.log("✓ memory ok");
+	console.log("✓ memory ok");
 }
 ws.close();

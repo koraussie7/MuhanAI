@@ -3,15 +3,15 @@ import { createByokVisionProvider } from "../e2b-byok-vision.js";
 
 describe("createByokVisionProvider", () => {
 	it("throws when apiKey is empty", () => {
-		expect(() =>
-			createByokVisionProvider({ provider: "openai", apiKey: "" }),
-		).toThrow(/apiKey/);
+		expect(() => createByokVisionProvider({ provider: "openai", apiKey: "" })).toThrow(/apiKey/);
 	});
 
 	it("rejects unknown providers", () => {
 		expect(() =>
 			createByokVisionProvider({
-				provider: "anthropic" as unknown as Parameters<typeof createByokVisionProvider>[0]["provider"],
+				provider: "anthropic" as unknown as Parameters<
+					typeof createByokVisionProvider
+				>[0]["provider"],
 				apiKey: "x",
 			}),
 		).toThrow(/unknown provider/);
@@ -28,7 +28,9 @@ describe("createByokVisionProvider", () => {
 
 	it("returns a provider for groq/openrouter/google", () => {
 		expect(createByokVisionProvider({ provider: "groq", apiKey: "x" }).provider).toBe("groq");
-		expect(createByokVisionProvider({ provider: "openrouter", apiKey: "x" }).provider).toBe("openrouter");
+		expect(createByokVisionProvider({ provider: "openrouter", apiKey: "x" }).provider).toBe(
+			"openrouter",
+		);
 		expect(createByokVisionProvider({ provider: "google", apiKey: "x" }).provider).toBe("google");
 	});
 
@@ -53,9 +55,7 @@ describe("BYOK vision JSON parsing — covered indirectly via createByokVisionPr
 		});
 		// call will fail because endpoint is unreachable, but the function
 		// signature accepts the right shape
-		await expect(
-			v.locate({ imageBase64: "AAAA", prompt: "find button" }),
-		).rejects.toBeDefined();
+		await expect(v.locate({ imageBase64: "AAAA", prompt: "find button" })).rejects.toBeDefined();
 		await expect(
 			v.planAction({ goal: "x", imageBase64: "AAAA", history: [] }),
 		).rejects.toBeDefined();

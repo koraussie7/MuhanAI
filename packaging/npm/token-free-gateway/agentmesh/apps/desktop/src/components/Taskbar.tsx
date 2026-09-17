@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, type ReactNode } from "react";
-import { Bot, Wifi, Battery, Volume2, Folder, Terminal, Globe } from "lucide-react";
-import { useI18n, SUPPORTED_LANGUAGES, setLanguage } from "@agentmesh/web/i18n.js";
+import { SUPPORTED_LANGUAGES, setLanguage, useI18n } from "@agentmesh/web/i18n.js";
+import { Battery, Bot, Folder, Globe, Terminal, Volume2, Wifi } from "lucide-react";
+import { type ReactNode, useEffect, useState } from "react";
 
 export interface ActiveWindowItem {
 	id: string;
@@ -87,9 +87,13 @@ export function Taskbar({
 				<div className={`engine-status flex items-center gap-2 ${getStatusColor()}`}>
 					<div className="w-2 h-2 rounded-full bg-current animate-pulse" />
 					<span className="text-xs">
-						{engineStatus === "ready" ? "AI Ready" :
-						 engineStatus === "loading" ? "Loading..." :
-						 engineStatus === "error" ? "AI Error" : "Initializing..."}
+						{engineStatus === "ready"
+							? "AI Ready"
+							: engineStatus === "loading"
+								? "Loading..."
+								: engineStatus === "error"
+									? "AI Error"
+									: "Initializing..."}
 					</span>
 				</div>
 
@@ -173,4 +177,3 @@ export function Taskbar({
 		</div>
 	);
 }
-

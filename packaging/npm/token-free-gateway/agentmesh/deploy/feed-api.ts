@@ -541,7 +541,9 @@ async function createKnowledgeNode(
 		author: (body.author ?? "anonymous").trim().slice(0, 80),
 		summary: (body.summary ?? title).trim().slice(0, 300),
 		tags: Array.isArray(body.tags) ? body.tags.slice(0, 8).map((t) => String(t).slice(0, 24)) : [],
-		links: Array.isArray(body.links) ? body.links.slice(0, 24).map((l) => String(l).slice(0, 120)) : [],
+		links: Array.isArray(body.links)
+			? body.links.slice(0, 24).map((l) => String(l).slice(0, 120))
+			: [],
 		markdown,
 		createdAt: now(),
 	};
@@ -594,8 +596,16 @@ const ROUTES: Route[] = [
 		handler: getRewards,
 	},
 	{ method: "GET", pattern: /^\/api\/unsolved$/, handler: listUnsolved },
-	{ method: "GET", pattern: /^\/api\/knowledge\/nodes$/, handler: (r, m, s) => listKnowledgeNodes(s) },
-	{ method: "POST", pattern: /^\/api\/knowledge\/nodes$/, handler: (r, m, s) => createKnowledgeNode(r, m, s) },
+	{
+		method: "GET",
+		pattern: /^\/api\/knowledge\/nodes$/,
+		handler: (r, m, s) => listKnowledgeNodes(s),
+	},
+	{
+		method: "POST",
+		pattern: /^\/api\/knowledge\/nodes$/,
+		handler: (r, m, s) => createKnowledgeNode(r, m, s),
+	},
 ];
 
 const FEED_PREFIXES = [

@@ -19,7 +19,10 @@ const AXL_TOPOLOGY: TopologySnapshot = {
 	fetchedAt: 0,
 };
 
-function makeStubTransport(name: string, opts: Partial<Transport> = {}): Transport & {
+function makeStubTransport(
+	name: string,
+	opts: Partial<Transport> = {},
+): Transport & {
 	send: ReturnType<typeof vi.fn>;
 	callMcp: ReturnType<typeof vi.fn>;
 } {
@@ -30,7 +33,9 @@ function makeStubTransport(name: string, opts: Partial<Transport> = {}): Transpo
 		getTopology: vi.fn(async () => EMPTY_TOPOLOGY),
 		send: vi.fn(async () => ({ sentBytes: 1 })),
 		recv: vi.fn(async () => null),
-		callMcp: vi.fn(async () => ({ response: { jsonrpc: "2.0", id: null, result: {} } as JsonRpcResponse })),
+		callMcp: vi.fn(async () => ({
+			response: { jsonrpc: "2.0", id: null, result: {} } as JsonRpcResponse,
+		})),
 		callA2a: vi.fn(async () => ({ a2a: true })),
 		getAgentCard: vi.fn(async () => null),
 		...opts,

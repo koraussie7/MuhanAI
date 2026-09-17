@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useGossipPulse } from "../hooks/useGossipPulse.js";
-import { formatPeerCountBare, formatHumanCount } from "../lib/mesh-stats.js";
+import { formatHumanCount, formatPeerCountBare } from "../lib/mesh-stats.js";
 
 const API = "";
 

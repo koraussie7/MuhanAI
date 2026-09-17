@@ -1,7 +1,6 @@
 import "./cosmic-prompt.css";
 import {
 	AlertTriangle,
-	Globe,
 	Check,
 	Computer,
 	Copy,
@@ -9,6 +8,7 @@ import {
 	Eye,
 	EyeOff,
 	FileText,
+	Globe,
 	KeyRound,
 	PlusCircle,
 	Settings,
@@ -20,8 +20,12 @@ import {
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "../../i18n";
+import {
+	answerWithBitterbot,
+	chatWithSippEngine,
+	preloadBitterbotEngine,
+} from "../../lib/bitterbot-engine.js";
 import { ComputerUsePanel } from "../ComputerUsePanel";
-import { answerWithBitterbot, chatWithSippEngine, preloadBitterbotEngine } from "../../lib/bitterbot-engine.js";
 
 interface ResolvedAnswer {
 	text: string;
@@ -66,7 +70,9 @@ function getGeminiCliBaseUrl(): string {
 	try {
 		const saved = window.localStorage.getItem("muhanai.gemini-cli-url");
 		if (saved && saved.trim().length > 0) return saved.trim().replace(/\/+$/, "");
-	} catch { /* ignore */ }
+	} catch {
+		/* ignore */
+	}
 	return DEFAULT_GEMINI_CLI_URL;
 }
 
@@ -130,7 +136,12 @@ interface ByokProviderDef {
 	models: string[];
 	defaultModel: string;
 	hint: string;
-	build: (model: string, systemMsg: string, userMsg: string, key: string) => {
+	build: (
+		model: string,
+		systemMsg: string,
+		userMsg: string,
+		key: string,
+	) => {
 		url: string;
 		headers: Record<string, string>;
 		body: unknown;
@@ -145,13 +156,7 @@ const BYOK_PROVIDERS: Record<ByokProviderId, ByokProviderDef> = {
 	oauth_gateway: {
 		label: "OAuth / Token-Free Gateway (WebAuth)",
 		hint: "http://127.0.0.1:3456/v1 또는 Bearer 토큰 (선택)",
-		models: [
-			"claude-3-7-sonnet",
-			"deepseek-r1",
-			"gpt-4o",
-			"gemini-2.5-pro",
-			"qwen-2.5",
-		],
+		models: ["claude-3-7-sonnet", "deepseek-r1", "gpt-4o", "gemini-2.5-pro", "qwen-2.5"],
 		defaultModel: "claude-3-7-sonnet",
 		build: (model, sys, user, key) => {
 			const trimmed = (key || "").trim();
@@ -221,7 +226,13 @@ const BYOK_PROVIDERS: Record<ByokProviderId, ByokProviderDef> = {
 		build: (model, sys, user, key) => ({
 			url: "https://api.deepseek.com/chat/completions",
 			headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-			body: { model, messages: [{ role: "system", content: sys }, { role: "user", content: user }] },
+			body: {
+				model,
+				messages: [
+					{ role: "system", content: sys },
+					{ role: "user", content: user },
+				],
+			},
 		}),
 		parse: (d) => {
 			const x = d as { choices?: Array<{ message?: { content?: string } }> };
@@ -236,7 +247,13 @@ const BYOK_PROVIDERS: Record<ByokProviderId, ByokProviderDef> = {
 		build: (model, sys, user, key) => ({
 			url: "https://api.openai.com/v1/chat/completions",
 			headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-			body: { model, messages: [{ role: "system", content: sys }, { role: "user", content: user }] },
+			body: {
+				model,
+				messages: [
+					{ role: "system", content: sys },
+					{ role: "user", content: user },
+				],
+			},
 		}),
 		parse: (d) => {
 			const x = d as { choices?: Array<{ message?: { content?: string } }> };
@@ -258,10 +275,17 @@ const BYOK_PROVIDERS: Record<ByokProviderId, ByokProviderDef> = {
 			headers: {
 				Authorization: `Bearer ${key}`,
 				"Content-Type": "application/json",
-				"HTTP-Referer": typeof window !== "undefined" ? window.location.origin : "https://muhanai.com",
+				"HTTP-Referer":
+					typeof window !== "undefined" ? window.location.origin : "https://muhanai.com",
 				"X-Title": "MuhanAI",
 			},
-			body: { model, messages: [{ role: "system", content: sys }, { role: "user", content: user }] },
+			body: {
+				model,
+				messages: [
+					{ role: "system", content: sys },
+					{ role: "user", content: user },
+				],
+			},
 		}),
 		parse: (d) => {
 			const x = d as { choices?: Array<{ message?: { content?: string } }> };
@@ -295,7 +319,13 @@ const BYOK_PROVIDERS: Record<ByokProviderId, ByokProviderDef> = {
 		build: (model, sys, user, key) => ({
 			url: "https://api.groq.com/openai/v1/chat/completions",
 			headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-			body: { model, messages: [{ role: "system", content: sys }, { role: "user", content: user }] },
+			body: {
+				model,
+				messages: [
+					{ role: "system", content: sys },
+					{ role: "user", content: user },
+				],
+			},
 		}),
 		parse: (d) => {
 			const x = d as { choices?: Array<{ message?: { content?: string } }> };
@@ -310,7 +340,13 @@ const BYOK_PROVIDERS: Record<ByokProviderId, ByokProviderDef> = {
 		build: (model, sys, user, key) => ({
 			url: "https://api.mistral.ai/v1/chat/completions",
 			headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-			body: { model, messages: [{ role: "system", content: sys }, { role: "user", content: user }] },
+			body: {
+				model,
+				messages: [
+					{ role: "system", content: sys },
+					{ role: "user", content: user },
+				],
+			},
 		}),
 		parse: (d) => {
 			const x = d as { choices?: Array<{ message?: { content?: string } }> };
@@ -331,12 +367,18 @@ function loadByok(): ByokSettings | null {
 		const provider = (parsed.provider ?? "oauth_gateway") as ByokProviderId;
 		const def = BYOK_PROVIDERS[provider];
 		if (!def) return null;
-		if ((provider !== "oauth_gateway" && provider !== "omniroute") && (!parsed.apiKey || parsed.apiKey.length === 0)) return null;
+		if (
+			provider !== "oauth_gateway" &&
+			provider !== "omniroute" &&
+			(!parsed.apiKey || parsed.apiKey.length === 0)
+		)
+			return null;
 		return {
 			provider,
-			model: typeof parsed.model === "string" && def.models.includes(parsed.model)
-				? parsed.model
-				: def.defaultModel,
+			model:
+				typeof parsed.model === "string" && def.models.includes(parsed.model)
+					? parsed.model
+					: def.defaultModel,
 			apiKey: parsed.apiKey ?? "",
 		};
 	} catch {
@@ -393,7 +435,9 @@ export async function startOpenRouterOAuth(): Promise<void> {
 	const { verifier, challenge } = await createPkcePair();
 	try {
 		window.sessionStorage.setItem(OPENROUTER_OAUTH_STATE_KEY, verifier);
-	} catch { /* ignore */ }
+	} catch {
+		/* ignore */
+	}
 	const callbackUrl = `${window.location.origin}/oauth-callback`;
 	const authUrl =
 		`https://openrouter.ai/oauth?callback_url=${encodeURIComponent(callbackUrl)}` +
@@ -430,14 +474,19 @@ export async function handleOpenRouterCallbackIfPresent(): Promise<boolean> {
 				body: JSON.stringify({ code, code_verifier: verifier }),
 			});
 			const data = (await res.json()) as { key?: string; error?: string };
-			message = res.ok && data.key
-				? { type: OPENROUTER_OAUTH_MESSAGE_TYPE, key: data.key }
-				: { type: OPENROUTER_OAUTH_MESSAGE_TYPE, error: data.error || "Exchange failed" };
+			message =
+				res.ok && data.key
+					? { type: OPENROUTER_OAUTH_MESSAGE_TYPE, key: data.key }
+					: { type: OPENROUTER_OAUTH_MESSAGE_TYPE, error: data.error || "Exchange failed" };
 		} catch (err: any) {
 			message = { type: OPENROUTER_OAUTH_MESSAGE_TYPE, error: err?.message || "Network error" };
 		}
 	}
-	try { window.sessionStorage.removeItem(OPENROUTER_OAUTH_STATE_KEY); } catch { /* ignore */ }
+	try {
+		window.sessionStorage.removeItem(OPENROUTER_OAUTH_STATE_KEY);
+	} catch {
+		/* ignore */
+	}
 	if (window.opener && !window.opener.closed) {
 		window.opener.postMessage(message, window.location.origin);
 		window.close();
@@ -458,9 +507,17 @@ export async function handleOpenRouterCallbackIfPresent(): Promise<boolean> {
  * Returns null on any failure (no key, network error, auth error, parse
  * error, empty response) so the caller can fall through to the next tier.
  */
-async function resolveAnswerFromByok(query: string, settings: ByokSettings | null): Promise<ResolvedAnswer | null> {
+async function resolveAnswerFromByok(
+	query: string,
+	settings: ByokSettings | null,
+): Promise<ResolvedAnswer | null> {
 	if (!settings) return null;
-	if (settings.provider !== "oauth_gateway" && settings.provider !== "omniroute" && !settings.apiKey) return null;
+	if (
+		settings.provider !== "oauth_gateway" &&
+		settings.provider !== "omniroute" &&
+		!settings.apiKey
+	)
+		return null;
 	const def = BYOK_PROVIDERS[settings.provider];
 	if (!def) return null;
 	const req = def.build(settings.model, SYSTEM_PROMPT, query, settings.apiKey);
@@ -548,39 +605,42 @@ async function resolveAnswerFromPollinations(query: string): Promise<ResolvedAns
 	const POLLINATIONS_SYSTEM =
 		"You are MuhanAI, a helpful multilingual assistant. Answer concisely and accurately in the same language as the user's question.";
 
-	const start = (typeof performance !== "undefined" ? performance.now() : Date.now());
+	const start = typeof performance !== "undefined" ? performance.now() : Date.now();
 
-	const candidates: Array<{ provider: string; model: string; tryFetch: () => Promise<Response> }> = [
-{
-		provider: "pollinations-post",
-		model: "openai-fast",
-		tryFetch: () =>
-			fetchWithTimeout(
-				"https://text.pollinations.ai/v1/chat/completions",
-				{
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({
-						model: "openai-fast",
-						messages: [
-							{ role: "system", content: POLLINATIONS_SYSTEM },
-							{ role: "user", content: query },
-						],
-						stream: false,
-						max_tokens: 512,
-					}),
-				},
-				10000,
-			),
-	},
-];
+	const candidates: Array<{ provider: string; model: string; tryFetch: () => Promise<Response> }> =
+		[
+			{
+				provider: "pollinations-post",
+				model: "openai-fast",
+				tryFetch: () =>
+					fetchWithTimeout(
+						"https://text.pollinations.ai/v1/chat/completions",
+						{
+							method: "POST",
+							headers: { "Content-Type": "application/json" },
+							body: JSON.stringify({
+								model: "openai-fast",
+								messages: [
+									{ role: "system", content: POLLINATIONS_SYSTEM },
+									{ role: "user", content: query },
+								],
+								stream: false,
+								max_tokens: 512,
+							}),
+						},
+						10000,
+					),
+			},
+		];
 
 	for (const c of candidates) {
 		try {
 			const res = await pollinationsEnqueue(() => c.tryFetch());
 			// Drain body so the connection can be reused; ignore on errors.
 			if (!res.ok) {
-				try { await res.text(); } catch {}
+				try {
+					await res.text();
+				} catch {}
 				continue;
 			}
 			// GET returns plain text, POST returns JSON. Inspect content-type.
@@ -599,8 +659,7 @@ async function resolveAnswerFromPollinations(query: string): Promise<ResolvedAns
 			}
 			if (typeof text !== "string" || text.trim().length === 0) continue;
 			if (!isValidLlmText(text)) continue; // ad/budget-error page — treat as failure
-			const elapsed =
-				(typeof performance !== "undefined" ? performance.now() : Date.now()) - start;
+			const elapsed = (typeof performance !== "undefined" ? performance.now() : Date.now()) - start;
 			return {
 				text,
 				provider: c.provider,
@@ -608,10 +667,7 @@ async function resolveAnswerFromPollinations(query: string): Promise<ResolvedAns
 				latencyMs: Math.round(elapsed),
 				tier: "browser-direct",
 			};
-		} catch {
-			// Network/abort/parse — try the next candidate.
-			continue;
-		}
+		} catch {}
 	}
 
 	return null;
@@ -743,9 +799,9 @@ async function resolveAnswerFromLlm(query: string): Promise<ResolvedAnswer | nul
 		const authToken =
 			typeof localStorage !== "undefined"
 				? localStorage.getItem("muhanai_auth_token") ||
-				  localStorage.getItem("auth_token") ||
-				  localStorage.getItem("token") ||
-				  localStorage.getItem("oauth_token")
+					localStorage.getItem("auth_token") ||
+					localStorage.getItem("token") ||
+					localStorage.getItem("oauth_token")
 				: null;
 		const headers: Record<string, string> = { "Content-Type": "application/json" };
 		if (authToken) {
@@ -805,7 +861,11 @@ async function resolveAnswerFromMcp(query: string): Promise<ResolvedAnswer | nul
 		if (typeof text !== "string" || text.trim().length === 0) return null;
 
 		// If MCP returned an error payload disguised as string, do not treat as valid LLM answer
-		if (text.includes('"error":') || text.includes('"status":"unavailable"') || text.includes("Quorum service is not configured")) {
+		if (
+			text.includes('"error":') ||
+			text.includes('"status":"unavailable"') ||
+			text.includes("Quorum service is not configured")
+		) {
 			try {
 				const parsed = JSON.parse(text);
 				if (parsed.error || parsed.status === "unavailable") {
@@ -909,7 +969,10 @@ Supported providers: OpenAI · OpenRouter · Google AI Studio · Groq · Mistral
  * - Gemini 2.5 Pro: Multilingual consensus and factual validation
  * - Bitterbot Agent: Local WebGPU inference (real response)
  */
-async function resolveAnswerFromMultiAgentQuorum(query: string, config: FreeLlmConfig): Promise<ResolvedAnswer | null> {
+async function resolveAnswerFromMultiAgentQuorum(
+	query: string,
+	config: FreeLlmConfig,
+): Promise<ResolvedAnswer | null> {
 	if (typeof window === "undefined") return null;
 	if (!query || query.trim().length === 0) return null;
 
@@ -918,18 +981,190 @@ async function resolveAnswerFromMultiAgentQuorum(query: string, config: FreeLlmC
 	let bitterbotResponse: string | null = null;
 	let bitterbotProvider = "Local WebGPU (SippEngine)";
 	// 1. Bitterbot (local WebGPU)
-	try { bitterbotResponse = await chatWithSippEngine(query); } catch { /* continue */ }
+	try {
+		bitterbotResponse = await chatWithSippEngine(query);
+	} catch {
+		/* continue */
+	}
 	// 2. Mesh-LLM (local mesh node, port 9337)
-	if (!bitterbotResponse && config.enabledProviders.includes("mesh-llm")) { try { const res = await fetchWithTimeout("http://127.0.0.1:9337/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "auto", messages: [{ role: "system", content: "You are MuhanAI, a helpful multilingual assistant." }, { role: "user", content: query }], stream: false, max_tokens: 512 }) }, 6000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (isValidLlmText(text)) { bitterbotResponse = (text as string).trim(); bitterbotProvider = "Mesh-LLM (Local)"; } } } catch { /* continue */ } }
+	if (!bitterbotResponse && config.enabledProviders.includes("mesh-llm")) {
+		try {
+			const res = await fetchWithTimeout(
+				"http://127.0.0.1:9337/v1/chat/completions",
+				{
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						model: "auto",
+						messages: [
+							{ role: "system", content: "You are MuhanAI, a helpful multilingual assistant." },
+							{ role: "user", content: query },
+						],
+						stream: false,
+						max_tokens: 512,
+					}),
+				},
+				6000,
+			);
+			if (res.ok) {
+				const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+				const text = data?.choices?.[0]?.message?.content;
+				if (isValidLlmText(text)) {
+					bitterbotResponse = (text as string).trim();
+					bitterbotProvider = "Mesh-LLM (Local)";
+				}
+			}
+		} catch {
+			/* continue */
+		}
+	}
 	// 3. Pollination POST
-	if (!bitterbotResponse && config.enabledProviders.includes("pollinations")) { try { const res = await fetchWithTimeout("https://text.pollinations.ai/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "openai-fast", messages: [{ role: "system", content: "You are MuhanAI, a helpful multilingual assistant." }, { role: "user", content: query }], stream: false, max_tokens: 300 }) }, 6000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (isValidLlmText(text)) { bitterbotResponse = (text as string).trim(); bitterbotProvider = "Pollination (Free)"; } } } catch { /* continue */ } }
+	if (!bitterbotResponse && config.enabledProviders.includes("pollinations")) {
+		try {
+			const res = await fetchWithTimeout(
+				"https://text.pollinations.ai/v1/chat/completions",
+				{
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						model: "openai-fast",
+						messages: [
+							{ role: "system", content: "You are MuhanAI, a helpful multilingual assistant." },
+							{ role: "user", content: query },
+						],
+						stream: false,
+						max_tokens: 300,
+					}),
+				},
+				6000,
+			);
+			if (res.ok) {
+				const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+				const text = data?.choices?.[0]?.message?.content;
+				if (isValidLlmText(text)) {
+					bitterbotResponse = (text as string).trim();
+					bitterbotProvider = "Pollination (Free)";
+				}
+			}
+		} catch {
+			/* continue */
+		}
+	}
 	// 4. /api/llm/chat
-	if (!bitterbotResponse && config.enabledProviders.includes("api-llm-chat")) { try { const res = await fetchWithTimeout("/api/llm/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt: query, system: "You are MuhanAI, a helpful assistant." }) }, 8000); if (res.ok) { const data = (await res.json()) as { text?: string; provider?: string }; if (data.text && data.text.trim().length > 0) { bitterbotResponse = data.text.trim(); bitterbotProvider = data.provider || "MuhanAI LLM"; } } } catch { /* continue */ } }
+	if (!bitterbotResponse && config.enabledProviders.includes("api-llm-chat")) {
+		try {
+			const res = await fetchWithTimeout(
+				"/api/llm/chat",
+				{
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ prompt: query, system: "You are MuhanAI, a helpful assistant." }),
+				},
+				8000,
+			);
+			if (res.ok) {
+				const data = (await res.json()) as { text?: string; provider?: string };
+				if (data.text && data.text.trim().length > 0) {
+					bitterbotResponse = data.text.trim();
+					bitterbotProvider = data.provider || "MuhanAI LLM";
+				}
+			}
+		} catch {
+			/* continue */
+		}
+	}
 	// 5. Local OAuth Gateway
-	if (!bitterbotResponse && config.enabledProviders.includes("local-oauth")) { try { const res = await fetchWithTimeout("http://127.0.0.1:3456/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "claude-3-7-sonnet", messages: [{ role: "system", content: "You are MuhanAI." }, { role: "user", content: query }] }) }, 4000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (text && text.trim().length > 0) { bitterbotResponse = text.trim(); bitterbotProvider = "Local OAuth"; } } } catch { /* continue */ } }
+	if (!bitterbotResponse && config.enabledProviders.includes("local-oauth")) {
+		try {
+			const res = await fetchWithTimeout(
+				"http://127.0.0.1:3456/v1/chat/completions",
+				{
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						model: "claude-3-7-sonnet",
+						messages: [
+							{ role: "system", content: "You are MuhanAI." },
+							{ role: "user", content: query },
+						],
+					}),
+				},
+				4000,
+			);
+			if (res.ok) {
+				const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+				const text = data?.choices?.[0]?.message?.content;
+				if (text && text.trim().length > 0) {
+					bitterbotResponse = text.trim();
+					bitterbotProvider = "Local OAuth";
+				}
+			}
+		} catch {
+			/* continue */
+		}
+	}
 	// 6. OmniRoute
-	if (!bitterbotResponse && config.enabledProviders.includes("omniroute")) { try { const res = await fetchWithTimeout("http://127.0.0.1:20128/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "auto", messages: [{ role: "system", content: "You are MuhanAI." }, { role: "user", content: query }] }) }, 4000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (text && text.trim().length > 0) { bitterbotResponse = text.trim(); bitterbotProvider = "OmniRoute"; } } } catch { /* continue */ } }
-	if (!bitterbotResponse && config.enabledProviders.includes("gemini-cli")) { try { const res = await fetchWithTimeout(getGeminiCliBaseUrl() + "/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "gemini-2.5-pro", messages: [{ role: "system", content: "You are MuhanAI Bitterbot, a helpful multilingual AI assistant." }, { role: "user", content: query }] }) }, 5000); if (res.ok) { const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> }; const text = data?.choices?.[0]?.message?.content; if (isValidLlmText(text)) { bitterbotResponse = text!.trim(); bitterbotProvider = "Gemini CLI (Free)"; } } } catch { /* continue */ } }
+	if (!bitterbotResponse && config.enabledProviders.includes("omniroute")) {
+		try {
+			const res = await fetchWithTimeout(
+				"http://127.0.0.1:20128/v1/chat/completions",
+				{
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						model: "auto",
+						messages: [
+							{ role: "system", content: "You are MuhanAI." },
+							{ role: "user", content: query },
+						],
+					}),
+				},
+				4000,
+			);
+			if (res.ok) {
+				const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+				const text = data?.choices?.[0]?.message?.content;
+				if (text && text.trim().length > 0) {
+					bitterbotResponse = text.trim();
+					bitterbotProvider = "OmniRoute";
+				}
+			}
+		} catch {
+			/* continue */
+		}
+	}
+	if (!bitterbotResponse && config.enabledProviders.includes("gemini-cli")) {
+		try {
+			const res = await fetchWithTimeout(
+				getGeminiCliBaseUrl() + "/v1/chat/completions",
+				{
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						model: "gemini-2.5-pro",
+						messages: [
+							{
+								role: "system",
+								content: "You are MuhanAI Bitterbot, a helpful multilingual AI assistant.",
+							},
+							{ role: "user", content: query },
+						],
+					}),
+				},
+				5000,
+			);
+			if (res.ok) {
+				const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+				const text = data?.choices?.[0]?.message?.content;
+				if (isValidLlmText(text)) {
+					bitterbotResponse = text!.trim();
+					bitterbotProvider = "Gemini CLI (Free)";
+				}
+			}
+		} catch {
+			/* continue */
+		}
+	}
 
 	// Simulated agent analyses
 	const agents = [
@@ -938,8 +1173,10 @@ async function resolveAnswerFromMultiAgentQuorum(query: string, config: FreeLlmC
 			focus: "Architecture & cognitive intent",
 			analysis: (q: string) => {
 				const len = q.length;
-				if (len < 20) return "Intent classification verified. Short-form query patterns match greeting/salutation heuristics.";
-				if (len < 100) return "Semantic structure analyzed. Query decomposition shows clear intent boundaries and contextual coherence.";
+				if (len < 20)
+					return "Intent classification verified. Short-form query patterns match greeting/salutation heuristics.";
+				if (len < 100)
+					return "Semantic structure analyzed. Query decomposition shows clear intent boundaries and contextual coherence.";
 				return "Deep architectural analysis complete. Multi-layer intent parsing confirms coherent question structure.";
 			},
 		},
@@ -958,7 +1195,8 @@ async function resolveAnswerFromMultiAgentQuorum(query: string, config: FreeLlmC
 			focus: "Multilingual consensus and factual validation",
 			analysis: (q: string) => {
 				const len = q.length;
-				if (len < 20) return "Cross-linguistic pattern match confirmed. Universal greeting semantics validated.";
+				if (len < 20)
+					return "Cross-linguistic pattern match confirmed. Universal greeting semantics validated.";
 				if (len < 100) return "Multilingual consensus achieved. Factual alignment verified.";
 				return "Global consensus validated. Cross-referenced with multilingual knowledge bases.";
 			},
@@ -1008,15 +1246,21 @@ mcp-quorum
 •
 —`;
 	}
-	return { text, provider: bitterbotProvider, model: "multi-agent-quorum", latencyMs: 0, tier: "zero-token" };
+	return {
+		text,
+		provider: bitterbotProvider,
+		model: "multi-agent-quorum",
+		latencyMs: 0,
+		tier: "zero-token",
+	};
 }
 
 /** Resolve local Bitterbot providers without allowing an offline placeholder here. */
 async function resolveAnswerFromBitterbot(query: string): Promise<ResolvedAnswer | null> {
 	if (typeof window === "undefined") return null;
 	const response = await answerWithBitterbot(
-	[{ id: `prompt-${Date.now()}`, role: "user", content: query, createdAt: Date.now() }],
-	{ allowOffline: false },
+		[{ id: `prompt-${Date.now()}`, role: "user", content: query, createdAt: Date.now() }],
+		{ allowOffline: false },
 	);
 	if (!response) return null;
 	return response;
@@ -1065,7 +1309,9 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 	const [showByokKey, setShowByokKey] = useState(false);
 	const [byokError, setByokError] = useState<string | null>(null);
 	const [showComputerUsePanel, setShowComputerUsePanel] = useState(false);
-	const [freeLlmEnabled, setFreeLlmEnabled] = useState<Set<FreeLlmProviderId>>(new Set(DEFAULT_FREE_LLM_PROVIDERS));
+	const [freeLlmEnabled, setFreeLlmEnabled] = useState<Set<FreeLlmProviderId>>(
+		new Set(DEFAULT_FREE_LLM_PROVIDERS),
+	);
 	const [showFreeLlmPanel, setShowFreeLlmPanel] = useState(false);
 
 	// WebGPU 로컬 엔진 자동 프리로드: 페이지 마운트 시 백그라운드에서 기본 모델을
@@ -1202,7 +1448,10 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 		//   6. quorum template → offline fallback so the UI never hangs
 		let resolved = await resolveAnswerFromByok(query, byokSettings);
 		if (!resolved) resolved = await resolveAnswerFromBitterbot(query);
-		if (!resolved) resolved = await resolveAnswerFromMultiAgentQuorum(query, { enabledProviders: Array.from(freeLlmEnabled) });
+		if (!resolved)
+			resolved = await resolveAnswerFromMultiAgentQuorum(query, {
+				enabledProviders: Array.from(freeLlmEnabled),
+			});
 		if (!resolved) resolved = await resolveAnswerFromLocalOAuthGateway(query);
 		if (!resolved) resolved = await resolveAnswerFromLocalOmniRoute(query);
 		if (!resolved) resolved = await resolveAnswerFromPollinations(query);
@@ -1385,7 +1634,10 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 						title={t.promptBar.computerUseTitle}
 						aria-label="Computer Use 열기"
 					>
-						<Computer size={13} className={showComputerUsePanel ? "text-cyan-300" : "text-slate-400"} />
+						<Computer
+							size={13}
+							className={showComputerUsePanel ? "text-cyan-300" : "text-slate-400"}
+						/>
 					</button>
 					<button
 						type="button"
@@ -1427,9 +1679,7 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 			</form>
 
 			{/* Computer Use Panel — e2b Desktop + BYOK vision model */}
-			{showComputerUsePanel && (
-				<ComputerUsePanel onClose={() => setShowComputerUsePanel(false)} />
-			)}
+			{showComputerUsePanel && <ComputerUsePanel onClose={() => setShowComputerUsePanel(false)} />}
 
 			{/* BYOK Settings Panel — Bring Your Own Key (client-only, never sent to server) */}
 			{showByokPanel && (
@@ -1438,7 +1688,9 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 						<div className="flex items-center gap-2">
 							<KeyRound size={14} className="text-amber-300" />
 							<span className="cosmic-byok-title">Bring Your Own Key (BYOK)</span>
-							{byokSettings && <span className="cosmic-byok-status-pill">{t.promptBar.byokActive}</span>}
+							{byokSettings && (
+								<span className="cosmic-byok-status-pill">{t.promptBar.byokActive}</span>
+							)}
 						</div>
 						<button
 							type="button"
@@ -1465,8 +1717,9 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 						<div className="cosmic-byok-warning">
 							<AlertTriangle size={12} className="text-amber-400 flex-shrink-0 mt-0.5" />
 							<span>
-								API 키는 이 브라우저의 <code>localStorage</code>에만 저장되며, 절대 muhanai.com 서버로
-								전송되지 않습니다. 키를 직접 provider(OpenAI, Anthropic, Google 등)에 보내 추론합니다.
+								API 키는 이 브라우저의 <code>localStorage</code>에만 저장되며, 절대 muhanai.com
+								서버로 전송되지 않습니다. 키를 직접 provider(OpenAI, Anthropic, Google 등)에 보내
+								추론합니다.
 							</span>
 						</div>
 
@@ -1548,7 +1801,9 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 								disabled={!byokDraftKey.trim()}
 							>
 								<KeyRound size={12} />
-								<span>{byokSettings ? t.promptBar.keySaveRefresh : t.promptBar.keySaveActivate}</span>
+								<span>
+									{byokSettings ? t.promptBar.keySaveRefresh : t.promptBar.keySaveActivate}
+								</span>
 							</button>
 							{byokSettings && (
 								<button
@@ -1582,7 +1837,9 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 						<div className="flex items-center gap-2">
 							<Globe size={14} className="text-sky-400" />
 							<span className="cosmic-free-llm-title">{t.freeLlm.settingsTitle}</span>
-							<span className="text-xs text-slate-500">({freeLlmEnabled.size}/{DEFAULT_FREE_LLM_PROVIDERS.length})</span>
+							<span className="text-xs text-slate-500">
+								({freeLlmEnabled.size}/{DEFAULT_FREE_LLM_PROVIDERS.length})
+							</span>
 						</div>
 						<button
 							type="button"
@@ -1635,8 +1892,9 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 							<Sparkles size={13} className="text-sky-400" />
 							<span>
 								{answerMeta.tier === "offline"
-									? ((t.ui as Record<string, string> | undefined)?.aiOfflineTitle || "⚠ No LLM Available · BYOK 추가 필요")
-									: (t.ui?.aiQuorumTitle || "MuhanAI Multi-Agent Quorum Consensus")}
+									? (t.ui as Record<string, string> | undefined)?.aiOfflineTitle ||
+										"⚠ No LLM Available · BYOK 추가 필요"
+									: t.ui?.aiQuorumTitle || "MuhanAI Multi-Agent Quorum Consensus"}
 							</span>
 						</div>
 						<div className="cosmic-ai-quorum-models">
@@ -1645,13 +1903,19 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 								<span className="cosmic-ai-model-pill">Zero-Token</span>
 							)}
 							{answerMeta.tier === "local-webgpu" && (
-								<span className="cosmic-ai-model-pill bg-emerald-900/60 text-emerald-300 border border-emerald-500/40">Local WebGPU · Zero-Token</span>
+								<span className="cosmic-ai-model-pill bg-emerald-900/60 text-emerald-300 border border-emerald-500/40">
+									Local WebGPU · Zero-Token
+								</span>
 							)}
 							{answerMeta.tier === "omniroute" && (
-								<span className="cosmic-ai-model-pill bg-cyan-900/60 text-cyan-300 border border-cyan-500/40">OmniRoute Mesh</span>
+								<span className="cosmic-ai-model-pill bg-cyan-900/60 text-cyan-300 border border-cyan-500/40">
+									OmniRoute Mesh
+								</span>
 							)}
 							{answerMeta.tier === "oauth-gateway" && (
-								<span className="cosmic-ai-model-pill bg-sky-900/60 text-sky-300 border border-sky-500/40">OAuth WebAuth</span>
+								<span className="cosmic-ai-model-pill bg-sky-900/60 text-sky-300 border border-sky-500/40">
+									OAuth WebAuth
+								</span>
 							)}
 							{answerMeta.tier === "browser-direct" && (
 								<span className="cosmic-ai-model-pill">Browser-Direct</span>
@@ -1660,7 +1924,9 @@ export const CosmicPromptBar: React.FC<CosmicPromptBarProps> = ({
 								<span className="cosmic-ai-model-pill cosmic-byok-tier-pill">BYOK · Your Key</span>
 							)}
 							{answerMeta.tier === "offline" && (
-								<span className="cosmic-ai-model-pill cosmic-offline-tier-pill">{t.promptBar.rateLimitedHint}</span>
+								<span className="cosmic-ai-model-pill cosmic-offline-tier-pill">
+									{t.promptBar.rateLimitedHint}
+								</span>
 							)}
 							<button
 								type="button"

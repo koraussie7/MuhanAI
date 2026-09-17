@@ -1,5 +1,5 @@
-import { AIEngineFactory } from "@agentmesh/ai-engine/factory";
 import type { SippEngine } from "@agentmesh/ai-engine";
+import { AIEngineFactory } from "@agentmesh/ai-engine/factory";
 import { answerOffline, type BitterbotMessage as OfflineMessage } from "./offline-brain.js";
 
 export type BitterbotRole = "system" | "user" | "assistant";
@@ -45,24 +45,28 @@ function abortIfNeeded(signal?: AbortSignal): void {
 	if (signal?.aborted) throw new DOMException("The request was aborted", "AbortError");
 }
 
-async function fetchJson(url: string, body: unknown, options: BitterbotChatOptions = {}): Promise<any> {
+async function fetchJson(
+	url: string,
+	body: unknown,
+	options: BitterbotChatOptions = {},
+): Promise<any> {
 	abortIfNeeded(options.signal);
 	const controller = new AbortController();
 	const onAbort = () => controller.abort();
 	options.signal?.addEventListener("abort", onAbort, { once: true });
 	const timer = setTimeout(() => controller.abort(), 12_000);
 	try {
-	const response = await fetch(url, {
-	method: "POST",
-		headers: { "Content-Type": "application/json" },
-	body: JSON.stringify(body),
-		signal: controller.signal,
-	});
-	if (!response.ok) throw new Error(`Provider returned HTTP ${response.status}`);
-	return await response.json();
+		const response = await fetch(url, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(body),
+			signal: controller.signal,
+		});
+		if (!response.ok) throw new Error(`Provider returned HTTP ${response.status}`);
+		return await response.json();
 	} finally {
-	clearTimeout(timer);
-	options.signal?.removeEventListener("abort", onAbort);
+		clearTimeout(timer);
+		options.signal?.removeEventListener("abort", onAbort);
 	}
 }
 
@@ -70,17 +74,17 @@ async function getSippEngine(): Promise<SippEngine | null> {
 	if (sippEngine) return sippEngine;
 	if (sippInit) return sippInit;
 	sippInit = (async () => {
-	try {
-	const engine = AIEngineFactory.createDefault();
-	await engine.init();
-	await engine.loadModel("phi-3-mini-q4"); // 2.3GB — 첫 자동 다운로드가 빠른 기본 모델
-		sippEngine = engine;
-	return engine;
-	} catch {
-	return null;
-	} finally {
-		sippInit = null;
-	}
+		try {
+			const engine = AIEngineFactory.createDefault();
+			await engine.init();
+			await engine.loadModel("phi-3-mini-q4"); // 2.3GB — 첫 자동 다운로드가 빠른 기본 모델
+			sippEngine = engine;
+			return engine;
+		} catch {
+			return null;
+		} finally {
+			sippInit = null;
+		}
 	})();
 	return sippInit;
 }
@@ -98,26 +102,26 @@ function offlineResponse(messages: BitterbotMessage[]): BitterbotResponse {
 export function loadBitterbotHistory(): BitterbotMessage[] {
 	if (typeof localStorage === "undefined") return [];
 	try {
-	const value = JSON.parse(localStorage.getItem(HISTORY_KEY) ?? "[]") as BitterbotMessage[];
-	return Array.isArray(value) ? value.filter((item) => item && validText(item.content)) : [];
+		const value = JSON.parse(localStorage.getItem(HISTORY_KEY) ?? "[]") as BitterbotMessage[];
+		return Array.isArray(value) ? value.filter((item) => item && validText(item.content)) : [];
 	} catch {
-	return [];
+		return [];
 	}
 }
 
 export function saveBitterbotHistory(history: BitterbotMessage[]): void {
 	try {
-	localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(-40)));
+		localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(-40)));
 	} catch {
-	// Storage can be unavailable in private or embedded contexts.
+		// Storage can be unavailable in private or embedded contexts.
 	}
 }
 
 export function clearBitterbotHistory(): void {
 	try {
-	localStorage.removeItem(HISTORY_KEY);
+		localStorage.removeItem(HISTORY_KEY);
 	} catch {
-	// Ignore storage failures.
+		// Ignore storage failures.
 	}
 }
 
@@ -126,37 +130,63 @@ export async function answerWithBitterbot(
 	options: BitterbotChatOptions = {},
 ): Promise<BitterbotResponse | null> {
 	const started = now();
-	const promptMessages = [{ role: "system", content: SYSTEM_PROMPT }, ...messages].map(({ role, content }) => ({ role, content }));
+	const promptMessages = [{ role: "system", content: SYSTEM_PROMPT }, ...messages].map(
+		({ role, content }) => ({ role, content }),
+	);
 	abortIfNeeded(options.signal);
 
 	try {
-	if (typeof navigator !== "undefined" && "gpu" in navigator) {
-	const engine = await getSippEngine();
-	if (engine) {
-	const lastUser = [...messages].reverse().find((message) => message.role === "user")?.content ?? "";
-	const text = await engine.chat(lastUser, { stream: false });
-	if (validText(text)) {
-	return { text, provider: "bitterbot-webgpu", model: "phi-3-mini-q4", tier: "local-webgpu", latencyMs: Math.round(now() - started) };
-	}
-	}
-	}
+		if (typeof navigator !== "undefined" && "gpu" in navigator) {
+			const engine = await getSippEngine();
+			if (engine) {
+				const lastUser =
+					[...messages].reverse().find((message) => message.role === "user")?.content ?? "";
+				const text = await engine.chat(lastUser, { stream: false });
+				if (validText(text)) {
+					return {
+						text,
+						provider: "bitterbot-webgpu",
+						model: "phi-3-mini-q4",
+						tier: "local-webgpu",
+						latencyMs: Math.round(now() - started),
+					};
+				}
+			}
+		}
 	} catch {
-	// Continue through local providers.
+		// Continue through local providers.
 	}
 
-	for (const endpoint of ["http://127.0.0.1:8080/v1/chat/completions", "http://127.0.0.1:3456/v1/chat/completions", "/api/llm/chat"]) {
-	try {
-	const body = endpoint === "/api/llm/chat"
-	? { prompt: messages.at(-1)?.content ?? "", system: SYSTEM_PROMPT }
-	: { model: "local", messages: promptMessages, temperature: options.temperature ?? 0.7, max_tokens: options.maxTokens ?? 512 };
-	const data = await fetchJson(endpoint, body, options);
-	const text = data?.choices?.[0]?.message?.content ?? data?.text;
-	if (validText(text)) {
-	return { text, provider: data.provider ?? (endpoint.includes("8080") ? "nanos-local" : "bitterbot-local"), model: data.model ?? "local", tier: endpoint.includes("8080") ? "nanos-local" : "local", latencyMs: Math.round(now() - started) };
-	}
-	} catch {
-	// Try the next local provider.
-	}
+	for (const endpoint of [
+		"http://127.0.0.1:8080/v1/chat/completions",
+		"http://127.0.0.1:3456/v1/chat/completions",
+		"/api/llm/chat",
+	]) {
+		try {
+			const body =
+				endpoint === "/api/llm/chat"
+					? { prompt: messages.at(-1)?.content ?? "", system: SYSTEM_PROMPT }
+					: {
+							model: "local",
+							messages: promptMessages,
+							temperature: options.temperature ?? 0.7,
+							max_tokens: options.maxTokens ?? 512,
+						};
+			const data = await fetchJson(endpoint, body, options);
+			const text = data?.choices?.[0]?.message?.content ?? data?.text;
+			if (validText(text)) {
+				return {
+					text,
+					provider:
+						data.provider ?? (endpoint.includes("8080") ? "nanos-local" : "bitterbot-local"),
+					model: data.model ?? "local",
+					tier: endpoint.includes("8080") ? "nanos-local" : "local",
+					latencyMs: Math.round(now() - started),
+				};
+			}
+		} catch {
+			// Try the next local provider.
+		}
 	}
 
 	if (options.allowOffline === false) return null;

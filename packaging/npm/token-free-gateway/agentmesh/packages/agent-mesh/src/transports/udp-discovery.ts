@@ -182,13 +182,7 @@ export class UdpDiscovery {
 			if (!obj.kind || !obj.peerId || typeof obj.nonce !== "number" || typeof obj.ts !== "number") {
 				return null;
 			}
-			const validKinds: DiscoveryMessageKind[] = [
-				"HELLO",
-				"BYE",
-				"TASK_ANNOUNCE",
-				"PING",
-				"PONG",
-			];
+			const validKinds: DiscoveryMessageKind[] = ["HELLO", "BYE", "TASK_ANNOUNCE", "PING", "PONG"];
 			if (!validKinds.includes(obj.kind as DiscoveryMessageKind)) return null;
 			return {
 				v: 1,

@@ -137,13 +137,10 @@ export function ComputerUsePanel({ onClose }: ComputerUsePanelProps) {
 					maxSteps,
 				}),
 			});
-			const body = (await res.json()) as
-				| { error?: string }
-				| RunResult;
+			const body = (await res.json()) as { error?: string } | RunResult;
 			if (!res.ok) {
 				const msg =
-					(body as { error?: string }).error ??
-					`computer-use route returned ${res.status}`;
+					(body as { error?: string }).error ?? `computer-use route returned ${res.status}`;
 				setError(msg);
 			} else {
 				setResult(body as RunResult);
@@ -218,8 +215,8 @@ export function ComputerUsePanel({ onClose }: ComputerUsePanelProps) {
 					<div className="cosmic-byok-warning">
 						<KeyRound size={12} />
 						<span>
-							BYOK 키가 없습니다. 🔑 BYOK 패널에서 OpenAI / OpenRouter / Google / Groq 중
-							하나를 등록하세요.
+							BYOK 키가 없습니다. 🔑 BYOK 패널에서 OpenAI / OpenRouter / Google / Groq 중 하나를
+							등록하세요.
 						</span>
 					</div>
 				)}
@@ -274,9 +271,7 @@ export function ComputerUsePanel({ onClose }: ComputerUsePanelProps) {
 										? "⏱ Max steps 도달"
 										: "❌ 오류"}
 							</span>
-							<span className="cosmic-byok-result-count">
-								{result.stepCount} step
-							</span>
+							<span className="cosmic-byok-result-count">{result.stepCount} step</span>
 						</div>
 						{result.error && (
 							<div className="cosmic-byok-error">
@@ -308,9 +303,7 @@ export function ComputerUsePanel({ onClose }: ComputerUsePanelProps) {
 	);
 }
 
-function summarizeAction(
-	action: RunStep["action"],
-): string {
+function summarizeAction(action: RunStep["action"]): string {
 	switch (action.type) {
 		case "click":
 			return `click(${action.x}, ${action.y})`;

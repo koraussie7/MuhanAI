@@ -1,6 +1,6 @@
-import { SippEngine } from "./sipp/sipp-engine";
-import { OllamaEngine } from "./ollama/ollama-engine";
 import { CloudEngine } from "./cloud/cloud-engine";
+import { OllamaEngine } from "./ollama/ollama-engine";
+import { SippEngine } from "./sipp/sipp-engine";
 import type { EngineConfig } from "./types";
 
 export type EngineType = "sipp" | "ollama" | "cloud";

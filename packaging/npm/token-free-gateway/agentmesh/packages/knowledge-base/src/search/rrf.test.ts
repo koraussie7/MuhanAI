@@ -62,24 +62,16 @@ describe("rrfFusionN — weights", () => {
 	it("higher positional weight boosts that list's contribution", () => {
 		// List 0 weighted 1.0, list 1 weighted 5.0
 		// "x" ranks 1st in list 1 but 2nd in list 0
-		const heavyList1 = rrfFusionN(
-			[ids("y", "x"), ids("x", "y")],
-			60,
-			10,
-			{ weights: [1, 5] },
-		);
+		const heavyList1 = rrfFusionN([ids("y", "x"), ids("x", "y")], 60, 10, { weights: [1, 5] });
 		// With heavy weight on list 1, "x" should win
 		expect(heavyList1[0]!.id).toBe("x");
 	});
 
 	it("a list with weight 0 contributes nothing", () => {
 		// "ghost" only appears in list 0, which has weight 0
-		const out = rrfFusionN(
-			[ids("ghost", "real"), ids("real", "ghost")],
-			60,
-			10,
-			{ weights: [0, 1] },
-		);
+		const out = rrfFusionN([ids("ghost", "real"), ids("real", "ghost")], 60, 10, {
+			weights: [0, 1],
+		});
 		// "ghost" gets 0 + 1/(60+2); "real" gets 1/(60+2) + 1/(60+1)
 		// real wins
 		expect(out[0]!.id).toBe("real");
@@ -111,7 +103,10 @@ describe("rrfFusionN — recency", () => {
 	it("high R boosts the score; low R penalizes it (centered at 0.5)", () => {
 		const highR = 0.95;
 		const lowR = 0.05;
-		const recencyScores = new Map<string, number>([["x", highR], ["y", lowR]]);
+		const recencyScores = new Map<string, number>([
+			["x", highR],
+			["y", lowR],
+		]);
 		const out = rrfFusionN([ids("x", "y")], 60, 10, {
 			recencyScores,
 			recencyWeight: 0.5,
@@ -128,7 +123,10 @@ describe("rrfFusionN — recency", () => {
 
 	it("bounded: recencyWeight·0.5 is the maximum swing on either side", () => {
 		// recencyWeight=0.4 → max swing is ±0.2
-		const recencyScores = new Map<string, number>([["x", 1.0], ["y", 0.0]]);
+		const recencyScores = new Map<string, number>([
+			["x", 1.0],
+			["y", 0.0],
+		]);
 		const out = rrfFusionN([ids("x", "y")], 60, 10, {
 			recencyScores,
 			recencyWeight: 0.4,

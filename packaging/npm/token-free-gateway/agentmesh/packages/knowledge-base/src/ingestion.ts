@@ -1,5 +1,10 @@
+import type {
+	CategoryContext,
+	KnowledgeNode,
+	SourceType,
+	UserActivity,
+} from "@agentmesh/shared-types";
 import { createDefaultPermissions } from "@agentmesh/shared-types";
-import type { CategoryContext, KnowledgeNode, SourceType, UserActivity } from "@agentmesh/shared-types";
 
 export interface ExtractedKnowledge {
 	title: string;

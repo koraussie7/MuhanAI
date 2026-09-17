@@ -8,13 +8,17 @@ import {
 
 describe("extractEntities — wikilink primary signal", () => {
 	it("extracts plain [[Target]] wikilinks from content", () => {
-		const entities = extractEntities({ content: "See [[FSRS]] and [[Hybrid Search]] for context." });
+		const entities = extractEntities({
+			content: "See [[FSRS]] and [[Hybrid Search]] for context.",
+		});
 		expect(entities).toContain("fsrs");
 		expect(entities).toContain("hybrid search");
 	});
 
 	it("drops the alias in [[Target|alias]]", () => {
-		const entities = extractEntities({ content: "Read [[FSRS|the spaced-repetition scheduler]] today." });
+		const entities = extractEntities({
+			content: "Read [[FSRS|the spaced-repetition scheduler]] today.",
+		});
 		expect(entities).toContain("fsrs");
 		expect(entities).not.toContain("the spaced repetition scheduler");
 	});
@@ -39,7 +43,9 @@ describe("extractEntities — wikilink primary signal", () => {
 	});
 
 	it("skips embeds ![[...]] (transclusions are not entity references)", () => {
-		const entities = extractEntities({ content: "Image: ![[diagram.png]] and text [[RealEntity]]." });
+		const entities = extractEntities({
+			content: "Image: ![[diagram.png]] and text [[RealEntity]].",
+		});
 		expect(entities).toContain("realentity");
 		expect(entities.every((e) => !e.includes("diagram"))).toBe(true);
 	});

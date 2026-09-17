@@ -106,8 +106,12 @@ export function RightPanel() {
 								))}
 							</div>
 							<div className="agent-stats">
-								<span>{t.rightPanel.reputation}: {agent.reputation}%</span>
-								<span>{t.rightPanel.success}: {agent.success}%</span>
+								<span>
+									{t.rightPanel.reputation}: {agent.reputation}%
+								</span>
+								<span>
+									{t.rightPanel.success}: {agent.success}%
+								</span>
 							</div>
 						</div>
 					))}

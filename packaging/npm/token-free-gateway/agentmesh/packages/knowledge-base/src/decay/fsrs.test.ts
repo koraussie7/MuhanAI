@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-	FSRS_PARAMS,
-	computeRetrievability,
-	updateStability,
-} from "./fsrs.js";
+import { computeRetrievability, FSRS_PARAMS, updateStability } from "./fsrs.js";
 
 describe("FSRS_PARAMS", () => {
 	it("exposes the stellavault v0.9.0 defaults", () => {

@@ -11,8 +11,9 @@
  * The full happy-path loop is covered by tests in
  * packages/muhan-agent/src/tests/computer-use-router.test.ts.
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import Fastify, { type FastifyInstance } from "fastify";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("POST /api/computer-use/run", () => {
 	let app: FastifyInstance;

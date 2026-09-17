@@ -32,7 +32,12 @@ export class WikiSync {
 	private readonly weknora: WeKnoraClient | null;
 	private readonly kbId: string;
 
-	constructor(opts: { baseUrl?: string; apiKey?: string; kbId?: string; fetchImpl?: typeof fetch }) {
+	constructor(opts: {
+		baseUrl?: string;
+		apiKey?: string;
+		kbId?: string;
+		fetchImpl?: typeof fetch;
+	}) {
 		this.kbId = opts.kbId ?? "default";
 		this.weknora = opts.baseUrl
 			? new WeKnoraClient({ baseUrl: opts.baseUrl, apiKey: opts.apiKey, fetchImpl: opts.fetchImpl })
