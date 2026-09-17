@@ -18,7 +18,8 @@ When done, change to:
 - <role> done @ <short-sha> | was: <branch> | summary
 -->
 
-_(empty — no agent is currently reserved. First agent: append a row below the `_END_OF_BOARD_` line.)_
+- claude done @ ffeab8a | was: chore/biome-auto-fix-2026-09-17 | biome 2.5.12 auto-fix across 170 agentmesh source files + pnpm-lock.yaml sync (vickrey-market devDeps)
+
 
 _END_OF_BOARD_
 
