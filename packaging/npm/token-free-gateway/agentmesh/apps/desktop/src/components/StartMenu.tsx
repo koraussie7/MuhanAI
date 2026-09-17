@@ -159,7 +159,6 @@ export function StartMenu({
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
 						className="start-search-input"
-						autoFocus
 					/>
 					{searchQuery && (
 						<button

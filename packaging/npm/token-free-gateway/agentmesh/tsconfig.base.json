@@ -1,33 +1,25 @@
 {
-  "$schema": "https://json.schemastore.org/tsconfig",
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "lib": [
-      "ES2022"
-    ],
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    "esModuleInterop": true,
-    "isolatedModules": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "paths": {
-      "@agentmesh/ai-engine": [
-        "./packages/ai-engine/src/index.ts"
-      ],
-      "@agentmesh/ai-engine/factory": [
-        "./packages/ai-engine/src/factory.ts"
-      ],
-      "@agentmesh/ai-engine/*": [
-        "./packages/ai-engine/src/*"
-      ]
-    }
-  }
+	"$schema": "https://json.schemastore.org/tsconfig",
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"lib": ["ES2022"],
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"noImplicitOverride": true,
+		"esModuleInterop": true,
+		"isolatedModules": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"resolveJsonModule": true,
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": true,
+		"paths": {
+			"@agentmesh/ai-engine": ["./packages/ai-engine/src/index.ts"],
+			"@agentmesh/ai-engine/factory": ["./packages/ai-engine/src/factory.ts"],
+			"@agentmesh/ai-engine/*": ["./packages/ai-engine/src/*"]
+		}
+	}
 }

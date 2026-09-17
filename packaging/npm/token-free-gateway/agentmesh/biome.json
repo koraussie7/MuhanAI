@@ -4,6 +4,7 @@
 		"includes": [
 			"**",
 			"!**/dist/**",
+			"!**/dist-shop1/**",
 			"!**/.next/**",
 			"!**/.nx/**",
 			"!**/.wrangler/**",
