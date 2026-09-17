@@ -4,6 +4,7 @@ node_modules
 # output
 out
 dist
+dist-shop1
 /npm
 *.tgz
 /token-free-gateway
