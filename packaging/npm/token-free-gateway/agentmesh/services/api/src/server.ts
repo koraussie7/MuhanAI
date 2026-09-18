@@ -13,6 +13,7 @@ import { resonanceRoutes } from "./integrations/resonance/routes.js";
 import { computeRoutes } from "./compute-routes.js";
 import { computerUseRoutes } from "./computer-use-routes.js";
 import { creditsRoutes } from "./credits-routes.js";
+import { factoryRoutes } from "./factory-routes.js";
 import { feedRoutes } from "./feed-routes.js";
 import { PulseBridge } from "./gossip-bridge.js";
 import { ghostRoutes } from "./ghost-routes.js";
@@ -194,6 +195,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	await app.register(happyRoutes);
 	await app.register(pythiaRoutes);
 	await app.register(creditsRoutes);
+	await app.register(factoryRoutes);
 	await app.register(securityRoutes);
 	await app.register(feedRoutes);
 	await app.register(authRoutes);

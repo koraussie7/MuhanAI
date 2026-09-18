@@ -17,8 +17,16 @@ export async function dispatchA2UIAction(request: A2UIActionRequest): Promise<A2
 		headers: { "content-type": "application/json", accept: "application/json" },
 		body: JSON.stringify(request),
 	});
-	const body = (await response.json().catch(() => null)) as A2UIActionEvent | { error?: string } | null;
-	if (!response.ok) throw new Error(body && "error" in body ? body.error ?? `Action failed (${response.status})` : `Action failed (${response.status})`);
+	const body = (await response.json().catch(() => null)) as
+		| A2UIActionEvent
+		| { error?: string }
+		| null;
+	if (!response.ok)
+		throw new Error(
+			body && "error" in body
+				? (body.error ?? `Action failed (${response.status})`)
+				: `Action failed (${response.status})`,
+		);
 	return body as A2UIActionEvent;
 }
 
@@ -35,6 +43,7 @@ export function subscribeToA2UIEvents(
 		}
 	};
 	source.onmessage = handleMessage;
+	source.addEventListener("surface.ready", handleMessage);
 	source.addEventListener("action.accepted", handleMessage);
 	source.addEventListener("action.rejected", handleMessage);
 	return () => source.close();
