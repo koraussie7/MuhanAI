@@ -1,6 +1,13 @@
+import { resolve } from "node:path";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+	resolve: {
+	alias: {
+		"@agentmesh/ghost-adapter": resolve("packages/ghost-adapter/src/index.ts"),
+		"@agentmesh/mcp": resolve("packages/mcp/src/index.ts"),
+	},
+	},
 	test: {
 		include: [
 			"packages/**/*.test.ts",
