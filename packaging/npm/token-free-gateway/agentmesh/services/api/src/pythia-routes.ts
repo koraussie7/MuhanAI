@@ -253,7 +253,7 @@ export async function pythiaRoutes(app: FastifyInstance) {
 				cost: "0 MHT (Token-Free)",
 				surface: await pythiaA2uiCall({
 					prompt: `[PYTHIA] File: ${session.file}\n\n${parse.data.message}`,
-					file,
+					file: session.file,
 				}).then((r) => r.surface),
 			};
 		} catch (err) {

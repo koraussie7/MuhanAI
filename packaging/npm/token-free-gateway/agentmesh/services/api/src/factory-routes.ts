@@ -104,6 +104,7 @@ export async function factoryRoutes(app: FastifyInstance) {
 			});
 
 			const site: FactorySite = {
+				name,
 				success: result.success,
 				subdomain: result.subdomain,
 				cid: result.cid,

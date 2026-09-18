@@ -13,6 +13,7 @@ import { computeRoutes } from "./compute-routes.js";
 import { computerUseRoutes } from "./computer-use-routes.js";
 import { creditsRoutes } from "./credits-routes.js";
 import { factoryRoutes } from "./factory-routes.js";
+import { elizaosRpcRoutes } from "./elizaos-rpc-routes.js";
 import { feedRoutes } from "./feed-routes.js";
 import { ghostRoutes } from "./ghost-routes.js";
 import { PulseBridge } from "./gossip-bridge.js";
@@ -52,6 +53,7 @@ const PUBLIC_PATH_PREFIXES = [
 	"/api/agents",
 	"/api/auth",
 	"/api/health",
+	"/rpc",
 	"/api/mcp",
 ];
 const PUBLIC_PATH_EXACT = new Set(["/health", "/.well-known/mcp.json"]);
@@ -198,6 +200,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	await app.register(pythiaRoutes);
 	await app.register(creditsRoutes);
 	await app.register(factoryRoutes);
+	await app.register(elizaosRpcRoutes);
 	await app.register(securityRoutes);
 	await app.register(feedRoutes);
 	await app.register(authRoutes);
