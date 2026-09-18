@@ -19,6 +19,7 @@ import type { FastifyInstance } from "fastify";
 
 /** A node this process has spawned. Mirrors `SpawnedSite` in the web app. */
 export interface FactorySite {
+	name: string;
 	success: boolean;
 	subdomain: string;
 	cid: string;
@@ -121,4 +122,36 @@ export async function factoryRoutes(app: FastifyInstance) {
 			});
 		}
 	});
+
+	// Pythia proxy for store-specific Python tasks via the Token-Free Gateway.
+	// POST /api/factory/sites/:subdomain/pythia
+	app.post<{ Params: { subdomain: string }; Body: SpawnBody & { prompt: string } }>(
+		"/api/factory/sites/:subdomain/pythia",
+		async (request, reply) => {
+			const site = sites.get(request.params.subdomain);
+			if (!site) {
+				return reply.code(404).send({ error: "store_not_found" });
+			}
+			const prompt = request.body?.prompt?.trim();
+			if (!prompt) {
+				return reply.code(400).send({ error: "prompt is required" });
+			}
+			try {
+				const { pythiaA2uiCall } = await import("./pythia-a2ui-service.js");
+				const result = await pythiaA2uiCall({
+					prompt: `[STORE:${site.subdomain}] ${prompt}`,
+					file: "app.py",
+					system: `You are coding for the store ${site.name}. Provide Python code solutions.`,
+				});
+				return {
+					subdomain: site.subdomain,
+					name: site.name,
+					cid: site.cid,
+					...result,
+				};
+			} catch (err) {
+				return reply.code(502).send({ error: "pythia_call_failed", message: err instanceof Error ? err.message : String(err) });
+			}
+		}
+	);
 }

@@ -133,6 +133,7 @@ describe("POST /api/mcp/rpc", () => {
 		const parsed = JSON.parse(body.result.content[0].text);
 		expect(parsed.status).toBe("operational");
 		expect(parsed.peers).toBeGreaterThan(0);
+		expect(parsed._demo).toBe(true);
 		expect(Array.isArray(parsed.activeModels)).toBe(true);
 	});
 
