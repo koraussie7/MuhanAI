@@ -5,7 +5,8 @@
  *
  * Only providers verified to actually work without credentials are kept here.
  * The local Mesh-LLM node (127.0.0.1:9337) is tried first when running, followed
- * by the pollinations OpenAI-compatible POST API. The pollinations GET text
+ * by the OmniRoute free-tier mesh (only when OMNIROUTE_BASE_URL is set), and
+ * finally the pollinations OpenAI-compatible POST API. The pollinations GET text
  * endpoint and openrouter-free / cloudflare-worker-ai / HF-inference paths were
  * removed as non-functional.
  *
@@ -29,7 +30,7 @@ export interface KeylessResponse {
 	latencyMs: number;
 }
 
-interface KeylessProviderConfig {
+export interface KeylessProviderConfig {
 	name: string;
 	endpoint: string;
 	headers: Record<string, string>;
@@ -37,41 +38,114 @@ interface KeylessProviderConfig {
 	parse: (data: any) => string;
 }
 
-const KEYLESS_PROVIDERS: KeylessProviderConfig[] = [
-	{
-		name: "mesh-llm",
-		// Local Mesh-LLM node — OpenAI-compatible endpoint exposed by
-		// `mesh-llm serve` (see https://github.com/Mesh-LLM/mesh-llm).
-		// Highest priority: a local mesh usually answers faster than a keyless API.
-		endpoint: "http://127.0.0.1:9337/v1/chat/completions",
-		headers: { "Content-Type": "application/json" },
-		body: (req) => ({
-			messages: [
-				...(req.system ? [{ role: "system", content: req.system }] : []),
-				{ role: "user", content: req.prompt },
-			],
-			model: req.model ?? "auto",
-			temperature: req.temperature ?? 0.3,
-			max_tokens: req.maxTokens ?? 1024,
-		}),
-		parse: (data) => data?.choices?.[0]?.message?.content ?? "",
-	},
-	{
-		name: "pollinations-api",
-		endpoint: "https://api.pollinations.ai/v1/chat/completions",
-		headers: { "Content-Type": "application/json" },
-		body: (req) => ({
-			messages: [
-				...(req.system ? [{ role: "system", content: req.system }] : []),
-				{ role: "user", content: req.prompt },
-			],
-			model: req.model ?? "openai/gpt-4o-mini",
-			temperature: req.temperature ?? 0.3,
-			max_tokens: req.maxTokens ?? 1024,
-		}),
-		parse: (data) => data?.choices?.[0]?.message?.content ?? "",
-	},
-];
+/**
+ * OmniRoute env + endpoint resolver.
+ *
+ * OmniRoute (>= v3.8) exposes an OpenAI-compatible /v1/chat/completions
+ * behind localhost:20128.  When OMNIROUTE_BASE_URL is set we append a
+ * third keyless provider that routes through its free-tier mesh
+ * (OpenCode Zen: minimax-m3, gpt-5, claude-sonnet-4-5, …).  This is
+ * how Pythia gains access to minimax-m3 and ~1.47 B tokens / month.
+ *
+ * Env is read at call time (not module load) so tests can flip it per case —
+ * mirrors the `isOmniRouteDisabled()` convention in services/api.
+ */
+export function getOmniRouteEndpoint(): string | null {
+	const baseUrl = process.env.OMNIROUTE_BASE_URL;
+	if (!baseUrl) return null;
+	// `OMNIROUTE_BASE_URL` is documented as a base (e.g. http://localhost:20128/v1),
+	// so a leading-slash path would drop the `/v1` prefix — `new URL("/chat/…")`
+	// resolves against the origin, not the directory. Join relatively instead so
+	// any configured path prefix is preserved.
+	const trimmed = baseUrl.replace(/\/+$/, "");
+	if (trimmed.endsWith("/chat/completions")) return trimmed;
+	try {
+		return new URL("chat/completions", `${trimmed}/`).toString();
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * Build the active keyless provider list at call time.
+ *
+ * `omniroute-auto` is inserted at index 1 (after the local mesh-llm node,
+ * before the pollinations fallback) so that the 1.47 B-token/month free
+ * pool is preferred over the slower pollinations fallback.  The provider is
+ * only added when OMNIROUTE_BASE_URL is configured, so a fresh local dev
+ * install without OmniRoute sees exactly the original two-provider surface:
+ * `["mesh-llm", "pollinations-api"]`.
+ */
+export function buildKeylessProviders(): KeylessProviderConfig[] {
+	const providers: KeylessProviderConfig[] = [
+		{
+			name: "mesh-llm",
+			// Local Mesh-LLM node — OpenAI-compatible endpoint exposed by
+			// `mesh-llm serve` (see https://github.com/Mesh-LLM/mesh-llm).
+			// Highest priority: a local mesh usually answers faster than a keyless API.
+			endpoint: "http://127.0.0.1:9337/v1/chat/completions",
+			headers: { "Content-Type": "application/json" },
+			body: (req) => ({
+				messages: [
+					...(req.system ? [{ role: "system", content: req.system }] : []),
+					{ role: "user", content: req.prompt },
+				],
+				model: req.model ?? "auto",
+				temperature: req.temperature ?? 0.3,
+				max_tokens: req.maxTokens ?? 1024,
+			}),
+			parse: (data) => data?.choices?.[0]?.message?.content ?? "",
+		},
+		{
+			name: "pollinations-api",
+			endpoint: "https://api.pollinations.ai/v1/chat/completions",
+			headers: { "Content-Type": "application/json" },
+			body: (req) => ({
+				messages: [
+					...(req.system ? [{ role: "system", content: req.system }] : []),
+					{ role: "user", content: req.prompt },
+				],
+				model: req.model ?? "openai/gpt-4o-mini",
+				temperature: req.temperature ?? 0.3,
+				max_tokens: req.maxTokens ?? 1024,
+			}),
+			parse: (data) => data?.choices?.[0]?.message?.content ?? "",
+		},
+	];
+
+	// OmniRoute free-tier mesh (OpenCode Zen — minimax-m3, gpt-5, …)
+	// Inserted after mesh-llm so the free pool is preferred over pollinations.
+	const endpoint = getOmniRouteEndpoint();
+	if (endpoint) {
+		const apiKey = process.env.OMNIROUTE_API_KEY;
+		providers.splice(1, 0, {
+			name: "omniroute-auto",
+			endpoint,
+			headers: {
+				"Content-Type": "application/json",
+				...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+			},
+			body: (req) => ({
+				messages: [
+					...(req.system ? [{ role: "system", content: req.system }] : []),
+					{ role: "user", content: req.prompt },
+				],
+				// "auto" lets OmniRoute's scoring engine pick the best free provider
+				// for the request (minimax-m3 for coding, gpt-5 for reasoning, etc.).
+				model: req.model ?? "auto",
+				temperature: req.temperature ?? 0.7,
+				max_tokens: req.maxTokens ?? 4096,
+				stream: false,
+			}),
+			// OmniRoute returns OpenAI JSON when stream=false, but some upstreams
+			// return plain text on error — tolerate both shapes.
+			parse: (data) =>
+				typeof data === "string" ? data : (data?.choices?.[0]?.message?.content ?? ""),
+		});
+	}
+
+	return providers;
+}
 
 /**
  * Call a single keyless provider with a timeout.
@@ -208,7 +282,7 @@ function localKnowledgeFallback(prompt: string): string | null {
  * Falls back to local knowledge base, then to a generic message.
  */
 export async function callKeylessProviders(req: KeylessRequest): Promise<KeylessResponse> {
-	const providers = KEYLESS_PROVIDERS;
+	const providers = buildKeylessProviders();
 
 	const results = await Promise.allSettled(providers.map((p) => callProvider(p, req)));
 
@@ -242,5 +316,5 @@ export async function callKeylessProviders(req: KeylessRequest): Promise<Keyless
  * Get the list of available keyless provider names.
  */
 export function getKeylessProviderNames(): string[] {
-	return KEYLESS_PROVIDERS.map((p) => p.name);
+	return buildKeylessProviders().map((p) => p.name);
 }

@@ -115,7 +115,7 @@ describe("A2UI API routes", () => {
 				surfaceId: "s",
 				data: expect.objectContaining({ catalogId: "basic", root: "root" }),
 			});
-			expect(typeof received[0].timestamp).toBe("number");
+			expect(typeof received[0]?.timestamp).toBe("number");
 		} finally {
 			eventSubscribers.delete("s");
 			await app.close();

@@ -5,6 +5,7 @@
 import {
 	callKeylessProviders,
 	getKeylessProviderNames,
+	getOmniRouteEndpoint,
 	type KeylessRequest,
 } from "@agentmesh/llm-router/src/keyless-providers.js";
 import type { FastifyInstance } from "fastify";
@@ -22,17 +23,20 @@ const ChatSchema = z.object({
 
 // === OmniRoute 우선 설정 ===
 // OMNIROUTE_PRIORITY=true 이면 OmniRoute Free LLM을 먼저 시도
-const OMNIROUTE_PRIORITY = process.env.OMNIROUTE_PRIORITY !== 'false';
-const OMNIROUTE_BASE_URL = process.env.OMNIROUTE_BASE_URL ?? process.env.OPENAI_BASE_URL ?? null;
-const OMNIROUTE_MODEL = process.env.OMNIROUTE_MODEL ?? process.env.OPENAI_DEFAULT_MODEL ?? "openai/gpt-4o-mini";
-
-const OMNIROUTE_CHAT_ROUTE = OMNIROUTE_BASE_URL ? new URL("/chat/completions", OMNIROUTE_BASE_URL) : null;
+const OMNIROUTE_PRIORITY = process.env.OMNIROUTE_PRIORITY !== "false";
+const OMNIROUTE_MODEL =
+	process.env.OMNIROUTE_MODEL ?? process.env.OPENAI_DEFAULT_MODEL ?? "openai/gpt-4o-mini";
 
 /**
  * OmniRoute Free LLM 호출
  */
 async function callOmniRouteFree(req: KeylessRequest) {
-	if (!OMNIROUTE_CHAT_ROUTE) {
+	// Resolve at call time (env may be flipped in tests) and join the path
+	// relatively so a `/v1` suffix in OMNIROUTE_BASE_URL is preserved —
+	// `new URL("/chat/completions", base)` would drop it (see
+	// getOmniRouteEndpoint for the full explanation).
+	const route = getOmniRouteEndpoint();
+	if (!route) {
 		return null;
 	}
 
@@ -54,10 +58,11 @@ async function callOmniRouteFree(req: KeylessRequest) {
 
 	// API 키가 있으면 추가 (OpenRouter 등)
 	if (process.env.OMNIROUTE_API_KEY) {
-		(options.headers as Record<string, string>)["Authorization"] = `Bearer ${process.env.OMNIROUTE_API_KEY}`;
+		(options.headers as Record<string, string>)["Authorization"] =
+			`Bearer ${process.env.OMNIROUTE_API_KEY}`;
 	}
 
-	const upstream = await fetch(OMNIROUTE_CHAT_ROUTE.toString(), options);
+	const upstream = await fetch(route, options);
 
 	if (!upstream.ok) {
 		const text = await upstream.text().catch(() => "");
@@ -88,11 +93,14 @@ export async function llmRoutes(app: FastifyInstance) {
 		const req: KeylessRequest = parse.data;
 
 		// === 1순위: OmniRoute Free LLM (OMNIROUTE_PRIORITY=true일 때) ===
-		if (OMNIROUTE_PRIORITY && OMNIROUTE_CHAT_ROUTE) {
+		if (OMNIROUTE_PRIORITY && getOmniRouteEndpoint()) {
 			try {
 				const result = await callOmniRouteFree(req);
 				if (result) {
-					request.log.info({ provider: result.provider, model: result.model }, "OmniRoute Free LLM 성공");
+					request.log.info(
+						{ provider: result.provider, model: result.model },
+						"OmniRoute Free LLM 성공",
+					);
 					return {
 						text: result.text,
 						provider: result.provider,
@@ -121,7 +129,7 @@ export async function llmRoutes(app: FastifyInstance) {
 		}
 
 		// === 3순위: OmniRoute fallback (모든 시도 실패 시) ===
-		if (!OMNIROUTE_CHAT_ROUTE) {
+		if (!getOmniRouteEndpoint()) {
 			return clientError(reply, 502, "All LLM providers failed", request.id);
 		}
 

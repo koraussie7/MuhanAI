@@ -4,17 +4,112 @@
  * Verifies:
  * - the local mesh-llm node (localhost:9337) is the highest-priority provider
  * - the pollinations POST API is tried next and returned on success
+ * - the OmniRoute free-tier mesh is spliced in at index 1 when
+ *   OMNIROUTE_BASE_URL is configured, and *only* then
+ * - getOmniRouteEndpoint preserves any configured path prefix (the `/v1`
+ *   regression that a leading-slash `new URL()` would silently drop)
  * - callKeylessProviders falls back to local knowledge when all providers fail
  * - callKeylessProviders wires through to a real provider response when fetch works
  */
 
 import { afterEach, describe, expect, test } from "vitest";
-import { callKeylessProviders, getKeylessProviderNames } from "./keyless-providers.js";
+import {
+	buildKeylessProviders,
+	callKeylessProviders,
+	getKeylessProviderNames,
+	getOmniRouteEndpoint,
+} from "./keyless-providers.js";
+
+// The suite shares the vitest fork with sibling suites, so snapshot and
+// restore the OmniRoute envs around every test.
+const ENV_KEYS = ["OMNIROUTE_BASE_URL", "OMNIROUTE_API_KEY"] as const;
+const ENV_SNAPSHOT = Object.fromEntries(ENV_KEYS.map((k) => [k, process.env[k]])) as Record<
+	(typeof ENV_KEYS)[number],
+	string | undefined
+>;
+
+afterEach(() => {
+	for (const key of ENV_KEYS) {
+		const value = ENV_SNAPSHOT[key];
+		if (value === undefined) delete process.env[key];
+		else process.env[key] = value;
+	}
+});
 
 describe("getKeylessProviderNames", () => {
 	test("exposes mesh-llm first, then the pollinations POST API", () => {
+		delete process.env.OMNIROUTE_BASE_URL;
 		const names = getKeylessProviderNames();
 		expect(names).toEqual(["mesh-llm", "pollinations-api"]);
+	});
+});
+
+describe("getOmniRouteEndpoint", () => {
+	test("returns null when OMNIROUTE_BASE_URL is unset", () => {
+		delete process.env.OMNIROUTE_BASE_URL;
+		expect(getOmniRouteEndpoint()).toBeNull();
+	});
+
+	test("preserves the /v1 path prefix instead of resolving against the origin", () => {
+		process.env.OMNIROUTE_BASE_URL = "http://localhost:20128/v1";
+		// A leading-slash path would yield http://localhost:20128/chat/completions
+		// and silently break every OmniRoute call — this is the regression guard.
+		expect(getOmniRouteEndpoint()).toBe("http://localhost:20128/v1/chat/completions");
+	});
+
+	test("tolerates a trailing slash and a nested prefix", () => {
+		process.env.OMNIROUTE_BASE_URL = "https://zen.example.com/api/v1/";
+		expect(getOmniRouteEndpoint()).toBe("https://zen.example.com/api/v1/chat/completions");
+	});
+
+	test("returns the base unchanged when it already points at chat/completions", () => {
+		process.env.OMNIROUTE_BASE_URL = "http://localhost:20128/v1/chat/completions";
+		expect(getOmniRouteEndpoint()).toBe("http://localhost:20128/v1/chat/completions");
+	});
+
+	test("returns null for an unparseable base URL", () => {
+		process.env.OMNIROUTE_BASE_URL = "not a url";
+		expect(getOmniRouteEndpoint()).toBeNull();
+	});
+});
+
+describe("buildKeylessProviders — OmniRoute splice", () => {
+	test("keeps the original two-provider surface when OmniRoute is unconfigured", () => {
+		delete process.env.OMNIROUTE_BASE_URL;
+		expect(buildKeylessProviders().map((p) => p.name)).toEqual(["mesh-llm", "pollinations-api"]);
+	});
+
+	test("inserts omniroute-auto at index 1 so the free pool beats pollinations", () => {
+		process.env.OMNIROUTE_BASE_URL = "http://localhost:20128/v1";
+		const providers = buildKeylessProviders();
+		expect(providers.map((p) => p.name)).toEqual([
+			"mesh-llm",
+			"omniroute-auto",
+			"pollinations-api",
+		]);
+		expect(providers[1]?.endpoint).toBe("http://localhost:20128/v1/chat/completions");
+	});
+
+	test("omits the Authorization header when OMNIROUTE_API_KEY is unset", () => {
+		process.env.OMNIROUTE_BASE_URL = "http://localhost:20128/v1";
+		delete process.env.OMNIROUTE_API_KEY;
+		const entry = buildKeylessProviders().find((p) => p.name === "omniroute-auto");
+		expect(entry?.headers.Authorization).toBeUndefined();
+	});
+
+	test("adds the Authorization header when OMNIROUTE_API_KEY is set", () => {
+		process.env.OMNIROUTE_BASE_URL = "http://localhost:20128/v1";
+		process.env.OMNIROUTE_API_KEY = "sk-test";
+		const entry = buildKeylessProviders().find((p) => p.name === "omniroute-auto");
+		expect(entry?.headers.Authorization).toBe("Bearer sk-test");
+	});
+
+	test("defaults the OmniRoute model to `auto` so the combo engine routes", () => {
+		process.env.OMNIROUTE_BASE_URL = "http://localhost:20128/v1";
+		const entry = buildKeylessProviders().find((p) => p.name === "omniroute-auto");
+		const body = entry?.body({ prompt: "hi" }) as Record<string, unknown>;
+		expect(body.model).toBe("auto");
+		expect(body.stream).toBe(false);
 	});
 });
 

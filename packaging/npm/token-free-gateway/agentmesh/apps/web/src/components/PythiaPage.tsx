@@ -26,11 +26,22 @@ export const PythiaPage: React.FC = () => {
 	const [sessions, setSessions] = useState<PythiaSession[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [result, setResult] = useState<string | null>(null);
+	const [models, setModels] = useState<string[]>(["auto"]);
+	const [model, setModel] = useState("auto");
 
 	useEffect(() => {
 		fetch("/api/pythia/sessions")
 			.then((r) => r.json())
 			.then((data) => setSessions(data.sessions ?? []))
+			.catch(() => {});
+		fetch("/api/pythia/models")
+			.then((r) => r.json())
+			.then((data) => {
+				if (Array.isArray(data.models) && data.models.length > 0) {
+					setModels(data.models);
+					if (!data.models.includes("auto")) setModel(data.models[0]);
+				}
+			})
 			.catch(() => {});
 	}, []);
 
@@ -43,7 +54,7 @@ export const PythiaPage: React.FC = () => {
 			const res = await fetch("/api/pythia/session", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ file, prompt }),
+				body: JSON.stringify({ file, prompt, model }),
 			});
 
 			if (res.ok) {
@@ -90,8 +101,8 @@ export const PythiaPage: React.FC = () => {
 							Pythia — Token-Free Gateway
 						</h1>
 						<p className="dashboard-hero-desc">
-							Python 코드 분석·수정을 $0으로 모바일/웹에서 제어. muhanai.com의 Token-Free
-							Gateway를 통해 API 키 없이 동작.
+							Python 코드 분석·수정을 $0으로 모바일/웹에서 제어. muhanai.com의 Token-Free Gateway를
+							통해 API 키 없이 동작.
 						</p>
 					</div>
 				</div>
@@ -126,6 +137,41 @@ export const PythiaPage: React.FC = () => {
 							}}
 							placeholder="app.py"
 						/>
+					</div>
+				</div>
+
+				<div className="prompt-model-pills" style={{ marginBottom: 12 }}>
+					<span
+						style={{
+							fontSize: 11,
+							color: "var(--cline-text-muted)",
+							fontWeight: 600,
+							textTransform: "uppercase",
+						}}
+					>
+						Model
+					</span>
+					<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+						<Zap size={14} style={{ color: "#38bdf8" }} />
+						<select
+							value={model}
+							onChange={(e) => setModel(e.target.value)}
+							style={{
+								background: "var(--cline-bg-tertiary, rgba(255,255,255,0.05))",
+								border: "1px solid var(--cline-border, rgba(255,255,255,0.1))",
+								borderRadius: 6,
+								padding: "4px 8px",
+								color: "var(--cline-text)",
+								fontSize: 13,
+								minWidth: 160,
+							}}
+						>
+							{models.map((m) => (
+								<option key={m} value={m}>
+									{m}
+								</option>
+							))}
+						</select>
 					</div>
 				</div>
 
@@ -177,7 +223,9 @@ export const PythiaPage: React.FC = () => {
 							}}
 						>
 							<div>
-								<span style={{ color: "var(--cline-text)" }}><Code2 size={12} /> {s.file}</span>
+								<span style={{ color: "var(--cline-text)" }}>
+									<Code2 size={12} /> {s.file}
+								</span>
 								<span style={{ color: "var(--cline-text-muted)", marginLeft: 8 }}>
 									{s.prompt.slice(0, 60)}
 									{s.prompt.length > 60 ? "..." : ""}
