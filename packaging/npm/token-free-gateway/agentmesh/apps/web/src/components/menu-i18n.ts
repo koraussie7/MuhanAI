@@ -75,6 +75,7 @@ export const MENU_TRANSLATIONS: Record<SupportedLanguage, NavI18n> = {
 			settings: "보안 & 키 설정",
 			happy: "해피 코더",
 			pythia: "파이썬 분석",
+			world: "세계 인텔리전스",
 			agents: "에이전트 목록",
 			"human-agents": "전문가 에이전트",
 		},

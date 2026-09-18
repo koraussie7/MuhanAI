@@ -145,10 +145,13 @@ const HiveBearPanelLazy = React.lazy(() =>
 	import("./components/HiveBearPanel").then((m) => ({ default: m.HiveBearPanel })),
 );
 const PythiaPageLazy = React.lazy(() =>
-import("./components/PythiaPage").then((m) => ({ default: m.PythiaPage })),
+	import("./components/PythiaPage").then((m) => ({ default: m.PythiaPage })),
 );
 const HappyPageLazy = React.lazy(() =>
 	import("./components/HappyPage").then((m) => ({ default: m.HappyPage })),
+);
+const WorldPageLazy = React.lazy(() =>
+	import("./components/WorldPage").then((m) => ({ default: m.WorldPage })),
 );
 const SearchPageLazy = React.lazy(() =>
 	import("./components/SpecPages").then((m) => ({ default: m.SearchPage })),
@@ -618,12 +621,19 @@ export function App() {
 								<HappyPageLazy />
 							</Suspense>
 						)}
-							{/* Pythia */}
-							{activeSection === "pythia" && (
-								<Suspense fallback={<PageSkeleton />}>
-									<PythiaPageLazy />
-								</Suspense>
-							)}
+
+						{/* World — Pythia World Engine */}
+						{activeSection === "world" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<WorldPageLazy />
+							</Suspense>
+						)}
+						{/* Pythia */}
+						{activeSection === "pythia" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<PythiaPageLazy />
+							</Suspense>
+						)}
 
 						{!IMPLEMENTED_SECTIONS.has(activeSection) && (
 							<div className="placeholder-page" style={{ padding: 40, textAlign: "center" }}>
