@@ -20,3 +20,6 @@ officeDist/
 junit.xml
 # shop1 store bundle — regenerated from deploy/shop1-store.ts on every deploy
 dist-shop1/
+# danang directory bundle & crawl cache
+dist-danang/
+deploy/.ekoreatown/

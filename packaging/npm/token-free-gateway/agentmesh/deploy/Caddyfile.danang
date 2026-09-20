@@ -1,0 +1,21 @@
+# Origin block for danang.kbizhub.com.
+# Cloudflare proxies the DNS record to 185.55.240.110; Caddy terminates
+# the origin TLS connection and serves the generated static release.
+danang.kbizhub.com {
+	tls internal
+	root * /var/www/danang.kbizhub.com/current
+	encode zstd gzip
+	# Try directory index files before falling back to the directory homepage.
+	# Without {path}/index.html, /store/<category>/<id>/ incorrectly serves the
+	# root directory index instead of the individual store page.
+	try_files {path} {path}/index.html /index.html
+	file_server
+	header {
+	Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+	X-Content-Type-Options "nosniff"
+	Cache-Control "no-cache"
+	}
+	log {
+	output file /var/log/caddy/danang-kbizhub.log
+	}
+}
