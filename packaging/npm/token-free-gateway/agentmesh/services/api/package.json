@@ -21,6 +21,7 @@
 		"@agentmesh/compute-market": "workspace:*",
 		"@agentmesh/federation": "workspace:*",
 		"@agentmesh/shared-types": "workspace:*",
+		"@agentmesh/ghost-adapter": "workspace:*",
 		"@agentmesh/credit-system": "workspace:*",
 		"@agentmesh/peer-mesh": "workspace:*",
 		"@agentmesh/database": "workspace:*",
