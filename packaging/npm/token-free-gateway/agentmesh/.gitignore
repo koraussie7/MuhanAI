@@ -18,3 +18,5 @@ packages/*/types/**/*.d.ts.map
 apps/web/package-lock.json
 officeDist/
 junit.xml
+# shop1 store bundle — regenerated from deploy/shop1-store.ts on every deploy
+dist-shop1/
