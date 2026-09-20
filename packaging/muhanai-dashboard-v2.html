@@ -1,0 +1,2164 @@
+<!doctype html>
+<html lang="ko"><head><script data-od-sandbox-shim="">(function(){
+  function makeStore(){
+    var data = {};
+    var api = {
+      getItem: function(k){ return Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null; },
+      setItem: function(k, v){ data[k] = String(v); },
+      removeItem: function(k){ delete data[k]; },
+      clear: function(){ data = {}; },
+      key: function(i){ return Object.keys(data)[i] || null; }
+    };
+    Object.defineProperty(api, 'length', { get: function(){ return Object.keys(data).length; } });
+    return api;
+  }
+  function tryShim(name){
+    var works = false;
+    try { works = !!window[name] && typeof window[name].getItem === 'function'; void window[name].length; }
+    catch (_) { works = false; }
+    if (works) return;
+    try { Object.defineProperty(window, name, { configurable: true, value: makeStore() }); }
+    catch (_) { try { window[name] = makeStore(); } catch (__) {} }
+  }
+  tryShim('localStorage');
+  tryShim('sessionStorage');
+  document.addEventListener('click', (e) => {
+    if (!e.target || !(e.target instanceof Element)) return;
+    var link = e.target.closest('a[href]');
+    if (!link) return;
+    var href = link.getAttribute('href');
+    if (href === null) return;
+    var isAnchor = href.startsWith('#') || href === '';
+    if (isAnchor) {
+      e.preventDefault();
+      if (href === '' || href === '#') {
+        window.scrollTo({ top: 0 });
+        history.replaceState(null, '', ' ');
+      } else {
+        var targetId = href.slice(1);
+        var target = targetId ? document.getElementById(targetId) : null;
+        if (target) {
+          target.scrollIntoView();
+          location.hash === href && history.replaceState(null, '', ' ');
+          location.hash = href;
+        }
+      }
+    } else if (link.getAttribute('target') === '_blank') {
+      e.preventDefault();
+      let safe = false;
+      try {
+        var url = new URL(href, location.href);
+        safe =
+          url.protocol === 'http:' ||
+          url.protocol === 'https:' ||
+          url.protocol === 'mailto:';
+      } catch (_) {}
+      safe && window.open(href, '_blank', 'noopener,noreferrer');
+    }
+  });
+})();</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#090d16">
+<title>muhanai — 메시 오퍼레이터</title>
+<style>
+/* ─────────────────────────────────────────────────────────────────────
+   muhanai · 함께 생각하는 AI 네트워크 — /dashboard 개선판 (v2)
+   토큰 스키마: Neutral Modern (활성 설계시스템) — 값: muhanai.com 실측 브랜드
+   다크 네이비 캔버스 · 스카이-시안 액센트 · Inter + JetBrains Mono
+   ───────────────────────────────────────────────────────────────────── */
+:root {
+  /* surface — 다크 3티어 (cline 실측) */
+  --bg:            #090d16;
+  --surface:       #0f1626;
+  --surface-warm:  #0b101c;
+  /* foreground — slate 램프 4티어 */
+  --fg:            #e7eef9;
+  --fg-2:          #c6d2e4;
+  --muted:         #94a3b8;
+  --meta:          #64748b;
+  /* border — 화이트 헤어라인 2티어 */
+  --border:        rgba(255, 255, 255, .08);
+  --border-soft:   rgba(255, 255, 255, .04);
+  /* accent — sky-400 실측 */
+  --accent:        #38bdf8;
+  --accent-on:     #062c49;
+  --accent-hover:  #0ea5e9;
+  --accent-active: #0284c7;
+  /* semantic */
+  --success:       #34d399;
+  --warn:          #fbbf24;
+  --danger:        #fb7185;
+  --know:          #a5b4fc; /* 지식노드 계열 (indigo 300) */
+  /* type */
+  --font-display:  "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-body:     "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono:     "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --text-xs: 12px;  --text-sm: 14px;  --text-base: 16px;
+  --text-lg: 20px;  --text-xl: 24px;  --text-2xl: 32px;
+  --leading-body: 1.5;  --leading-tight: 1.2;
+  --tracking-display: -0.01em;
+  /* spacing — 4px 베이스 */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px;  --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px;  --space-12: 48px;
+  /* radius — 시드 8–12px 제품용 */
+  --radius-sm: 8px;  --radius-md: 12px;  --radius-pill: 9999px;
+  /* elevation — 2단계 */
+  --elev-flat: none;
+  --elev-ring: 0 0 0 1px var(--border);
+  --elev-raised: 0 2px 8px rgba(0, 0, 0, .45);
+  /* focus ring */
+  --focus-ring: 0 0 0 3px color-mix(in oklab, var(--accent) 35%, transparent);
+  /* motion */
+  --motion-fast: 150ms;  --motion-base: 200ms;
+  --ease-standard: cubic-bezier(.2, 0, 0, 1);
+  /* layout */
+  --container-max: 1440px;
+  --gutter-desktop: 24px;  --gutter-phone: 12px;
+  /* 앱 셸 치수 */
+  --sidebar-w: 232px;
+  --rail-w: 348px;
+  --topbar-h: 52px;
+}
+
+/* ─── reset & base ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+img, svg { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; color: inherit; background: none; border: 0; }
+p { text-wrap: pretty; }
+h1, h2, h3, h4 { text-wrap: balance; margin: 0; }
+:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--radius-sm); }
+
+/* mono 유틸 */
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.meta { font-size: var(--text-xs); color: var(--muted); }
+.num  { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.eyebrow {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--muted);
+}
+
+/* ─── 앱 셸 ────────────────────────────────────────────────────────── */
+.app-shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  height: 100vh;
+}
+
+/* ─── 사이드바 ─────────────────────────────────────────────────────── */
+.sidebar {
+  background: var(--surface-warm);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  padding: var(--space-4) var(--space-3) var(--space-3);
+  gap: var(--space-2);
+  min-height: 0;
+}
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: var(--space-2) var(--space-2) var(--space-4);
+}
+.brand-mark { width: 26px; height: 26px; color: var(--accent); flex: none; }
+.brand-name { font-family: var(--font-display); font-weight: 600; font-size: 17px; letter-spacing: -.01em; }
+.brand-tag { font-size: 10px; color: var(--meta); display: block; margin-top: 1px; }
+
+.nav-label {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--meta);
+  padding: var(--space-3) var(--space-2) var(--space-1);
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  color: var(--muted);
+  transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard);
+  text-align: left;
+}
+.nav-item .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border); flex: none; transition: background var(--motion-fast); }
+.nav-item .count { margin-left: auto; font-size: 10px; color: var(--meta); }
+.nav-item:hover { background: var(--border-soft); color: var(--fg); }
+.nav-item[aria-current="page"] { background: color-mix(in oklab, var(--accent) 8%, transparent); color: var(--fg); }
+.nav-item[aria-current="page"] .dot { background: var(--accent); box-shadow: 0 0 6px color-mix(in oklab, var(--accent) 60%, transparent); }
+
+.sidebar-foot {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-3);
+  display: flex; flex-direction: column; gap: var(--space-1);
+}
+.device-chip {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: var(--radius-sm);
+  font-size: var(--text-xs); color: var(--muted);
+}
+.device-chip .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); flex: none; }
+.device-chip .pulse-dot.online { animation: breathe 2.4s ease-in-out infinite; }
+@keyframes breathe { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--success) 45%, transparent); } 50% { box-shadow: 0 0 0 4px transparent; } }
+
+/* ─── 메인 컬럼 ────────────────────────────────────────────────────── */
+.col { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+
+/* ─── 탑바 ─────────────────────────────────────────────────────────── */
+.topbar {
+  height: var(--topbar-h); flex: none;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: var(--space-4);
+  padding-inline: var(--space-4);
+}
+
+.breadcrumb { display: flex; align-items: center; gap: 8px; font-size: var(--text-sm); white-space: nowrap; }
+.breadcrumb .crumb-muted { color: var(--meta); }
+.breadcrumb .crumb-now { color: var(--fg); font-weight: 500; }
+
+.search-trigger {
+  flex: 1; max-width: 460px;
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  color: var(--meta);
+  transition: border-color var(--motion-fast) var(--ease-standard);
+  text-align: left;
+}
+.search-trigger:hover { border-color: color-mix(in oklab, var(--accent) 40%, transparent); }
+.search-trigger span { flex: 1; font-size: var(--text-sm); font-family: var(--font-mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.search-trigger kbd { font-size: 10px; color: var(--meta); background: var(--border-soft); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; }
+
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: var(--space-2); }
+
+.clock { font-family: var(--font-mono); font-size: 11px; color: var(--meta); letter-spacing: .04em; }
+
+.status-pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 5px 12px;
+  white-space: nowrap;
+}
+.status-pill .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); animation: breathe 2.4s ease-in-out infinite; }
+
+.byok-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 11px;
+  padding: 5px 12px; border-radius: var(--radius-pill);
+  border: 1px solid color-mix(in oklab, var(--warn) 45%, transparent);
+  background: color-mix(in oklab, var(--warn) 10%, transparent);
+  color: color-mix(in oklab, var(--warn) 80%, white);
+  white-space: nowrap;
+  transition: border-color var(--motion-fast) var(--ease-standard);
+}
+.byok-badge svg { flex: none; }
+.byok-badge:hover { border-color: var(--warn); }
+.byok-badge.off { border-color: var(--border); background: var(--surface); color: var(--meta); }
+.byok-badge.off svg { color: var(--meta); }
+
+/* ─── 텔레메트리 스트립 ────────────────────────────────────────────── */
+.statsbar {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-warm);
+}
+.stat-cell {
+  padding: 10px var(--space-4);
+  border-right: 1px solid var(--border-soft);
+  min-width: 0;
+}
+.stat-cell:last-child { border-right: 0; }
+.stat-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--meta); }
+.stat-line { display: flex; align-items: baseline; gap: 8px; margin-top: 3px; }
+.stat-value { font-family: var(--font-mono); font-size: 18px; font-weight: 600; color: var(--fg); letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.stat-value.ok { color: var(--success); }
+.stat-sub { font-family: var(--font-mono); font-size: 10px; color: var(--meta); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ─── 워크스페이스 ─────────────────────────────────────────────────── */
+.workspace {
+  flex: 1; min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--rail-w);
+  gap: var(--space-3);
+  padding: var(--space-3);
+  overflow-y: auto;
+}
+@media (max-width: 1180px) { :root { --rail-w: 312px; } }
+
+.center-col { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+
+/* ─── 패널 ─────────────────────────────────────────────────────────── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  min-width: 0; min-height: 0;
+  display: flex; flex-direction: column;
+}
+.panel-head {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.panel-title { font-family: var(--font-display); font-weight: 600; font-size: var(--text-lg); letter-spacing: -.01em; }
+.panel-sub { font-family: var(--font-mono); font-size: 11px; color: var(--meta); white-space: nowrap; }
+.panel-actions { margin-left: auto; display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+.chip.online { color: var(--success); border-color: color-mix(in oklab, var(--success) 35%, transparent); background: color-mix(in oklab, var(--success) 8%, transparent); }
+
+.quorum-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--accent);
+  border: 1px solid color-mix(in oklab, var(--accent) 40%, transparent);
+  background: color-mix(in oklab, var(--accent) 8%, transparent);
+  border-radius: var(--radius-pill);
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+.quorum-chip .mini-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex: none; animation: breathe-accent 1.6s ease-in-out infinite; }
+@keyframes breathe-accent { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 50%, transparent); } 50% { box-shadow: 0 0 0 4px transparent; } }
+.quorum-chip.deliberating .full { color: var(--warn); }
+
+/* ─── 캔버스 ───────────────────────────────────────────────────────── */
+.canvas-panel { height: 372px; flex: none; }
+.canvas-wrap { position: relative; flex: 1; min-height: 0; }
+.canvas-atmos {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(600px 260px at 68% 32%, color-mix(in oklab, var(--accent) 5%, transparent), transparent 70%),
+    radial-gradient(480px 240px at 20% 78%, color-mix(in oklab, var(--know) 4%, transparent), transparent 70%);
+  pointer-events: none;
+}
+#mesh { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.mesh-legend {
+  position: absolute; left: 12px; bottom: 10px;
+  display: flex; gap: 14px; flex-wrap: wrap;
+  font-family: var(--font-mono); font-size: 10px; color: var(--meta);
+  background: color-mix(in oklab, var(--surface) 82%, transparent);
+  padding: 6px 10px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border-soft);
+  backdrop-filter: blur(6px);
+}
+.mesh-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.mesh-legend i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+
+.edge { stroke: var(--border); stroke-width: 1; }
+.edge.hot { stroke: color-mix(in oklab, var(--accent) 45%, transparent); stroke-width: 1.2; }
+.node { cursor: pointer; }
+.node.dim { opacity: .18; }
+.edge.dim { opacity: .12; }
+.node.core { transition: filter var(--motion-fast) var(--ease-standard); }
+.node select ~ .halo { opacity: 1; }
+
+.halo-you { fill: none; stroke: color-mix(in oklab, var(--accent) 55%, transparent); stroke-width: 1.5; animation: halo-pulse 2.6s ease-in-out infinite; transform-origin: center; }
+@keyframes halo-pulse { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.18); opacity: .35; } }
+.halo-you.halo { transform-box: fill-box; }
+
+.fill-you { fill: var(--accent); } .stroke-you { stroke: var(--accent); }
+.fill-peer { fill: var(--fg-2); }  .stroke-peer { stroke: var(--fg-2); }
+.fill-compute { fill: var(--warn); } .stroke-compute { stroke: var(--warn); }
+.fill-mcp { fill: var(--success); }  .stroke-mcp { stroke: var(--success); }
+.fill-know { fill: var(--know); }    .stroke-know { stroke: var(--know); }
+.node .label { font-family: var(--font-mono); font-size: 10.5px; fill: var(--fg-2); }
+.node .tag { font-family: var(--font-mono); font-size: 9px; fill: var(--meta); }
+.node.selected .core { stroke: var(--accent); stroke-width: 2; }
+
+.pulse-travel { fill: var(--accent); filter: drop-shadow(0 0 4px color-mix(in oklab, var(--accent) 70%, transparent)); }
+
+/* ─── 인스펙터 ─────────────────────────────────────────────────────── */
+.inspector {
+  position: absolute; right: 12px; bottom: 12px;
+  width: 296px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--elev-raised);
+  padding: 14px;
+  display: none;
+  z-index: 5;
+}
+.inspector.open { display: block; animation: rise var(--motion-base) var(--ease-standard); }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.insp-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.insp-name { font-family: var(--font-mono); font-size: 13px; color: var(--fg); font-weight: 600; }
+.insp-close { margin-left: auto; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 6px; color: var(--meta); font-size: 14px; }
+.insp-close:hover { background: var(--border-soft); color: var(--fg); }
+.insp-tags { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0 10px; }
+.insp-tag { font-family: var(--font-mono); font-size: 10px; padding: 2px 7px; border-radius: var(--radius-pill); border: 1px solid var(--border); color: var(--muted); }
+.insp-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border-soft); border: 1px solid var(--border-soft); border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 12px; }
+.insp-stat { background: var(--surface-warm); padding: 7px 8px; }
+.insp-stat b { display: block; font-family: var(--font-mono); font-size: 13px; color: var(--fg); font-variant-numeric: tabular-nums; }
+.insp-stat span { font-family: var(--font-mono); font-size: 9px; color: var(--meta); text-transform: uppercase; letter-spacing: .06em; }
+.insp-actions { display: flex; gap: var(--space-2); }
+
+/* ─── 스페이스 모듈 ────────────────────────────────────────────────── */
+.module-panel { flex: 1; min-height: 260px; overflow: hidden; }
+.module-body { flex: 1; min-height: 0; overflow-y: auto; padding: var(--space-4); }
+
+.mod-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
+
+.gpu-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: flex; flex-direction: column; gap: 8px;
+  background: var(--surface-warm);
+}
+.gpu-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.gpu-name { font-family: var(--font-mono); font-size: 12px; color: var(--fg); }
+.gpu-zone { font-family: var(--font-mono); font-size: 10px; color: var(--meta); }
+.util-track { height: 4px; border-radius: 2px; background: var(--border-soft); overflow: hidden; }
+.util-fill { height: 100%; border-radius: 2px; background: var(--accent); }
+.gpu-card.warm .util-fill { background: var(--warn); }
+.gpu-meta { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 10px; color: var(--meta); }
+.gpu-load { font-family: var(--font-mono); font-size: 10px; color: var(--fg-2); }
+
+.jrn-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: var(--space-3);
+  align-items: center;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: var(--text-sm);
+}
+.jrn-row:last-child { border-bottom: 0; }
+.jrn-op { font-family: var(--font-mono); font-size: 11px; color: var(--meta); white-space: nowrap; }
+.jrn-key { font-family: var(--font-mono); font-size: 12.5px; color: var(--fg-2); }
+.jrn-key b { color: var(--fg); font-weight: 500; }
+.jrn-ops { font-family: var(--font-mono); font-size: 11px; color: var(--meta); white-space: nowrap; }
+
+.tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--space-4); }
+.tag-chip { font-family: var(--font-mono); font-size: 11px; color: var(--muted); border: 1px solid var(--border); border-radius: var(--radius-pill); padding: 3px 10px; }
+.tag-chip.hot { color: var(--know); border-color: color-mix(in oklab, var(--know) 40%, transparent); background: color-mix(in oklab, var(--know) 7%, transparent); }
+
+.table-head, .fed-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, .8fr) minmax(0, .7fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  padding: 8px 4px;
+  font-size: var(--text-sm);
+}
+.table-head { font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--meta); border-bottom: 1px solid var(--border); }
+.fed-row { border-bottom: 1px solid var(--border-soft); }
+.fed-row:last-child { border-bottom: 0; }
+.fed-name { font-family: var(--font-mono); font-size: 12.5px; color: var(--fg); }
+.fed-nation { font-size: 12.5px; color: var(--fg-2); }
+.fed-count { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.fed-lat { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+
+.state-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--font-mono); font-size: 10px;
+  padding: 2px 8px; border-radius: var(--radius-pill);
+  border: 1px solid var(--border); color: var(--muted); white-space: nowrap;
+}
+.state-pill.ok { color: var(--success); border-color: color-mix(in oklab, var(--success) 35%, transparent); background: color-mix(in oklab, var(--success) 7%, transparent); }
+.state-pill.warn { color: var(--warn); border-color: color-mix(in oklab, var(--warn) 35%, transparent); background: color-mix(in oklab, var(--warn) 7%, transparent); }
+
+.tool-row, .model-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, .9fr) minmax(0, .8fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: var(--text-sm);
+}
+.tool-row:last-child, .model-row:last-child { border-bottom: 0; }
+.tool-name { font-family: var(--font-mono); font-size: 12.5px; color: var(--fg); }
+.tool-desc { font-size: 12.5px; color: var(--fg-2); }
+.tool-use { font-family: var(--font-mono); font-size: 11px; color: var(--meta); }
+.model-name { font-family: var(--font-mono); font-size: 12.5px; color: var(--fg); }
+.model-prov { font-size: 12.5px; color: var(--fg-2); }
+.model-quota { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.free-mark { font-family: var(--font-mono); font-size: 9px; color: var(--success); border: 1px solid color-mix(in oklab, var(--success) 30%, transparent); border-radius: 4px; padding: 1px 5px; margin-left: 6px; }
+.sel-mark { font-family: var(--font-mono); font-size: 9px; color: var(--accent); border: 1px solid color-mix(in oklab, var(--accent) 35%, transparent); border-radius: 4px; padding: 1px 5px; margin-left: 6px; }
+
+/* 토글 스위치 */
+.toggle { position: relative; width: 30px; height: 17px; border-radius: var(--radius-pill); background: var(--border); transition: background var(--motion-fast) var(--ease-standard); flex: none; }
+.toggle::after { content: ""; position: absolute; top: 2px; left: 2px; width: 13px; height: 13px; border-radius: 50%; background: var(--surface); box-shadow: var(--elev-raised); transition: transform var(--motion-fast) var(--ease-standard); }
+.toggle.on { background: var(--accent); }
+.toggle.on::after { transform: translateX(13px); }
+
+/* ─── 우측 레일 · 탭 ──────────────────────────────────────────────── */
+.right-rail { display: flex; min-height: 0; min-width: 0; }
+.right-rail .panel { flex: 1; min-height: 0; }
+.tabbar { display: flex; gap: 2px; padding: 8px 8px 0; border-bottom: 1px solid var(--border); }
+.tab {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  font-size: var(--text-sm); color: var(--muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color var(--motion-fast) var(--ease-standard);
+}
+.tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); }
+.badge-count {
+  font-family: var(--font-mono); font-size: 9px; color: var(--meta);
+  background: var(--border-soft); border: 1px solid var(--border);
+  border-radius: var(--radius-pill); padding: 1px 6px;
+}
+.tab[aria-selected="true"] .badge-count { color: var(--accent); border-color: color-mix(in oklab, var(--accent) 35%, transparent); background: color-mix(in oklab, var(--accent) 8%, transparent); }
+
+.panel-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+[data-tab-pane] { display: none; flex-direction: column; min-height: 0; flex: 1; }
+[data-tab-pane][data-active="true"] { display: flex; }
+
+/* 채팅 */
+.thread { flex: 1; min-height: 0; overflow-y: auto; padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); }
+.msg { display: flex; flex-direction: column; gap: 4px; }
+.who { display: flex; align-items: baseline; gap: 10px; font-family: var(--font-mono); font-size: 10.5px; color: var(--meta); }
+.who span:first-child { font-weight: 600; color: var(--accent); }
+.msg.user .who span:first-child { color: var(--fg-2); }
+.stamp { margin-left: auto; }
+.msg-body { font-size: 13.5px; color: var(--fg); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm) var(--radius-sm) var(--radius-sm) 2px; padding: 9px 12px; }
+.msg.user .msg-body { background: color-mix(in oklab, var(--accent) 7%, var(--surface)); border-color: color-mix(in oklab, var(--accent) 22%, transparent); }
+.msg.plain .msg-body { color: var(--muted); background: transparent; border-color: var(--border-soft); font-family: var(--font-mono); font-size: 11.5px; }
+
+.consensus { border: 1px solid var(--border); border-radius: var(--radius-sm) var(--radius-sm) var(--radius-sm) 2px; overflow: hidden; }
+.consensus-head {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: .06em; color: var(--accent);
+  padding: 7px 12px; background: var(--surface-warm); border-bottom: 1px solid var(--border);
+}
+.consensus-head .models { display: inline-flex; gap: 4px; margin-left: auto; }
+.consensus-head .models span { font-size: 9px; color: var(--muted); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; }
+.consensus-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--fg-2); }
+.consensus-body strong { color: var(--fg); font-weight: 600; font-size: 13.5px; }
+.consensus-actions { display: flex; gap: var(--space-2); padding: 0 12px 12px; flex-wrap: wrap; }
+
+.inv-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto;
+  gap: 10px; align-items: center;
+  font-size: 12px; color: var(--fg-2);
+  font-family: var(--font-mono);
+}
+.inv-row .amt { color: var(--fg); font-weight: 600; }
+
+.deliberating { border: 1px solid color-mix(in oklab, var(--warn) 30%, transparent); border-radius: var(--radius-sm); padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; background: color-mix(in oklab, var(--warn) 4%, var(--surface)); }
+.delib-title { display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 11px; color: var(--warn); }
+.mini-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex: none; }
+.mini-dot.work { background: var(--warn); animation: breathe-accent 1.2s ease-in-out infinite; }
+.mini-dot.done { background: var(--success); }
+.delib-row { display: grid; grid-template-columns: auto 74px minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: 12px; }
+.delib-row .model { font-family: var(--font-mono); font-size: 11px; color: var(--fg); }
+.delib-row .state { font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+
+/* 컴포저 */
+.composer { border-top: 1px solid var(--border); padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-2); background: var(--surface); }
+.composer-row { display: flex; gap: var(--space-2); align-items: flex-end; }
+.composer textarea {
+  flex: 1; min-height: 40px; max-height: 120px; resize: none;
+  background: var(--surface-warm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--fg); font: inherit; font-size: var(--text-sm);
+  padding: 9px 12px;
+}
+.composer textarea::placeholder { color: var(--meta); }
+.composer textarea:focus-visible { outline: none; border-color: var(--accent); box-shadow: var(--focus-ring); }
+
+.model-select { position: relative; align-self: flex-start; }
+.model-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--fg-2);
+  border: 1px solid var(--border); border-radius: var(--radius-pill);
+  padding: 5px 12px;
+  transition: border-color var(--motion-fast) var(--ease-standard);
+}
+.model-chip:hover { border-color: color-mix(in oklab, var(--accent) 40%, transparent); }
+.model-chip .caret { color: var(--meta); font-size: 9px; }
+.model-menu {
+  position: absolute; bottom: 130%; left: 0; z-index: 20;
+  width: 268px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
+  box-shadow: var(--elev-raised);
+  padding: 6px;
+  display: none; flex-direction: column; gap: 2px;
+}
+.model-menu.open { display: flex; }
+.model-opt {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: var(--radius-sm);
+  font-size: 12.5px; color: var(--fg-2); text-align: left;
+}
+.model-opt:hover { background: var(--border-soft); color: var(--fg); }
+.model-opt[aria-selected="true"] { color: var(--fg); background: color-mix(in oklab, var(--accent) 8%, var(--surface)); }
+.model-opt .check { margin-left: auto; color: var(--accent); font-family: var(--font-mono); font-size: 11px; }
+.model-opt .free { color: var(--success); }
+
+/* 잡 큐 */
+.jobs-head { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.jobs-head .eyebrow { margin-right: auto; }
+.jobs-list { flex: 1; min-height: 0; overflow-y: auto; padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-2); }
+.job-row { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 12px; background: var(--surface-warm); }
+.job-top { display: flex; align-items: center; gap: 8px; }
+.job-id { font-family: var(--font-mono); font-size: 10px; color: var(--meta); }
+.job-name { font-size: 12.5px; color: var(--fg); font-weight: 500; }
+.job-tool { margin-left: auto; font-family: var(--font-mono); font-size: 9px; color: var(--muted); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; }
+.job-state { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 10px; color: var(--muted); margin-top: 8px; }
+.job-state.running { color: var(--warn); }
+.job-state.done { color: var(--success); }
+.job-bar { height: 3px; border-radius: 2px; background: var(--border-soft); overflow: hidden; margin-top: 6px; }
+.job-bar i { display: block; height: 100%; background: var(--accent); width: 0; transition: width var(--motion-fast) linear; }
+.job-bar.done i { background: var(--success); width: 100% !important; }
+.jobs-empty { font-family: var(--font-mono); font-size: 11.5px; color: var(--meta); text-align: center; padding: 24px 12px; border: 1px dashed var(--border); border-radius: var(--radius-md); }
+
+/* ─── 쿼럼 패인 ───────────────────────────────────────────────────── */
+.quorum-list { flex: 1; min-height: 0; overflow-y: auto; padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); }
+.quorum-card { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px; background: var(--surface-warm); display: flex; flex-direction: column; gap: 8px; }
+.qname { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--fg); }
+.qbar { height: 4px; border-radius: 2px; background: var(--border-soft); overflow: hidden; }
+.qbar.agree span { display: block; height: 100%; background: var(--success); }
+.qbar.pending span { display: block; height: 100%; background: var(--warn); }
+.qstat { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 10px; color: var(--meta); }
+
+/* ─── 이벤트 피드 ──────────────────────────────────────────────────── */
+.event-strip { flex: none; border-top: 1px solid var(--border); background: var(--surface-warm); }
+.event-inner { max-width: calc(var(--container-max) + 64px); margin: 0 auto; padding: 10px var(--space-4) 12px; }
+.event-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.feed-live { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 10px; color: var(--success); letter-spacing: .08em; }
+.event-list { display: flex; gap: var(--space-2); overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+.feed-item {
+  flex: none;
+  display: flex; align-items: baseline; gap: 8px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--fg-2);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 12px;
+  white-space: nowrap;
+}
+.fts { color: var(--meta); flex: none; }
+.ftag { flex: none; font-size: 9px; text-transform: uppercase; letter-spacing: .06em; padding: 1px 5px; border-radius: 4px; color: var(--muted); border: 1px solid var(--border); }
+.ftag.quorum { color: var(--accent); border-color: color-mix(in oklab, var(--accent) 35%, transparent); }
+.ftag.crdt { color: var(--know); border-color: color-mix(in oklab, var(--know) 35%, transparent); }
+.ftag.mcp { color: var(--success); border-color: color-mix(in oklab, var(--success) 35%, transparent); }
+
+/* ─── 버튼 ─────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--font-body); font-size: var(--text-sm); font-weight: 500;
+  border-radius: var(--radius-sm);
+  padding: 9px 16px;
+  transition: background var(--motion-fast) var(--ease-standard), border-color var(--motion-fast);
+}
+.btn-primary { background: var(--accent); color: var(--accent-on); }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-primary:active { background: var(--accent-active); }
+.btn-secondary { background: transparent; color: var(--fg-2); border: 1px solid var(--border); }
+.btn-secondary:hover { border-color: color-mix(in oklab, var(--accent) 40%, transparent); color: var(--fg); }
+.btn-sm { padding: 6px 11px; font-size: 12px; }
+
+/* ─── 모달 ─────────────────────────────────────────────────────────── */
+.overlay {
+  position: fixed; inset: 0; z-index: 60;
+  background: color-mix(in oklab, var(--bg) 64%, transparent);
+  backdrop-filter: blur(3px);
+  display: none; align-items: flex-start; justify-content: center;
+  padding: 13vh var(--space-4) var(--space-4);
+}
+.overlay.open { display: flex; }
+.modal {
+  width: 100%; max-width: 460px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
+  box-shadow: var(--elev-raised);
+  display: flex; flex-direction: column;
+  max-height: 74vh;
+}
+.modal-head { display: flex; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+.modal-title { font-family: var(--font-display); font-size: 16px; font-weight: 600; }
+.modal-x { margin-left: auto; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 6px; color: var(--meta); font-size: 16px; }
+.modal-x:hover { background: var(--border-soft); color: var(--fg); }
+.modal-body { padding: 14px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 13.5px; color: var(--fg-2); }
+.modal-body > p { margin: 0 0 4px; }
+.modal-foot { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: var(--space-2); }
+.provider { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 8px; background: var(--surface-warm); }
+.chead { display: flex; align-items: center; justify-content: space-between; }
+.chead .mono { font-size: 12px; color: var(--fg); }
+.free-mark.solo { font-size: 9px; color: var(--success); border: 1px solid color-mix(in oklab, var(--success) 30%, transparent); border-radius: 4px; padding: 1px 5px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--meta); }
+.input {
+  background: var(--bg);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--fg); font: inherit; font-family: var(--font-mono); font-size: 12.5px;
+  padding: 8px 10px;
+}
+.input::placeholder { color: var(--meta); }
+.input:focus-visible { outline: none; border-color: var(--accent); box-shadow: var(--focus-ring); }
+
+/* ─── Cmd+K 팔레트 ─────────────────────────────────────────────────── */
+.palette-overlay {
+  position: fixed; inset: 0; z-index: 70;
+  background: color-mix(in oklab, var(--bg) 60%, transparent);
+  backdrop-filter: blur(3px);
+  display: none; align-items: flex-start; justify-content: center;
+  padding: 14vh var(--space-4) var(--space-4);
+}
+.palette-overlay.open { display: flex; }
+.palette {
+  width: 100%; max-width: 560px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
+  box-shadow: var(--elev-raised);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.palette-input-row { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.palette-input-row svg { flex: none; color: var(--meta); }
+.palette-input {
+  flex: 1; background: none; border: 0; color: var(--fg);
+  font: inherit; font-size: var(--text-base); font-family: var(--font-mono);
+}
+.palette-input::placeholder { color: var(--meta); }
+.palette-input:focus { outline: none; box-shadow: none; }
+.palette-list { max-height: 340px; overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+.palette-group { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--meta); padding: 8px 10px 3px; }
+.palette-item {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 13.5px; color: var(--fg-2); text-align: left;
+}
+.palette-item .p-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.palette-item .p-kind { font-family: var(--font-mono); font-size: 9.5px; color: var(--meta); margin-left: auto; }
+.palette-item .p-desc { font-family: var(--font-mono); font-size: 10.5px; color: var(--meta); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.palette-item[aria-selected="true"] { background: color-mix(in oklab, var(--accent) 8%, var(--surface)); color: var(--fg); }
+.palette-item[aria-selected="true"] .p-kind { color: var(--accent); }
+.palette-empty { font-family: var(--font-mono); font-size: 12px; color: var(--meta); padding: 20px 14px; text-align: center; }
+
+/* ─── 토스트 ───────────────────────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(16px);
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-pill);
+  box-shadow: var(--elev-raised);
+  color: var(--fg); font-size: 12.5px; font-family: var(--font-mono);
+  padding: 9px 18px;
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--motion-base) var(--ease-standard), transform var(--motion-base) var(--ease-standard);
+  z-index: 80;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ─── 모바일 반응형 ───────────────────────────────────────────────── */
+@media (max-width: 920px) {
+  body { overflow: auto; }
+  .app-shell { grid-template-columns: 1fr; height: auto; min-height: 100vh; }
+  .sidebar { position: sticky; top: 0; z-index: 30; border-right: 0; border-bottom: 1px solid var(--border); flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px var(--space-2); padding: 8px 12px; overflow-x: hidden; }
+  .brand { padding: 0; flex: none; order: 1; }
+  .brand-tag { display: none; }
+  .nav-label { display: none; }
+  #space-nav { order: 3; flex: 1 1 100%; display: flex; gap: 4px; min-width: 0; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .nav-item { width: auto; white-space: nowrap; font-size: 13px; padding: 7px 10px; }
+  .nav-item .count { display: none; }
+  .sidebar-foot { order: 2; margin: 0 0 0 auto; border-top: 0; padding: 0; flex-direction: row; flex: none; gap: var(--space-1); }
+  .device-chip { padding: 7px 10px; white-space: nowrap; }
+  .panel-actions { flex-wrap: wrap; margin-left: 0; width: 100%; }
+  .quorum-chip .full { display: none; }
+  .quorum-chip.deliberating { border-color: var(--warn); color: var(--warn); }
+  .topbar { flex-wrap: wrap; height: auto; padding-block: 10px; gap: var(--space-2); row-gap: 6px; }
+  .topbar-right { flex-wrap: wrap; justify-content: flex-end; row-gap: 6px; }
+  .status-pill { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+  .search-trigger { order: 3; flex-basis: 100%; max-width: none; }
+  .breadcrumb { max-width: 100%; }
+  .statsbar { grid-template-columns: repeat(3, 1fr); }
+  .stat-cell:nth-child(n+4) { border-top: 1px solid var(--border-soft); }
+  .workspace { grid-template-columns: 1fr; }
+  .canvas-panel { height: 300px; }
+  .mod-grid { grid-template-columns: 1fr; }
+  .table-head, .fed-row { grid-template-columns: 1fr 1fr auto; }
+  .table-head span:nth-child(2), .table-head span:nth-child(3), .fed-row > :nth-child(2), .fed-row > :nth-child(3) { display: none; }
+  .tool-row, .model-row { grid-template-columns: 1fr auto; }
+  .tool-row > :nth-child(2), .tool-row > :nth-child(3), .model-row > :nth-child(2), .model-row > :nth-child(3) { display: none; }
+  .right-rail { min-height: 520px; }
+  .inspector { width: min(296px, calc(100vw - 40px)); }
+}
+
+/* ─── 좁은 모바일 (≤560px) — 헤더/텔레메트리 압축 ─────────────────── */
+@media (max-width: 560px) {
+  .device-chip { display: none; }
+  .statsbar { grid-template-columns: repeat(2, 1fr); }
+  .stat-cell:nth-child(n+3) { border-top: 1px solid var(--border-soft); }
+  .status-pill { font-size: 10px; padding: 4px 9px; }
+  .canvas-panel { height: 260px; }
+  .mesh-legend span:nth-child(n+4) { display: none; }
+}
+</style>
+<style data-od-tweaks-bridge-style="">
+[data-od-tweaks-hidden] .tw-panel {
+  transform: translateX(calc(100% + 32px)) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+.tw-restore { display: none !important; }
+</style><script data-od-tweaks-bridge="">(function(){
+  // Synchronously hide BEFORE the artifact body parses so the panel never
+  // flashes on initial paint. The host removes the attribute via postMessage
+  // once it knows the desired state.
+  document.documentElement.setAttribute('data-od-tweaks-hidden', '');
+
+  var suppressEcho = false;
+  var observer = null;
+
+  function panelEl(){ return document.querySelector('.tw-panel'); }
+
+  function applyClassesToPanel(visible){
+    var panel = panelEl();
+    if (panel) panel.classList.toggle('tw-hidden', !visible);
+  }
+
+  function setPanelVisible(visible){
+    suppressEcho = true;
+    document.documentElement.toggleAttribute('data-od-tweaks-hidden', !visible);
+    applyClassesToPanel(visible);
+    // Clear flag after the MutationObserver has had a chance to fire for this
+    // change so we don't echo our own host-driven toggles back to the host.
+    Promise.resolve().then(function(){ suppressEcho = false; });
+  }
+
+  function postState(){
+    var panel = panelEl();
+    if (!panel) return;
+    try {
+      parent.postMessage({
+        type: 'od:tweaks-panel-state',
+        visible: !panel.classList.contains('tw-hidden'),
+      }, '*');
+    } catch (e) {}
+  }
+
+  function postAvailability(){
+    try {
+      parent.postMessage({
+        type: 'od:tweaks-available',
+        available: !!panelEl(),
+      }, '*');
+    } catch (e) {}
+  }
+
+  function attachObserver(){
+    var panel = panelEl();
+    if (!panel || observer) return;
+    observer = new MutationObserver(function(){
+      if (suppressEcho) return;
+      postState();
+    });
+    observer.observe(panel, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  function onReady(){
+    // Capture the panel authored visibility BEFORE we apply the host hidden
+    // attribute. The bridge sets data-od-tweaks-hidden synchronously in head
+    // (before the body parses), so on entry to onReady the attribute is
+    // always present even though the artifact may have authored the panel
+    // as default-visible. Reading the panel class first is the only place
+    // we can still observe the author intent. Then drive the attribute,
+    // classes, and posted state from that captured value so a default
+    // visible tw-panel reports visible:true and the toolbar toggle starts
+    // ON. Issue surfaced in PR #1643 review.
+    var panel = panelEl();
+    var initialVisible = !!panel && !panel.classList.contains('tw-hidden');
+    document.documentElement.toggleAttribute('data-od-tweaks-hidden', !initialVisible);
+    applyClassesToPanel(initialVisible);
+    attachObserver();
+    postAvailability();
+    // Post the captured initial visibility so the toolbar toggle reflects
+    // the default state on mount. Without this the toggle reads OFF while
+    // a default-visible tw-panel artifact clearly shows its panel and the
+    // user would have to click toggle-on then toggle-off to actually hide.
+    postState();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', onReady);
+  } else {
+    onReady();
+  }
+
+  window.addEventListener('message', function(ev){
+    if (!ev.data || ev.data.type !== 'od:tweaks-panel-visible') return;
+    setPanelVisible(!!ev.data.visible);
+  });
+})();</script></head>
+<body>
+
+<div class="app-shell" data-od-id="shell">
+
+  <!-- ── 사이드바 ─────────────────────────────────────────────────── -->
+  <aside class="sidebar" data-od-id="sidebar" aria-label="메시 스페이스 네비게이션">
+    <div class="brand" data-od-id="path-0-0-0">
+      <svg class="brand-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+        <circle cx="7" cy="12" r="3.2"></circle>
+        <circle cx="17" cy="12" r="3.2"></circle>
+        <path d="M7 8.8c1.4 1 1.4 5.4 0 6.4M17 8.8c-1.4 1-1.4 5.4 0 6.4"></path>
+      </svg>
+      <div>
+        <div class="brand-name">muhanai</div>
+        <span class="brand-tag mono">함께 생각하는 AI 네트워크</span>
+      </div>
+    </div>
+
+    <p class="nav-label">Spaces</p>
+    <nav id="space-nav" aria-label="스페이스" data-od-id="path-0-0-2">
+      <button class="nav-item" data-space="mesh" aria-current="page" data-od-id="path-0-0-2-0"><span class="dot" aria-hidden="true"></span>코스믹 메시<span class="count">23</span></button>
+      <button class="nav-item" data-space="compute" data-od-id="path-0-0-2-1"><span class="dot" aria-hidden="true"></span>컴퓨트 메시<span class="count">9</span></button>
+      <button class="nav-item" data-space="knowledge" data-od-id="path-0-0-2-2"><span class="dot" aria-hidden="true"></span>지식 시장<span class="count">1.2K</span></button>
+      <button class="nav-item" data-space="fed" data-od-id="path-0-0-2-3"><span class="dot" aria-hidden="true"></span>연방<span class="count">4</span></button>
+      <button class="nav-item" data-space="mcp" data-od-id="path-0-0-2-4"><span class="dot" aria-hidden="true"></span>MCP 마켓<span class="count">142</span></button>
+      <button class="nav-item" data-space="llm" data-od-id="path-0-0-2-5"><span class="dot" aria-hidden="true"></span>LLM 허브<span class="count">6</span></button>
+      <button class="nav-item" data-space="factory" data-od-id="path-0-0-2-6"><span class="dot" aria-hidden="true"></span>1-Click 팩토리<span class="count" id="factory-count">0</span></button>
+    </nav>
+
+    <div class="sidebar-foot" data-od-id="path-0-0-3">
+      <div class="device-chip"><span class="pulse-dot online" aria-hidden="true"></span><span class="mono">이 기기 · mesh-llm :9337</span></div>
+      <button class="nav-item" id="sys-settings" data-od-id="path-0-0-3-1"><span class="dot" aria-hidden="true"></span>시스템 설정</button>
+    </div>
+  </aside>
+
+  <div class="col">
+    <!-- ── 탑바 ──────────────────────────────────────────────────── -->
+    <header class="topbar" data-od-id="topbar">
+      <div class="breadcrumb" data-od-id="path-0-1-0-0"><span class="crumb-muted mono">mesh</span><span style="color:var(--meta)">/</span><span class="crumb-now" id="crumb-now" data-od-id="path-0-1-0-0-2">코스믹 메시</span></div>
+
+      <button class="search-trigger" id="search-trigger" type="button" data-od-id="path-0-1-0-1">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path></svg>
+        <span>노드 · 툴 · 지식 검색…</span>
+        <kbd>⌘K</kbd>
+      </button>
+
+      <div class="topbar-right" data-od-id="path-0-1-0-2">
+        <span class="clock" id="clock" data-od-id="path-0-1-0-2-0">--:--:--</span>
+        <span class="status-pill"><span class="pulse-dot" aria-hidden="true"></span>Peers Online · WebRTC &amp; libp2p DHT Active</span>
+        <button class="byok-badge" id="byok-badge" type="button" aria-haspopup="dialog" data-od-id="path-0-1-0-2-2">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+          BYOK 활성화됨
+        </button>
+      </div>
+    </header>
+
+    <!-- ── 텔레메트리 스트립 ─────────────────────────────────────── -->
+    <section class="statsbar" data-od-id="statsbar" aria-label="메시 실시간 텔레메트리">
+      <div class="stat-cell" data-od-id="path-0-1-1-0"><div class="stat-label">Peers</div><div class="stat-line"><span class="stat-value" id="s-peers" data-od-id="path-0-1-1-0-1-0">23</span><span class="stat-sub" id="s-peers-sub" data-od-id="path-0-1-1-0-1-1">+1 · 30s</span></div></div>
+      <div class="stat-cell" data-od-id="path-0-1-1-1"><div class="stat-label">DHT 지연</div><div class="stat-line"><span class="stat-value" id="s-lat" data-od-id="path-0-1-1-1-1-0">42<span style="font-size:11px;color:var(--meta)">ms</span></span><span class="stat-sub">libp2p · bootstrap ok</span></div></div>
+      <div class="stat-cell" data-od-id="path-0-1-1-2"><div class="stat-label">CRDT ops</div><div class="stat-line"><span class="stat-value" id="s-ops" data-od-id="path-0-1-1-2-1-0">1.2K<span style="font-size:11px;color:var(--meta)">/s</span></span><span class="stat-sub">저널 v214</span></div></div>
+      <div class="stat-cell" data-od-id="path-0-1-1-3"><div class="stat-label">GPU util</div><div class="stat-line"><span class="stat-value" id="s-gpu" data-od-id="path-0-1-1-3-1-0">61<span style="font-size:11px;color:var(--meta)">%</span></span><span class="stat-sub">9 nodes · 6 active</span></div></div>
+      <div class="stat-cell" data-od-id="path-0-1-1-4"><div class="stat-label">게이트웨이</div><div class="stat-line"><span class="stat-value ok" id="s-gw" data-od-id="path-0-1-1-4-1-0">keyless</span><span class="stat-sub">0 토큰 · BYOK 2</span></div></div>
+    </section>
+
+    <!-- ── 워크스페이스 ──────────────────────────────────────────── -->
+    <main class="workspace" data-od-id="workspace">
+
+      <!-- 중앙 컬럼 -->
+      <div class="center-col" data-od-id="path-0-1-2-0">
+
+        <!-- 캔버스 -->
+        <section class="panel canvas-panel" data-od-id="canvas-panel" aria-label="메시 시각화">
+          <div class="panel-head" data-od-id="path-0-1-2-0-0-0">
+            <h1 class="panel-title" id="space-title" data-od-id="path-0-1-2-0-0-0-0">코스믹 메시</h1>
+            <span class="panel-sub" id="space-sub" data-od-id="path-0-1-2-0-0-0-1">mesh://global · 23 peers · 1,284 knowledge nodes</span>
+            <div class="panel-actions">
+              <span class="chip online"><span class="pulse-dot" style="width:6px;height:6px;border-radius:50%;background:var(--success);display:inline-block;animation:breathe 2.4s ease-in-out infinite" aria-hidden="true"></span>libp2p DHT 연결됨</span>
+              <span class="quorum-chip" id="quorum-chip" data-od-id="path-0-1-2-0-0-0-2-1"><span class="mini-dot" aria-hidden="true"></span>쿼럼 B-12 · <span class="full">Claude 3.7 + DeepSeek R1 + Gemini 2.5 ·</span> 3/3 동의</span>
+            </div>
+          </div>
+          <div class="canvas-wrap" data-od-id="path-0-1-2-0-0-1">
+            <div class="canvas-atmos" aria-hidden="true"></div>
+            <svg id="mesh" viewBox="0 0 960 560" preserveAspectRatio="xMidYMid meet" role="img" aria-label="muhanai P2P 메시 그래프" data-od-id="path-0-1-2-0-0-1-1"></svg>
+            <div class="inspector" id="inspector" role="region" aria-label="노드 인스펙터" data-od-id="path-0-1-2-0-0-1-2">
+              <div class="insp-head" data-od-id="path-0-1-2-0-0-1-2-0">
+                <span class="insp-name" id="insp-name" data-od-id="path-0-1-2-0-0-1-2-0-0">—</span>
+                <button class="insp-close" id="insp-close" type="button" aria-label="인스펙터 닫기" data-od-id="path-0-1-2-0-0-1-2-0-1">×</button>
+              </div>
+              <div class="insp-tags" id="insp-tags" data-od-id="path-0-1-2-0-0-1-2-1"></div>
+              <div class="insp-stats" data-od-id="path-0-1-2-0-0-1-2-2">
+                <div class="insp-stat"><b id="insp-edges" data-od-id="path-0-1-2-0-0-1-2-2-0-0">0</b><span>edges</span></div>
+                <div class="insp-stat"><b id="insp-lat" data-od-id="path-0-1-2-0-0-1-2-2-1-0">—</b><span>latency</span></div>
+                <div class="insp-stat"><b id="insp-sync" data-od-id="path-0-1-2-0-0-1-2-2-2-0">—</b><span>CRDT sync</span></div>
+              </div>
+              <div class="insp-actions" data-od-id="path-0-1-2-0-0-1-2-3">
+                <button class="btn btn-secondary btn-sm" id="insp-query" type="button" data-od-id="path-0-1-2-0-0-1-2-3-0">쿼럼 조회</button>
+                <button class="btn btn-secondary btn-sm" id="insp-focus" type="button" data-od-id="path-0-1-2-0-0-1-2-3-1">공간 포커스</button>
+              </div>
+            </div>
+            <div class="mesh-legend" aria-hidden="true">
+              <span><i style="background:var(--fg-2)"></i>agent peer</span>
+              <span><i style="background:var(--accent)"></i>this node</span>
+              <span><i style="background:var(--warn)"></i>gpu node</span>
+              <span><i style="background:var(--success)"></i>mcp tool</span>
+              <span><i style="background:var(--know)"></i>지식 노드</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 스페이스 모듈 -->
+        <section class="panel module-panel" data-od-id="module-panel" aria-label="스페이스 오퍼레이션 모듈">
+          <div class="panel-head" data-od-id="path-0-1-2-0-1-0">
+            <h2 class="panel-title" id="module-title" data-od-id="path-0-1-2-0-1-0-0">메시 오퍼레이션</h2>
+            <span class="panel-sub" id="module-sub" data-od-id="path-0-1-2-0-1-0-1">live · 2s refresh</span>
+          </div>
+          <div class="module-body" id="module-body" data-od-id="path-0-1-2-0-1-1"></div>
+        </section>
+      </div>
+
+      <!-- 우측 레일 -->
+      <aside class="right-rail" data-od-id="right-rail" aria-label="오케스트레이션 패널">
+        <section class="panel" data-od-id="path-0-1-2-1-0">
+          <div class="tabbar" role="tablist" aria-label="패널 탭" data-od-id="path-0-1-2-1-0-0">
+            <button class="tab" role="tab" id="tab-chat" aria-selected="true" aria-controls="pane-chat" data-od-id="path-0-1-2-1-0-0-0">Cœur &amp; Chat</button>
+            <button class="tab" role="tab" id="tab-quorum" aria-selected="false" aria-controls="pane-quorum" data-od-id="path-0-1-2-1-0-0-1">쿼럼 합의<span class="badge-count">B-12</span></button>
+            <button class="tab" role="tab" id="tab-jobs" aria-selected="false" aria-controls="pane-jobs" data-od-id="path-0-1-2-1-0-0-2">Jobs<span class="badge-count" id="jobs-count" data-od-id="path-0-1-2-1-0-0-2-0">0</span></button>
+          </div>
+
+          <div class="panel-body" data-od-id="path-0-1-2-1-0-1">
+            <!-- 채팅 패인 -->
+            <div data-tab-pane="" id="pane-chat" data-active="true" role="tabpanel" aria-labelledby="tab-chat" data-od-id="path-0-1-2-1-0-1-0">
+              <div class="thread" id="thread" aria-live="polite" data-od-id="path-0-1-2-1-0-1-0-0">
+                <div class="msg agent" data-od-id="path-0-1-2-1-0-1-0-0-0">
+                  <div class="who"><span>ko·seoul·pelican</span><span class="stamp">14:02:12</span></div>
+                  <div class="consensus">
+                    <div class="consensus-head">QUORUM B-12 · 3/3 동의
+                      <span class="models"><span>claude</span><span>deepseek</span><span>gemini</span></span>
+                    </div>
+                    <div class="consensus-body">
+                      <strong>Gmail에서 마지막 인보이스 3건을 찾았어요.</strong>
+                      <div class="inv-row"><span>Vercel Inc. — USD 청구서</span><span class="mono amt">$19.00</span><span class="mono">Mar 02</span><span style="color:var(--success);font-family:var(--font-mono);font-size:11px">발송됨</span></div>
+                      <div class="inv-row"><span>GitHub, Inc. — Teams 요금</span><span class="mono amt">$4.00</span><span class="mono">Feb 28</span><span style="color:var(--success);font-family:var(--font-mono);font-size:11px">발송됨</span></div>
+                      <div class="inv-row"><span>Cloudflare — 도메인 갱신</span><span class="mono amt">$10.44</span><span class="mono">Feb 26</span><span style="color:var(--meta);font-family:var(--font-mono);font-size:11px">대기</span></div>
+                    </div>
+                    <div class="consensus-actions">
+                      <button class="btn btn-secondary btn-sm" data-job="gmail" data-jobname="인보이스 답장 준비" data-node="ko" data-od-id="path-0-1-2-1-0-1-0-0-0-1-2-0">답장 준비</button>
+                      <button class="btn btn-secondary btn-sm" data-job="obsidian" data-jobname="지식노드로 발행" data-node="know" data-od-id="path-0-1-2-1-0-1-0-0-0-1-2-1">지식노드로 발행</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="msg user" data-od-id="path-0-1-2-1-0-1-0-0-1">
+                  <div class="who"><span>you</span><span class="stamp">14:02:13</span></div>
+                  <div class="msg-body">Gmail 열고 마지막 인보이스 찾아줘</div>
+                </div>
+              </div>
+
+              <div class="composer" data-od-id="path-0-1-2-1-0-1-0-1">
+                <div class="model-select">
+                  <button class="model-chip" id="model-chip" type="button" aria-haspopup="listbox" aria-expanded="false" data-od-id="path-0-1-2-1-0-1-0-1-0-0">
+                    <span id="model-name" data-od-id="path-0-1-2-1-0-1-0-1-0-0-0">쿼럼 · 3 모델</span><span class="caret">▾</span>
+                  </button>
+                  <div class="model-menu" id="model-menu" role="listbox" aria-label="모델 선택" data-od-id="path-0-1-2-1-0-1-0-1-0-1">
+                    <button class="model-opt" role="option" data-model="quorum" aria-selected="true" data-od-id="path-0-1-2-1-0-1-0-1-0-1-0"><span>쿼럼 · 3 모델 합의</span><span class="check">✓</span></button>
+                    <button class="model-opt" role="option" data-model="claude" data-od-id="path-0-1-2-1-0-1-0-1-0-1-1"><span>Claude 3.7 Sonnet</span><span class="check">✓</span></button>
+                    <button class="model-opt" role="option" data-model="deepseek" data-od-id="path-0-1-2-1-0-1-0-1-0-1-2"><span>DeepSeek R1</span><span class="check">✓</span></button>
+                    <button class="model-opt" role="option" data-model="gemini" data-od-id="path-0-1-2-1-0-1-0-1-0-1-3"><span>Gemini 2.5 Pro<span class="free" style="margin-left:6px">무료 · 1,000/일</span></span><span class="check">✓</span></button>
+                    <button class="model-opt" role="option" data-model="mesh" data-od-id="path-0-1-2-1-0-1-0-1-0-1-4"><span>Mesh-LLM (로컬 메시, 9337)</span><span class="check">✓</span></button>
+                    <button class="model-opt" role="option" data-model="pool" data-od-id="path-0-1-2-1-0-1-0-1-0-1-5"><span>키리스 풀 (라우팅)<span class="free" style="margin-left:6px">keyless</span></span><span class="check">✓</span></button>
+                  </div>
+                </div>
+                <div class="composer-row">
+                  <textarea id="goal-input" rows="2" placeholder="Goal (자연어로 입력) — 예: 다음 주 일정 정리해줘" aria-label="목표 입력" data-od-id="path-0-1-2-1-0-1-0-1-1-0"></textarea>
+                  <button class="btn btn-primary" id="send-btn" type="button" data-od-id="path-0-1-2-1-0-1-0-1-1-1">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h13M12 5l7 7-7 7"></path></svg>
+                    전송
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 쿼럼 패인 -->
+            <div data-tab-pane="" id="pane-quorum" data-active="false" role="tabpanel" aria-labelledby="tab-quorum" data-od-id="path-0-1-2-1-0-1-1">
+              <div class="quorum-list" id="quorum-list" data-od-id="path-0-1-2-1-0-1-1-0">
+                <div class="quorum-card" data-od-id="path-0-1-2-1-0-1-1-0-0">
+                  <div class="qname"><span class="mini-dot" style="background:var(--accent)"></span>claude-3.7-sonnet</div>
+                  <div style="font-size:var(--text-sm);color:var(--fg-2)">Gmail 인보이스 3건, 발신·금액·상태 추출 완료</div>
+                  <div class="qbar agree"><span style="width:100%"></span></div>
+                  <div class="qstat"><span>동의 · B-12</span><span>0.6s</span></div>
+                </div>
+                <div class="quorum-card" data-od-id="path-0-1-2-1-0-1-1-0-1">
+                  <div class="qname"><span class="mini-dot" style="background:var(--success)"></span>deepseek-r1</div>
+                  <div style="font-size:var(--text-sm);color:var(--fg-2)">반박 없음 — Cloudflare 항목 "대기" 상태로 분류 합의</div>
+                  <div class="qbar agree"><span style="width:100%"></span></div>
+                  <div class="qstat"><span>동의 · B-12</span><span>0.9s</span></div>
+                </div>
+                <div class="quorum-card" data-od-id="path-0-1-2-1-0-1-1-0-2">
+                  <div class="qname"><span class="mini-dot" style="background:var(--know)"></span>gemini-2.5-pro</div>
+                  <div style="font-size:var(--text-sm);color:var(--fg-2)">입장 동일, 요약 카드 구성안 제안 반영됨</div>
+                  <div class="qbar agree"><span style="width:100%"></span></div>
+                  <div class="qstat"><span>동의 · B-12</span><span>1.1s</span></div>
+                </div>
+                <p class="eyebrow" style="margin:4px 0 0">PROTOCOL · OBSERVE → REFUTE → AGREE</p>
+              </div>
+            </div>
+
+            <!-- 잡 큐 패인 -->
+            <div data-tab-pane="" id="pane-jobs" data-active="false" role="tabpanel" aria-labelledby="tab-jobs" data-od-id="path-0-1-2-1-0-1-2">
+              <div class="jobs-head" data-od-id="path-0-1-2-1-0-1-2-0"><span class="eyebrow">Orchestration Queue</span><span class="mono" id="jobs-count-hd" data-od-id="path-0-1-2-1-0-1-2-0-1">0 active</span></div>
+              <div class="jobs-list" id="jobs-list" data-od-id="path-0-1-2-1-0-1-2-1">
+                <div class="jobs-empty" data-od-id="path-0-1-2-1-0-1-2-1-0">잡 큐가 비어 있습니다. 채팅 카드의 실행 버튼 또는 Cmd+K 팔레트로 액션을 오케스트레이션하세요.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <!-- ── 이벤트 피드 ────────────────────────────────────────────── -->
+    <section class="event-strip" data-od-id="event-strip" aria-label="메시 이벤트 피드">
+      <div class="event-inner" data-od-id="path-0-1-3-0">
+        <div class="event-head">
+          <span class="eyebrow">Feed · Mesh P2P &amp; CRDT Journal</span>
+          <span class="feed-live"><span class="pulse-dot" style="width:6px;height:6px;border-radius:50%;background:var(--success);display:inline-block;animation:breathe 2.4s ease-in-out infinite" aria-hidden="true"></span>LIVE</span>
+        </div>
+        <div class="event-list" id="event-list" aria-live="polite" data-od-id="path-0-1-3-0-1"></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ── Cmd+K 팔레트 ────────────────────────────────────────────────── -->
+<div class="palette-overlay" id="palette-overlay" role="dialog" aria-modal="true" aria-label="명령 팔레트" data-od-id="path-1">
+  <div class="palette" data-od-id="path-1-0">
+    <div class="palette-input-row">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path></svg>
+      <input class="palette-input" id="palette-input" type="text" placeholder="노드 · 툴 · 지식 · 명령 검색…" aria-label="명령 팔레트 입력" autocomplete="off" data-od-id="path-1-0-0-1">
+      <kbd style="font-size:10px;color:var(--meta)">esc</kbd>
+    </div>
+    <div class="palette-list" id="palette-list" role="listbox" aria-label="검색 결과" data-od-id="path-1-0-1"></div>
+  </div>
+</div>
+
+<!-- ── BYOK 모달 ──────────────────────────────────────────────────── -->
+<div class="overlay" id="byok-overlay" role="dialog" aria-modal="true" aria-labelledby="byok-title" data-od-id="path-2">
+  <div class="modal" data-od-id="path-2-0">
+    <div class="modal-head">
+      <h2 class="modal-title" id="byok-title" data-od-id="path-2-0-0-0">BYOK 설정 — 자신의 API 키 사용</h2>
+      <button class="modal-x" id="byok-close" type="button" aria-label="닫기" data-od-id="path-2-0-0-1">×</button>
+    </div>
+    <div class="modal-body">
+      <p>키는 이 브라우저에만 저장됩니다. 등록하지 않으면 <strong style="color:var(--fg-2)">키리스 풀</strong>로 자동 라우팅됩니다.</p>
+      <div class="provider">
+        <div class="chead"><span class="mono">OpenAI</span><span class="free-mark solo">pool fallback</span></div>
+        <div class="field">
+          <label for="k-openai">API 키</label>
+          <input class="input" id="k-openai" type="password" placeholder="sk-…" autocomplete="off" data-od-id="path-2-0-1-1-1-1">
+        </div>
+      </div>
+      <div class="provider">
+        <div class="chead"><span class="mono">OpenRouter</span><span class="free-mark solo">모든 모델 라우팅</span></div>
+        <div class="field">
+          <label for="k-or">API 키</label>
+          <input class="input" id="k-or" type="password" placeholder="sk-or-…" autocomplete="off" data-od-id="path-2-0-1-2-1-1">
+        </div>
+      </div>
+      <div class="provider">
+        <div class="chead"><span class="mono">Google AI Studio</span><span class="free-mark solo">무료 · Gemini 1,000/일</span></div>
+        <div class="field">
+          <label for="k-google">API 키</label>
+          <input class="input" id="k-google" type="password" placeholder="AIza…" autocomplete="off" data-od-id="path-2-0-1-3-1-1">
+        </div>
+      </div>
+      <div class="provider">
+        <div class="chead"><span class="mono">Groq</span><span class="free-mark solo">저지연 추론</span></div>
+        <div class="field">
+          <label for="k-groq">API 키</label>
+          <input class="input" id="k-groq" type="password" placeholder="gsk_…" autocomplete="off" data-od-id="path-2-0-1-4-1-1">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" id="byok-clear" type="button" data-od-id="path-2-0-2-0">키 모두 지우기</button>
+      <button class="btn btn-primary" id="byok-save" type="button" data-od-id="path-2-0-2-1">키 등록 및 활성화</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" data-od-id="path-3"></div>
+
+<script>
+/* ─────────────────────────────────────────────────────────────────────
+   muhanai /dashboard 개선판 — mesh graph · space modules · job queue
+   · command palette · inspector · quorum chat (응답은 로컬 시뮬레이션)
+   ───────────────────────────────────────────────────────────────────── */
+(function () {
+  "use strict";
+
+  /* ── 상태 ─────────────────────────────────────────────────────── */
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+  const state = {
+    space: "mesh",
+    model: "quorum",
+    byok: true,
+    deliberating: false,
+    quorumSeq: 12,
+    selected: null,
+    jobSeq: 0,
+    jobs: []
+  };
+
+  /* ── 시계 ─────────────────────────────────────────────────────── */
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function tickClock() {
+    const d = new Date();
+    $("#clock").textContent = pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+
+  /* ── 텔레메트리 지터 ──────────────────────────────────────────── */
+  function tickTelemetry() {
+    const j = (base, amp) => base + Math.round((Math.random() - .5) * amp);
+    $("#s-peers").textContent = j(23, 2);
+    $("#s-lat").innerHTML = j(42, 8) + '<span style="font-size:11px;color:var(--meta)">ms</span>';
+    $("#s-ops").innerHTML = j(12, 3) / 10 + 'K<span style="font-size:11px;color:var(--meta)">/s</span>';
+    const g = j(61, 12);
+    $("#s-gpu").innerHTML = g + '<span style="font-size:11px;color:var(--meta)">%</span>';
+  }
+  setInterval(tickTelemetry, 2000);
+
+  /* ── 메시 그래프 ──────────────────────────────────────────────── */
+  const GRAPH = {
+    nodes: [
+      { id: "you",        x: 700, y: 296, type: "you",     label: "me·this·node",    tag: "mesh-llm",   spaces: "mesh fed" },
+      { id: "ko",         x: 200, y: 150, type: "peer",    label: "ko·seoul·pelican", tag: "agent",     spaces: "mesh fed" },
+      { id: "jp",         x: 430, y: 84,  type: "peer",    label: "jp·tokyo·kite",    tag: "agent",     spaces: "mesh knowledge" },
+      { id: "us",         x: 762, y: 116, type: "peer",    label: "us·sfo·relay01",   tag: "relay",     spaces: "mesh compute fed" },
+      { id: "eu",         x: 850, y: 396, type: "peer",    label: "eu·ber·lynx",      tag: "agent",     spaces: "mesh fed" },
+      { id: "cn",         x: 122, y: 384, type: "peer",    label: "cn·sha·crane",     tag: "agent",     spaces: "mesh" },
+      { id: "br",         x: 322, y: 498, type: "peer",    label: "br·sao·tucan",     tag: "agent",     spaces: "mesh" },
+      { id: "gpu1",       x: 570, y: 208, type: "compute", label: "gpu·a100·01",      tag: "t4",        spaces: "compute" },
+      { id: "gpu2",       x: 430, y: 300, type: "compute", label: "gpu·a100·02",      tag: "t4",        spaces: "compute" },
+      { id: "mcp-web",    x: 84,  y: 236, type: "mcp",     label: "mcp·browser",      tag: "tool",      spaces: "mcp" },
+      { id: "mcp-os",     x: 600, y: 470, type: "mcp",     label: "mcp·computer-use", tag: "e2b",       spaces: "mcp" },
+      { id: "mcp-obs",    x: 470, y: 404, type: "mcp",     label: "mcp·obsidian",     tag: "graph",     spaces: "mcp knowledge" },
+      { id: "know",       x: 250, y: 258, type: "know",    label: "지식·v214",        tag: "moc",       spaces: "knowledge" },
+      { id: "llm",        x: 470, y: 216, type: "compute", label: "llm·hub·6",        tag: "models",    spaces: "llm" }
+    ],
+    edges: [
+      ["you", "ko"], ["you", "us"], ["you", "eu"], ["you", "cn"], ["you", "llm"],
+      ["ko", "jp"], ["ko", "eu"], ["ko", "cn"],
+      ["us", "eu"], ["eu", "br"], ["cn", "br"],
+      ["gpu1", "us"], ["gpu2", "ko"],
+      ["mcp-web", "cn"], ["mcp-obs", "ko"], ["mcp-os", "eu"],
+      ["know", "ko"], ["llm", "jp"]
+    ]
+  };
+  const byId = {};
+  GRAPH.nodes.forEach((n) => (byId[n.id] = n));
+
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  const mesh = $("#mesh");
+  const meshWrap = $(".canvas-wrap");
+  function el(tag, attrs, parent) {
+    const node = document.createElementNS(SVG_NS, tag);
+    for (const k in attrs) node.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(node);
+    return node;
+  }
+
+  function edgeCount(id) {
+    return GRAPH.edges.filter(([a, b]) => a === id || b === id).length;
+  }
+  function pseudoLatency(id) {
+    let h = 0;
+    for (const c of id) h = (h * 31 + c.charCodeAt(0)) % 997;
+    return 28 + (h % 152);
+  }
+
+  function selectNode(id) {
+    state.selected = id;
+    $$(".node", mesh).forEach((g) => g.classList.toggle("selected", g.dataset.id === id));
+    const n = byId[id];
+    $("#insp-name").textContent = n.label;
+    $("#insp-tags").innerHTML = '<span class="insp-tag">' + n.tag + "</span>" +
+      n.spaces.split(" ").map((s) => '<span class="insp-tag">' + s + "</span>").join("");
+    $("#insp-edges").textContent = edgeCount(id);
+    $("#insp-lat").textContent = pseudoLatency(id) + "ms";
+    $("#insp-sync").textContent = "synced";
+    $("#inspector").classList.add("open");
+  }
+  function closeInspector() {
+    state.selected = null;
+    $$(".node", mesh).forEach((g) => g.classList.remove("selected"));
+    $("#inspector").classList.remove("open");
+  }
+  $("#insp-close").addEventListener("click", closeInspector);
+  $("#insp-query").addEventListener("click", () => {
+    if (!state.selected) return;
+    const n = byId[state.selected];
+    addFeed("quorum", "쿼럼 컨텍스트 조회 · " + n.label + " 스냅샷 갱신");
+    pulseTo(n);
+  });
+  $("#insp-focus").addEventListener("click", () => {
+    if (!state.selected) return;
+    const n = byId[state.selected];
+    const space = n.spaces.split(" ")[0];
+    if (SPACE_META[space]) { setSpace(space); addFeed("mesh", space + " 스페이스로 포커스 · " + n.label); }
+  });
+
+  function buildMesh() {
+    GRAPH.edges.forEach(([a, b]) => {
+      const na = byId[a], nb = byId[b];
+      el("line", {
+        x1: na.x, y1: na.y, x2: nb.x, y2: nb.y,
+        class: "edge", "data-a": a, "data-b": b,
+        "data-spaces": na.spaces + " " + nb.spaces
+      }, mesh);
+    });
+    GRAPH.nodes.forEach((n) => {
+      const g = el("g", { class: "node", "data-id": n.id, "data-spaces": n.spaces, tabindex: "0" }, mesh);
+      if (n.type === "you") {
+        el("circle", { r: 17, class: "halo-you halo" }, g);
+        el("circle", { r: 5.5, class: "core fill-you stroke-you" }, g);
+      } else if (n.type === "peer") {
+        el("circle", { r: 4.5, class: "core fill-peer stroke-peer" }, g);
+      } else if (n.type === "compute") {
+        el("rect", { x: -4.5, y: -4.5, width: 9, height: 9, transform: "rotate(45)", class: "core fill-compute stroke-compute" }, g);
+      } else if (n.type === "mcp") {
+        el("rect", { x: -4.5, y: -4.5, width: 9, height: 9, rx: 1.5, class: "core fill-mcp stroke-mcp" }, g);
+      } else {
+        el("polygon", { points: "0,-5.5 4.8,-2.7 4.8,2.7 0,5.5 -4.8,2.7 -4.8,-2.7", class: "core fill-know stroke-know" }, g);
+      }
+      const tx = n.type === "you" ? 12 : 9;
+      const ty = n.type === "you" ? 4 : 3.5;
+      el("text", { class: "label", x: n.x + tx, y: n.y + ty }, g).textContent = n.label;
+      el("text", { class: "tag", x: n.x + tx, y: n.y + ty + 12 }, g).textContent = n.tag;
+      const tip = el("title", {}, g);
+      tip.textContent = n.label + " · " + n.tag;
+      g.addEventListener("click", (e) => {
+        e.stopPropagation();
+        selectNode(n.id);
+      });
+    });
+  }
+  meshWrap.addEventListener("click", (e) => { if (e.target === meshWrap) closeInspector(); });
+
+  /* 펄스: you→target 방향 여행 */
+  function pulseTo(target) {
+    const you = byId.you;
+    const cx = (you.x + target.x) / 2, cy = (you.y + target.y) / 2;
+    const d = "M " + you.x + " " + you.y + " Q " + cx + " " + (cy - 60) + " " + target.x + " " + target.y;
+    const moving = el("circle", { class: "pulse-travel", r: 3.5 }, mesh);
+    const anim = el("animateMotion", {
+      dur: "1.3s", begin: "indefinite", repeatCount: "1",
+      fill: "freeze", path: d
+    }, moving);
+    anim.beginElement();
+    setTimeout(() => moving.remove(), 1400);
+    const core = $('.node[data-id="' + target.id + '"] .core');
+    if (core) {
+      core.style.filter = "brightness(1.6)";
+      setTimeout(() => (core.style.filter = ""), 1300);
+    }
+  }
+
+  /* ── 스페이스 전환 + 모듈 렌더 ───────────────────────────────── */
+  const SPACE_META = {
+    mesh:      ["코스믹 메시", "mesh://global · 23 peers · 1,284 knowledge nodes"],
+    compute:   ["컴퓨트 메시", "mesh://compute · 9 gpu nodes · 6 models"],
+    knowledge: ["지식 시장",   "mesh://knowledge · 1,284 nodes · CRDT journal v214"],
+    fed:       ["연방",        "mesh://federation · 4 rabbit-holes · 2 nations"],
+    mcp:       ["MCP 마켓",    "mesh://mcp · 142 tools · 12 runtimes"],
+    llm:       ["LLM 허브",    "mesh://llm · 6 models · keyless pool on"],
+    factory:   ["1-Click 팩토리", "mesh://factory · 상점 노드 스폰 · shop?.kbizhub.com"]
+  };
+
+  const FACTORY_SITES = [];
+  function esc(value) {
+    return String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function factoryCard(s) {
+    return (
+      '<div class="gpu-card">' +
+        '<div class="gpu-head"><span class="gpu-name">' + esc(s.name) + '</span><span class="gpu-zone">' + esc(s.category || "상점") + '</span></div>' +
+        '<div class="mono" style="font-size:11px;color:var(--meta)">https://' + esc(s.subdomain) + '.kbizhub.com</div>' +
+        (s.address ? '<div style="font-size:12px;margin-top:6px">📍 ' + esc(s.address) + '</div>' : "") +
+        (s.phone ? '<div style="font-size:12px">☎ ' + esc(s.phone) + '</div>' : "") +
+        '<div class="mono" style="font-size:10px;color:var(--meta);margin-top:6px">' + esc(s.mcpUrl || "") + '</div>' +
+      '</div>'
+    );
+  }
+  const FACTORY_FORM_DEFAULTS = { category: "한식당", hours: "매일 영업 · 22:00 마감" };
+
+  const GPUS = [
+    ["gpu·a100·01", "us·sfo", 61, "quorum 할당", false],
+    ["gpu·a100·02", "ko·seoul", 34, "gemini 배치", false],
+    ["gpu·a100·03", "eu·ber", 0, "idle", false],
+    ["gpu·a100·04", "us·sfo", 82, "deepseek r1", true],
+    ["gpu·a100·05", "jp·tokyo", 55, "mesh-llm", false],
+    ["gpu·a100·06", "cn·sha", 12, "idle", false]
+  ];
+  const JOURNAL = [
+    ["2140331", "know.v214.invoice-q1", "+12 keys", "merged"],
+    ["2140330", "moc/review-q3", "+3 keys", "merged"],
+    ["2140329", "know.v214.gpu-trace", "+8 keys", "merged"],
+    ["2140328", "know.v214.byok-pool", "+4 keys", "auto-merge"],
+    ["2140327", "moc/invoice-reply", "+2 keys", "merged"]
+  ];
+  const FED = [
+    ["ko·seoul·pelican", "대한민국", "23 peers", "38ms", "ok", "동의"],
+    ["jp·tokyo·kite", "일본", "9 peers", "61ms", "ok", "동의"],
+    ["us·sfo·relay01", "미국", "41 peers", "91ms", "ok", "동의"],
+    ["eu·ber·lynx", "독일", "17 peers", "146ms", "warn", "동기화 중"]
+  ];
+  const TOOLS = [
+    ["browser", "playwright", "사용 1.2K", true],
+    ["computer-use", "e2b desktop", "사용 847", true],
+    ["obsidian", "graph / vault", "사용 391", true],
+    ["gmail", "인보이스 / 메일", "사용 214", true],
+    ["github", "이슈 / PR", "사용 66", false],
+    ["slack", "채널 게시", "사용 12", false]
+  ];
+  const MODELS = {
+    quorum:  "쿼럼 · 3 모델",
+    claude:  "Claude 3.7 Sonnet",
+    deepseek:"DeepSeek R1",
+    gemini:  "Gemini 2.5 Pro",
+    mesh:    "Mesh-LLM (로컬 메시, 9337)",
+    pool:    "키리스 풀 (라우팅)"
+  };
+  const LLM_ROWS = [
+    ["Claude 3.7 Sonnet", "Anthropic · BYOK", "128k ctx", "claude"],
+    ["DeepSeek R1", "DeepSeek · BYOK", "128k ctx", "deepseek"],
+    ["Gemini 2.5 Pro", "Google AI Studio", "무료 · 1,000/일", "gemini"],
+    ["Gemini CLI", "Google · 무료", "1,000건/일", "gemini"],
+    ["Mesh-LLM", "로컬 메시", "0 토큰 · :9337", "mesh"],
+    ["키리스 풀", "라우팅 · keyless", "자동 폴백", "pool"]
+  ];
+
+  const moduleBody = $("#module-body");
+
+  function renderModule(space) {
+    let html = "";
+    if (space === "mesh") {
+      html =
+        '<div class="mod-grid">' + GPUS.slice(0, 3).map(gpuCard).join("") + "</div>" +
+        '<div class="tag-cloud"><span class="tag-chip hot">#quorum</span><span class="tag-chip">#mesh</span><span class="tag-chip">#byok</span><span class="tag-chip">#mcp</span><span class="tag-chip">#invoice</span><span class="tag-chip">#gpu-trace</span></div>';
+    } else if (space === "compute") {
+      html = '<div class="mod-grid">' + GPUS.map(gpuCard).join("") + "</div>";
+    } else if (space === "knowledge") {
+      html =
+        JOURNAL.map(([op, key, ops, st]) =>
+          '<div class="jrn-row"><span class="jrn-op">op·' + op + "</span><span class=\"jrn-key\"><b>" + key.split(".").slice(0, 2).join("·") + "</b>·" + key.split(".").slice(2).join("·") + '</span><span class="jrn-ops">' + ops + '<span class="state-pill ok" style="margin-left:8px">' + st + "</span></span></div>").join("") +
+        '<div class="tag-cloud"><span class="tag-chip hot">#quorum</span><span class="tag-chip">#mesh</span><span class="tag-chip">#mcp</span><span class="tag-chip">#invoice</span><span class="tag-chip">#gpu-trace</span></div>';
+    } else if (space === "fed") {
+      html =
+        '<div class="table-head"><span>도메인</span><span>국가</span><span>peers</span><span>latency</span><span>상태</span></div>' +
+        FED.map(([name, nat, peers, lat, cls, st]) =>
+          '<div class="fed-row"><span class="fed-name">' + name + "</span><span class=\"fed-nation\">" + nat + '</span><span class="fed-count">' + peers + '</span><span class="fed-lat">' + lat + '</span><span class="state-pill ' + cls + '">' + st + "</span></div>").join("");
+    } else if (space === "mcp") {
+      html =
+        '<div class="tool-row" style="border-bottom-color:var(--border)"><span class="eyebrow" style="align-self:center">툴</span><span class="eyebrow">러타임</span><span class="eyebrow">사용량</span><span class="eyebrow">상태</span></div>' +
+        TOOLS.map(([name, rt, use, on]) =>
+          '<div class="tool-row"><span class="tool-name">mcp·' + name + '</span><span class="tool-desc">' + rt + '</span><span class="tool-use">' + use + '</span><button class="toggle ' + (on ? "on" : "") + '" data-tool="' + name + '" role="switch" aria-checked="' + on + '" aria-label="' + name + " 토글" + '"></button></div>').join("");
+    } else if (space === "llm") {
+      html =
+        '<div class="model-row" style="border-bottom-color:var(--border)"><span class="eyebrow" style="align-self:center">모델</span><span class="eyebrow">제공자</span><span class="eyebrow">쿼터</span><span class="eyebrow">선택</span></div>' +
+        LLM_ROWS.map(([name, prov, quota, key], i) =>
+          '<div class="model-row"><span class="model-name">' + name + (key === "gemini" ? '<span class="free-mark">free</span>' : "") + (key === "pool" ? '<span class="free-mark">keyless</span>' : "") + (key === state.model ? '<span class="sel-mark">사용 중</span>' : "") + '</span><span class="model-prov">' + prov + '</span><span class="model-quota">' + quota + '</span><button class="btn btn-secondary btn-sm" data-use="' + key + '">사용</button></div>').join("");
+    } else if (space === "factory") {
+      const siteCards = FACTORY_SITES.length
+        ? '<div class="mod-grid">' + FACTORY_SITES.map(factoryCard).join("") + "</div>"
+        : '<div class="tag-cloud" style="margin-bottom:12px"><span class="tag-chip">아직 스폰된 상점 노드가 없습니다</span></div>';
+      html =
+        '<div class="mod-grid" style="grid-template-columns:1fr">' +
+          '<div class="gpu-card" style="display:grid;gap:10px">' +
+            '<div class="gpu-head"><span class="gpu-name">상점 노드 스폰</span><span class="gpu-zone">POST /api/factory/spawn</span></div>' +
+            '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">' +
+              '<input id="f-name" placeholder="상점명 (예: 초원식당)" style="padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--fg)">' +
+              '<input id="f-subdomain" placeholder="서브도메인 (예: shop1)" style="padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--fg)">' +
+              '<input id="f-category" value="' + FACTORY_FORM_DEFAULTS.category + '" placeholder="업종" style="padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--fg)">' +
+              '<input id="f-phone" placeholder="전화번호" style="padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--fg);grid-column:1">' +
+              '<input id="f-address" placeholder="주소" style="padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--fg);grid-column:2/4">' +
+            '</div>' +
+            '<div style="display:flex;gap:8px;align-items:center">' +
+              '<button class="btn btn-secondary" id="f-spawn">스폰</button>' +
+              '<span class="mono" style="color:var(--meta);font-size:11px">https://&lt;subdomain&gt;.kbizhub.com · A2UI 3-서피스 계약 자동 생성</span>' +
+            '</div>' +
+            '<div id="f-msg" class="mono" style="font-size:11px;color:var(--meta)"></div>' +
+          '</div>' +
+        '</div>' +
+        siteCards;
+    }
+    moduleBody.innerHTML = html;
+    if (space === "factory") {
+      const msg = $("#f-msg");
+      $("#f-spawn").addEventListener("click", async () => {
+        const payload = {
+          name: $("#f-name").value, subdomain: $("#f-subdomain").value, category: $("#f-category").value,
+          phone: $("#f-phone").value, address: $("#f-address").value
+        };
+        msg.textContent = "스폰 중…";
+        try {
+          const res = await fetch("/api/factory/spawn", {
+            method: "POST", headers: { "content-type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          const body = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(body.error || "스폰 실패 (" + res.status + ")");
+          FACTORY_SITES.unshift(body);
+          $("#factory-count").textContent = String(FACTORY_SITES.length);
+          addFeed("factory", "상점 노드 스폰 · " + body.name + " → " + body.websiteUrl);
+          renderModule("factory");
+        } catch (err) {
+          msg.textContent = "⚠ " + (err && err.message ? err.message : err);
+        }
+      });
+    }
+    // 이벤트 바인딩
+    $$("[data-tool]", moduleBody).forEach((b) => {
+      b.addEventListener("click", () => {
+        const on = b.classList.toggle("on");
+        b.setAttribute("aria-checked", String(on));
+        addFeed("mcp", "MCP 토글 · " + b.dataset.tool + (on ? " 활성화" : " 비활성화"));
+        if (on) pushJob("MCP — " + b.dataset.tool + " 툴 활성화", "tool", byId["mcp-" + b.dataset.tool] || byId["mcp-web"]);
+      });
+    });
+    $$("[data-use]", moduleBody).forEach((b) => {
+      b.addEventListener("click", () => {
+        state.model = b.dataset.use;
+        $$("#model-menu .model-opt").forEach((o) => o.setAttribute("aria-selected", String(o.dataset.model === state.model)));
+        $("#model-name").textContent = MODELS[state.model];
+        addFeed("mesh", "모델 라우팅 변경 · " + MODELS[state.model]);
+        renderModule(space);
+        showToast("라우팅 변경 · " + MODELS[state.model]);
+      });
+    });
+  }
+
+  function gpuCard([name, zone, util, load, warm]) {
+    return '<div class="gpu-card' + (warm ? " warm" : "") + '"><div class="gpu-head"><span class="gpu-name">' + name + '</span><span class="gpu-zone">' + zone + '</span></div><div class="util-track"><div class="util-fill" style="width:' + util + '%"></div></div><div class="gpu-meta"><span class="gpu-load">' + load + '</span><span class="num">' + util + "%</span></div></div>";
+  }
+
+  function applySpace(space) {
+    $$(".node", mesh).forEach((g) => {
+      const ok = g.dataset.spaces.split(" ").includes(space);
+      g.classList.toggle("dim", !ok);
+    });
+    $$(".edge", mesh).forEach((l) => {
+      const ok = l.dataset.spaces.split(" ").includes(space);
+      l.classList.toggle("dim", !ok);
+      l.classList.toggle("hot", ok && l.dataset.a === "you");
+    });
+  }
+
+  function setSpace(space, silent) {
+    state.space = space;
+    $$("#space-nav .nav-item").forEach((b) =>
+      b.setAttribute("aria-current", b.dataset.space === space ? "page" : "false"));
+    const meta = SPACE_META[space];
+    $("#space-title").textContent = meta[0];
+    $("#space-sub").textContent = meta[1];
+    $("#crumb-now").textContent = meta[0];
+    $("#module-title").textContent = space === "mesh" ? "메시 오퍼레이션" : meta[0];
+    applySpace(space);
+    renderModule(space);
+    if (!silent) addFeed("mesh", space + " 스페이스로 전환 · " + meta[1]);
+  }
+  $$("#space-nav .nav-item").forEach((b) =>
+    b.addEventListener("click", () => { setSpace(b.dataset.space); }));
+
+  /* ── 이벤트 피드 ──────────────────────────────────────────────── */
+  const feedEl = $("#event-list");
+  function stamp() {
+    const d = new Date();
+    return pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+  }
+  function addFeed(type, text) {
+    const item = document.createElement("div");
+    item.className = "feed-item";
+    const ts = document.createElement("span");
+    ts.className = "fts"; ts.textContent = stamp();
+    const tag = document.createElement("span");
+    tag.className = "ftag " + type; tag.textContent = type;
+    const body = document.createElement("span");
+    body.textContent = text;
+    item.append(ts, tag, body);
+    feedEl.prepend(item);
+    while (feedEl.children.length > 9) feedEl.lastChild.remove();
+  }
+  [
+    ["mesh", "peer jp·tokyo·kite joined · mesh hello handshake"],
+    ["crdt", "CRDT op merged · journal v214 · 12 keys"],
+    ["quorum", "쿼럼 B-11 해소 · 3/3 동의 · 1.8s"],
+    ["mcp", "MCP 실행 · obsidian · publish → 지식·v214"],
+    ["mesh", "libp2p DHT · 4 새 peer 발견 · refresh 30s"]
+  ].forEach(([t, s]) => addFeed(t, s));
+
+  /* ── 잡 큐 오케스트레이션 ────────────────────────────────────── */
+  const jobsList = $("#jobs-list");
+  const jobsCountEl = $("#jobs-count");
+  const jobsCountHd = $("#jobs-count-hd");
+  const JOBS_NODE = { gmail: "ko", obsidian: "know", shell: "mcp-os", tool: "mcp-web" };
+
+  function jobsMeta() {
+    const active = state.jobs.filter((j) => j.state !== "done").length;
+    jobsCountEl.textContent = state.jobs.length;
+    jobsCountHd.textContent = active + " active · " + state.jobs.length + " total";
+  }
+  function renderJobs() {
+    if (state.jobs.length === 0) {
+      jobsList.innerHTML = '<div class="jobs-empty">잡 큐가 비어 있습니다. 채팅 카드의 실행 버튼 또는 Cmd+K 팔레트로 액션을 오케스트레이션하세요.</div>';
+      jobsMeta();
+      return;
+    }
+    jobsList.innerHTML = state.jobs.map((j) =>
+      '<div class="job-row" data-jid="' + j.id + '">' +
+        '<div class="job-top"><span class="job-id">J-' + pad(j.id) + '</span><span class="job-name">' + j.name + '</span><span class="job-tool">' + j.tool + '</span></div>' +
+        '<div class="job-state ' + j.state + '">' +
+          (j.state === "queued" ? "<span>—</span> 대기" : j.state === "running" ? '<span class="mini-dot work" aria-hidden="true"></span> 실행 중' : '<span class="mini-dot done" aria-hidden="true"></span> 완료') +
+        "</div>" +
+        (j.state === "running" ? '<div class="job-bar"><i style="width:' + j.progress + '%"></i></div>' : j.state === "done" ? '<div class="job-bar done"><i></i></div>' : "") +
+      "</div>").join("");
+    jobsMeta();
+  }
+  function advanceJob(job) {
+    if (job.state === "queued") {
+      job.state = "running";
+      job.progress = 0;
+      renderJobs();
+      const iv = setInterval(() => {
+        job.progress = Math.min(100, job.progress + 12 + Math.round(Math.random() * 16));
+        const row = jobsList.querySelector('[data-jid="' + job.id + '"] .job-bar i');
+        if (row) row.style.width = job.progress + "%";
+        if (job.progress >= 100) {
+          clearInterval(iv);
+          job.state = "done";
+          renderJobs();
+          showToast("잡 J-" + pad(job.id) + " 완료 · " + job.name);
+        }
+      }, 220);
+    }
+  }
+  function pushJob(name, tool, node) {
+    const job = { id: ++state.jobSeq, name: name, tool: tool, state: "queued", progress: 0 };
+    state.jobs.unshift(job);
+    if (state.jobs.length > 7) state.jobs.pop();
+    const empty = $(".jobs-empty", jobsList);
+    if (empty) empty.remove();
+    renderJobs();
+    addFeed("mcp", "잡 대기열 등록 · J-" + pad(job.id) + " · " + name);
+    $("#tab-jobs").click();
+    setTimeout(() => advanceJob(job), 900);
+    if (node) setTimeout(() => pulseTo(node), 1400);
+  }
+
+  $$(".consensus-actions [data-job]").forEach((b) => {
+    b.addEventListener("click", () => {
+      const tool = b.dataset.job;
+      const node = byId[b.dataset.node];
+      pushJob("잡 실행 · " + b.dataset.jobname, tool, node);
+    });
+  });
+
+  /* ── 채팅 · 쿼럼 시뮬레이션 ───────────────────────────────────── */
+  const thread = $("#thread");
+  const input = $("#goal-input");
+  const sendBtn = $("#send-btn");
+  const quorumChip = $("#quorum-chip");
+  const quorumBadge = $('#tab-quorum .badge-count');
+
+  /* 응답 뱅크 — 로컬 시뮬레이션 (진짜 LLM 호출 아님) */
+  function makeReply(q) {
+    const t = (q || "").toLowerCase();
+    if (t.includes("invoice") || t.includes("gmail") || t.includes("이메일") || t.includes("인보이스") || t.includes("메일")) {
+      return [
+        "Gmail에서 마지막 인보이스 3건을 찾았어요.",
+        '<div class="inv-row"><span>Vercel Inc. — USD 청구서</span><span class="mono amt">$19.00</span><span class="mono">Mar 02</span><span style="color:var(--success);font-family:var(--font-mono);font-size:11px">발송됨</span></div><div class="inv-row"><span>GitHub, Inc. — Teams 요금</span><span class="mono amt">$4.00</span><span class="mono">Feb 28</span><span style="color:var(--success);font-family:var(--font-mono);font-size:11px">발송됨</span></div><div class="inv-row"><span>Cloudflare — 도메인 갱신</span><span class="mono amt">$10.44</span><span class="mono">Feb 26</span><span style="color:var(--meta);font-family:var(--font-mono);font-size:11px">대기</span></div>',
+        "답장 준비", "지식노드로 발행"
+      ];
+    }
+    if (t.includes("날씨") || t.includes("weather")) {
+      return [
+        "3개 도시 일기예보 — 쿼럼 합의 요약",
+        '<div class="inv-row"><span>서울</span><span class="mono amt">17°C</span><span class="mono">흐림 · 20%</span><span style="color:var(--meta);font-family:var(--font-mono);font-size:11px">오후 소나기</span></div><div class="inv-row"><span>도쿄</span><span class="mono amt">21°C</span><span class="mono">맑음</span><span style="color:var(--success);font-family:var(--font-mono);font-size:11px">외출 추천</span></div><div class="inv-row"><span>샌프란시스코</span><span class="mono amt">18°C</span><span class="mono">안개</span><span style="color:var(--meta);font-family:var(--font-mono);font-size:11px">오후 맑아짐</span></div>',
+        "일정에 추가", "지식노드로 발행"
+      ];
+    }
+    if (t.includes("발행") || t.includes("obsidian") || t.includes("지식")) {
+      return [
+        "지식노드 v215로 발행 준비 완료",
+        'Obsidian 그래프에 컨텍스트 4개 노드로 연결됩니다. 태그: <span style="font-family:var(--font-mono);color:var(--accent)">#mesh #quorum</span> — 게시 전 미리보기를 확인하세요.',
+        "미리보기", "발행 실행"
+      ];
+    }
+    if (t.includes("코드") || t.includes("wasm") || t.includes("셸") || t.includes("shell")) {
+      return [
+        "Mesh Shell & WASM 환경 — 실행 가능",
+        "목표를 3개 하위 태스크로 분해했어요. MCP 도구 <span style=\"font-family:var(--font-mono);color:var(--warn)\">computer-use</span>가 데스크톱 세션을 열고, 결과는 CRDT 저널로 동기화됩니다.",
+        "하위 태스크 보기", "실행"
+      ];
+    }
+    return [
+      "3개 모델 합의 · 목표 분해 안",
+      "문제를 관찰 → 반박 → 동의 3단계로 검토했어요. 실행 계획: (1) 컨텍스트 수집 2건, (2) MCP 도구 1회 실행, (3) 결과를 지식노드로 게시. 우선순위·일정을 조정하려면 \"~를 우선해\"라고 덧붙이세요.",
+      "계획 보기", "실행"
+    ];
+  }
+
+  function sysMsg(html) {
+    const wrap = document.createElement("div");
+    wrap.className = "msg plain";
+    wrap.innerHTML = '<div class="who"><span>system</span><span class="stamp">' + stamp() + '</span></div><div class="msg-body">' + html + "</div>";
+    thread.appendChild(wrap);
+    thread.scrollTop = thread.scrollHeight;
+  }
+  function userMsg(text) {
+    const wrap = document.createElement("div");
+    wrap.className = "msg user";
+    wrap.innerHTML = '<div class="who"><span>you</span><span class="stamp">' + stamp() + '</span></div><div class="msg-body"></div>';
+    wrap.querySelector(".msg-body").textContent = text;
+    thread.appendChild(wrap);
+    thread.scrollTop = thread.scrollHeight;
+  }
+
+  function deliberationRow(model, label, states, done) {
+    return '<div class="delib-row"><span class="mini-dot ' + (done ? "done" : "work") + '" aria-hidden="true"></span><span class="model">' + model + "</span><span>" + label + '</span><span class="state">' + states + "</span></div>";
+  }
+  function showDeliberating() {
+    state.deliberating = true;
+    quorumChip.classList.add("deliberating");
+    quorumChip.querySelector(".full").textContent = " deliberating… ";
+    const wrap = document.createElement("div");
+    wrap.className = "msg agent";
+    wrap.id = "delib-box";
+    wrap.innerHTML =
+      '<div class="who"><span>quorum · ' + MODELS[state.model] + '</span><span class="stamp">' + stamp() + "</span></div>" +
+      '<div class="deliberating">' +
+      '<div class="delib-title"><span class="mini-dot work" aria-hidden="true"></span>쿼럼 합의 중 · B-' + state.quorumSeq + "</div>" +
+      deliberationRow("claude", "제안 작성", "0%", false) +
+      deliberationRow("deepseek", "관찰 대기", "…", false) +
+      deliberationRow("gemini", "관찰 대기", "…", false) +
+      "</div>";
+    thread.appendChild(wrap);
+    thread.scrollTop = thread.scrollHeight;
+    const rows = wrap.querySelectorAll(".delib-row");
+    setTimeout(() => { rowStep(rows[0], "제안 작성", "40%"); }, 380);
+    setTimeout(() => { rowStep(rows[0], "제안 작성", "100%"); rows[0].querySelector(".mini-dot").className = "mini-dot done"; rows[1].querySelector(".mini-dot").className = "mini-dot work"; rows[1].querySelector(".state").textContent = "57%"; }, 820);
+    setTimeout(() => { rowStep(rows[1], "반박 없음 — 합의", "100%"); rows[1].querySelector(".mini-dot").className = "mini-dot done"; rows[2].querySelector(".mini-dot").className = "mini-dot work"; rows[2].querySelector(".state").textContent = "82%"; }, 1260);
+    setTimeout(() => { rowStep(rows[2], "동의 · B-" + state.quorumSeq, "100%"); rows[2].querySelector(".mini-dot").className = "mini-dot done"; }, 1640);
+    setTimeout(() => finishDeliberation(wrap), 2050);
+  }
+  function rowStep(row, label, status) {
+    row.querySelector("span:nth-child(3)").textContent = label;
+    row.querySelector(".state").textContent = status;
+  }
+  function finishDeliberation(box) {
+    box.remove();
+    state.deliberating = false;
+    quorumChip.classList.remove("deliberating");
+    quorumChip.querySelector(".full").textContent = "Claude 3.7 + DeepSeek R1 + Gemini 2.5 ·";
+    const seq = state.quorumSeq;
+    state.quorumSeq += 1;
+    quorumBadge.textContent = "B-" + seq;
+
+    const goal = lastGoal;
+    const wrap = document.createElement("div");
+    wrap.className = "msg agent";
+    const replied = Promise.resolve(makeReply(goal));
+    wrap.innerHTML = '<div class="who"><span>quorum · ' + MODELS[state.model] + '</span><span class="stamp">' + stamp() + '</span></div>';
+    const cons = document.createElement("div");
+    cons.className = "consensus";
+    cons.innerHTML =
+      '<div class="consensus-head">QUORUM B-' + seq + " · 3/3 동의" +
+      '<span class="models"><span>claude</span><span>deepseek</span><span>gemini</span></span></div>';
+    const cBody = document.createElement("div");
+    cBody.className = "consensus-body";
+    const cActions = document.createElement("div");
+    cActions.className = "consensus-actions";
+    cons.append(cBody, cActions);
+    wrap.appendChild(cons);
+    replied.then(([head, html, a1, a2]) => {
+      cBody.innerHTML = "<strong>" + head + "</strong>" + html;
+      const b1 = document.createElement("button"); b1.className = "btn btn-secondary btn-sm"; b1.textContent = a1;
+      const b2 = document.createElement("button"); b2.className = "btn btn-secondary btn-sm"; b2.textContent = a2;
+      b1.addEventListener("click", () => {
+        addFeed("mcp", "MCP 실행 · " + a1 + " 대기열 등록");
+        pushJob(a1, "gmail", byId.ko);
+      });
+      b2.addEventListener("click", () => {
+        addFeed("crdt", "지식노드 CRDT op · publish 준비 완료");
+        pushJob("지식노드로 발행 · " + a2, "obsidian", byId.know);
+      });
+      cActions.append(b1, b2);
+    });
+    thread.appendChild(wrap);
+    thread.scrollTop = thread.scrollHeight;
+
+    addFeed("quorum", "쿼럼 B-" + seq + " 해소 · 3/3 동의 · " + (600 + Math.round(Math.random() * 900)) + "ms");
+    pulseTo(byId.ko);
+  }
+  let lastGoal = "";
+
+  function sendGoal() {
+    const text = input.value.trim();
+    if (!text || state.deliberating) return;
+    lastGoal = text;
+    userMsg(text);
+    input.value = "";
+    input.style.height = "auto";
+    showDeliberating();
+    $("#model-chip").setAttribute("aria-expanded", "false");
+    $("#model-menu").classList.remove("open");
+  }
+  sendBtn.addEventListener("click", sendGoal);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendGoal(); }
+  });
+  input.addEventListener("input", () => {
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 120) + "px";
+  });
+
+  /* 모델 선택 */
+  const modelChip = $("#model-chip"), modelMenu = $("#model-menu");
+  modelChip.addEventListener("click", () => {
+    const open = modelMenu.classList.toggle("open");
+    modelChip.setAttribute("aria-expanded", String(open));
+  });
+  $$(".model-opt", modelMenu).forEach((opt) =>
+    opt.addEventListener("click", () => {
+      state.model = opt.dataset.model;
+      $$(".model-opt", modelMenu).forEach((o) => o.setAttribute("aria-selected", o === opt ? "true" : "false"));
+      $("#model-name").textContent = MODELS[state.model];
+      modelMenu.classList.remove("open");
+      modelChip.setAttribute("aria-expanded", "false");
+      addFeed("mesh", "모델 라우팅 변경 · " + MODELS[state.model]);
+    }));
+  document.addEventListener("click", (e) => {
+    if (!modelChip.contains(e.target) && !modelMenu.contains(e.target)) {
+      modelMenu.classList.remove("open");
+      modelChip.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  /* ── 탭 (Chat / Quorum / Jobs) ───────────────────────────────── */
+  const TABS = [["tab-chat", "pane-chat"], ["tab-quorum", "pane-quorum"], ["tab-jobs", "pane-jobs"]];
+  function setTab(which) {
+    TABS.forEach(([tid, pid]) => {
+      $("#" + tid).setAttribute("aria-selected", String(tid === which));
+      $("#" + pid).dataset.active = String(pid === TABS.find((t) => t[0] === which)[1]);
+    });
+  }
+  TABS.forEach(([tid]) => $("#" + tid).addEventListener("click", () => setTab(tid)));
+
+  /* ── Cmd+K 팔레트 ────────────────────────────────────────────── */
+  const paletteOverlay = $("#palette-overlay");
+  const paletteInput = $("#palette-input");
+  const paletteList = $("#palette-list");
+  let paletteItems = [];
+  let paletteSel = 0;
+
+  const COMMANDS = [
+    { kind: "명령", label: "지식노드로 발행", desc: "obsidian · CRDT op", act: "knowledge" },
+    { kind: "명령", label: "BYOK 설정", desc: "API 키 관리", act: "byok" },
+    { kind: "명령", label: "시스템 설정", desc: "mesh-llm · CRDT · DHT", act: "settings" }
+  ];
+  function palettePool() {
+    const nodes = GRAPH.nodes.map((n) => ({
+      kind: "노드", label: n.label, desc: n.tag + " · " + n.spaces, act: "node:" + n.id, dot: n.type === "you" ? "var(--accent)" : n.type === "peer" ? "var(--fg-2)" : n.type === "compute" ? "var(--warn)" : n.type === "mcp" ? "var(--success)" : "var(--know)"
+    }));
+    const tools = TOOLS.map(([name, rt, use]) => ({ kind: "툴", label: "mcp·" + name, desc: rt + " · " + use, act: "tool:" + name, dot: "var(--success)" }));
+    return nodes.concat(tools, COMMANDS.map((c) => Object.assign({}, c, { dot: "var(--meta)" })));
+  }
+  function renderPalette(q) {
+    const text = (q || "").toLowerCase().trim();
+    paletteItems = text
+      ? palettePool().filter((i) => (i.label + " " + i.kind + " " + i.desc).toLowerCase().includes(text))
+      : palettePool().slice(0, 12);
+    paletteSel = 0;
+    if (paletteItems.length === 0) {
+      paletteList.innerHTML = '<div class="palette-empty">일치하는 항목 없음 — "' + q + '"</div>';
+      return;
+    }
+    let lastKind = "";
+    paletteList.innerHTML = paletteItems.map((i, idx) => {
+      const sep = i.kind !== lastKind ? '<div class="palette-group">' + i.kind + "</div>" : "";
+      lastKind = i.kind;
+      return sep + '<button class="palette-item" role="option" data-idx="' + idx + '" aria-selected="' + (idx === 0) + '"><span class="p-dot" style="background:' + i.dot + '"></span><span>' + i.label + '</span><span class="p-desc">' + i.desc + '</span></button>';
+    }).join("");
+    $$(".palette-item", paletteList).forEach((item) =>
+      item.addEventListener("click", () => execPalette(Number(item.dataset.idx))));
+  }
+  function execPalette(idx) {
+    const item = paletteItems[idx];
+    if (!item) return;
+    closePalette();
+    if (item.act.startsWith("node:")) {
+      const n = byId[item.act.slice(5)];
+      selectNode(n.id);
+      pulseTo(n);
+      addFeed("quorum", "노드 조회 · " + n.label);
+    } else if (item.act.startsWith("tool:")) {
+      const name = item.act.slice(5);
+      const btn = moduleBody.querySelector('[data-tool="' + name + '"]');
+      if (btn && !btn.classList.contains("on")) btn.click();
+      showToast("MCP 툴 · " + name + " 활성화");
+    } else if (item.act === "knowledge") {
+      pushJob("지식노드 발행 준비", "obsidian", byId.know);
+    } else if (item.act === "byok") {
+      openByok();
+    } else if (item.act === "settings") {
+      openSettings();
+    }
+  }
+  function openPalette() {
+    paletteOverlay.classList.add("open");
+    renderPalette("");
+    paletteInput.value = "";
+    setTimeout(() => paletteInput.focus(), 30);
+  }
+  function closePalette() {
+    paletteOverlay.classList.remove("open");
+  }
+  $("#search-trigger").addEventListener("click", openPalette);
+  paletteInput.addEventListener("input", () => renderPalette(paletteInput.value));
+  paletteInput.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") { closePalette(); return; }
+    if (e.key === "ArrowDown") { paletteSel = Math.min(paletteSel + 1, paletteItems.length - 1); paintSel(); e.preventDefault(); }
+    if (e.key === "ArrowUp") { paletteSel = Math.max(paletteSel - 1, 0); paintSel(); e.preventDefault(); }
+    if (e.key === "Enter") { execPalette(paletteSel); }
+  });
+  function paintSel() {
+    $$(".palette-item", paletteList).forEach((item, idx) =>
+      item.setAttribute("aria-selected", String(idx === paletteSel)));
+  }
+  paletteOverlay.addEventListener("click", (e) => { if (e.target === paletteOverlay) closePalette(); });
+  document.addEventListener("keydown", (e) => {
+    if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) { e.preventDefault(); openPalette(); }
+    if (e.key === "Escape") { closePalette(); closeByok(); modelMenu.classList.remove("open"); }
+  });
+
+  /* ── BYOK 모달 ────────────────────────────────────────────────── */
+  const overlay = $("#byok-overlay");
+  function resetByokModal() {
+    overlay.querySelector(".modal-title").textContent = "BYOK 설정 — 자신의 API 키 사용";
+    overlay.querySelectorAll(".provider").forEach((p) => (p.style.display = ""));
+  }
+  function openByok() { overlay.classList.add("open"); }
+  function closeByok() { overlay.classList.remove("open"); }
+  $("#byok-badge").addEventListener("click", () => { resetByokModal(); openByok(); });
+  $("#byok-close").addEventListener("click", closeByok);
+  $("#byok-save").addEventListener("click", () => {
+    const keys = [["#k-openai", "OpenAI"], ["#k-or", "OpenRouter"], ["#k-google", "Google AI Studio"], ["#k-groq", "Groq"]]
+      .filter(([sel]) => $(sel).value.trim() !== "");
+    state.byok = keys.length > 0;
+    const badge = $("#byok-badge");
+    if (state.byok) {
+      badge.textContent = "BYOK 활성화됨";
+      badge.classList.remove("off");
+    } else {
+      badge.textContent = "BYOK 꺼짐 · 키리스 풀";
+      badge.classList.add("off");
+    }
+    closeByok();
+    keys.forEach(([sel, name]) => { $(sel).value = ""; });
+    showToast(state.byok ? "BYOK 키 등록됨 · " + keys.length + " provider" : "BYOK 해제 · 키리스 풀 라우팅");
+    addFeed("mcp", "BYOK 상태 변경 · " + (state.byok ? "활성화" : "키리스 풀"));
+    renderModule(state.space);
+  });
+  $("#byok-clear").addEventListener("click", () => showToast("모든 키가 제거되었습니다 · 키리스 풀 라우팅"));
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closeByok(); });
+
+  /* ── 설정 ─────────────────────────────────────────────────────── */
+  function openSettings() {
+    overlay.querySelector(".modal-title").textContent = "시스템 설정";
+    overlay.querySelectorAll(".provider").forEach((p) => (p.style.display = "none"));
+    const bodyEl = overlay.querySelector(".modal-body");
+    let note = bodyEl.querySelector(".sys-note");
+    if (!note) {
+      note = document.createElement("div");
+      note.className = "sys-note";
+      note.style.cssText = "padding:12px;border:1px solid var(--border);border-radius:8px;background:var(--surface-warm);font-family:var(--font-mono);font-size:12px;color:var(--muted)";
+      note.textContent = "Mesh-LLM (로컬 메시, 9337) · CRDT 저널 v214 · libp2p DHT refresh 30s";
+      bodyEl.appendChild(note);
+    }
+    openByok();
+  }
+  $("#sys-settings").addEventListener("click", openSettings);
+
+  /* ── 토스트 ───────────────────────────────────────────────────── */
+  let toastTimer = null;
+  function showToast(msg) {
+    const t = $("#toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 2400);
+  }
+
+  /* ── 부트 ─────────────────────────────────────────────────────── */
+  buildMesh();
+  applySpace("mesh");
+  renderModule("mesh");
+})();
+</script>
+
+<script data-od-snapshot-bridge="">(function(){
+  var SNAPSHOT_STYLE_PROPS = [
+    'display','position','box-sizing','width','height','min-width','max-width','min-height','max-height',
+    'margin','margin-top','margin-right','margin-bottom','margin-left',
+    'padding','padding-top','padding-right','padding-bottom','padding-left',
+    'border','border-top','border-right','border-bottom','border-left','border-radius',
+    'font','font-family','font-size','font-weight','font-style','line-height','letter-spacing',
+    'color','background-color','opacity','transform','transform-origin','overflow','overflow-x','overflow-y',
+    'white-space','text-align','vertical-align','object-fit','object-position',
+    'flex','flex-direction','flex-wrap','flex-grow','flex-shrink','flex-basis',
+    'grid','grid-template-columns','grid-template-rows','grid-column','grid-row',
+    'gap','row-gap','column-gap','align-items','align-content','align-self',
+    'justify-items','justify-content','justify-self','inset','top','right','bottom','left',
+    'z-index','box-shadow','text-shadow'
+  ];
+  function copyComputedStyle(source, target){
+    if (!source || !target || source.nodeType !== 1 || target.nodeType !== 1) return;
+    var computed = window.getComputedStyle(source);
+    var style = target.getAttribute('style') || '';
+    for (var i = 0; i < SNAPSHOT_STYLE_PROPS.length; i++){
+      var prop = SNAPSHOT_STYLE_PROPS[i];
+      var value = computed.getPropertyValue(prop);
+      if (value) style += prop + ':' + value + ';';
+    }
+    target.setAttribute('style', style);
+  }
+  function syncElementState(source, target){
+    var tag = source.tagName ? source.tagName.toLowerCase() : '';
+    if (tag === 'img' && source.currentSrc) target.setAttribute('src', source.currentSrc);
+    if (tag === 'input' || tag === 'textarea') target.setAttribute('value', source.value || '');
+    if (tag === 'canvas') {
+      try {
+        var img = document.createElement('img');
+        img.setAttribute('src', source.toDataURL('image/png'));
+        img.setAttribute('style', target.getAttribute('style') || '');
+        target.parentNode && target.parentNode.replaceChild(img, target);
+      } catch (_) {}
+    }
+  }
+  function inlineSnapshotStyles(originalRoot, cloneRoot){
+    copyComputedStyle(originalRoot, cloneRoot);
+    syncElementState(originalRoot, cloneRoot);
+    var originals = originalRoot.querySelectorAll('*');
+    var clones = cloneRoot.querySelectorAll('*');
+    var count = Math.min(originals.length, clones.length, 3500);
+    for (var i = 0; i < count; i++){
+      copyComputedStyle(originals[i], clones[i]);
+      syncElementState(originals[i], clones[i]);
+    }
+    var scripts = cloneRoot.querySelectorAll('script');
+    for (var s = scripts.length - 1; s >= 0; s--) scripts[s].remove();
+    var links = cloneRoot.querySelectorAll('link[rel~="stylesheet"], link[rel~="preload"], link[rel~="preconnect"]');
+    for (var l = links.length - 1; l >= 0; l--) links[l].remove();
+    var styles = cloneRoot.querySelectorAll('style');
+    for (var st = 0; st < styles.length; st++) {
+      styles[st].textContent = (styles[st].textContent || '')
+        .replace(/@import[^;]+;/gi, '')
+        .replace(/@font-face\s*\{[^}]*\}/gi, '');
+    }
+  }
+  function waitForImages(){
+    var imgs = Array.prototype.slice.call(document.images || []);
+    return Promise.all(imgs.map(function(img){
+      if (img.complete) return Promise.resolve();
+      return new Promise(function(resolve){
+        img.addEventListener('load', resolve, { once: true });
+        img.addEventListener('error', resolve, { once: true });
+      });
+    }));
+  }
+  function scrollOffset(){
+    var doc = document.documentElement;
+    var body = document.body;
+    return {
+      x: Math.max(window.scrollX || 0, doc ? doc.scrollLeft || 0 : 0, body ? body.scrollLeft || 0 : 0),
+      y: Math.max(window.scrollY || 0, doc ? doc.scrollTop || 0 : 0, body ? body.scrollTop || 0 : 0)
+    };
+  }
+  function escapeAttribute(value){
+    return String(value || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  }
+  function renderSnapshot(id){
+    var w = Math.max(1, window.innerWidth || document.documentElement.clientWidth || 1);
+    var h = Math.max(1, window.innerHeight || document.documentElement.clientHeight || 1);
+    var dpr = window.devicePixelRatio || 1;
+    var docW = Math.max(w, document.documentElement.scrollWidth || 0, document.body ? document.body.scrollWidth : 0);
+    var docH = Math.max(h, document.documentElement.scrollHeight || 0, document.body ? document.body.scrollHeight : 0);
+    var clone = document.documentElement.cloneNode(true);
+    clone.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+    inlineSnapshotStyles(document.documentElement, clone);
+    var scroll = scrollOffset();
+    var cloneBody = clone.querySelector('body');
+    var rootStyle = clone.getAttribute('style') || '';
+    var bodyStyle = cloneBody ? cloneBody.getAttribute('style') || '' : '';
+    var bodyContent = cloneBody ? cloneBody.innerHTML : clone.innerHTML;
+    var wrapperStyle = rootStyle + bodyStyle +
+      'margin:0;position:relative;left:' + (-scroll.x) + 'px;top:' + (-scroll.y) + 'px;' +
+      'width:' + docW + 'px;height:' + docH + 'px;overflow:visible;';
+    var html = '<div xmlns="http://www.w3.org/1999/xhtml" style="' + escapeAttribute(wrapperStyle) + '">' + bodyContent + '</div>';
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' +
+      '<foreignObject x="0" y="0" width="' + docW + '" height="' + docH + '">' +
+      html +
+      '</foreignObject></svg>';
+    var img = new Image();
+    img.onload = function(){
+      try {
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.floor(w * dpr));
+        canvas.height = Math.max(1, Math.floor(h * dpr));
+        var ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('no 2d context');
+        ctx.scale(dpr, dpr);
+        ctx.drawImage(img, 0, 0, w, h);
+        window.parent.postMessage({ type: 'od:snapshot:result', id: id, dataUrl: canvas.toDataURL('image/png'), w: canvas.width, h: canvas.height }, '*');
+      } catch (err) {
+        window.parent.postMessage({ type: 'od:snapshot:result', id: id, error: String(err && err.message || err) }, '*');
+      }
+    };
+    function encodedSvgDataUrl(){
+      var encoded = encodeURIComponent(svg);
+      return 'data:image/svg+xml;charset=utf-8,' + encoded;
+    }
+    img.onerror = function(){
+      window.parent.postMessage({ type: 'od:snapshot:result', id: id, error: 'snapshot image failed' }, '*');
+    };
+    img.src = encodedSvgDataUrl();
+  }
+  window.addEventListener('message', function(ev){
+    var data = ev && ev.data;
+    if (!data || data.type !== 'od:snapshot' || !data.id) return;
+    waitForImages().then(function(){ renderSnapshot(String(data.id)); });
+  });
+})();</script><script data-od-srcdoc-transport-activation="">(function(){
+  window.addEventListener('message', function(ev){
+    var data = ev && ev.data;
+    if (!data || data.type !== 'od:srcdoc-transport-activate' || typeof data.html !== 'string') return;
+    document.open();
+    document.write(data.html);
+    document.close();
+  });
+})();</script></body></html>
