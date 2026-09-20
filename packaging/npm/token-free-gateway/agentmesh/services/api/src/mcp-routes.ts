@@ -394,6 +394,37 @@ export async function mcpRoutes(app: FastifyInstance): Promise<void> {
 		return manifest;
 	});
 
+	// Ghost/A2A Agent Card — the canonical discovery document Ghost desktop
+	// (and any A2A-protocol client) fetches at /.well-known/agent.json to find
+	// and bind to this server as a remote agent. See docs/GHOST-INTEGRATION.md
+	// and packages/ghost-adapter (parseGhostAgentCard) for the client side.
+	app.get("/.well-known/agent.json", async (req, reply) => {
+		reply.header("cache-control", "public, max-age=300");
+		const baseUrl = `${req.protocol}://${req.headers.host ?? "muhanai.com"}`;
+		return {
+			name: "MuhanAI Agent Mesh",
+			description:
+				"Zero-token multi-agent quorum reasoning, CRDT knowledge lake, MCP tools, and P2P pulse — served from the MuhanAI agent mesh.",
+			url: baseUrl,
+			version: "1.0.0",
+			capabilities: [
+				"local_file_search",
+				"local_code_analysis",
+				"offline_inference",
+				"desktop_automation",
+			],
+			skills: [
+				{ id: "muhanai_ask_quorum", name: "Ask Quorum" },
+				{ id: "muhanai_search_knowledge", name: "Search Knowledge" },
+				{ id: "muhanai_get_pulse", name: "Get Pulse" },
+			],
+			protocol: {
+				a2a: "jsonrpc-2.0",
+				mcp: `${baseUrl}/api/mcp/rpc`,
+			},
+		};
+	});
+
 	// Alias under .well-known so MCP-aware clients that probe the canonical
 	// discovery path also find us without extra config.
 	app.get("/.well-known/mcp.json", async (_req, reply) => {

@@ -56,7 +56,11 @@ const PUBLIC_PATH_PREFIXES = [
 	"/rpc",
 	"/api/mcp",
 ];
-const PUBLIC_PATH_EXACT = new Set(["/health", "/.well-known/mcp.json"]);
+const PUBLIC_PATH_EXACT = new Set([
+	"/health",
+	"/.well-known/mcp.json",
+	"/.well-known/agent.json",
+]);
 
 function isPublicPath(rawUrl: string | undefined): boolean {
 	if (!rawUrl) return false;

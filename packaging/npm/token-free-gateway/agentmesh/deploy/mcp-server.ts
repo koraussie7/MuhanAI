@@ -151,6 +151,46 @@ export async function handleMcpRequest(request: Request, url: URL, env?: { API_O
 		});
 	}
 
+	// 1b. A2A / Ghost Agent Card — what Ghost desktop and any A2A-protocol
+	// client fetches at /.well-known/agent.json to discover and bind this
+	// server as a remote agent. Served from the Worker (not API_ORIGIN) so it
+	// resolves even when the origin API is unreachable, matching the mcp.json
+	// manifest behaviour above.
+	if (pathname === "/.well-known/agent.json") {
+		const baseUrl = `${url.protocol}//${url.host}`;
+		const agentCard = {
+			name: "MuhanAI Agent Mesh",
+			description:
+				"Zero-token multi-agent quorum reasoning, CRDT knowledge lake, MCP tools, and P2P pulse — served from the MuhanAI agent mesh.",
+			url: baseUrl,
+			version: "1.0.0",
+			capabilities: [
+				"local_file_search",
+				"local_code_analysis",
+				"offline_inference",
+				"desktop_automation",
+			],
+			skills: [
+				{ id: "muhanai_ask_quorum", name: "Ask Quorum" },
+				{ id: "muhanai_search_knowledge", name: "Search Knowledge" },
+				{ id: "muhanai_get_pulse", name: "Get Pulse" },
+			],
+			protocol: {
+				a2a: "jsonrpc-2.0",
+				mcp: `${baseUrl}/api/mcp/rpc`,
+			},
+		};
+
+		return new Response(JSON.stringify(agentCard, null, 2), {
+			status: 200,
+			headers: {
+				"content-type": "application/json; charset=utf-8",
+				"access-control-allow-origin": "*",
+				"cache-control": "public, max-age=300",
+			},
+		});
+	}
+
 	// 2. Client Configurations (Claude Desktop, Cline, Cursor)
 	if (pathname === "/api/mcp/config") {
 		const _client = url.searchParams.get("client") || "claude";
