@@ -115,6 +115,24 @@ export function parseGhostAgentCard(value: unknown, fallbackUrl: string): GhostA
 	if (typeof record.name !== "string" || !record.name.trim()) {
 		throw new Error("Ghost Agent Card requires a name");
 	}
+	// Skills are free-form {id, name, description?} entries. Drop malformed
+	// rows rather than failing the whole card — an unknown skill must never
+	// make an otherwise discoverable agent un-registrable.
+	const skills = Array.isArray(record.skills)
+		? record.skills.flatMap((entry) => {
+				if (!entry || typeof entry !== "object") return [];
+				const row = entry as Record<string, unknown>;
+				if (typeof row.id !== "string" || !row.id.trim()) return [];
+				if (typeof row.name !== "string" || !row.name.trim()) return [];
+				return [
+					{
+						id: row.id,
+						name: row.name,
+						...(typeof row.description === "string" ? { description: row.description } : {}),
+					},
+				];
+			})
+		: [];
 	const capabilities = Array.isArray(record.capabilities)
 		? record.capabilities.filter(
 				(item): item is GhostCapability =>
@@ -130,6 +148,7 @@ export function parseGhostAgentCard(value: unknown, fallbackUrl: string): GhostA
 		url: typeof record.url === "string" ? record.url : fallbackUrl,
 		...(typeof record.version === "string" ? { version: record.version } : {}),
 		capabilities,
+		...(skills.length ? { skills } : {}),
 		...(record.privacy && typeof record.privacy === "object"
 			? {
 					privacy: {
