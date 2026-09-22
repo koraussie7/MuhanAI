@@ -1,0 +1,21 @@
+formatVersion: 2
+id: agentmesh-bridge
+name: AgentMesh Bridge
+version: 0.1.0
+description: Expose the agentmesh multi-agent routing gateway as Rome actions
+tagline: Route any question through the agentmesh agent mesh from Rome
+icon: assets/icon.svg
+appRoot: dist
+includeSource: true
+
+web:
+  manifest: web/manifest.json
+  displayName: AgentMesh Bridge
+  navLabel: AgentMesh
+
+api:
+  entry: api/index
+
+actions:
+  - actions/route
+  - actions/status

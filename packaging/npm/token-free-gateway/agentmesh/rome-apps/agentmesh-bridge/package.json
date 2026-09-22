@@ -1,0 +1,20 @@
+{
+  "name": "@rome/app-agentmesh-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.6.0",
+  "type": "module",
+  "scripts": {
+    "dev": "rome dev",
+    "build": "rome build",
+    "typecheck": "tsc --noEmit",
+    "test": "pnpm --filter @agentmesh/agentmesh test tests/rome-bridge-gateway.test.ts"
+  },
+  "dependencies": {
+    "@rome-os/app-runtime": "^0.6.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
