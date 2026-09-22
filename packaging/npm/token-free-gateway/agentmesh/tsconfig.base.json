@@ -33,6 +33,9 @@
       ],
       "@agentmesh/ghost-adapter": [
         "./packages/ghost-adapter/src/index.ts"
+      ],
+      "@agentmesh/llm-router": [
+        "./packages/llm-router/src/index.ts"
       ]
     }
   }

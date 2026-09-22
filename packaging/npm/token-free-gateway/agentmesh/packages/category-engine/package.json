@@ -10,7 +10,8 @@
 		"typecheck": "tsc -p tsconfig.json --noEmit",
 		"lint": "tsc -p tsconfig.json --noEmit"
 	},
-	"dependencies": {
-		"@agentmesh/shared-types": "workspace:*"
+		"dependencies": {
+		"@agentmesh/shared-types": "workspace:*",
+		"@agentmesh/llm-router": "workspace:*"
 	}
 }

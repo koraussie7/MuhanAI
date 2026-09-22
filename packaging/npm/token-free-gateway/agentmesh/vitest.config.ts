@@ -2,10 +2,12 @@ import { resolve } from "node:path";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-	resolve: {
+		resolve: {
 	alias: {
 		"@agentmesh/ghost-adapter": resolve("packages/ghost-adapter/src/index.ts"),
 		"@agentmesh/mcp": resolve("packages/mcp/src/index.ts"),
+		"@agentmesh/llm-router": resolve("packages/llm-router/src/index.ts"),
+		"@agentmesh/category-engine": resolve("packages/category-engine/src/index.ts"),
 	},
 	},
 	test: {

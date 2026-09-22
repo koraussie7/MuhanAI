@@ -336,6 +336,9 @@ export class LLMRouter {
 
 export const llmRouter = new LLMRouter();
 
+export { FastDecider, fastDecider } from "./fast-decider/client.js";
+export { LAYA_CONFIG } from "./fast-decider/config.js";
+
 export { p2pNodeRegistry, P2pNodeRegistry, type P2pNodesChangeCallback } from "./p2p-node-registry.js";
 export { p2pLoadBalancer, P2pLoadBalancer } from "./p2p-load-balancer.js";
 export type {

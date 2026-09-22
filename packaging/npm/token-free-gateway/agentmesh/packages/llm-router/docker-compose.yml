@@ -1,0 +1,12 @@
+services:
+  api:
+    build: ./packaging/npm/token-free-gateway
+    ports:
+      - "20128:20128"
+    env_file: .env
+  fast-decider:
+    build: ./services/fast-decider
+    ports:
+      - "8123:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
