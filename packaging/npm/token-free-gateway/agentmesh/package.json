@@ -36,7 +36,8 @@
 		"affected:lint": "nx affected -t lint"
 	},
 	"dependencies": {
-		"@prisma/client": "^5.22.0"
+		"@prisma/client": "^5.22.0",
+		"globe.gl": "^2.46.2"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.0.0",

@@ -331,6 +331,9 @@ importers:
 
   packages/category-engine:
     dependencies:
+      '@agentmesh/llm-router':
+        specifier: workspace:*
+        version: link:../llm-router
       '@agentmesh/shared-types':
         specifier: workspace:*
         version: link:../shared-types
