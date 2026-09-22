@@ -1,0 +1,1032 @@
+/* TravelPage — Fullscreen Travel Search Experience (LetsFG-Style Engine UI)
+   Deep navy / indigo palette with high-contrast glass panels and modern flight card displays */
+
+.travel-container {
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  max-height: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 20px 48px;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(14, 165, 233, 0.18), transparent 60%),
+    radial-gradient(900px 500px at 80% 20%, rgba(99, 102, 241, 0.15), transparent 65%),
+    #070b14;
+  color: #e2e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+/* ---------------- Top Nav Header ---------------- */
+
+.travel-nav-header {
+  width: min(1040px, 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.travel-brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.travel-brand-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(14, 165, 233, 0.35);
+}
+
+.travel-plane-icon {
+  color: #fff;
+  transform: rotate(-15deg);
+}
+
+.travel-brand-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.travel-brand-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.travel-brand-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.travel-powered-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(14, 165, 233, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(14, 165, 233, 0.3);
+}
+
+.travel-brand-tagline {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.travel-mode-tabs {
+  display: flex;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.8);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.travel-mode-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #94a3b8;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.travel-mode-tab.active {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+/* ---------------- Hero Search Card ---------------- */
+
+.travel-hero-card {
+  width: min(1040px, 100%);
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    0 0 40px rgba(14, 165, 233, 0.05);
+  backdrop-filter: blur(12px);
+  margin-bottom: 28px;
+}
+
+.travel-config-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.travel-pill-selector {
+  display: flex;
+  background: rgba(2, 6, 23, 0.5);
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.travel-pill-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #94a3b8;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.travel-pill-btn.active {
+  background: rgba(14, 165, 233, 0.25);
+  color: #38bdf8;
+  font-weight: 600;
+}
+
+.travel-select-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.travel-inline-select {
+  background: transparent;
+  border: 0;
+  color: #f1f5f9;
+  font-size: 12px;
+  outline: 0;
+  cursor: pointer;
+}
+
+/* Middle Row Grid */
+
+.travel-inputs-grid {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.travel-input-block {
+  flex: 1;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.travel-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.05em;
+}
+
+.travel-input-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(2, 6, 23, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px 12px;
+  border-radius: 12px;
+  height: 48px;
+  box-sizing: border-box;
+}
+
+.travel-code-badge {
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 14px;
+  color: #38bdf8;
+  padding: 2px 6px;
+  background: rgba(14, 165, 233, 0.15);
+  border-radius: 6px;
+}
+
+.travel-airport-input {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  color: #f8fafc;
+  font-size: 14px;
+  font-weight: 600;
+  outline: 0;
+  text-transform: uppercase;
+}
+
+.travel-field-icon {
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.travel-date-input {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  color: #f8fafc;
+  font-size: 13px;
+  outline: 0;
+  cursor: pointer;
+}
+
+.travel-swap-btn {
+  width: 44px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
+
+.travel-swap-btn:hover {
+  background: rgba(14, 165, 233, 0.2);
+  color: #38bdf8;
+  border-color: rgba(14, 165, 233, 0.4);
+}
+
+.travel-main-submit-btn {
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 24px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  border: 0;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(14, 165, 233, 0.35);
+  transition: transform 0.1s ease, filter 0.2s ease;
+  white-space: nowrap;
+}
+
+.travel-main-submit-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.travel-main-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* Bottom Natural Search Row */
+
+.travel-natural-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(2, 6, 23, 0.4);
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  margin-bottom: 14px;
+}
+
+.travel-natural-hint {
+  font-size: 12px;
+  font-weight: 600;
+  color: #38bdf8;
+  white-space: nowrap;
+}
+
+.travel-natural-input {
+  flex: 1;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: #e2e8f0;
+  font-size: 13px;
+}
+
+.travel-natural-input::placeholder {
+  color: #475569;
+}
+
+.travel-clear-natural {
+  background: transparent;
+  border: 0;
+  color: #64748b;
+  cursor: pointer;
+}
+
+/* Quick destination chips */
+
+.travel-quick-destinations {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.travel-quick-label {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.travel-quick-chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 11px;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.travel-quick-chip:hover {
+  background: rgba(14, 165, 233, 0.15);
+  border-color: rgba(14, 165, 233, 0.35);
+  color: #38bdf8;
+}
+
+/* Hotel Placeholder */
+
+.travel-hotel-placeholder {
+  text-align: center;
+  padding: 48px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.travel-hotel-icon {
+  color: #818cf8;
+}
+
+.travel-hotel-placeholder h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.travel-hotel-placeholder p {
+  font-size: 13px;
+  color: #94a3b8;
+  max-width: 500px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ---------------- Results Section ---------------- */
+
+.travel-results-area {
+  width: min(1040px, 100%);
+}
+
+.travel-status-box {
+  padding: 16px 20px;
+  border-radius: 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.travel-status-box.searching {
+  background: rgba(14, 165, 233, 0.08);
+  border: 1px solid rgba(14, 165, 233, 0.25);
+  color: #7dd3fc;
+}
+
+.travel-scanning-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.travel-scanning-sub {
+  margin: 6px 0 0 28px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.travel-scanning-sub code {
+  background: rgba(2, 6, 23, 0.6);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #38bdf8;
+}
+
+.travel-status-box.error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+/* Filter bar */
+
+.travel-filters-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding: 10px 16px;
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.travel-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.travel-filter-chip {
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(2, 6, 23, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.travel-filter-chip.active {
+  background: rgba(14, 165, 233, 0.2);
+  color: #38bdf8;
+  border-color: rgba(14, 165, 233, 0.4);
+  font-weight: 600;
+}
+
+.travel-filter-chip.starlink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.travel-filter-chip.starlink.active {
+  background: rgba(99, 102, 241, 0.25);
+  color: #a5b4fc;
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+.travel-results-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+/* Cards List */
+
+.travel-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.travel-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 24px;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.travel-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(14, 165, 233, 0.35);
+}
+
+.travel-card-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.travel-card-airline-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.travel-card-airline-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.travel-card-flightno {
+  font-size: 11px;
+  color: #64748b;
+  font-family: monospace;
+}
+
+.travel-starlink-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #a5b4fc;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.travel-tag-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.travel-tag-badge.cheapest {
+  background: rgba(34, 197, 94, 0.18);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+}
+
+.travel-tag-badge.fastest {
+  background: rgba(56, 189, 248, 0.18);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+.travel-route-display {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.travel-time-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.travel-time {
+  font-size: 18px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.travel-station {
+  font-size: 12px;
+  color: #94a3b8;
+  font-family: monospace;
+}
+
+.travel-flight-line {
+  flex: 1;
+  max-width: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.travel-duration {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.travel-line-bar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.travel-line {
+  flex: 1;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.travel-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #38bdf8;
+}
+
+.travel-dot.stop {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #f59e0b;
+}
+
+.travel-stops-text {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* Card Right */
+
+.travel-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  min-width: 150px;
+}
+
+.travel-price-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.travel-price-currency {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.travel-price-amount {
+  font-size: 24px;
+  font-weight: 800;
+  color: #4ade80;
+  line-height: 1;
+}
+
+.travel-fee-free {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.travel-book-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.travel-book-btn:hover {
+  opacity: 0.9;
+}
+
+/* Empty state */
+
+.travel-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 16px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.travel-empty-state p {
+  color: #94a3b8;
+  font-size: 13px;
+  margin: 0;
+}
+
+.travel-external-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: rgba(14, 165, 233, 0.15);
+  border: 1px solid rgba(14, 165, 233, 0.35);
+  color: #38bdf8;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.travel-external-btn:hover {
+  background: rgba(14, 165, 233, 0.25);
+}
+
+/* Footer */
+
+.travel-main-footer {
+  margin-top: 48px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.travel-footer-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #64748b;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.travel-spin {
+  animation: travel-spin 1s linear infinite;
+}
+
+@keyframes travel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------------- WinWin Hotel Specific Styles ---------------- */
+
+.travel-engine-label.winwin {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #818cf8;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  padding: 4px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+.travel-checkbox-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.travel-checkbox-pill input[type="checkbox"] {
+  cursor: pointer;
+  accent-color: #6366f1;
+}
+
+.travel-input-block.flex-2 {
+  flex: 2;
+  min-width: 200px;
+}
+
+.travel-airport-input.lowercase-allow {
+  text-transform: none;
+}
+
+.travel-main-submit-btn.hotel-theme {
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
+}
+
+.travel-hotels-view {
+  width: 100%;
+}
+
+.travel-hotel-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.travel-hotel-card {
+  display: flex;
+  gap: 20px;
+  padding: 18px 22px;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.travel-hotel-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.travel-hotel-thumb-wrap {
+  position: relative;
+  width: 200px;
+  height: 140px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.travel-hotel-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.travel-hotel-stars-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(2, 6, 23, 0.85);
+  color: #fbbf24;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  backdrop-filter: blur(4px);
+}
+
+.travel-hotel-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.travel-hotel-header-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.travel-hotel-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.travel-hotel-city {
+  font-size: 12px;
+  color: #94a3b8;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.travel-hotel-roomtype {
+  font-size: 13px;
+  font-weight: 600;
+  color: #818cf8;
+  margin: 0;
+}
+
+.travel-hotel-summary {
+  font-size: 12px;
+  color: #94a3b8;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.travel-hotel-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.travel-hotel-hl-chip {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  color: #c7d2fe;
+}
+
+.travel-hotel-pricing-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  min-width: 170px;
+}
+
+.travel-hotel-rates {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.travel-hotel-total-price {
+  font-size: 22px;
+  font-weight: 800;
+  color: #4ade80;
+}
+
+.travel-hotel-pernight {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.travel-hotel-refund-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #38bdf8;
+  margin-top: 4px;
+}
+
+.travel-hotel-book-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.travel-hotel-book-btn:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .travel-hotel-card {
+    flex-direction: column;
+  }
+  .travel-hotel-thumb-wrap {
+    width: 100%;
+    height: 180px;
+  }
+  .travel-hotel-pricing-box {
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .travel-hotel-rates {
+    align-items: flex-start;
+  }
+}

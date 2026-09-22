@@ -68,6 +68,7 @@ function PageSkeleton() {
 
 import { Dashboard } from "./components/Dashboard";
 import { FindPage } from "./components/find/FindPage";
+import { TravelPage } from "./components/find/TravelPage";
 import { getMenuTranslation } from "./components/menu-i18n";
 import { RightPanel } from "./components/RightPanel";
 import { Sidebar } from "./components/Sidebar";
@@ -206,14 +207,35 @@ function sectionIdFromPath(path: string) {
 		return LEGACY_PATH_REDIRECTS[cleanPath]!;
 	}
 
+	// Host-specific root routing overrides
+	if (typeof window !== "undefined") {
+		const host = window.location.hostname;
+		if (host === "travel.kbizhub.com" || host.startsWith("travel.")) {
+			if (cleanPath === "/" || cleanPath === "" || cleanPath === "/travel") {
+				return "travel";
+			}
+		}
+		if (host === "find.muhanai.com" || host.startsWith("find.")) {
+			if (cleanPath === "/" || cleanPath === "" || cleanPath === "/find") {
+				return "find";
+			}
+		}
+	}
+
 	if (cleanPath === "/dashboard") {
 		return "dashboard";
 	}
 	if (cleanPath === "/" || cleanPath === "/find" || cleanPath === "") {
 		return "find";
 	}
+	if (cleanPath === "/travel") {
+		return "travel";
+	}
 	if (typeof window !== "undefined") {
 		const host = window.location.hostname;
+		if (host === "travel.kbizhub.com" || host.startsWith("travel.")) {
+			return "travel";
+		}
 		if (host === "find.muhanai.com" || host.startsWith("find.")) {
 			return "find";
 		}
@@ -291,6 +313,11 @@ export function App() {
 				}}
 			/>
 		);
+	}
+
+	// 1b. Fullscreen Standalone View for travel.kbizhub.com
+	if (activeSection === "travel") {
+		return <TravelPage />;
 	}
 
 	// 2. DaedalOS Web Desktop - Full Desktop Environment
