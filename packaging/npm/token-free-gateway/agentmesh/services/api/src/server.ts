@@ -16,6 +16,7 @@ import { factoryRoutes } from "./factory-routes.js";
 import { elizaosRpcRoutes } from "./elizaos-rpc-routes.js";
 import { feedRoutes } from "./feed-routes.js";
 import { ghostRoutes } from "./ghost-routes.js";
+import { ghostDispatchRoutes } from "./ghost-dispatch-routes.js";
 import { PulseBridge } from "./gossip-bridge.js";
 import { happyRoutes } from "./happy-routes.js";
 import { hivebearRoutes } from "./hivebear-routes.js";
@@ -31,10 +32,12 @@ import { openaiCompatRoutes } from "./openai-compat-routes.js";
 import { paymentRoutes } from "./payment-routes.js";
 import pulseRoutes from "./pulse-routes.js";
 import { pythiaRoutes } from "./pythia-routes.js";
+import { cosmosRoutes } from "./cosmos-routes.js";
 import { quorumRoutes } from "./quorum-routes.js";
 import { routerRoutes } from "./router-routes.js";
 import { securityRoutes } from "./security-routes.js";
 import { semanticRoutes } from "./semantic-routes.js";
+import { shoppingRoutes } from "./shopping-routes.js";
 import { worldRoutes } from "./world-routes.js";
 
 function timingSafeEqual(a: string | undefined, b: string | undefined): boolean {
@@ -46,6 +49,29 @@ function timingSafeEqual(a: string | undefined, b: string | undefined): boolean 
 	}
 	return result === 0;
 }
+
+/** Bridge 앱 전용 가드: AGENTMESH_BRIDGE_TOKEN Bearer 토큰 검증 */
+function isBridgeAuth(
+	request: { headers: Record<string, string | string[] | undefined> },
+	bridgeToken: string | undefined,
+): boolean {
+	if (!bridgeToken) return false;
+	const authHeader = request.headers["authorization"];
+	if (!authHeader || typeof authHeader !== "string") return false;
+	if (!authHeader.startsWith("Bearer ")) return false;
+	const token = authHeader.slice("Bearer ".length);
+	return timingSafeEqual(token, bridgeToken);
+}
+
+// AgentMesh Bridge ↔ Rome app 토큰 가드
+//   - bridge 앱이 Rome 런타임에서 실행될 때 사용하는 BEARER 토큰.
+//   - 환경변수가 없으면 가드 비활성 (개발 환경 편의를 위해).
+//   - 라이브 환경에서는 둘 다 동일하게 설정한다.
+const bridgeTokenRaw = process.env.AGENTMESH_BRIDGE_TOKEN;
+const bridgeToken: string | undefined =
+	typeof bridgeTokenRaw === "string" && bridgeTokenRaw.trim().length > 0
+		? bridgeTokenRaw.trim()
+		: undefined;
 
 const PUBLIC_PATH_PREFIXES = [
 	"/api/pulse",
@@ -60,6 +86,7 @@ const PUBLIC_PATH_EXACT = new Set([
 	"/health",
 	"/.well-known/mcp.json",
 	"/.well-known/agent.json",
+	
 ]);
 
 function isPublicPath(rawUrl: string | undefined): boolean {
@@ -171,6 +198,9 @@ export async function buildApp(options: BuildAppOptions = {}) {
 		if (isPublicPath(request.url)) return;
 		if (!isProduction && process.env.DISABLE_AUTH === "true") return;
 
+		// Rome bridge 앱 전용 가드: AGENTMESH_BRIDGE_TOKEN Bearer 토큰
+		if (bridgeToken && isBridgeAuth(request, bridgeToken)) return;
+
 		const validApiKey = process.env.API_KEY;
 		const rawApiKey = request.headers["x-api-key"];
 		const apiKey = Array.isArray(rawApiKey) ? rawApiKey[0] : rawApiKey;
@@ -190,6 +220,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
 
 	await app.register(a2uiRoutes);
 	await app.register(ghostRoutes);
+	await app.register(ghostDispatchRoutes);
 	await app.register(noemaRoutes);
 	await app.register(semanticRoutes);
 	await app.register(hivebearRoutes);
@@ -202,10 +233,12 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	await app.register(computerUseRoutes);
 	await app.register(happyRoutes);
 	await app.register(pythiaRoutes);
+	await app.register(cosmosRoutes);
 	await app.register(creditsRoutes);
 	await app.register(factoryRoutes);
 	await app.register(elizaosRpcRoutes);
 	await app.register(securityRoutes);
+	await app.register(shoppingRoutes);
 	await app.register(feedRoutes);
 	await app.register(authRoutes);
 	await app.register(pulseRoutes);

@@ -1,302 +1,537 @@
 // In-Worker travel search proxy and routing engine.
-// Combines LetsFG (Agent-Native Flights) + WinWin.travel (3M+ Global Hotels).
+// Flights: LetsFG (letsfg.co). Hotels: TourMind Booking API (api.tourmind.com).
 
 interface TravelFlightSearchRequest {
-  origin: string;
-  destination: string;
-  date?: string;
-  adults?: number;
-  cabinClass?: string;
+	origin: string;
+	destination: string;
+	date?: string;
+	adults?: number;
+	cabinClass?: string;
 }
 
 interface TravelHotelSearchRequest {
-  destination: string;
-  checkIn: string;
-  checkOut: string;
-  adults?: number;
-  rooms?: number;
-  filters?: {
-    petsAllowed?: boolean;
-    freeCancellation?: boolean;
-    starRating?: number;
-    budgetMax?: number;
-    amenities?: string[];
-  };
+	destination: string;
+	checkIn: string;
+	checkOut: string;
+	adults?: number;
+	rooms?: number;
+	filters?: {
+		petsAllowed?: boolean;
+		freeCancellation?: boolean;
+		starRating?: number;
+		/** Per-room nightly budget cap, in `currency` (defaults to CNY). */
+		budgetMax?: number;
+		/** ISO code for `budgetMax`. TourMind requires CNY whole-stay totals. */
+		currency?: string;
+		amenities?: string[];
+	};
 }
 
 function errorMessage(err: unknown): string {
-  if (err instanceof Error) return err.message;
-  if (typeof err === "string") return err;
-  return "Unknown error";
+	if (err instanceof Error) return err.message;
+	if (typeof err === "string") return err;
+	return "Unknown error";
+}
+
+function nightsBetween(checkIn: string, checkOut: string): number {
+	const start = Date.parse(checkIn);
+	const end = Date.parse(checkOut);
+	if (Number.isNaN(start) || Number.isNaN(end)) return 1;
+	const days = Math.round((end - start) / 86_400_000);
+	return days > 0 ? days : 1;
+}
+
+// TourMind's lowest_price / highest_price must be CNY totals covering the whole
+// stay across every room. Converts a per-room nightly cap using a live rate.
+async function budgetToCnyStayTotal(
+	budgetMax: number,
+	currency: string,
+	nights: number,
+	rooms: number,
+): Promise<number | null> {
+	const code = currency.toUpperCase();
+	if (code === "CNY") return Math.round(budgetMax * nights * rooms);
+	try {
+		const res = await fetch(
+			`https://api.frankfurter.app/latest?from=${encodeURIComponent(code)}&to=CNY`,
+		);
+		if (!res.ok) return null;
+		const data = (await res.json()) as { rates?: Record<string, number> };
+		const rate = data.rates?.CNY;
+		if (typeof rate !== "number" || rate <= 0) return null;
+		return Math.round(budgetMax * rate * nights * rooms);
+	} catch {
+		return null;
+	}
+}
+
+function jsonOk(data: unknown, corsHeaders: Record<string, string>): Response {
+	return new Response(JSON.stringify(data), {
+		headers: { ...corsHeaders, "Content-Type": "application/json" },
+	});
+}
+
+function jsonError(
+	status: number,
+	payload: { error: string; message?: string },
+	corsHeaders: Record<string, string>,
+): Response {
+	return new Response(JSON.stringify(payload), {
+		status,
+		headers: { ...corsHeaders, "Content-Type": "application/json" },
+	});
+}
+
+// TourMind Booking API (https://api.tourmind.com) — ToC channel.
+const TOURMIND_BASE = "https://api.tourmind.com";
+
+// Envelope returned by every TourMind endpoint.
+interface TourMindEnvelope {
+	ok: boolean;
+	data?: Record<string, unknown>;
+	error_code?: string;
+	error?: string;
+}
+
+interface TourMindCallOptions {
+	path: string;
+	body: Record<string, unknown>;
+	userKey?: string;
+}
+
+// POSTs JSON to the TourMind API and returns its { ok, data, error } envelope.
+// Public ToC read endpoints work without credentials; booking/order calls send
+// the `uk_` personal key as `user_key`.
+async function callTourMind({
+	path,
+	body,
+	userKey,
+}: TourMindCallOptions): Promise<TourMindEnvelope> {
+	const payload = userKey ? { ...body, user_key: userKey } : body;
+	const res = await fetch(`${TOURMIND_BASE}${path}`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			"User-Agent": "MuhanAIGateway/1.0 (TravelSearch; +https://travel.kbizhub.com)",
+		},
+		body: JSON.stringify(payload),
+	});
+
+	const text = await res.text();
+	let parsed: TourMindEnvelope;
+	try {
+		parsed = JSON.parse(text) as TourMindEnvelope;
+	} catch {
+		throw new Error(`TourMind returned non-JSON (HTTP ${res.status})`);
+	}
+
+	if (!res.ok && !parsed.error) {
+		throw new Error(`TourMind HTTP ${res.status}`);
+	}
+	return parsed;
 }
 
 export async function handleTravelApi(
-  request: Request,
-  pathname: string,
+	request: Request,
+	pathname: string,
 ): Promise<Response | null> {
-  const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-  };
+	const corsHeaders = {
+		"Access-Control-Allow-Origin": "*",
+		"Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+		"Access-Control-Allow-Headers": "Content-Type, Authorization",
+	};
 
-  if (request.method === "OPTIONS" && pathname.startsWith("/api/travel/")) {
-    return new Response(null, { status: 204, headers: corsHeaders });
-  }
+	if (request.method === "OPTIONS" && pathname.startsWith("/api/travel/")) {
+		return new Response(null, { status: 204, headers: corsHeaders });
+	}
 
-  // -------------------------------------------------------------
-  // 1. FLIGHTS ENGINE — Powered by LetsFG (letsfg.co)
-  // -------------------------------------------------------------
+	// -------------------------------------------------------------
+	// 1. FLIGHTS ENGINE — Powered by LetsFG (letsfg.co)
+	// -------------------------------------------------------------
 
-  // 1a. POST /api/travel/search — Start or lookup flight search session
-  if (pathname === "/api/travel/search" && request.method === "POST") {
-    try {
-      const body = (await request.json()) as TravelFlightSearchRequest;
-      const { origin, destination, date } = body;
+	// 1a. POST /api/travel/search — Start or lookup flight search session
+	if (pathname === "/api/travel/search" && request.method === "POST") {
+		try {
+			const body = (await request.json()) as TravelFlightSearchRequest;
+			const { origin, destination, date } = body;
 
-      if (!origin || !destination) {
-        return new Response(
-          JSON.stringify({ error: "Missing origin or destination" }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
+			if (!origin || !destination) {
+				return jsonError(400, { error: "Missing origin or destination" }, corsHeaders);
+			}
 
-      const q = `${origin.toUpperCase()} to ${destination.toUpperCase()}${date ? ` ${date}` : ""}`;
-      const upstreamRes = await fetch(`https://letsfg.co/en?q=${encodeURIComponent(q)}`, {
-        headers: {
-          "User-Agent": "MuhanAIGateway/1.0 (TravelSearch; +https://travel.kbizhub.com)",
-          Accept: "text/html,application/xhtml+xml,application/json",
-        },
-      });
+			const q = `${origin.toUpperCase()} to ${destination.toUpperCase()}${date ? ` ${date}` : ""}`;
+			const upstreamRes = await fetch(`https://letsfg.co/en?q=${encodeURIComponent(q)}`, {
+				headers: {
+					"User-Agent": "MuhanAIGateway/1.0 (TravelSearch; +https://travel.kbizhub.com)",
+					Accept: "text/html,application/xhtml+xml,application/json",
+				},
+			});
 
-      if (!upstreamRes.ok) {
-        return new Response(
-          JSON.stringify({ error: `Upstream LetsFG error: ${upstreamRes.status}` }),
-          { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
+			if (!upstreamRes.ok) {
+				return jsonError(
+					502,
+					{ error: `Upstream LetsFG error: ${upstreamRes.status}` },
+					corsHeaders,
+				);
+			}
 
-      const html = await upstreamRes.text();
-      const match = html.match(/ws_[A-Za-z0-9]{6,}/);
-      const searchId = match ? match[0] : null;
+			const html = await upstreamRes.text();
+			const match = html.match(/ws_[A-Za-z0-9]{6,}/);
+			const searchId = match ? match[0] : null;
 
-      return new Response(
-        JSON.stringify({
-          engine: "letsfg",
-          query: q,
-          searchId,
-          status: searchId ? "searching" : "pending",
-          origin: origin.toUpperCase(),
-          destination: destination.toUpperCase(),
-          date: date || null,
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    } catch (err: unknown) {
-      return new Response(
-        JSON.stringify({ error: "Flight search error", message: errorMessage(err) }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-  }
+			return jsonOk(
+				{
+					engine: "letsfg",
+					query: q,
+					searchId,
+					status: searchId ? "searching" : "pending",
+					origin: origin.toUpperCase(),
+					destination: destination.toUpperCase(),
+					date: date || null,
+				},
+				corsHeaders,
+			);
+		} catch (err: unknown) {
+			return jsonError(
+				500,
+				{ error: "Flight search error", message: errorMessage(err) },
+				corsHeaders,
+			);
+		}
+	}
 
-  // 1b. GET /api/travel/results/:searchId — Poll flight search results from LetsFG
-  if (pathname.startsWith("/api/travel/results/") && request.method === "GET") {
-    const searchId = pathname.slice("/api/travel/results/".length).trim();
-    if (!searchId) {
-      return new Response(
-        JSON.stringify({ error: "Missing searchId" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
+	// 1b. GET /api/travel/results/:searchId — Poll flight search results from LetsFG
+	if (pathname.startsWith("/api/travel/results/") && request.method === "GET") {
+		const searchId = pathname.slice("/api/travel/results/".length).trim();
+		if (!searchId) {
+			return jsonError(400, { error: "Missing searchId" }, corsHeaders);
+		}
 
-    try {
-      const upstreamRes = await fetch(`https://letsfg.co/api/results/${encodeURIComponent(searchId)}`, {
-        headers: {
-          "User-Agent": "MuhanAIGateway/1.0 (TravelSearch; +https://travel.kbizhub.com)",
-          Accept: "application/json",
-        },
-      });
+		try {
+			const upstreamRes = await fetch(
+				`https://letsfg.co/api/results/${encodeURIComponent(searchId)}`,
+				{
+					headers: {
+						"User-Agent": "MuhanAIGateway/1.0 (TravelSearch; +https://travel.kbizhub.com)",
+						Accept: "application/json",
+					},
+				},
+			);
 
-      if (!upstreamRes.ok) {
-        return new Response(
-          JSON.stringify({ error: `Upstream error: ${upstreamRes.status}` }),
-          { status: upstreamRes.status, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
+			if (!upstreamRes.ok) {
+				return jsonError(
+					upstreamRes.status >= 400 && upstreamRes.status < 500 ? upstreamRes.status : 502,
+					{ error: `Upstream error: ${upstreamRes.status}` },
+					corsHeaders,
+				);
+			}
 
-      const data = await upstreamRes.json();
-      return new Response(JSON.stringify(data), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    } catch (err: unknown) {
-      return new Response(
-        JSON.stringify({ error: "Flight results poll error", message: errorMessage(err) }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-  }
+			const data = await upstreamRes.json();
+			return jsonOk(data, corsHeaders);
+		} catch (err: unknown) {
+			return jsonError(
+				500,
+				{ error: "Flight results poll error", message: errorMessage(err) },
+				corsHeaders,
+			);
+		}
+	}
 
-  // -------------------------------------------------------------
-  // 2. HOTELS ENGINE — Powered by WinWin.travel MCP Gateway
-  // -------------------------------------------------------------
+	// -------------------------------------------------------------
+	// 2. HOTELS ENGINE — Powered by WinWin.travel MCP Gateway
+	// -------------------------------------------------------------
 
-  // 2a. POST /api/travel/hotels/search — Search 3M+ hotels with 500+ filters
-  if (pathname === "/api/travel/hotels/search" && request.method === "POST") {
-    try {
-      const body = (await request.json()) as TravelHotelSearchRequest;
-      const { destination, checkIn, checkOut, adults = 2, rooms = 1, filters = {} } = body;
+	// 2a. POST /api/travel/hotels/search — Search 3M+ hotels with 500+ filters
+	if (pathname === "/api/travel/hotels/search" && request.method === "POST") {
+		try {
+			const body = (await request.json()) as TravelHotelSearchRequest;
+			const { destination, checkIn, checkOut, adults = 2, rooms = 1, filters = {} } = body;
 
-      if (!destination || !checkIn || !checkOut) {
-        return new Response(
-          JSON.stringify({ error: "destination, checkIn, and checkOut are required" }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
+			if (!destination || !checkIn || !checkOut) {
+				return jsonError(
+					400,
+					{ error: "destination, checkIn, and checkOut are required" },
+					corsHeaders,
+				);
+			}
 
-      const winwinToken = process.env.WINWIN_TRAVEL_TOKEN || "";
-      const searchUrl = `https://winwin.travel/app?destination=${encodeURIComponent(destination)}`;
+			const userKey = process.env.TOURMIND_USER_KEY || "";
 
-      // Call WinWin remote MCP/API if token configured, otherwise return rich direct search session
-      let hotelsResult: any = null;
+			// 1. Resolve the free-text destination to a TourMind region id.
+			const locRes = await callTourMind({
+				path: "/skill/toc/search_location",
+				body: { keyword: destination },
+				userKey,
+			});
 
-      if (winwinToken) {
-        try {
-          const mcpReq = await fetch("https://mcp.winwin.travel/mcp/messages", {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${winwinToken}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              jsonrpc: "2.0",
-              method: "tools/call",
-              params: {
-                name: "search",
-                arguments: {
-                  destination,
-                  stayDates: { checkIn, checkOut },
-                  guestQuantity: adults,
-                  rooms,
-                  filters,
-                },
-              },
-              id: Date.now(),
-            }),
-          });
-          if (mcpReq.ok) {
-            hotelsResult = await mcpReq.json();
-          }
-        } catch {
-          // fallback to curated WinWin provider payload
-        }
-      }
+			if (!locRes.ok) {
+				return jsonError(
+					502,
+					{
+						error: "TourMind location lookup failed",
+						message: locRes.error || "Could not resolve destination",
+					},
+					corsHeaders,
+				);
+			}
 
-      // Standardized JSON response for TravelPage frontend
-      return new Response(
-        JSON.stringify({
-          engine: "winwin",
-          provider: "WinWin.travel",
-          destination,
-          checkIn,
-          checkOut,
-          adults,
-          rooms,
-          searchUrl,
-          mcpData: hotelsResult,
-          hotels: [
-            {
-              hotelId: "ww-1",
-              name: `${destination} Grand Central Palace Hotel`,
-              city: destination,
-              stars: 4.5,
-              roomType: "Deluxe King Room with City View",
-              totalPrice: 185,
-              currency: "USD",
-              pricePerNight: 92.5,
-              refundable: true,
-              freeCancellationUntil: checkIn,
-              highlights: ["Free High-speed Wi-Fi", "Pet-Friendly", "Rain Shower", "Free Cancellation"],
-              summary: "Top-rated stay in center location with verified pet station & quiet acoustics.",
-              imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
-              bookingUrl: `https://www.google.com/travel/hotels?q=${encodeURIComponent(`${destination} Grand Central Palace Hotel`)}&checkin=${checkIn}&checkout=${checkOut}`,
-            },
-            {
-              hotelId: "ww-2",
-              name: `Boutique Urban Suites ${destination}`,
-              city: destination,
-              stars: 4.8,
-              roomType: "Executive Studio with Kitchenette",
-              totalPrice: 240,
-              currency: "USD",
-              pricePerNight: 120,
-              refundable: true,
-              freeCancellationUntil: checkIn,
-              highlights: ["Blackout Curtains", "Dedicated Workspace", "Digital Nomad Ready"],
-              summary: "Perfect for remote work and quiet recovery with ergonomic desk and blackout drapes.",
-              imageUrl: "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=800&q=80",
-              bookingUrl: `https://www.google.com/travel/hotels?q=${encodeURIComponent(`Boutique Urban Suites ${destination}`)}&checkin=${checkIn}&checkout=${checkOut}`,
-            },
-            {
-              hotelId: "ww-3",
-              name: `${destination} Heritage Garden Resort`,
-              city: destination,
-              stars: 4.2,
-              roomType: "Superior Double Garden View",
-              totalPrice: 140,
-              currency: "USD",
-              pricePerNight: 70,
-              refundable: true,
-              freeCancellationUntil: checkIn,
-              highlights: ["Outdoor Pool", "Breakfast Included", "Family Friendly"],
-              summary: "Peaceful oasis with complimentary buffet breakfast and kids-safe balcony.",
-              imageUrl: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=800&q=80",
-              bookingUrl: `https://www.google.com/travel/hotels?q=${encodeURIComponent(`${destination} Heritage Garden Resort`)}&checkin=${checkIn}&checkout=${checkOut}`,
-            },
-          ],
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    } catch (err: unknown) {
-      return new Response(
-        JSON.stringify({ error: "Hotel search error", message: errorMessage(err) }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-  }
+			const locData = locRes.data ?? {};
+			const regions = Array.isArray(locData.regions)
+				? (locData.regions as Array<Record<string, unknown>>)
+				: [];
+			const region = regions[0];
 
-  // 2b. POST /api/travel/hotels/reserve — Create reservation and get payment link via WinWin
-  if (pathname === "/api/travel/hotels/reserve" && request.method === "POST") {
-    try {
-      const body = (await request.json()) as { hotelId: string; roomType: string; email: string };
-      const { hotelId, roomType, email } = body;
+			if (!region?.region_id) {
+				return jsonError(
+					404,
+					{
+						error: "Destination not resolved",
+						message: `No TourMind region for "${destination}"`,
+					},
+					corsHeaders,
+				);
+			}
 
-      if (!hotelId || !roomType) {
-        return new Response(
-          JSON.stringify({ error: "Missing hotelId or roomType" }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
+			const locationName = String(region.name ?? region.full_name ?? destination);
 
-      return new Response(
-        JSON.stringify({
-          success: true,
-          reservationId: `ww-res-${Date.now()}`,
-          hotelId,
-          roomType,
-          paymentUrl: `https://winwin.travel/checkout?res=${hotelId}&email=${encodeURIComponent(email || "")}`,
-          status: "pending_payment",
-          note: "Complete payment in browser to lock rate. Card data is never stored on agent.",
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    } catch (err: unknown) {
-      return new Response(
-        JSON.stringify({ error: "Hotel reservation error", message: errorMessage(err) }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-  }
+			// region_id may arrive as a number or string; coerce only scalars so we
+			// never forward "[object Object]" to TourMind.
+			const rawRegionId = region.region_id;
+			if (typeof rawRegionId !== "string" && typeof rawRegionId !== "number") {
+				return jsonError(
+					502,
+					{
+						error: "Destination not resolved",
+						message: "TourMind returned a region without a usable id",
+					},
+					corsHeaders,
+				);
+			}
+			const regionId = String(rawRegionId);
 
-  return null;
+			// TourMind only accepts CNY whole-stay price bounds. Convert a per-room
+			// nightly budget (defaulting to CNY) before searching.
+			const searchBody: Record<string, unknown> = {
+				region_id: regionId,
+				check_in_date: checkIn,
+				check_out_date: checkOut,
+				adults,
+				room_count: rooms,
+				location_name: locationName,
+			};
+
+			const budgetMax = filters.budgetMax;
+			if (typeof budgetMax === "number" && budgetMax > 0) {
+				const cnyTotal = await budgetToCnyStayTotal(
+					budgetMax,
+					filters.currency || "CNY",
+					nightsBetween(checkIn, checkOut),
+					rooms,
+				);
+				if (cnyTotal === null) {
+					return jsonError(
+						502,
+						{
+							error: "Budget conversion unavailable",
+							message:
+								"Could not obtain a live exchange rate to CNY; omit filters.budgetMax or supply a CNY budget.",
+						},
+						corsHeaders,
+					);
+				}
+				searchBody.highest_price = cnyTotal;
+			}
+
+			// 2. Search live-probed hotel candidates in the resolved region.
+			const searchRes = await callTourMind({
+				path: "/skill/toc/search_hotels",
+				body: searchBody,
+				userKey,
+			});
+
+			if (!searchRes.ok) {
+				return jsonError(
+					502,
+					{
+						error: "TourMind hotel search failed",
+						message: searchRes.error || "Upstream search error",
+					},
+					corsHeaders,
+				);
+			}
+
+			return jsonOk(
+				{
+					engine: "tourmind",
+					provider: "TourMind Booking API",
+					source: "tourmind-toc",
+					destination,
+					locationName,
+					regionId,
+					checkIn,
+					checkOut,
+					adults,
+					rooms,
+					hotels: searchRes.data?.hotels ?? [],
+					searchScope: searchRes.data?.search_scope ?? null,
+					webUrl: searchRes.data?.web_url ?? null,
+				},
+				corsHeaders,
+			);
+		} catch (err: unknown) {
+			return jsonError(
+				500,
+				{ error: "Hotel search error", message: errorMessage(err) },
+				corsHeaders,
+			);
+		}
+	}
+
+	// 2b. POST /api/travel/hotels/rates — Live room rates for one hotel.
+	// search_hotels.min_price is only a cached signal; this returns bookable products.
+	if (pathname === "/api/travel/hotels/rates" && request.method === "POST") {
+		try {
+			const body = (await request.json()) as {
+				hotelId?: string;
+				checkIn?: string;
+				checkOut?: string;
+				adults?: number;
+				rooms?: number;
+			};
+			const { hotelId, checkIn, checkOut, adults = 2, rooms = 1 } = body;
+
+			if (!hotelId || !checkIn || !checkOut) {
+				return jsonError(
+					400,
+					{ error: "hotelId, checkIn, and checkOut are required" },
+					corsHeaders,
+				);
+			}
+
+			const userKey = process.env.TOURMIND_USER_KEY || "";
+
+			const ratesRes = await callTourMind({
+				path: "/skill/toc/query_room_rates",
+				body: {
+					hotel_id: hotelId,
+					check_in_date: checkIn,
+					check_out_date: checkOut,
+					adults,
+					room_count: rooms,
+				},
+				userKey,
+			});
+
+			if (!ratesRes.ok) {
+				return jsonError(
+					502,
+					{
+						error: "TourMind room-rate query failed",
+						message: ratesRes.error || "Upstream rate error",
+					},
+					corsHeaders,
+				);
+			}
+
+			const roomTypes = Array.isArray(ratesRes.data?.room_types)
+				? (ratesRes.data?.room_types as Array<Record<string, unknown>>)
+				: [];
+
+			// An empty live result is a normal 200 response, not a failure.
+			return jsonOk(
+				{
+					engine: "tourmind",
+					provider: "TourMind Booking API",
+					source: "tourmind-toc",
+					hotelId,
+					checkIn,
+					checkOut,
+					adults,
+					rooms,
+					roomTypes,
+					reason: ratesRes.data?.reason ?? null,
+					webUrl: ratesRes.data?.web_url ?? null,
+				},
+				corsHeaders,
+			);
+		} catch (err: unknown) {
+			return jsonError(
+				500,
+				{ error: "Hotel rate query error", message: errorMessage(err) },
+				corsHeaders,
+			);
+		}
+	}
+
+	// 2c. POST /api/travel/hotels/reserve — Verify a selected rate before booking
+	if (pathname === "/api/travel/hotels/reserve" && request.method === "POST") {
+		try {
+			const body = (await request.json()) as {
+				hotelId?: string;
+				rateCode?: string;
+				checkIn?: string;
+				checkOut?: string;
+				adults?: number;
+				rooms?: number;
+			};
+			const { hotelId, rateCode, checkIn, checkOut, adults = 2, rooms = 1 } = body;
+
+			if (!hotelId || !rateCode || !checkIn || !checkOut) {
+				return jsonError(
+					400,
+					{ error: "hotelId, rateCode, checkIn, and checkOut are required" },
+					corsHeaders,
+				);
+			}
+
+			const userKey = process.env.TOURMIND_USER_KEY || "";
+
+			// Recheck the exact product; the checked values, not the earlier query
+			// values, are what create_booking must use.
+			const checkRes = await callTourMind({
+				path: "/skill/toc/check_room_availability",
+				body: {
+					hotel_id: hotelId,
+					rate_code: rateCode,
+					check_in_date: checkIn,
+					check_out_date: checkOut,
+					adults,
+					room_count: rooms,
+				},
+				userKey,
+			});
+
+			if (!checkRes.ok) {
+				return jsonError(
+					502,
+					{
+						error: "TourMind rate verification failed",
+						message: checkRes.error || "Upstream verification error",
+					},
+					corsHeaders,
+				);
+			}
+
+			return jsonOk(
+				{
+					engine: "tourmind",
+					provider: "TourMind Booking API",
+					source: "tourmind-toc",
+					status: "verified",
+					hotelId,
+					verified: checkRes.data ?? null,
+					note: "Use these checked values for create_booking. No order was created here.",
+				},
+				corsHeaders,
+			);
+		} catch (err: unknown) {
+			return jsonError(
+				500,
+				{ error: "Hotel reservation error", message: errorMessage(err) },
+				corsHeaders,
+			);
+		}
+	}
+
+	return null;
 }

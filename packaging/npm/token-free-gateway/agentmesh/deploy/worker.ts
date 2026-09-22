@@ -1,6 +1,7 @@
 import { handleFediverseRequest } from "./fediverse";
 import { handleFeedApi } from "./feed-api";
 import { handleMcpRequest } from "./mcp-server";
+import { handleTravelApi } from "./travel-api";
 
 interface KVNamespace {
 	get(key: string): Promise<string | null>;
@@ -70,6 +71,9 @@ export default {
 		}
 
 		if (url.pathname.startsWith("/api/")) {
+			const travelResponse = await handleTravelApi(request, url.pathname);
+			if (travelResponse) return travelResponse;
+
 			const feedResponse = await handleFeedApi(request, url.pathname, env.FEED_KV);
 			if (feedResponse) return feedResponse;
 
