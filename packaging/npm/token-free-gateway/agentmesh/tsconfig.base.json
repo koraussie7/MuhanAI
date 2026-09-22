@@ -19,24 +19,45 @@
     "declarationMap": true,
     "sourceMap": true,
     "paths": {
-      "@agentmesh/ai-engine": [
-        "./packages/ai-engine/src/index.ts"
-      ],
-      "@agentmesh/ai-engine/factory": [
-        "./packages/ai-engine/src/factory.ts"
-      ],
-      "@agentmesh/ai-engine/*": [
-        "./packages/ai-engine/src/*"
-      ],
-      "@agentmesh/mcp": [
-        "./packages/mcp/src/index.ts"
-      ],
-      "@agentmesh/ghost-adapter": [
-        "./packages/ghost-adapter/src/index.ts"
-      ],
-      "@agentmesh/llm-router": [
-        "./packages/llm-router/src/index.ts"
-      ]
+      "@agentmesh/adapters": ["./packages/adapters/src/index.ts"],
+      "@agentmesh/agent": ["./packages/agent/src/index.ts"],
+      "@agentmesh/agent-core": ["./packages/agent-core/index.ts"],
+      "@agentmesh/agent-daemon": ["./packages/agent-daemon/src/index.ts"],
+      "@agentmesh/agent-gateway": ["./packages/agent-gateway/src/index.ts"],
+      "@agentmesh/agent-router": ["./packages/agent-router/src/index.ts"],
+      "@agentmesh/ai-engine": ["./packages/ai-engine/src/index.ts"],
+      "@agentmesh/ai-engine/factory": ["./packages/ai-engine/src/factory.ts"],
+      "@agentmesh/ai-engine/*": ["./packages/ai-engine/src/*"],
+      "@agentmesh/ai-ui": ["./packages/ai-ui/src/index.ts"],
+      "@agentmesh/bitterbot": ["./packages/bitterbot/src/index.ts"],
+      "@agentmesh/category-engine": ["./packages/category-engine/src/index.ts"],
+      "@agentmesh/compute-market": ["./packages/compute-market/src/index.ts"],
+      "@agentmesh/core": ["./packages/core/src/index.ts"],
+      "@agentmesh/cosmos-core": ["./packages/cosmos-core/src/index.ts"],
+      "@agentmesh/credit-system": ["./packages/credit-system/src/index.ts"],
+      "@agentmesh/database": ["./packages/database/src/index.ts"],
+      "@agentmesh/elizaos-adapter": ["./packages/elizaos-adapter/src/index.ts"],
+      "@agentmesh/federation": ["./packages/federation/src/index.ts"],
+      "@agentmesh/ghost-adapter": ["./packages/ghost-adapter/src/index.ts"],
+      "@agentmesh/hivebear": ["./packages/hivebear/src/index.ts"],
+      "@agentmesh/knowledge-base": ["./packages/knowledge-base/src/index.ts"],
+      "@agentmesh/llm-router": ["./packages/llm-router/src/index.ts"],
+      "@agentmesh/llm-router/src/keyless-providers.js": ["./packages/llm-router/src/keyless-providers.ts"],
+      "@agentmesh/llm-router/src/*.js": ["./packages/llm-router/src/*.ts"],
+      "@agentmesh/llm-router/src/*": ["./packages/llm-router/src/*.ts"],
+      "@agentmesh/agent-cast": ["./packages/agent-cast/src/index.ts"],
+      "@agentmesh/agent-cast/src/*": ["./packages/agent-cast/src/*.ts"],
+      "@agentmesh/mcp": ["./packages/mcp/src/index.ts"],
+      "@agentmesh/noema": ["./packages/noema/src/index.ts"],
+      "@agentmesh/peer-mesh": ["./packages/peer-mesh/src/index.ts"],
+      "@agentmesh/personal-mcp": ["./packages/personal-mcp/src/index.ts"],
+      "@agentmesh/semantic-vote": ["./packages/semantic-vote/src/index.ts"],
+      "@agentmesh/payment": ["./packages/payment/src/index.ts"],
+      "@agentmesh/payment/src/*": ["./packages/payment/src/*.ts"],
+      "@agentmesh/shared-types": ["./packages/shared-types/types/index.ts"],
+      "@agentmesh/web": ["./apps/web/src/index.ts"],
+      "@agentmesh/web/*": ["./apps/web/src/*"],
+      "@agentmesh/ai-engine/types": ["./packages/ai-engine/src/types.ts"]
     }
   }
 }

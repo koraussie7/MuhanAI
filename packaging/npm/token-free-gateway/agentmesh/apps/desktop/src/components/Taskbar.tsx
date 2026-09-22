@@ -150,7 +150,7 @@ export function Taskbar({
 						onClick={() => {
 							const idx = SUPPORTED_LANGUAGES.findIndex((l) => l.code === lang);
 							const next = SUPPORTED_LANGUAGES[(idx + 1) % SUPPORTED_LANGUAGES.length];
-							setLanguage(next.code);
+							if (next) setLanguage(next.code);
 						}}
 						title="Switch Language"
 					>
