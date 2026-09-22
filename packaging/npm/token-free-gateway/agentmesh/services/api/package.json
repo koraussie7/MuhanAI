@@ -19,6 +19,7 @@
 		"@agentmesh/knowledge-base": "workspace:*",
 		"@agentmesh/agent-cast": "workspace:*",
 		"@agentmesh/compute-market": "workspace:*",
+		"@agentmesh/cosmos-core": "workspace:*",
 		"@agentmesh/federation": "workspace:*",
 		"@agentmesh/shared-types": "workspace:*",
 		"@agentmesh/ghost-adapter": "workspace:*",
