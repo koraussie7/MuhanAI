@@ -23,12 +23,15 @@ export function createAction(config: ActionConfig, _runtime: AppActionRuntimeDep
 			const health = await gatewayHealth({
 				env: process.env as Record<string, string | undefined>,
 			});
+			if (health.ok) {
+				return {
+					status: "ok",
+					data: { gateway: base, online: true },
+				} satisfies ActionResult;
+			}
 			return {
-				status: health.ok ? "ok" : "error",
-				data: health.ok
-					? { gateway: base, online: true }
-					: undefined,
-				error: health.ok ? undefined : (health.error ?? "gateway unreachable"),
+				status: "error",
+				error: health.error ?? "gateway unreachable",
 			} satisfies ActionResult;
 		},
 	});

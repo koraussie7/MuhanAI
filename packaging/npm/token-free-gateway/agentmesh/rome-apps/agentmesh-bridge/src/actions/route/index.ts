@@ -25,7 +25,10 @@ export function createAction(config: ActionConfig, _runtime: AppActionRuntimeDep
 		schema: routeInputSchema,
 		execute: async ({ userId, question }) => {
 			log.info("route invoked", { userId, questionLength: question.length });
-			const result = await routeQuestion({ userId, question });
+			const result = await routeQuestion(
+				{ userId, question },
+				{ env: process.env as Record<string, string | undefined> },
+			);
 			if (!result.ok || !result.data) {
 				return {
 					status: "error",
