@@ -20,6 +20,11 @@ export const isDemo = (): boolean =>
   (import.meta.env?.VITE_DEMO === "true" ||
     (typeof process !== "undefined" && process.env?.NODE_ENV === "development"));
 
+/** Check if the API pulse response indicates a demo mode. */
+export function isApiDemo(pulse: { _demo?: boolean }): boolean {
+  return pulse._demo === true;
+}
+
 export function formatPeerCount(n: number | undefined): string {
   if (n == null) return PLACEHOLDER;
   if (isDemo()) return `${DEMO_PEER_COUNT.toLocaleString()} (demo)`;
@@ -47,10 +52,12 @@ export interface MeshStats {
 export function getMeshStats(pulse: {
   agentsOnline?: number;
   humansOnline?: number;
+  _demo?: boolean;
 }): MeshStats {
+  const demo = isDemo() || isApiDemo(pulse);
   return {
-    agentsOnline: pulse.agentsOnline,
-    humansOnline: pulse.humansOnline,
-    demo: isDemo(),
+    agentsOnline: demo ? DEMO_PEER_COUNT : pulse.agentsOnline,
+    humansOnline: demo ? DEMO_HUMAN_COUNT : pulse.humansOnline,
+    demo: demo,
   };
 }

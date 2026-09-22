@@ -135,6 +135,29 @@ const MUHANAI_MCP_TOOLS: MCPToolDefinition[] = [
 			properties: {},
 		},
 	},
+	{
+		name: "pythia_analyze_code",
+		description:
+			"Analyze, repair, or refactor Python code via Pythia (github.com/jangles-byte/Pythia) through the Token-Free Gateway.",
+		inputSchema: {
+			type: "object",
+			properties: {
+				file: {
+					type: "string",
+					description: "Python file path (e.g. app.py)",
+				},
+				prompt: {
+					type: "string",
+					description: "Instruction (e.g. fix bug, refactor)",
+				},
+				system: {
+					type: "string",
+					description: "Optional system prompt override",
+				},
+			},
+			required: ["file", "prompt"],
+		},
+	}
 ];
 
 const PROMPT_LANG_MAP: Record<
@@ -255,10 +278,11 @@ function runToolCall(
 		return {
 			content: JSON.stringify({
 				status: "operational",
-				peers: 12482,
+				peers: 12_482,  // aligns with DEMO_PEER_COUNT (apps/web/src/lib/mesh-stats.ts)
 				latencyMs: 14,
 				activeModels: ["Claude 3.7 Sonnet", "DeepSeek R1", "Gemini 2.5 Pro"],
 				crdtMesh: "synced",
+			_demo: true,
 			}),
 		};
 	}
@@ -293,6 +317,21 @@ function runToolCall(
 			content: `✨ Successfully published [[${title}.md]] to MuhanAI cosmic knowledge topology. Node ID: note-${Date.now()}`,
 		};
 	}
+	if (toolName === "pythia_analyze_code") {
+		const file = typeof args.file === "string" ? args.file : "app.py";
+		const prompt = typeof args.prompt === "string" ? args.prompt : "";
+		return {
+			content: JSON.stringify({
+				provider: "pythia",
+				file,
+				prompt,
+			tier: "keyless",
+				cost: "0 MHT (Token-Free)",
+				instructions: "POST /api/pythia/session { file, prompt }",
+			}),
+		};
+	}
+
 	return {
 		content: "",
 		status: 404,
@@ -355,6 +394,37 @@ export async function mcpRoutes(app: FastifyInstance): Promise<void> {
 		return manifest;
 	});
 
+	// Ghost/A2A Agent Card — the canonical discovery document Ghost desktop
+	// (and any A2A-protocol client) fetches at /.well-known/agent.json to find
+	// and bind to this server as a remote agent. See docs/GHOST-INTEGRATION.md
+	// and packages/ghost-adapter (parseGhostAgentCard) for the client side.
+	app.get("/.well-known/agent.json", async (req, reply) => {
+		reply.header("cache-control", "public, max-age=300");
+		const baseUrl = `${req.protocol}://${req.headers.host ?? "muhanai.com"}`;
+		return {
+			name: "MuhanAI Agent Mesh",
+			description:
+				"Zero-token multi-agent quorum reasoning, CRDT knowledge lake, MCP tools, and P2P pulse — served from the MuhanAI agent mesh.",
+			url: baseUrl,
+			version: "1.0.0",
+			capabilities: [
+				"local_file_search",
+				"local_code_analysis",
+				"offline_inference",
+				"desktop_automation",
+			],
+			skills: [
+				{ id: "muhanai_ask_quorum", name: "Ask Quorum" },
+				{ id: "muhanai_search_knowledge", name: "Search Knowledge" },
+				{ id: "muhanai_get_pulse", name: "Get Pulse" },
+			],
+			protocol: {
+				a2a: "jsonrpc-2.0",
+				mcp: `${baseUrl}/api/mcp/rpc`,
+			},
+		};
+	});
+
 	// Alias under .well-known so MCP-aware clients that probe the canonical
 	// discovery path also find us without extra config.
 	app.get("/.well-known/mcp.json", async (_req, reply) => {
@@ -393,7 +463,7 @@ export async function mcpRoutes(app: FastifyInstance): Promise<void> {
 				"muhanai-mesh": {
 					url: rpc,
 					disabled: false,
-					autoApprove: ["muhanai_search_knowledge", "muhanai_get_pulse"],
+					autoApprove: ["muhanai_search_knowledge", "muhanai_get_pulse", "pythia_analyze_code"],
 				},
 			},
 		};
@@ -408,6 +478,14 @@ export async function mcpRoutes(app: FastifyInstance): Promise<void> {
 			claudeDesktop: claudeDesktopConfig,
 			cline: clineConfig,
 			cursor: cursorConfig,
+			librechat: {
+				mcpServers: {
+					pythia: {
+						url: `${baseUrl}/api/mcp/sse/pythia`,
+						type: "sse",
+					},
+				},
+			},
 			curlExample: `curl -X POST ${rpc} -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'`,
 			selectedClient: client,
 		};
@@ -472,6 +550,24 @@ export async function mcpRoutes(app: FastifyInstance): Promise<void> {
 
 		reply.code(400);
 		return jsonRpcError(id, -32601, `Method '${method}' not supported.`);
+	});
+
+	// SSE endpoint for Pythia MCP
+	app.get("/api/mcp/sse/pythia", async (req, reply) => {
+		reply.header("Content-Type", "text/event-stream");
+		reply.header("Cache-Control", "no-cache");
+		reply.header("Connection", "keep-alive");
+		reply.header("Access-Control-Allow-Origin", "*");
+
+		const send = (data: unknown) =>
+			reply.raw.write("data: " + JSON.stringify(data) + "\n\n");
+
+		send({ type: "server_info", name: "muhanai-pythia", version: "1.0.0" });
+		send({ type: "tools_list", tools: MUHANAI_MCP_TOOLS.filter((t) => t.name === "pythia_analyze_code") });
+
+		req.raw.on("close", () => {
+			reply.raw.end();
+		});
 	});
 }
 

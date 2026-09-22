@@ -18,6 +18,26 @@ export const DOMAIN_CATEGORIES = [
 
 export type DomainCategory = (typeof DOMAIN_CATEGORIES)[number];
 
+/**
+ * Laya fast-path intent labels for category routing.
+ * Maps each domain category to a human-readable description for the Laya Router.
+ */
+export const DOMAIN_INTENT_LABELS: Record<DomainCategory, string> = {
+	medical: "medical, health, and wellness questions",
+	legal: "legal, law, and regulatory questions",
+	education: "education, learning, and academic questions",
+	finance: "finance, banking, and investment questions",
+	tax: "tax and taxation questions",
+	"real-estate": "real estate and property questions",
+	business: "business, startup, and corporate questions",
+	technology: "technology, software, and IT questions",
+	travel: "travel, visa, and itinerary questions",
+	automotive: "automotive, car, and vehicle questions",
+	science: "science and research questions",
+	agriculture: "agriculture and farming questions",
+	shopping: "shopping, product, and e-commerce questions",
+};
+
 export interface CategoryDefinition {
 	id: string;
 	domain: DomainCategory;

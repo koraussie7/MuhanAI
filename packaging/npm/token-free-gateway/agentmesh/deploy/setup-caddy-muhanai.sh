@@ -7,7 +7,7 @@ set -euo pipefail
 # ============================================================
 
 CADDYFILE="/etc/caddy/Caddyfile"
-SITE_BLOCK='muhanai.com, www.muhanai.com, find.muhanai.com {
+SITE_BLOCK='muhanai.com, www.muhanai.com, find.muhanai.com, travel.kbizhub.com {
 	auto_https disable_redirect
 	root * /var/www/muhanai.com/current
 	encode zstd gzip
@@ -34,6 +34,20 @@ SITE_BLOCK='muhanai.com, www.muhanai.com, find.muhanai.com {
 	handle @asset {
 		file_server
 		header Cache-Control "public, immutable, max-age=604800"
+	}
+
+	# /dashboard2 — MuhanAI Dashboard v2 (self-contained static page).
+	# Must be declared as an exact-path `handle` block so it wins over the SPA
+	# catch-all below (Caddy orders `handle` by path-matcher specificity).
+	# `/dashboard` is intentionally NOT covered: it stays with the React SPA
+	# `<Dashboard>` route. The page is a single file with inline CSS/JS, so no
+	# asset routing is needed. Served with X-Frame-Options: DENY inherited from
+	# the site header block — this is a top-level navigation, not an iframe embed.
+	@dashboard path /dashboard2 /dashboard2/
+	handle @dashboard {
+		rewrite * /dashboard-v2.html
+		file_server
+		header Cache-Control "no-cache"
 	}
 
 	handle {

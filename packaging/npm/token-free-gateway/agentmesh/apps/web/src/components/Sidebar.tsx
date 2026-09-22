@@ -1,4 +1,6 @@
 import {
+	Ghost,
+	Code2,
 	Activity,
 	BookOpen,
 	Bot,
@@ -31,6 +33,7 @@ import {
 import type React from "react";
 import { useI18n } from "../i18n.js";
 import { formatPeerCountBare } from "../lib/mesh-stats.js";
+import { useMeshPulse } from "../hooks/useMeshPulse.js";
 import { CreditBalance } from "./CreditBalance.js";
 import { getMenuTranslation } from "./menu-i18n.js";
 import {
@@ -111,6 +114,12 @@ function renderIcon(key: string): React.ReactNode {
 			return <Star size={18} />;
 		case "git-branch":
 			return <GitBranch size={18} />;
+		case "python":
+			return <Code2 size={18} />;
+		case "ghost":
+			return <Ghost size={18} />;
+		case "robot":
+			return <Bot size={18} />;
 		default:
 			return null;
 	}
@@ -135,6 +144,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
 	const { lang } = useI18n();
 	const menuI18n = getMenuTranslation(lang);
+	const { stats } = useMeshPulse();
 
 	return (
 		<aside
@@ -232,7 +242,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 					<span className="pulse-dot" />
 					{!isCollapsed ? (
 						<span>
-							{menuI18n.footer.peerMesh}: {formatPeerCountBare(undefined)} {menuI18n.footer.nodes}
+							{menuI18n.footer.peerMesh}: {formatPeerCountBare(stats.peers ?? stats.agentsOnline)}{" "}
+								{menuI18n.footer.nodes}
 						</span>
 					) : (
 						<span>{menuI18n.footer.live}</span>

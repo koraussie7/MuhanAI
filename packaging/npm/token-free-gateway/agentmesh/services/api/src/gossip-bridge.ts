@@ -186,6 +186,15 @@ export class PulseBridge {
 		this.logger.info("pulse-bridge: stopped");
 	}
 
+	/**
+	 * Broadcast a message to all attached sinks. This is the bridge-side entry
+	 * point for RPC calls (e.g. elizaOS adapter pulse.broadcast) that originate
+	 * outside the libp2p source.
+	 */
+	broadcast(msg: PulseMessage): void {
+		void this.fanOut(msg);
+	}
+
 	size(): { sinks: number; sourceAttached: boolean } {
 		return { sinks: this.sinks.size, sourceAttached: this.source !== null };
 	}

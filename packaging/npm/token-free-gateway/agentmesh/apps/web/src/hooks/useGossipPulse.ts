@@ -81,7 +81,11 @@ export function useGossipPulse(opts: UseGossipPulseOptions = {}): UseGossipPulse
 	const [_nonce, setNonce] = useState(0);
 
 	const bufferRef = useRef<PulseMessage[]>([]);
-	const _kindsKey = kinds ? kinds.join(",") : "";
+	// `kinds` is often passed as an inline array literal, so depending on its
+	// identity directly would re-run the effect on every render (and tear down /
+	// restart the EventSource in a loop). Depend on a stable string key instead
+	// and rebuild the array inside the effect.
+	const kindsKey = kinds ? kinds.join(",") : "";
 
 	useEffect(() => {
 		if (disabled) {
@@ -100,7 +104,7 @@ export function useGossipPulse(opts: UseGossipPulseOptions = {}): UseGossipPulse
 		const handle = createPulseSubscriber({
 			url,
 			bufferSize,
-			kinds,
+			kinds: kindsKey ? (kindsKey.split(",") as PulseKind[]) : undefined,
 			EventSource,
 			onStatus: setStatus,
 			onReconnect: () => setReconnectCount((n) => n + 1),
@@ -113,7 +117,7 @@ export function useGossipPulse(opts: UseGossipPulseOptions = {}): UseGossipPulse
 		});
 
 		return handle.dispose;
-	}, [url, bufferSize, disabled, EventSource, kinds]);
+	}, [url, bufferSize, disabled, EventSource, kindsKey]);
 
 	const close = useCallback(() => {
 		setStatus("closed");

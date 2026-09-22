@@ -27,6 +27,15 @@
       ],
       "@agentmesh/ai-engine/*": [
         "./packages/ai-engine/src/*"
+      ],
+      "@agentmesh/mcp": [
+        "./packages/mcp/src/index.ts"
+      ],
+      "@agentmesh/ghost-adapter": [
+        "./packages/ghost-adapter/src/index.ts"
+      ],
+      "@agentmesh/llm-router": [
+        "./packages/llm-router/src/index.ts"
       ]
     }
   }
