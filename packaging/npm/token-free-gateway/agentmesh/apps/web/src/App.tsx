@@ -112,6 +112,12 @@ const NetworkMonitorPageLazy = React.lazy(() =>
 const VerificationPageLazy = React.lazy(() =>
 	import("./components/DashPages").then((m) => ({ default: m.VerificationPage })),
 );
+const GhostPageLazy = React.lazy(() =>
+	import("./components/DashPages").then((m) => ({ default: m.GhostPage })),
+);
+const DroidringPageLazy = React.lazy(() =>
+	import("./components/DashPages").then((m) => ({ default: m.DroidringPage })),
+);
 const FederationPanelLazy = React.lazy(() =>
 	import("./components/FederationPanel").then((m) => ({ default: m.FederationPanel })),
 );
@@ -519,6 +525,16 @@ export function App() {
 						{activeSection === "network-monitor" && (
 							<Suspense fallback={<PageSkeleton />}>
 								<NetworkMonitorPageLazy />
+							</Suspense>
+						)}
+						{activeSection === "ghost" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<GhostPageLazy />
+							</Suspense>
+						)}
+						{activeSection === "droidring" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<DroidringPageLazy />
 							</Suspense>
 						)}
 
