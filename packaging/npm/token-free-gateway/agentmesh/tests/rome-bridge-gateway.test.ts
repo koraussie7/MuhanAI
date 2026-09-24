@@ -98,3 +98,99 @@ describe("gatewayHealth", () => {
 		expect(result.error).toBe("ECONNREFUSED");
 	});
 });
+
+describe("contract: bridge token header", () => {
+	it("sends authorization: Bearer when AGENTMESH_BRIDGE_TOKEN is set (routeQuestion)", async () => {
+		let capturedHeaders: Record<string, string> | undefined;
+		const result = await routeQuestion(
+			{ userId: "u1", question: "q" },
+			{
+				fetchImpl: mockFetch((_url, init) => {
+					capturedHeaders = init?.headers as Record<string, string>;
+					return { status: 200, body: { category: {}, cast: {} } };
+				}),
+				env: { AGENTMESH_BRIDGE_TOKEN: "s3cret" },
+			},
+		);
+		expect(result.ok).toBe(true);
+		expect(capturedHeaders?.authorization).toBe("Bearer s3cret");
+		expect(capturedHeaders?.["content-type"]).toBe("application/json");
+	});
+
+	it("omits authorization when no token is configured", async () => {
+		let capturedHeaders: Record<string, string> | undefined;
+		await routeQuestion(
+			{ userId: "u1", question: "q" },
+			{
+				fetchImpl: mockFetch((_url, init) => {
+					capturedHeaders = init?.headers as Record<string, string>;
+					return { status: 200, body: { category: {}, cast: {} } };
+				}),
+				env: {},
+			},
+		);
+		expect(capturedHeaders?.authorization).toBeUndefined();
+	});
+
+	it("sends the same token on gatewayHealth probes", async () => {
+		let capturedHeaders: Record<string, string> | undefined;
+		await gatewayHealth({
+			fetchImpl: mockFetch((_url, init) => {
+				capturedHeaders = init?.headers as Record<string, string>;
+				return { status: 200, body: { ok: true } };
+			}),
+			env: { AGENTMESH_BRIDGE_TOKEN: "s3cret" },
+		});
+		expect(capturedHeaders?.authorization).toBe("Bearer s3cret");
+	});
+});
+
+describe("contract: response shape & error status passthrough", () => {
+	it("passes the full credits receipt through unchanged on 200", async () => {
+		const body = {
+			userId: "u1",
+			category: { domain: "tax" },
+			cast: { agents: ["a1"] },
+			knowledgeUsed: [{ id: "k1" }],
+			runIds: ["run-1"],
+			credits: { spent: 10, balanceAfter: "990", enforced: true },
+		};
+		const result = await routeQuestion(
+			{ userId: "u1", question: "q" },
+			{ fetchImpl: mockFetch(() => ({ status: 200, body })) },
+		);
+		expect(result.ok).toBe(true);
+		expect(result.data).toEqual(body);
+		expect(result.data?.credits).toEqual({ spent: 10, balanceAfter: "990", enforced: true });
+	});
+
+	it("preserves status 402 + insufficient_credits (business result, not transport error)", async () => {
+		const result = await routeQuestion(
+			{ userId: "u1", question: "q" },
+			{
+				fetchImpl: mockFetch(() => ({
+					status: 402,
+					body: { error: "insufficient_credits", balance: "5", required: "15" },
+				})),
+			},
+		);
+		expect(result.ok).toBe(false);
+		expect(result.status).toBe(402);
+		expect(result.error).toBe("insufficient_credits");
+	});
+
+	it("preserves status 502 + route_pipeline_failed", async () => {
+		const result = await routeQuestion(
+			{ userId: "u1", question: "q" },
+			{
+				fetchImpl: mockFetch(() => ({
+					status: 502,
+					body: { error: "route_pipeline_failed", message: "boom" },
+				})),
+			},
+		);
+		expect(result.ok).toBe(false);
+		expect(result.status).toBe(502);
+		expect(result.error).toBe("route_pipeline_failed");
+	});
+});

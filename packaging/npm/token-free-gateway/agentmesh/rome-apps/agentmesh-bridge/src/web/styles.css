@@ -1,0 +1,10 @@
+/* Rome's design-token layer. The import below is what makes the host's theme
+   vocabulary (semantic tokens, light/dark, the active theme) available inside
+   this bundle's Shadow DOM. Without it, the `@rome-os/ui` components render
+   unstyled.
+
+   Paint only with semantic tokens (`bg-[var(--app-canvas)]`,
+   `text-muted-foreground`, `rounded-12`, …) — never raw shades
+   (`bg-gray-100`) or scrims. Raw values render correctly in the Rome dashboard
+   and break against any other host, with nothing to catch it. */
+@import "@rome-os/app-web-sdk/styles";

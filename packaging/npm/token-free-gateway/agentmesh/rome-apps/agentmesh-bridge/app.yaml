@@ -10,6 +10,7 @@ includeSource: true
 
 web:
   manifest: web/manifest.json
+  entry: App.tsx
   displayName: AgentMesh Bridge
   navLabel: AgentMesh
 
