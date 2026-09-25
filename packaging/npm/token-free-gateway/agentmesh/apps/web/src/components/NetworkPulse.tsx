@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useGossipPulse } from "../hooks/useGossipPulse.js";
-import { formatPeerCountBare, formatHumanCount } from "../lib/mesh-stats.js";
+import { formatPeerCountBare, formatHumanCount, ingestApiPayload } from "../lib/mesh-stats.js";
 
 const API = "";
 
@@ -13,6 +13,8 @@ interface PulseData {
 	mcpTasksWaiting: number;
 	agentsOnline?: number;
 	humansOnline?: number;
+	peers?: number;
+	_demo?: boolean;
 }
 
 const DEFAULT_PULSE: PulseData = {
@@ -71,6 +73,7 @@ export function NetworkPulse({ live = false }: Props) {
 				});
 				if (res.ok) {
 					const data = await res.json();
+					ingestApiPayload(data);
 					setPulse((prev) => ({ ...prev, ...data }));
 				}
 			} catch {
@@ -119,8 +122,8 @@ export function NetworkPulse({ live = false }: Props) {
 				<span className="pulse-dot" />
 				<span className="pulse-title">NETWORK PULSE</span>
 				<span className="pulse-subtitle">
-					(agents online: {formatPeerCountBare(pulse.agentsOnline)} · human:{" "}
-					{formatHumanCount(pulse.humansOnline)}){live ? " · LIVE" : ""}
+					(agents online: {formatPeerCountBare(pulse.peers ?? pulse.agentsOnline)} · human:{" "}
+										{formatHumanCount(pulse.humansOnline)}){live ? " · LIVE" : ""}
 				</span>
 			</div>
 			<div className="pulse-items">

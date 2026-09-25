@@ -3,6 +3,7 @@ import type React from "react";
 import { lazy, Suspense, useState } from "react";
 import { useI18n } from "../i18n.js";
 import { formatPeerCountBare } from "../lib/mesh-stats.js";
+import { useMeshPulse } from "../hooks/useMeshPulse.js";
 import { AiVsHuman } from "./AiVsHuman";
 import { AskNetwork } from "./AskNetwork";
 import { CreditBalance } from "./CreditBalance";
@@ -43,6 +44,7 @@ interface WorkstreamTab {
 export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 	const [activeTab, setActiveTab] = useState<"tasks" | "verify" | "knowledge" | "economy" | "workspace">("tasks");
 	const { t } = useI18n();
+	const { stats } = useMeshPulse();
 
 	const navigate = (path: string) => {
 		if (onNavigate) {
@@ -317,7 +319,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 					<div className="telemetry-stat-card">
 						<span className="telemetry-stat-lbl">{t.dashboard.activeP2PNodes}</span>
 						<span className="telemetry-stat-val" style={{ color: "var(--cline-sky)" }}>
-							{formatPeerCountBare(undefined)} Peers
+							{formatPeerCountBare(stats.peers ?? stats.agentsOnline)} Peers
 						</span>
 					</div>
 					<div className="telemetry-stat-card">

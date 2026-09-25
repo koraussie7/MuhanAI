@@ -25,7 +25,9 @@ export function isDemo(): boolean {
 
 /** Call after every successful pulse (or other) JSON parse. */
 export function ingestApiPayload(data: { _demo?: boolean } | null | undefined): void {
-	if (data && data._demo === true) setApiDemoFlag(true);
+	if (data && typeof data._demo === "boolean") {
+		setApiDemoFlag(data._demo);
+	}
 }
 
 export function resolvePeerCount(
@@ -74,9 +76,11 @@ export function getMeshStats(pulse: {
 	_demo?: boolean;
 }): MeshStats {
 	ingestApiPayload(pulse);
-	const peers = resolvePeerCount(pulse.peers ?? pulse.agentsOnline, {
-		allowDemoSeed: true,
-	});
+	const rawPeers = pulse.peers ?? pulse.agentsOnline;
+	const peers =
+		typeof rawPeers === "number" && Number.isFinite(rawPeers)
+			? rawPeers
+			: resolvePeerCount(rawPeers, { allowDemoSeed: true });
 	return {
 		agentsOnline: pulse.agentsOnline,
 		humansOnline: pulse.humansOnline,

@@ -51,10 +51,20 @@ export class Libp2pTransport implements Transport {
 	async start(): Promise<void> {
 		const identity = await loadOrCreateIdentity(this.identityPath);
 
+			const listen = process.env.P2P_LISTEN?.split(",").filter(Boolean) ?? ["/ip4/127.0.0.1/tcp/0"];
+		const announce = process.env.P2P_ANNOUNCE?.split(",").filter(Boolean);
+		const bootstrapPeers = process.env.P2P_BOOTSTRAP?.split(",").filter(Boolean) ?? [];
+		const discovery = process.env.P2P_DISCOVERY?.split(",").filter(Boolean) as
+		| ("mdns" | "bootstrap" | "dht")[]
+		| undefined;
 		const transportResult = await createP2PTransport({
-			privateKey: identity.privateKey,
-			listen: ["/ip4/127.0.0.1/tcp/0"],
-			discovery: ["mdns"],
+		privateKey: identity.privateKey,
+		listen,
+		...(announce && announce.length > 0 ? { announce } : {}),
+		...(bootstrapPeers.length > 0 ? { bootstrapPeers } : {}),
+			discovery: discovery ?? (bootstrapPeers.length > 0 ? ["bootstrap", "dht"] : ["mdns"]),
+			dhtServer: process.env.P2P_DHT_SERVER === "true",
+			relayServer: process.env.P2P_RELAY_SERVER === "true",
 		});
 		if (transportResult.isErr()) {
 			throw new Error(`transport init failed: ${transportResult.error.message}`);

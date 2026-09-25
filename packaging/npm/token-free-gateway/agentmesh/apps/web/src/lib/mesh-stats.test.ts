@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import assert from "node:assert/strict";
+import { beforeEach, describe, test } from "node:test";
 import {
 	formatPeerCountBare,
 	ingestApiPayload,
@@ -10,18 +11,18 @@ import {
 beforeEach(() => setApiDemoFlag(false));
 
 describe("mesh-stats", () => {
-	it("shows placeholder when no count and not demo", () => {
-		expect(formatPeerCountBare(undefined)).toBe(PLACEHOLDER);
+	test("shows placeholder when no count and not demo", () => {
+		assert.equal(formatPeerCountBare(undefined), PLACEHOLDER);
 	});
 
-	it("uses API _demo flag", () => {
+	test("uses API _demo flag", () => {
 		ingestApiPayload({ _demo: true });
-		expect(isDemo()).toBe(true);
-		expect(formatPeerCountBare(undefined)).toMatch(/12,482.*demo/);
+		assert.equal(isDemo(), true);
+		assert.match(formatPeerCountBare(undefined), /12,482.*demo/);
 	});
 
-	it("formats live count without demo suffix", () => {
+	test("formats live count without demo suffix", () => {
 		setApiDemoFlag(false);
-		expect(formatPeerCountBare(4)).toBe("4");
+		assert.equal(formatPeerCountBare(4), "4");
 	});
 });

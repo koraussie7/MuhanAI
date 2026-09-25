@@ -1,6 +1,7 @@
 import React, { Suspense, useEffect, useState } from "react";
 import "./styles/cline-theme.css";
 import "./styles/mobile.css";
+import "./styles/pythia-dashboard.css";
 import { ChevronRight, Globe, Menu, Radio, Search, Sparkles, Zap } from "lucide-react";
 
 function PageSkeleton() {
@@ -72,6 +73,7 @@ import { TravelPage } from "./components/find/TravelPage";
 import { getMenuTranslation } from "./components/menu-i18n";
 import { RightPanel } from "./components/RightPanel";
 import { Sidebar } from "./components/Sidebar";
+import { startBrowserPeer, stopBrowserPeer } from "./lib/browser-peer";
 import { type SupportedLanguage, useI18n } from "./i18n";
 import { ROUTES, routeByPath } from "./routes.js";
 
@@ -201,6 +203,8 @@ const LEGACY_PATH_REDIRECTS: Record<string, string> = {
 	"/network-monitor": "network-monitor",
 	// Knowledge Graph duplicates
 	"/knowledge-graph": "knowledge",
+	// Pythia alias / typo redirect
+	"/pathia": "pythia",
 };
 
 const IMPLEMENTED_SECTIONS = new Set(SECTIONS.map((s) => s.id));
@@ -295,11 +299,15 @@ export function App() {
 	};
 
 	useEffect(() => {
-		const onPopState = () => {
-			setActiveSection(sectionIdFromPath(window.location.pathname));
-		};
-		window.addEventListener("popstate", onPopState);
-		return () => window.removeEventListener("popstate", onPopState);
+	void startBrowserPeer();
+	const onPopState = () => {
+	setActiveSection(sectionIdFromPath(window.location.pathname));
+	};
+	window.addEventListener("popstate", onPopState);
+	return () => {
+	window.removeEventListener("popstate", onPopState);
+	void stopBrowserPeer();
+	};
 	}, []);
 
 	// 1. Fullscreen Standalone View for find.muhanai.com or /

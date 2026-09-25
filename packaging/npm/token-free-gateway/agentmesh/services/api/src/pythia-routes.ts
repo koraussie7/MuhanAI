@@ -28,6 +28,7 @@ import {
 } from "@agentmesh/llm-router/src/keyless-providers.js";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
+import { recordPythiaAnalysis } from "./cosmos-routes.js";
 import { clientError, formatZodError } from "./error-shapes.js";
 import { pythiaA2uiCall } from "./pythia-a2ui-service.js";
 
@@ -174,7 +175,7 @@ export async function pythiaRoutes(app: FastifyInstance) {
 			return clientError(reply, 400, formatZodError(parse.error), request.id);
 		}
 
-		const { file, prompt, system, model } = parse.data;
+		const { file, prompt, system, model, userId } = parse.data;
 		const sessionId = `pythia_${randomUUID().replace(/-/g, "").slice(0, 12)}`;
 
 		try {
@@ -197,6 +198,25 @@ export async function pythiaRoutes(app: FastifyInstance) {
 			};
 			sessions.set(sessionId, session);
 
+			// Feed the analysis into the cosmic knowledge graph. Best-effort:
+			// graph problems must never fail a Pythia session.
+			let graph: { conceptIds: string[]; derivedRelations: number } | undefined;
+			try {
+				const ingested = await recordPythiaAnalysis({
+					sessionId,
+					...(userId !== undefined ? { actorId: userId } : {}),
+					source: "user",
+					file,
+					prompt,
+					response: result.text,
+				});
+				graph = {
+					conceptIds: ingested.conceptIds,
+					derivedRelations: ingested.derivedRelations,
+				};
+			} catch (graphErr) {
+				request.log.warn({ err: graphErr }, "pythia graph ingest skipped");
+			}
 
 			return {
 				sessionId,
@@ -206,6 +226,7 @@ export async function pythiaRoutes(app: FastifyInstance) {
 				latencyMs: result.latencyMs,
 				tier: "keyless",
 				cost: "0 MHT (Token-Free)",
+				...(graph !== undefined ? { graph } : {}),
 				surface: await pythiaA2uiCall({
 					prompt: `[PYTHIA] File: ${file}\n\n${prompt}`,
 					file,
@@ -242,6 +263,24 @@ export async function pythiaRoutes(app: FastifyInstance) {
 			if (session.model && session.model !== "auto") keylessReq.model = session.model;
 			const result = await callKeylessProviders(keylessReq);
 
+			// Follow-up messages also feed the graph (best-effort, per-message
+			// idempotency key so replays collapse but distinct messages don't).
+			let graph: { conceptIds: string[]; derivedRelations: number } | undefined;
+			try {
+				const ingested = await recordPythiaAnalysis({
+					sessionId: `${id}:msg:${Date.now()}`,
+					source: "user",
+					file: session.file,
+					prompt: parse.data.message,
+					response: result.text,
+				});
+				graph = {
+					conceptIds: ingested.conceptIds,
+					derivedRelations: ingested.derivedRelations,
+				};
+			} catch (graphErr) {
+				request.log.warn({ err: graphErr }, "pythia graph ingest skipped");
+			}
 
 			return {
 				sessionId: id,
@@ -251,6 +290,7 @@ export async function pythiaRoutes(app: FastifyInstance) {
 				latencyMs: result.latencyMs,
 				tier: "keyless",
 				cost: "0 MHT (Token-Free)",
+				...(graph !== undefined ? { graph } : {}),
 				surface: await pythiaA2uiCall({
 					prompt: `[PYTHIA] File: ${session.file}\n\n${parse.data.message}`,
 					file: session.file,
@@ -268,8 +308,7 @@ export async function pythiaRoutes(app: FastifyInstance) {
 	 * List active sessions.
 	 */
 	app.get("/api/pythia/sessions", async (_request, _reply) => {
-
-			return {
+		return {
 			sessions: Array.from(sessions.values()).map((s) => ({
 				id: s.id,
 				file: s.file,
@@ -315,8 +354,7 @@ export async function pythiaRoutes(app: FastifyInstance) {
 	 * Returns the list of available keyless providers for Pythia CLI configuration.
 	 */
 	app.get("/api/pythia/providers", async (_request, _reply) => {
-
-			return {
+		return {
 			providers: getKeylessProviderNames(),
 			endpoint: "/api/pythia/session",
 			tier: "keyless",

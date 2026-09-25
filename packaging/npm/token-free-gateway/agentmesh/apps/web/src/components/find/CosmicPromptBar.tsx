@@ -442,10 +442,14 @@ export async function handleOpenRouterCallbackIfPresent(): Promise<boolean> {
 		window.opener.postMessage(message, window.location.origin);
 		window.close();
 	} else {
-		// No opener (user navigated directly) — show a minimal confirmation page.
-		document.body.innerHTML = message.key
-			? "<p style='font-family:sans-serif;padding:2rem'>✅ OpenRouter 연결 완료! 이 창을 닫고 muhanai.com으로 돌아가세요.</p>"
-			: `<p style='font-family:sans-serif;padding:2rem'>⚠️ ${message.error ?? "OAuth 실패"}</p>`;
+		// No opener (user navigated directly) — show a minimal confirmation page safely.
+		document.body.textContent = "";
+		const p = document.createElement("p");
+		p.style.cssText = "font-family:sans-serif;padding:2rem";
+		p.textContent = message.key
+			? "✅ OpenRouter 연결 완료! 이 창을 닫고 muhanai.com으로 돌아가세요."
+			: `⚠️ ${message.error ?? "OAuth 실패"}`;
+		document.body.appendChild(p);
 	}
 	return true;
 }

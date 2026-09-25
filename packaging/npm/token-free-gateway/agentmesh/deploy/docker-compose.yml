@@ -28,8 +28,13 @@ services:
       - DATABASE_URL=postgresql://muhanai:muhanai@postgres:5432/muhanai
       - API_KEY=${API_KEY}
       - P2P_LISTEN=/ip4/0.0.0.0/tcp/4001
-      - P2P_BOOTSTRAP=/ip4/seed:4001/p2p/12D3KooSEED...
-      - ALLOWED_ORIGINS=https://muhanai.com,https://www.muhanai.com
+      - P2P_ANNOUNCE=${P2P_ANNOUNCE:-}
+      - P2P_BOOTSTRAP=${P2P_BOOTSTRAP:-}
+      - P2P_DISCOVERY=${P2P_DISCOVERY:-bootstrap,dht}
+      - P2P_DHT_SERVER=${P2P_DHT_SERVER:-false}
+      - P2P_RELAY_SERVER=${P2P_RELAY_SERVER:-false}
+      - VISITOR_RELAY_MULTIADDR=${VISITOR_RELAY_MULTIADDR:-}
+      - ALLOWED_ORIGINS=https://muhanai.com,https://www.muhanai.com,https://travel.kbizhub.com
     ports:
       - "3001:3001"
     depends_on:
@@ -45,6 +50,8 @@ services:
     command: ["node", "services/p2p-node/dist/index.js", "--seed"]
     environment:
       - P2P_LISTEN=/ip4/0.0.0.0/tcp/4001
+      - P2P_ANNOUNCE=${SEED_P2P_ANNOUNCE:-}
+      - P2P_DISCOVERY=${SEED_P2P_DISCOVERY:-dht}
       - P2P_RELAY_SERVER=true
       - P2P_DHT_SERVER=true
     ports:
@@ -60,7 +67,9 @@ services:
     command: ["node", "services/p2p-node/dist/index.js", "--relay"]
     environment:
       - P2P_LISTEN=/ip4/0.0.0.0/tcp/4002
-      - P2P_BOOTSTRAP=/ip4/seed:4001/p2p/12D3KooSEED...
+      - P2P_ANNOUNCE=${RELAY_P2P_ANNOUNCE:-}
+      - P2P_BOOTSTRAP=${P2P_BOOTSTRAP:-}
+      - P2P_DISCOVERY=${P2P_DISCOVERY:-bootstrap,dht}
       - P2P_RELAY_SERVER=true
     ports:
       - "4002:4002"
