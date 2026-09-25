@@ -6,6 +6,8 @@
  *  - `log`            — append-only log (memory + JSONL)
  *  - `ontology`       — concept identity + relation projection
  *  - `ingest`         — world-feed normalization + reaction/relation writes
+ *  - `shadowbroker`   — geospatial OSINT layer → world feed mapping
+ *  - `correlation`    — observation × forecast correlation (temporal/geospatial)
  *  - `amplification`  — reaction → significance score
  *  - `projections`    — log → read models (concepts, relations, rankings)
  *
@@ -13,9 +15,11 @@
  * Pythia/Osiris routes and the Pulse stream, but the core never imports them.
  */
 
-export * from "./types.js";
+export * from "./amplification.js";
+export * from "./correlation.js";
+export * from "./ingest.js";
 export * from "./log.js";
 export * from "./ontology.js";
-export * from "./ingest.js";
-export * from "./amplification.js";
 export * from "./projections.js";
+export * from "./shadowbroker.js";
+export * from "./types.js";
