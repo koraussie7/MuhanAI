@@ -1,0 +1,12 @@
+name: status
+type: custom # system | custom
+description: Liveness probe for the AgentMesh gateway — reports the resolved gateway URL and whether it is reachable. Read-only; consumes no credits.
+entry: ./index.ts
+complexity: simple # simple | moderate | complex
+speed: fast # fast | moderate | slow
+reliability: high # high | medium | low
+sideEffects: read-only # read-only | write
+# Safe to call repeatedly: it only performs an HTTP GET against /health and
+# never mutates agentmesh state or the caller's credit wallet.
+# requiresApproval: false # optional, default false — gate execution on guardian approval
+# cancellable: false      # optional, default false

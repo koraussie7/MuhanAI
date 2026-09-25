@@ -1,0 +1,13 @@
+name: route
+type: custom # system | custom
+description: Route a question through the AgentMesh agent mesh — runs category detection, agent casting, and consensus, and returns the answer plus a credit receipt.
+entry: ./index.ts
+complexity: complex # simple | moderate | complex
+speed: slow # fast | moderate | slow
+reliability: medium # high | medium | low
+sideEffects: write # read-only | write
+# Charges the caller's AgentMesh credit wallet (credits.spent), so execution is
+# not idempotent. A 402 insufficient_credits result is a normal business
+# outcome, not a transport error — the action surfaces it via `status: "error"`.
+# requiresApproval: false # optional, default false — gate execution on guardian approval
+# cancellable: false      # optional, default false

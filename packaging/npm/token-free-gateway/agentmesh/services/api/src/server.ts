@@ -11,12 +11,13 @@ import { authRoutes } from "./auth-routes.js";
 import { catalogRoutes } from "./catalog-routes.js";
 import { computeRoutes } from "./compute-routes.js";
 import { computerUseRoutes } from "./computer-use-routes.js";
+import { cosmosRoutes } from "./cosmos-routes.js";
 import { creditsRoutes } from "./credits-routes.js";
-import { factoryRoutes } from "./factory-routes.js";
 import { elizaosRpcRoutes } from "./elizaos-rpc-routes.js";
+import { factoryRoutes } from "./factory-routes.js";
 import { feedRoutes } from "./feed-routes.js";
-import { ghostRoutes } from "./ghost-routes.js";
 import { ghostDispatchRoutes } from "./ghost-dispatch-routes.js";
+import { ghostRoutes } from "./ghost-routes.js";
 import { PulseBridge } from "./gossip-bridge.js";
 import { happyRoutes } from "./happy-routes.js";
 import { hivebearRoutes } from "./hivebear-routes.js";
@@ -32,12 +33,12 @@ import { openaiCompatRoutes } from "./openai-compat-routes.js";
 import { paymentRoutes } from "./payment-routes.js";
 import pulseRoutes from "./pulse-routes.js";
 import { pythiaRoutes } from "./pythia-routes.js";
-import { cosmosRoutes } from "./cosmos-routes.js";
 import { quorumRoutes } from "./quorum-routes.js";
 import { routerRoutes } from "./router-routes.js";
 import { securityRoutes } from "./security-routes.js";
 import { semanticRoutes } from "./semantic-routes.js";
 import { shoppingRoutes } from "./shopping-routes.js";
+import { visitorRoutes } from "./visitor-routes.js";
 import { worldRoutes } from "./world-routes.js";
 
 function timingSafeEqual(a: string | undefined, b: string | undefined): boolean {
@@ -67,27 +68,25 @@ function isBridgeAuth(
 //   - bridge 앱이 Rome 런타임에서 실행될 때 사용하는 BEARER 토큰.
 //   - 환경변수가 없으면 가드 비활성 (개발 환경 편의를 위해).
 //   - 라이브 환경에서는 둘 다 동일하게 설정한다.
-const bridgeTokenRaw = process.env.AGENTMESH_BRIDGE_TOKEN;
-const bridgeToken: string | undefined =
-	typeof bridgeTokenRaw === "string" && bridgeTokenRaw.trim().length > 0
-		? bridgeTokenRaw.trim()
-		: undefined;
+//   - 모듈 로드가 아니라 빌드 시점(buildApp)에 읽어, 테스트가 환경변수로
+//     가드 on/off 를 제어할 수 있게 한다 (API_KEY 와 같은 패턴).
+function resolveBridgeToken(): string | undefined {
+	const raw = process.env.AGENTMESH_BRIDGE_TOKEN;
+	return typeof raw === "string" && raw.trim().length > 0 ? raw.trim() : undefined;
+}
 
 const PUBLIC_PATH_PREFIXES = [
 	"/api/pulse",
 	"/api/network",
 	"/api/agents",
+	"/api/nodes",
+	"/api/visitors",
 	"/api/auth",
 	"/api/health",
 	"/rpc",
 	"/api/mcp",
 ];
-const PUBLIC_PATH_EXACT = new Set([
-	"/health",
-	"/.well-known/mcp.json",
-	"/.well-known/agent.json",
-	
-]);
+const PUBLIC_PATH_EXACT = new Set(["/health", "/.well-known/mcp.json", "/.well-known/agent.json"]);
 
 function isPublicPath(rawUrl: string | undefined): boolean {
 	if (!rawUrl) return false;
@@ -111,6 +110,7 @@ export interface BuildAppOptions {
 
 export async function buildApp(options: BuildAppOptions = {}) {
 	const isProduction = process.env.NODE_ENV === "production";
+	const bridgeToken = resolveBridgeToken();
 	const logger = options.logger ?? getLogger({ service: "api" });
 	const enableTransport = options.enableTransport ?? process.env.NODE_ENV !== "test";
 	const identityPath = options.identityPath ?? "./.agentmesh/identity.json";
@@ -246,11 +246,28 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	await app.register(omniRouteRoutes);
 	await app.register(openaiCompatRoutes);
 	await app.register(worldRoutes);
+	await app.register(visitorRoutes);
 	await app.register(paymentRoutes);
 	await app.register(routerRoutes);
 	await app.register(mcpRoutes);
 	await app.register(catalogRoutes);
 	await app.register(resonanceRoutes);
+
+	// Liveness probes. Both are public + rate-limit exempt (see above) so
+	// orchestrators and the Rome agentmesh-bridge `status` action
+	// (GET /health via gatewayHealth()) can poll without credentials.
+	app.get("/health", async () => ({
+		ok: true,
+		service: "agentmesh-api",
+		uptimeSeconds: Math.floor(process.uptime()),
+		timestamp: new Date().toISOString(),
+	}));
+	app.get("/api/health", async () => ({
+		ok: true,
+		service: "agentmesh-api",
+		uptimeSeconds: Math.floor(process.uptime()),
+		timestamp: new Date().toISOString(),
+	}));
 
 	// Wire the libp2p transport into the bridge. Best-effort: any failure here
 	// (mDNS unavailable on Docker bridge, identity write denied, etc.) keeps
@@ -298,9 +315,14 @@ export async function buildApp(options: BuildAppOptions = {}) {
 const isMain = import.meta.url === `file://${process.argv[1]}`;
 if (isMain) {
 	const app = await buildApp();
+	// The port/host are configurable so a second deployment (e.g. the ShadowBroker
+	// world API alongside the existing agentmesh instance) can run without
+	// colliding with the default 3001 listener or the public bind.
+	const port = Number(process.env.PORT ?? 3001);
+	const host = process.env.HOST ?? "0.0.0.0";
 	try {
-		await app.listen({ port: 3001, host: "0.0.0.0" });
-		app.log.info("API server listening on http://0.0.0.0:3001");
+		await app.listen({ port, host });
+		app.log.info(`API server listening on http://${host}:${port}`);
 	} catch (err) {
 		app.log.error(err);
 		process.exit(1);

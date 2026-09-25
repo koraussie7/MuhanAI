@@ -1,63 +1,90 @@
 /**
  * Centralized mesh statistics helper.
  *
- * Goal: no hardcoded peer/agent/human counts anywhere in the rendered UI.
- * When the real value is absent (callers passed `undefined`) we render an
- * em-dash placeholder so the UI never shows a fabricated number.
- *
- * The DEMO_PEER_COUNT / DEMO_HUMAN_COUNT seeds are exported only for tests
- * and the `/api/pulse` fallback path — never rendered into the UI by these
- * helpers unless the operator explicitly opts in via `VITE_DEMO=true`.
+ * Rules:
+ * - Never invent a peer count in the UI unless demo mode is explicit.
+ * - Demo mode comes from VITE_DEMO, or from API responses with `_demo: true`.
+ * - NODE_ENV === "development" alone does NOT force demo numbers in production builds.
  */
 
 export const DEMO_PEER_COUNT = 12_482;
 export const DEMO_HUMAN_COUNT = 3_821;
-
 export const PLACEHOLDER = "—";
 
-export const isDemo = (): boolean =>
-  typeof import.meta !== "undefined" &&
-  (import.meta.env?.VITE_DEMO === "true" ||
-    (typeof process !== "undefined" && process.env?.NODE_ENV === "development"));
+/** Set from any /api/* response that includes `_demo: true`. */
+let apiDemoFlag = false;
 
-/** Check if the API pulse response indicates a demo mode. */
-export function isApiDemo(pulse: { _demo?: boolean }): boolean {
-  return pulse._demo === true;
+export function setApiDemoFlag(demo: boolean): void {
+	apiDemoFlag = demo;
+}
+
+export function isDemo(): boolean {
+	const viteDemo = typeof import.meta !== "undefined" && import.meta.env?.VITE_DEMO === "true";
+	return Boolean(viteDemo || apiDemoFlag);
+}
+
+/** Call after every successful pulse (or other) JSON parse. */
+export function ingestApiPayload(data: { _demo?: boolean } | null | undefined): void {
+	if (data && typeof data._demo === "boolean") {
+		setApiDemoFlag(data._demo);
+	}
+}
+
+export function resolvePeerCount(
+	n: number | undefined,
+	opts?: { allowDemoSeed?: boolean },
+): number | undefined {
+	if (typeof n === "number" && Number.isFinite(n)) return n;
+	if (opts?.allowDemoSeed && isDemo()) return DEMO_PEER_COUNT;
+	return undefined;
 }
 
 export function formatPeerCount(n: number | undefined): string {
-  if (n == null) return PLACEHOLDER;
-  if (isDemo()) return `${DEMO_PEER_COUNT.toLocaleString()} (demo)`;
-  return n.toLocaleString();
+	const resolved = resolvePeerCount(n, { allowDemoSeed: true });
+	if (resolved == null) return PLACEHOLDER;
+	if (isDemo()) return `${resolved.toLocaleString()} (demo)`;
+	return resolved.toLocaleString();
 }
 
 export function formatHumanCount(n: number | undefined): string {
-  if (n == null) return PLACEHOLDER;
-  if (isDemo()) return `${DEMO_HUMAN_COUNT.toLocaleString()} (demo)`;
-  return n.toLocaleString();
+	if (typeof n === "number" && Number.isFinite(n)) {
+		return isDemo() ? `${n.toLocaleString()} (demo)` : n.toLocaleString();
+	}
+	if (isDemo()) return `${DEMO_HUMAN_COUNT.toLocaleString()} (demo)`;
+	return PLACEHOLDER;
 }
 
+/** Bare number for tight UI; still appends (demo) when in demo mode. */
 export function formatPeerCountBare(n: number | undefined): string {
-  if (n == null) return PLACEHOLDER;
-  if (isDemo()) return DEMO_PEER_COUNT.toLocaleString();
-  return n.toLocaleString();
+	const resolved = resolvePeerCount(n, { allowDemoSeed: true });
+	if (resolved == null) return PLACEHOLDER;
+	if (isDemo()) return `${resolved.toLocaleString()} (demo)`;
+	return resolved.toLocaleString();
 }
 
 export interface MeshStats {
-  agentsOnline: number | undefined;
-  humansOnline: number | undefined;
-  demo: boolean;
+	agentsOnline: number | undefined;
+	humansOnline: number | undefined;
+	peers: number | undefined;
+	demo: boolean;
 }
 
 export function getMeshStats(pulse: {
-  agentsOnline?: number;
-  humansOnline?: number;
-  _demo?: boolean;
+	agentsOnline?: number;
+	humansOnline?: number;
+	peers?: number;
+	_demo?: boolean;
 }): MeshStats {
-  const demo = isDemo() || isApiDemo(pulse);
-  return {
-    agentsOnline: demo ? DEMO_PEER_COUNT : pulse.agentsOnline,
-    humansOnline: demo ? DEMO_HUMAN_COUNT : pulse.humansOnline,
-    demo: demo,
-  };
+	ingestApiPayload(pulse);
+	const rawPeers = pulse.peers ?? pulse.agentsOnline;
+	const peers =
+		typeof rawPeers === "number" && Number.isFinite(rawPeers)
+			? rawPeers
+			: resolvePeerCount(rawPeers, { allowDemoSeed: true });
+	return {
+		agentsOnline: pulse.agentsOnline,
+		humansOnline: pulse.humansOnline,
+		peers,
+		demo: isDemo(),
+	};
 }

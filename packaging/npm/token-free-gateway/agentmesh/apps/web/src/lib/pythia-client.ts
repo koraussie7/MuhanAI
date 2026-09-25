@@ -61,3 +61,67 @@ export async function stopPythiaSession(sessionId: string): Promise<void> {
 		credentials: "include",
 	});
 }
+
+// ---------------------------------------------------------------------------
+// Cosmic graph read models (/api/pythia/graph/*)
+// ---------------------------------------------------------------------------
+
+/** Mirrors GraphConceptView in services/api/src/cosmos-routes.ts. */
+export interface GraphConcept {
+	id: string;
+	label: string;
+	domain: string;
+	status: string;
+	signalScore: number;
+	effectiveStatus: "raw" | "validated" | "amplified";
+}
+
+/** Mirrors OntologyRelation in the cosmos projection. */
+export interface GraphRelation {
+	id: string;
+	sourceId: string;
+	targetId: string;
+	predicate: string;
+	strength: number;
+}
+
+export interface GraphEvent {
+	id: string;
+	kind: string;
+	source: string;
+	timestamp: string;
+}
+
+export interface PythiaProvider {
+	name: string;
+}
+
+async function getJson<T>(path: string, fallback: T): Promise<T> {
+	try {
+		const res = await fetch(path, { credentials: "include" });
+		if (!res.ok) return fallback;
+		return (await res.json()) as T;
+	} catch {
+		return fallback;
+	}
+}
+
+export async function listGraphConcepts(): Promise<GraphConcept[]> {
+	const data = await getJson<{ concepts?: GraphConcept[] }>("/api/pythia/graph/concepts", {});
+	return data.concepts ?? [];
+}
+
+export async function listGraphRelations(): Promise<GraphRelation[]> {
+	const data = await getJson<{ relations?: GraphRelation[] }>("/api/pythia/graph/relations", {});
+	return data.relations ?? [];
+}
+
+export async function listGraphEvents(): Promise<GraphEvent[]> {
+	const data = await getJson<{ events?: GraphEvent[] }>("/api/pythia/graph/events", {});
+	return data.events ?? [];
+}
+
+export async function listPythiaProviders(): Promise<string[]> {
+	const data = await getJson<{ providers?: string[] }>("/api/pythia/providers", {});
+	return data.providers ?? [];
+}

@@ -657,6 +657,105 @@ export function MarketplacePage({
 	);
 }
 
+// ---- Ghost Agents ----
+export function GhostPage() {
+	return (
+		<Page
+			iconKey="ghost"
+			title="Ghost Agents"
+			subtitle="A2A-compatible autonomous agents via Token-Free Gateway"
+		>
+			<div className="ghost-page">
+				<div className="ghost-stats">
+					<div className="stat-card">
+						<strong>Connected</strong>
+						<span>3 agents</span>
+					</div>
+					<div className="stat-card">
+						<strong>Tasks Completed</strong>
+						<span>247</span>
+					</div>
+					<div className="stat-card">
+						<strong>Success Rate</strong>
+						<span>94.2%</span>
+					</div>
+				</div>
+				<div className="ghost-agent-list">
+					<div className="agent-item">
+						<span className="agent-name">ghost-researcher</span>
+						<span className="agent-status active">Active</span>
+						<span className="agent-tasks">89 tasks</span>
+					</div>
+					<div className="agent-item">
+						<span className="agent-name">ghost-analyst</span>
+						<span className="agent-status active">Active</span>
+						<span className="agent-tasks">112 tasks</span>
+					</div>
+					<div className="agent-item">
+						<span className="agent-name">ghost-coder</span>
+						<span className="agent-status idle">Idle</span>
+						<span className="agent-tasks">46 tasks</span>
+					</div>
+				</div>
+			</div>
+		</Page>
+	);
+}
+
+// ---- Droidring P2P ----
+export function DroidringPage() {
+	return (
+		<Page
+			iconKey="robot"
+			title="Droidring P2P"
+			subtitle="Decentralized agent mesh over libp2p"
+		>
+			<div className="droidring-page">
+				<div className="droidring-stats">
+					<div className="stat-card">
+						<strong>Peers</strong>
+						<span>23</span>
+					</div>
+					<div className="stat-card">
+						<strong>Latency (avg)</strong>
+						<span>42ms</span>
+					</div>
+					<div className="stat-card">
+						<strong>Throughput</strong>
+						<span>1.2 MB/s</span>
+					</div>
+				</div>
+				<div className="droidring-peers">
+					<div className="peer-row header">
+						<span>Peer ID</span>
+						<span>Status</span>
+						<span>Latency</span>
+						<span>Address</span>
+					</div>
+					<div className="peer-row">
+						<span>12D3KooW...</span>
+						<span className="status connected">Connected</span>
+						<span>38ms</span>
+						<span>/ip4/10.0.0.1/tcp/4001</span>
+					</div>
+					<div className="peer-row">
+						<span>12D3KooX...</span>
+						<span className="status connected">Connected</span>
+						<span>52ms</span>
+						<span>/ip4/10.0.0.2/tcp/4001</span>
+					</div>
+					<div className="peer-row">
+						<span>12D3KooY...</span>
+						<span className="status connecting">Connecting</span>
+						<span>—</span>
+						<span>/ip4/10.0.0.3/tcp/4001</span>
+					</div>
+				</div>
+			</div>
+		</Page>
+	);
+}
+
 // ---- Verification Center ----
 export function VerificationPage() {
 	const [items, setItems] = useState<

@@ -11,13 +11,14 @@ import type { FastifyInstance } from "fastify";
 export const ghostRegistry = createGhostRegistry();
 
 /** Allowlist entries from `GHOST_NODE_URL_ALLOWLIST` (comma-separated). */
-function configuredAllowlist() {
+export function configuredAllowlist() {
 	const raw = process.env.GHOST_NODE_URL_ALLOWLIST;
 	if (!raw) return undefined;
 	return createHostAllowlist(raw.split(","));
 }
 
-function ghostFetchPolicy(): GhostFetchPolicy {
+/** Fetch policy reusing the SSRF guard for node-bound transport and discovery. */
+export function ghostFetchPolicy(): GhostFetchPolicy {
 	return {
 		// Resolved at call time so tests can swap globalThis.fetch.
 		fetchImpl: (input, init) => globalThis.fetch(input, init),
@@ -50,7 +51,7 @@ function firstHeader(headers: Record<string, unknown>, name: string): string | u
  * (DISABLE_AUTH=true) may register — the same fail-closed posture as the
  * global hook.
  */
-function registrationAuthorized(headers: Record<string, unknown>): boolean {
+export function registrationAuthorized(headers: Record<string, unknown>): boolean {
 	const ghostToken = process.env.GHOST_REGISTRATION_TOKEN;
 	if (ghostToken && timingSafeEqual(firstHeader(headers, "x-ghost-token"), ghostToken)) {
 		return true;

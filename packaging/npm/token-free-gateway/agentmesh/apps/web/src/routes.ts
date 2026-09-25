@@ -300,6 +300,24 @@ export const ROUTES: readonly RouteDefinition[] = [
 		badge: "NEW",
 		page: "world",
 	},
+	{
+		id: "ghost",
+		path: "/ghost",
+		group: "network",
+		label: "Ghost Agents",
+		iconKey: "ghost",
+		badge: "Beta",
+		page: "ghost",
+	},
+	{
+		id: "droidring",
+		path: "/droidring",
+		group: "network",
+		label: "Droidring P2P",
+		iconKey: "robot",
+		badge: "P2P",
+		page: "droidring",
+	},
 ];
 
 export const ROUTE_COUNT = ROUTES.length;

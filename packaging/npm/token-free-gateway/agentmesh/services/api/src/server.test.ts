@@ -153,6 +153,72 @@ describe("api server hardening", () => {
 		});
 	});
 
+	describe("Rome bridge token (AGENTMESH_BRIDGE_TOKEN)", () => {
+		beforeEach(async () => {
+			delete process.env.API_KEY;
+			delete process.env.DISABLE_AUTH;
+			process.env.AGENTMESH_BRIDGE_TOKEN = "bridge-secret";
+			app = await buildApp({ logger: pino({ level: "silent" }) });
+		});
+
+		it("rejects POST /api/route without any credential (401)", async () => {
+			const res = await app?.inject({
+				method: "POST",
+				url: "/api/route",
+				headers: { "content-type": "application/json" },
+				payload: JSON.stringify({ userId: "u1", question: "q" }),
+			});
+			expect(res?.statusCode).toBe(401);
+		});
+
+		it("rejects a wrong bearer token (401)", async () => {
+			const res = await app?.inject({
+				method: "POST",
+				url: "/api/route",
+				headers: {
+					"content-type": "application/json",
+					authorization: "Bearer wrong-secret",
+				},
+				payload: JSON.stringify({ userId: "u1", question: "q" }),
+			});
+			expect(res?.statusCode).toBe(401);
+		});
+
+		it("passes a valid bridge bearer token past auth (400 on invalid body, not 401)", async () => {
+			const res = await app?.inject({
+				method: "POST",
+				url: "/api/route",
+				headers: {
+					"content-type": "application/json",
+					authorization: "Bearer bridge-secret",
+				},
+				payload: JSON.stringify({}),
+			});
+			// Auth passed → the route's zod schema rejects the empty body.
+			expect(res?.statusCode).toBe(400);
+		});
+
+		it("still accepts a matching x-api-key alongside the bridge token", async () => {
+			// The hook reads process.env.API_KEY per-request, so set it post-build.
+			process.env.API_KEY = "secret-test-key";
+			const res = await app?.inject({
+				method: "POST",
+				url: "/api/route",
+				headers: {
+					"content-type": "application/json",
+					"x-api-key": "secret-test-key",
+				},
+				payload: JSON.stringify({}),
+			});
+			expect(res?.statusCode).toBe(400);
+		});
+
+		it("keeps GET /health public even with the guard configured", async () => {
+			const res = await app?.inject({ method: "GET", url: "/health" });
+			expect(res?.statusCode).toBe(200);
+		});
+	});
+
 	describe("shared logger wiring", () => {
 		it("uses the logger instance passed in via options", async () => {
 			const events: Array<{ msg: string }> = [];

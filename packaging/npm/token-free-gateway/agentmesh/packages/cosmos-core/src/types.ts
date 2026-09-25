@@ -8,15 +8,24 @@
  *  2. Ontology concepts are exposed as candidates whose meaning is confirmed
  *     by interaction (reaction → record → amplify).
  *  3. Sources: Pythia World Engine (world-routes), Osiris world state,
- *     users, and agents all emit into the same stream.
+ *     ShadowBroker geospatial OSINT, users, and agents all emit into the
+ *     same stream.
  */
 
 // ---------------------------------------------------------------------------
 // Event taxonomy
 // ---------------------------------------------------------------------------
 
-/** Where an event came from. */
-export type CosmosEventSource = "pythia" | "osiris" | "user" | "agent" | "system";
+/**
+ * Where an event came from.
+ *
+ * `shadowbroker` carries geospatial OSINT observations (aircraft, vessels,
+ * satellites, GPS jamming) from github.com/BigBodyCobain/Shadowbroker. Keeping
+ * it distinct from `pythia` matters: Pythia emits *forecasts*, ShadowBroker
+ * emits *observed positions*. Temporal correlation rules match the two, so a
+ * forecast and its confirming observation must stay separable in the log.
+ */
+export type CosmosEventSource = "pythia" | "shadowbroker" | "osiris" | "user" | "agent" | "system";
 
 /** Reaction verbs a user or agent can apply to a concept/relation/event. */
 export type ReactionType =
@@ -75,7 +84,7 @@ export interface CosmosEventBase {
 	actorId?: string;
 }
 
-/** A live world fact ingested from Pythia/Osiris feeds. */
+/** A live world fact ingested from Pythia/Osiris/ShadowBroker feeds. */
 export interface WorldEventIngested extends CosmosEventBase {
 	kind: "world_event";
 	payload: {
@@ -83,6 +92,11 @@ export interface WorldEventIngested extends CosmosEventBase {
 		title: string;
 		severity: WorldSeverity;
 		location?: string;
+		/**
+		 * GeoJSON-style point, present only on geospatial sources
+		 * (ShadowBroker). Lat/lng are degrees; `altitudeM` is metres when known.
+		 */
+		geo?: { lat: number; lng: number; altitudeM?: number };
 		upstreamId: string;
 		/** Concept ids this event touched (concept = domain::label). */
 		conceptIds: string[];
@@ -293,4 +307,3 @@ export interface AppendOnlyLog {
 	/** Remove all events (tests / dev reset only). */
 	reset(): Promise<void>;
 }
-

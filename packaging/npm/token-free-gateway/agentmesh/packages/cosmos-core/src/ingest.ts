@@ -11,7 +11,7 @@
  */
 
 import { randomUUID } from "node:crypto";
-import { conceptId, clamp01 } from "./ontology.js";
+import { clamp01, conceptId } from "./ontology.js";
 import type {
 	AppendOnlyLog,
 	CosmosEvent,
@@ -34,6 +34,8 @@ export interface WorldFeedEvent {
 	severity: WorldSeverity;
 	source: string;
 	timestamp: string;
+	/** GeoJSON-style point from geospatial sources (ShadowBroker). */
+	geo?: { lat: number; lng: number; altitudeM?: number };
 }
 
 /** Matches `WorldPrediction` in `services/api/src/world-routes.ts`. */
@@ -48,7 +50,12 @@ export interface WorldFeedPrediction {
 
 /** Matches `WorldBrief` in `services/api/src/world-routes.ts`. */
 export interface WorldFeedBrief {
-	source: "pythia" | "offline";
+	/**
+	 * `merged` is what the live routes emit once more than one engine is wired
+	 * in: a single brief carrying Pythia forecasts *and* ShadowBroker
+	 * observations. Offline snapshots are still skipped at ingest.
+	 */
+	source: "pythia" | "shadowbroker" | "merged" | "offline";
 	summary: string;
 	domains: string[];
 	events: WorldFeedEvent[];
@@ -61,6 +68,12 @@ export interface IngestOptions {
 	source?: CosmosEventSource;
 	/** Epoch millis override (tests). */
 	now?: number;
+	/**
+	 * Subject domains for a prediction (e.g. `["conflict"]`). Without at least
+	 * one, the forecast can only be correlated with an observation by proximity,
+	 * never by domain — see `normalizePrediction`.
+	 */
+	subjectDomains?: string[];
 }
 
 /** Parse an ISO timestamp, falling back to `now` when unparseable. */
@@ -101,6 +114,7 @@ export function normalizeWorldEvent(
 		raw: { source: event.source, timestamp: event.timestamp },
 	};
 	if (event.location) payload.location = event.location;
+	if (event.geo) payload.geo = event.geo;
 
 	return {
 		event: {
@@ -117,6 +131,12 @@ export function normalizeWorldEvent(
  * Prediction → `prediction` event. Predictions are the raw material for the
  * `prediction_accuracy` signal: once reality catches up, a matching world event
  * makes the originating concepts measurably more trustworthy.
+ *
+ * `domain` is fixed to `"prediction"` (the event kind), so the forecast's
+ * *subject* domains are carried in `conceptIds` instead — a forecast with no
+ * subject domain can never be correlated with an observation, because there is
+ * nothing to match on. Callers that know the subject domain (the world routes
+ * do, from the upstream brief) pass it via `subjectDomains`.
  */
 export function normalizePrediction(
 	prediction: WorldFeedPrediction,
@@ -124,6 +144,11 @@ export function normalizePrediction(
 ): { event: CosmosEventInput; conceptIds: string[] } {
 	const now = options.now ?? Date.now();
 	const conceptIds = [conceptId("prediction", prediction.title)];
+	for (const domain of options.subjectDomains ?? []) {
+		if (domain && domain !== "prediction" && domain !== "general") {
+			conceptIds.push(conceptId("domain", domain));
+		}
+	}
 
 	return {
 		event: {
@@ -246,12 +271,16 @@ export async function ingestWorldBrief(
 		for (const id of conceptIds) touchedConcepts.add(id);
 		batch.push(
 			event,
-			...conceptObservationEvents(conceptIds, {
-				domain: raw.domain,
-				label: raw.title,
-				upstreamId: raw.id,
-				timestamp: parseTimestamp(raw.timestamp, now),
-			}, source),
+			...conceptObservationEvents(
+				conceptIds,
+				{
+					domain: raw.domain,
+					label: raw.title,
+					upstreamId: raw.id,
+					timestamp: parseTimestamp(raw.timestamp, now),
+				},
+				source,
+			),
 		);
 	}
 
@@ -260,16 +289,26 @@ export async function ingestWorldBrief(
 			skippedUpstreamIds.push(raw.id);
 			continue;
 		}
-		const { event, conceptIds } = normalizePrediction(raw, { source, now });
+		// A forecast inherits the domains its author reported, so correlation has
+		// something to match an observation against.
+		const { event, conceptIds } = normalizePrediction(raw, {
+			source,
+			now,
+			subjectDomains: brief.domains,
+		});
 		for (const id of conceptIds) touchedConcepts.add(id);
 		batch.push(
 			event,
-			...conceptObservationEvents(conceptIds, {
-				domain: "prediction",
-				label: raw.title,
-				upstreamId: raw.id,
-				timestamp: now,
-			}, source),
+			...conceptObservationEvents(
+				conceptIds,
+				{
+					domain: "prediction",
+					label: raw.title,
+					upstreamId: raw.id,
+					timestamp: now,
+				},
+				source,
+			),
 		);
 	}
 

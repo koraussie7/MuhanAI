@@ -10,7 +10,10 @@
  * env-gated, and composable into the cosmic agent topology.
  */
 
-import { callKeylessProviders, type KeylessRequest } from "@agentmesh/llm-router/src/keyless-providers.js";
+import {
+	callKeylessProviders,
+	type KeylessRequest,
+} from "@agentmesh/llm-router/src/keyless-providers.js";
 import { maybeCompressPrompt } from "./pythia-routes.js";
 
 export interface PythiaA2uiResult {

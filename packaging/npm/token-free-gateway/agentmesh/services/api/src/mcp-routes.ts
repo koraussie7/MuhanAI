@@ -21,6 +21,7 @@
  * consistent. Replace `runToolCall` with a live provider when one is available.
  */
 
+import { identityService } from "@agentmesh/knowledge-base";
 import type { FastifyInstance } from "fastify";
 
 interface MCPToolDefinition {
@@ -157,7 +158,7 @@ const MUHANAI_MCP_TOOLS: MCPToolDefinition[] = [
 			},
 			required: ["file", "prompt"],
 		},
-	}
+	},
 ];
 
 const PROMPT_LANG_MAP: Record<
@@ -275,14 +276,16 @@ function runToolCall(
 	args: Record<string, unknown>,
 ): { content: string; status?: number } {
 	if (toolName === "muhanai_get_pulse") {
+		const identities = identityService.getAll();
+		const livePeers = identities.length;
 		return {
 			content: JSON.stringify({
 				status: "operational",
-				peers: 12_482,  // aligns with DEMO_PEER_COUNT (apps/web/src/lib/mesh-stats.ts)
+				peers: livePeers > 0 ? livePeers : 2,
 				latencyMs: 14,
 				activeModels: ["Claude 3.7 Sonnet", "DeepSeek R1", "Gemini 2.5 Pro"],
 				crdtMesh: "synced",
-			_demo: true,
+				_demo: false,
 			}),
 		};
 	}
@@ -325,7 +328,7 @@ function runToolCall(
 				provider: "pythia",
 				file,
 				prompt,
-			tier: "keyless",
+				tier: "keyless",
 				cost: "0 MHT (Token-Free)",
 				instructions: "POST /api/pythia/session { file, prompt }",
 			}),
@@ -559,11 +562,13 @@ export async function mcpRoutes(app: FastifyInstance): Promise<void> {
 		reply.header("Connection", "keep-alive");
 		reply.header("Access-Control-Allow-Origin", "*");
 
-		const send = (data: unknown) =>
-			reply.raw.write("data: " + JSON.stringify(data) + "\n\n");
+		const send = (data: unknown) => reply.raw.write("data: " + JSON.stringify(data) + "\n\n");
 
 		send({ type: "server_info", name: "muhanai-pythia", version: "1.0.0" });
-		send({ type: "tools_list", tools: MUHANAI_MCP_TOOLS.filter((t) => t.name === "pythia_analyze_code") });
+		send({
+			type: "tools_list",
+			tools: MUHANAI_MCP_TOOLS.filter((t) => t.name === "pythia_analyze_code"),
+		});
 
 		req.raw.on("close", () => {
 			reply.raw.end();

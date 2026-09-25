@@ -1,0 +1,726 @@
+/* ─────────────────────────────────────────────────────────────────────
+   Pythia Full Dashboard — muhanai.com/pythia
+   Extends the Neutral Modern token set used by cline-theme.css.
+   All selectors are prefixed `pythia-` so nothing here can leak into
+   other pages that share this stylesheet.
+   ───────────────────────────────────────────────────────────────────── */
+
+.pythia-board {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+/* ── toolbar ─────────────────────────────────────────────────────── */
+
+.pythia-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  background: var(--cline-bg-surface, #0f1626);
+  border: 1px solid var(--cline-border, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
+}
+
+.pythia-toolbar__spacer {
+  flex: 1;
+}
+
+.pythia-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  border: 1px solid var(--cline-border, rgba(255, 255, 255, 0.08));
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--cline-text-secondary, #c6d2e4);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.pythia-chip--online {
+  border-color: rgba(52, 211, 153, 0.45);
+  color: #34d399;
+}
+
+.pythia-chip--offline {
+  border-color: rgba(251, 113, 133, 0.45);
+  color: #fb7185;
+}
+
+.pythia-chip__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+.pythia-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--cline-border, rgba(255, 255, 255, 0.08));
+  background: transparent;
+  color: var(--cline-text, #e7eef9);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.pythia-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.pythia-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pythia-btn--primary {
+  background: #38bdf8;
+  border-color: #38bdf8;
+  color: #062c49;
+}
+
+.pythia-btn--primary:hover:not(:disabled) {
+  background: #0ea5e9;
+  border-color: #0ea5e9;
+}
+
+/* ── ticker ──────────────────────────────────────────────────────── */
+
+.pythia-ticker {
+  overflow: hidden;
+  position: relative;
+  border: 1px solid var(--cline-border, rgba(255, 255, 255, 0.08));
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 8px 0;
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 6%,
+    #000 94%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 6%,
+    #000 94%,
+    transparent
+  );
+}
+
+.pythia-ticker__track {
+  display: flex;
+  gap: 32px;
+  width: max-content;
+  animation: pythia-marquee 42s linear infinite;
+}
+
+.pythia-ticker:hover .pythia-ticker__track {
+  animation-play-state: paused;
+}
+
+.pythia-ticker__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.pythia-ticker__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.pythia-ticker__label {
+  color: var(--cline-text-muted, #94a3b8);
+}
+
+.pythia-ticker__value {
+  color: var(--cline-text, #e7eef9);
+  font-family: var(--cline-font-mono, ui-monospace, monospace);
+  font-weight: 600;
+}
+
+@keyframes pythia-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pythia-ticker__track {
+    animation: none;
+  }
+}
+
+/* ── KPI grid ────────────────────────────────────────────────────── */
+
+.pythia-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.pythia-kpi {
+  padding: 14px 16px;
+  background: var(--cline-bg-surface, #0f1626);
+  border: 1px solid var(--cline-border, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pythia-kpi__label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cline-text-muted, #94a3b8);
+}
+
+.pythia-kpi__value {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--cline-text, #e7eef9);
+  font-family: var(--cline-font-mono, ui-monospace, monospace);
+}
+
+.pythia-kpi__hint {
+  font-size: 11px;
+  color: var(--cline-text-muted, #94a3b8);
+}
+
+/* ── two-column workspace ────────────────────────────────────────── */
+
+.pythia-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 1080px) {
+  .pythia-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.pythia-card {
+  background: var(--cline-bg-surface, #0f1626);
+  border: 1px solid var(--cline-border, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pythia-card__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pythia-card__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cline-text, #e7eef9);
+  margin: 0;
+}
+
+.pythia-card__count {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--cline-text-muted, #94a3b8);
+  font-family: var(--cline-font-mono, ui-monospace, monospace);
+}
+
+.pythia-empty {
+  font-size: 12px;
+  color: var(--cline-text-muted, #94a3b8);
+  padding: 10px 0;
+}
+
+/* ── concept / relation rows ─────────────────────────────────────── */
+
+.pythia-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.pythia-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 3px solid #94a3b8;
+}
+
+.pythia-row--amplified {
+  border-left-color: #10b981;
+}
+
+.pythia-row--validated {
+  border-left-color: #38bdf8;
+}
+
+.pythia-row--raw {
+  border-left-color: #94a3b8;
+}
+
+.pythia-row__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.pythia-row__label {
+  font-size: 12px;
+  color: var(--cline-text, #e7eef9);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pythia-row__meta {
+  font-size: 10px;
+  color: var(--cline-text-muted, #94a3b8);
+  margin-top: 2px;
+}
+
+.pythia-row__score {
+  font-size: 11px;
+  font-family: var(--cline-font-mono, ui-monospace, monospace);
+  color: var(--cline-text-secondary, #c6d2e4);
+  flex: none;
+}
+
+/* ── score bar ───────────────────────────────────────────────────── */
+
+.pythia-bar {
+  height: 4px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.pythia-bar__fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #38bdf8, #10b981);
+  transition: width 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pythia-bar__fill {
+    transition: none;
+  }
+}
+
+/* ── status route pills ──────────────────────────────────────────── */
+
+.pythia-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.pythia-tab {
+  padding: 4px 10px;
+  border-radius: 9999px;
+  border: 1px solid var(--cline-border, rgba(255, 255, 255, 0.08));
+  background: transparent;
+  color: var(--cline-text-secondary, #c6d2e4);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pythia-tab[aria-pressed="true"] {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+/* ── code/response surface ───────────────────────────────────────── */
+
+.pythia-response {
+  margin: 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--cline-border, rgba(255, 255, 255, 0.08));
+  color: var(--cline-text, #e7eef9);
+  font-family: var(--cline-font-mono, ui-monospace, monospace);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.pythia-error {
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: rgba(244, 63, 94, 0.15);
+  color: #fb7185;
+  font-size: 12px;
+}
+
+.pythia-latency {
+  font-size: 11px;
+  color: var(--cline-text-muted, #94a3b8);
+  font-family: var(--cline-font-mono, ui-monospace, monospace);
+}
+
+/* ── sessions ────────────────────────────────────────────────────── */
+
+.pythia-session {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 12px;
+}
+
+.pythia-session__file {
+  color: var(--cline-text, #e7eef9);
+  font-weight: 600;
+  flex: none;
+}
+
+.pythia-session__prompt {
+  color: var(--cline-text-muted, #94a3b8);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pythia-session__provider {
+  color: #38bdf8;
+  font-family: var(--cline-font-mono, ui-monospace, monospace);
+  font-size: 11px;
+  flex: none;
+}
+
+.pythia-session__stop {
+  background: transparent;
+  border: none;
+  color: #fb7185;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  flex: none;
+}
+
+/* ── skeleton ────────────────────────────────────────────────────── */
+
+.pythia-skeleton {
+  height: 14px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  animation: pythia-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pythia-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pythia-skeleton {
+    animation: none;
+  }
+}
+
+/* ── Visual Canvas & Topology Mesh (Centerpiece) ─────────────────── */
+
+.pythia-canvas-card {
+	background: var(--cline-bg-surface, #0f1626);
+	border: 1px solid var(--cline-border, rgba(255, 255, 255, 0.08));
+	border-radius: 12px;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.pythia-canvas-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 16px;
+	background: rgba(0, 0, 0, 0.25);
+	border-bottom: 1px solid var(--cline-border, rgba(255, 255, 255, 0.08));
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.pythia-canvas-title {
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--cline-text, #e7eef9);
+	letter-spacing: -0.01em;
+}
+
+.pythia-canvas-badge {
+	font-size: 10px;
+	font-family: var(--cline-font-mono, ui-monospace, monospace);
+	color: var(--cline-text-muted, #94a3b8);
+	background: rgba(255, 255, 255, 0.04);
+	padding: 2px 6px;
+	border-radius: 4px;
+	border: 1px solid var(--cline-border, rgba(255, 255, 255, 0.06));
+}
+
+.pythia-view-toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 5px 10px;
+	border-radius: 6px;
+	border: 1px solid var(--cline-border, rgba(255, 255, 255, 0.08));
+	background: transparent;
+	color: var(--cline-text-secondary, #c6d2e4);
+	font-size: 11px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 150ms ease;
+}
+
+.pythia-view-toggle:hover {
+	background: rgba(255, 255, 255, 0.05);
+	color: var(--cline-text, #e7eef9);
+}
+
+.pythia-view-toggle.active {
+	background: rgba(56, 189, 248, 0.15);
+	border-color: #38bdf8;
+	color: #38bdf8;
+}
+
+.pythia-canvas-body {
+	position: relative;
+	min-height: 420px;
+	background: #090d16;
+}
+
+.pythia-mesh-wrap {
+	position: relative;
+	width: 100%;
+	height: 440px;
+	overflow: hidden;
+}
+
+.pythia-mesh-atmos {
+	position: absolute;
+	inset: 0;
+	background: radial-gradient(ellipse 65% 55% at 50% 45%, rgba(56, 189, 248, 0.12), transparent 70%),
+		radial-gradient(circle 320px at 78% 70%, rgba(165, 180, 252, 0.08), transparent 60%);
+	pointer-events: none;
+}
+
+.pythia-mesh-svg {
+	width: 100%;
+	height: 100%;
+	display: block;
+}
+
+.pythia-edge {
+	transition: stroke 200ms ease, stroke-width 200ms ease;
+}
+
+.pythia-edge--hot {
+	stroke: #38bdf8 !important;
+	stroke-width: 1.8 !important;
+}
+
+.pythia-node-g {
+	transition: transform 150ms ease;
+}
+
+.pythia-node-g:hover {
+	filter: brightness(1.25);
+}
+
+.pythia-node-halo {
+	fill: none;
+	stroke-width: 1.5;
+	animation: pythia-halo-pulse 2.6s ease-in-out infinite;
+	transform-origin: center;
+	transform-box: fill-box;
+}
+
+@keyframes pythia-halo-pulse {
+	0%,
+	100% {
+		transform: scale(1);
+		opacity: 0.85;
+	}
+	50% {
+		transform: scale(1.22);
+		opacity: 0.25;
+	}
+}
+
+.pythia-node-label {
+	font-family: var(--cline-font-mono, ui-monospace, monospace);
+	font-size: 10px;
+	pointer-events: none;
+}
+
+.pythia-node-tag {
+	font-family: var(--cline-font-mono, ui-monospace, monospace);
+	font-size: 8.5px;
+	fill: var(--cline-text-muted, #94a3b8);
+	pointer-events: none;
+}
+
+/* ── Slide-over Node Inspector ───────────────────────────────────── */
+
+.pythia-inspector {
+	position: absolute;
+	right: 14px;
+	top: 14px;
+	width: 260px;
+	background: rgba(15, 22, 38, 0.94);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	border: 1px solid var(--cline-border, rgba(255, 255, 255, 0.12));
+	border-radius: 10px;
+	padding: 12px;
+	box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+	animation: pythia-slide-in 200ms cubic-bezier(0.2, 0, 0, 1);
+	z-index: 20;
+}
+
+@keyframes pythia-slide-in {
+	from {
+		opacity: 0;
+		transform: translateX(12px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+.pythia-inspector__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 8px;
+}
+
+.pythia-inspector__title {
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--cline-text, #e7eef9);
+	font-family: var(--cline-font-mono, ui-monospace, monospace);
+}
+
+.pythia-inspector__close {
+	background: transparent;
+	border: none;
+	color: var(--cline-text-muted, #94a3b8);
+	cursor: pointer;
+	padding: 2px;
+	display: flex;
+}
+
+.pythia-inspector__close:hover {
+	color: var(--cline-text, #e7eef9);
+}
+
+.pythia-inspector__tags {
+	display: flex;
+	gap: 4px;
+	flex-wrap: wrap;
+	margin-bottom: 10px;
+}
+
+.pythia-itag {
+	font-size: 9.5px;
+	padding: 2px 6px;
+	border-radius: 4px;
+	background: rgba(255, 255, 255, 0.05);
+	color: var(--cline-text-secondary, #c6d2e4);
+	border: 1px solid var(--cline-border, rgba(255, 255, 255, 0.06));
+}
+
+.pythia-itag--amplified {
+	color: #34d399;
+	border-color: rgba(52, 211, 153, 0.3);
+}
+
+.pythia-itag--validated {
+	color: #38bdf8;
+	border-color: rgba(56, 189, 248, 0.3);
+}
+
+.pythia-inspector__metrics {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 8px;
+	padding: 8px;
+	background: rgba(0, 0, 0, 0.3);
+	border-radius: 6px;
+}
+
+.pythia-imetric {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.pythia-imetric__label {
+	font-size: 9px;
+	text-transform: uppercase;
+	color: var(--cline-text-muted, #94a3b8);
+}
+
+.pythia-imetric__val {
+	font-size: 13px;
+	font-weight: 700;
+	font-family: var(--cline-font-mono, ui-monospace, monospace);
+	color: var(--cline-text, #e7eef9);
+}
