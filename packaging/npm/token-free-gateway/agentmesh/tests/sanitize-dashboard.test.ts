@@ -2,7 +2,7 @@
  * Dashboard v2 — published-artifact sanitizer.
  *
  * `packaging/muhanai-dashboard-v2.html` is an OpenDesign canvas export. Before
- * it is published to muhanai.com/dashboard the host scaffolding (sandbox shim,
+ * it is published to muhanai.com/dashboard2 the host scaffolding (sandbox shim,
  * tweaks bridge, snapshot bridge, srcdoc transport, canvas breadcrumbs) has to
  * come out — `deploy/sanitize-dashboard-v2.mjs` documents why each one matters.
  *
@@ -12,11 +12,13 @@
  * stale deploy silently loses every BYOK key the operator saves.
  *
  * The final block cross-checks the *URL* rules that publish that file. The
- * `dashboard-v2.html` page answers on `/dashboard` and `/dashboard2`, and that
- * mapping is written down three times — Vite middleware for dev, Caddy and
- * nginx for production. A path added to one and missed in another gives a page
- * that renders locally and 404s in production, so the deploy configs are
- * grepped against the Vite config's `DASHBOARD_V2_ROUTES` list here.
+ * `dashboard-v2.html` page answers on `/dashboard2` only (`/dashboard`
+ * stays with the React SPA `<Dashboard>` component), and that
+ * mapping is written down four times — Vite middleware for dev, the Cloudflare
+ * Worker for muhanai.com production, plus Caddy and nginx for the 110 origin.
+ * A path added to one and missed in another gives a page that renders locally
+ * and 404s in production, so the deploy configs are grepped against the Vite
+ * config's `DASHBOARD_V2_ROUTES` list here.
  *
  * Run with `pnpm test tests/sanitize-dashboard.test.ts`.
  */
@@ -51,6 +53,10 @@ const NGINX_CONF = resolve(DEPLOY_DIR, "muhanai.com.nginx.conf");
 // silently unless they are grepped here too.
 const SETUP_CADDY_SH = resolve(DEPLOY_DIR, "setup-caddy-muhanai.sh");
 const INJECT_DASHBOARD_SH = resolve(DEPLOY_DIR, "inject-dashboard-v2.sh");
+// muhanai.com production path: Cloudflare Worker + ASSETS (apps/web/dist).
+// This is the rule that actually fixes /dashboard2 in production — the Caddy
+// and nginx configs only cover the 110 origin server.
+const WORKER_TS = resolve(DEPLOY_DIR, "worker.ts");
 
 /**
  * The dashboard paths as the dev server defines them. Read from source rather
@@ -134,7 +140,7 @@ describe("published dashboard artifacts", () => {
 	it("sanitizes the canonical export down to zero scaffolding", () => {
 		const sanitized = sanitizeDashboardHtml(readFileSync(CANONICAL_SOURCE, "utf8"));
 		expect(countScaffolding(sanitized)).toEqual({ tagged: 0, breadcrumbs: 0 });
-		// The /dashboard route's own markers, proving the page body survived.
+		// The /dashboard2 page's own markers, proving the page body survived.
 		expect(sanitized).toContain("space-nav");
 		expect(sanitized).toContain("1-Click");
 	});
@@ -163,7 +169,7 @@ describe("dashboard v2 URLs — dev server and deploy configs agree", () => {
 	const routes = viteDashboardRoutes();
 
 	it("reads the canonical route list from the Vite config", () => {
-		expect(routes).toEqual(["/dashboard", "/dashboard/", "/dashboard2", "/dashboard2/"]);
+		expect(routes).toEqual(["/dashboard2", "/dashboard2/"]);
 	});
 
 	it("Caddy matches exactly those paths and serves the v2 page for them", () => {
@@ -198,14 +204,37 @@ describe("dashboard v2 URLs — dev server and deploy configs agree", () => {
 		// A redeploy through either script rewrites the live Caddyfile from its
 		// own copy of the matcher. If that copy lags, `setup-caddy-muhanai.sh`
 		// or `inject-dashboard-v2.sh` would silently drop `/dashboard2` again
-		// even though the committed Caddyfile is correct.
+		// even though the committed Caddyfile is correct. Only a matcher whose
+		// paths are clean route tokens counts: the narrowing regex further
+		// down inject-dashboard-v2.sh merely mentions `@dashboard` with regex
+		// metacharacters (`\s`, `\"`) and must not satisfy this check.
 		for (const script of [SETUP_CADDY_SH, INJECT_DASHBOARD_SH]) {
 			const src = readFileSync(script, "utf8");
-			const matcher = src.match(/@dashboard\s+path\s+([^\n]+)/)?.[1];
-			if (matcher === undefined) {
+			const matchers = [...src.matchAll(/@dashboard\s+path\s+([^\n]+)/g)]
+				.map((match) => match[1]?.trim() ?? "")
+				.filter((matcher) =>
+					matcher.length > 0 &&
+					matcher.split(/\s+/).every((token) => /^\/[A-Za-z0-9/_-]*$/.test(token)),
+				);
+			if (matchers.length === 0) {
 				throw new Error(`\`@dashboard path\` matcher not found in ${script}`);
 			}
-			expect(matcher.trim().split(/\s+/), script).toEqual(routes);
+			for (const matcher of matchers) {
+				expect(matcher.split(/\s+/), script).toEqual(routes);
+			}
 		}
+	});
+
+	it("the Worker serves the v2 page for exactly those paths", () => {
+		// muhanai.com traffic goes through this Worker (ASSETS = apps/web/dist),
+		// not the 110 Caddy. Without this rule /dashboard2 falls through to
+		// /index.html — the React SPA. /dashboard must NOT match here: it
+		// stays with the SPA `<Dashboard>` component.
+		const worker = readFileSync(WORKER_TS, "utf8");
+		for (const route of routes) {
+			expect(worker, route).toContain(`"${route}"`);
+		}
+		expect(worker).toMatch(/dashboard-v2\.html/);
+		expect(worker).not.toContain('"/dashboard"');
 	});
 });

@@ -1,6 +1,9 @@
 import type { GhostFetchPolicy } from "./ssrf.js";
 import { fetchAgentCardDocument } from "./ssrf.js";
 
+// Task-dispatch guard — verification, approvals, replay-safe ledger, and the
+// gated dispatch orchestrator. See ./dispatch.ts.
+export * from "./dispatch.js";
 export type GhostCapability =
 	| "local_file_search"
 	| "local_code_analysis"

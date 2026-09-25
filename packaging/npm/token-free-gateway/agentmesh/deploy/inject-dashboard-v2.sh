@@ -2,13 +2,15 @@
 set -euo pipefail
 
 # ============================================================
-# MuhanAI Dashboard v2 — inject into muhanai.com/dashboard
+# MuhanAI Dashboard v2 — inject into muhanai.com/dashboard2
 # Run on the 110 server (ssh 110) from the repo/deploy dir.
 #
 # Idempotent: safe to re-run. It will
 #   1. publish dashboard-v2.html into the Caddy web root
-#   2. patch an EXISTING Caddyfile with the /dashboard + /dashboard2 handle
-#      block (setup-caddy-muhanai.sh only works on a fresh Caddyfile)
+#   2. patch an EXISTING Caddyfile with the /dashboard2 handle
+#      block (setup-caddy-muhanai.sh only works on a fresh Caddyfile),
+#      narrowing any legacy 4-path `/dashboard` + `/dashboard2` matcher
+#      back to `/dashboard2` only so `/dashboard` stays with the React SPA
 #   3. validate + reload Caddy, then verify the route
 # ============================================================
 
@@ -38,24 +40,37 @@ echo "       OK ($(wc -c < "${WEB_ROOT}/dashboard-v2.html" | tr -d ' ') bytes)"
 # 2. Patch the Caddyfile (idempotent) --------------------------------------
 echo "[2/4] Checking Caddy config..."
 mkdir -p "$BACKUP_DIR"
-if grep -q '@dashboard' "$CADDYFILE" 2>/dev/null; then
+if grep -qF 'path /dashboard2 /dashboard2/' "$CADDYFILE" 2>/dev/null; then
     echo "       Already present — no patch needed."
 else
     cp "$CADDYFILE" "${BACKUP_DIR}/Caddyfile.backup.${TIMESTAMP}"
     echo "       Backup: ${BACKUP_DIR}/Caddyfile.backup.${TIMESTAMP}"
 
     # Insert the handle block immediately before the SPA catch-all, which is
-    # the first bare "handle {" line inside the site block.
+    # the first bare "handle {" line inside the site block. If a legacy
+    # 4-path matcher ("/dashboard /dashboard/ /dashboard2 /dashboard2/") is
+    # already present from an earlier injection, narrow it to /dashboard2
+    # only so /dashboard falls back to the React SPA.
     python3 - "$CADDYFILE" <<'PY'
 import re, sys
 
 path = sys.argv[1]
 src = open(path, encoding="utf-8").read()
 
+narrowed, n = re.subn(
+    r"@dashboard\s+path\s+[^\n]*\/dashboard[^\n]*",
+    "@dashboard path /dashboard2 /dashboard2/",
+    src,
+)
+if n > 0:
+    open(path, "w", encoding="utf-8").write(narrowed)
+    print("       Narrowed legacy @dashboard matcher to /dashboard2 only.")
+    sys.exit(0)
+
 if "@dashboard" in src:
     sys.exit(0)
 
-block = """\t@dashboard path /dashboard /dashboard/ /dashboard2 /dashboard2/
+block = """\t@dashboard path /dashboard2 /dashboard2/
 \thandle @dashboard {
 \t\trewrite * /dashboard-v2.html
 \t\tfile_server
@@ -103,19 +118,23 @@ fi
 # 4. Verify -----------------------------------------------------------------
 echo "[4/4] Verifying route..."
 if command -v curl &>/dev/null; then
-    # Both published paths answer with the page — a patch that only covers
-    # /dashboard would pass a single-route check while /dashboard2 404s.
-    for route in /dashboard /dashboard2; do
-    code=$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: muhanai.com' "http://127.0.0.1${route}" || true)
-    echo "       GET ${route} -> ${code} (expect 200)"
-    curl -s -H 'Host: muhanai.com' "http://127.0.0.1${route}" 2>/dev/null \
+    # /dashboard2 answers with the page; /dashboard stays SPA.
+    code=$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: muhanai.com' "http://127.0.0.1/dashboard2" || true)
+    echo "       GET /dashboard2 -> ${code} (expect 200)"
+    curl -s -H 'Host: muhanai.com' "http://127.0.0.1/dashboard2" 2>/dev/null \
         | grep -q 'cosmic-mesh\|space-nav\|1-Click' \
         && echo "         Body check: dashboard-v2 markers found." \
         || echo "         WARNING: body did not contain dashboard-v2 markers."
-done
+    code=$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: muhanai.com' "http://127.0.0.1/dashboard" || true)
+    echo "       GET /dashboard -> ${code} (expect 200, SPA shell)"
+    if curl -s -H 'Host: muhanai.com' "http://127.0.0.1/dashboard" 2>/dev/null | grep -q 'id="root"'; then
+        echo "         Body check: React SPA shell found (expected)."
+    else
+        echo "         WARNING: /dashboard did not serve the SPA shell."
+    fi
 fi
 
 echo ""
-echo "=== Done ==="
-echo "Verify: curl -sI https://muhanai.com/dashboard | head -1"
-echo "        curl -sI https://muhanai.com/dashboard2 | head -1"
+echo "=== Done (dashboard=SPA, dashboard2=v2) ==="
+echo "Verify SPA: curl -s https://muhanai.com/dashboard | head -c 200"
+echo "Verify v2: curl -s https://muhanai.com/dashboard2 | head -c 200"

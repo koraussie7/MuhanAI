@@ -357,32 +357,28 @@ function mcpRpcPlugin(): Plugin {
 /**
  * Every URL path that serves the v2 dashboard page.
  *
- * `/dashboard` is the original injection point. `/dashboard2` is an additive
- * alias for the same self-contained page: it lets v2 be linked and shared on
- * its own URL without taking over `/dashboard` from the React SPA route, and
- * without the two shadowing each other.
+ * Only `/dashboard2` (plus the trailing-slash variant). `/dashboard` stays
+ * with the React SPA (`<Dashboard>` component) — the static page must not
+ * shadow the SPA route.
  *
  * Kept as the single list the dev-server middleware matches against so the
  * Vite and production (Caddy/nginx) rules cannot disagree about which paths
  * resolve to the static page.
  */
-export const DASHBOARD_V2_ROUTES = [
-	"/dashboard",
-	"/dashboard/",
-	"/dashboard2",
-	"/dashboard2/",
-] as const;
+export const DASHBOARD_V2_ROUTES = ["/dashboard2", "/dashboard2/"] as const;
 
 const DASHBOARD_V2_ROUTE_SET: ReadonlySet<string> = new Set(DASHBOARD_V2_ROUTES);
 
 /**
- * /dashboard, /dashboard2 — MuhanAI Dashboard v2 (static, self-contained).
+ * /dashboard2 — MuhanAI Dashboard v2 (static, self-contained).
  *
- * In production Caddy serves `dashboard-v2.html` directly for these paths
+ * In production Caddy serves `dashboard-v2.html` directly for this path
  * (see deploy/Caddyfile.muhanai). The Vite dev server has no such rule, so
- * they would fall through to the React SPA and render the legacy
- * `<Dashboard>` component. This plugin closes that dev/prod gap by serving
- * the same static file on :5173.
+ * it would fall through to the React SPA. This plugin closes that dev/prod
+ * gap by serving the same static file on :5173.
+ *
+ * `/dashboard` is intentionally NOT covered: it stays with the React SPA
+ * `<Dashboard>` component.
  *
  * Deliberately NOT an iframe embed: production sets
  * `X-Frame-Options: DENY`, which blocks framing even same-origin.
@@ -393,7 +389,7 @@ export function dashboardV2Plugin(): Plugin {
 		name: "muhanai-dashboard-v2",
 		configureServer(server) {
 			server.middlewares.use(async (req, res, next) => {
-				const path = (req.url ?? "").split("?")[0];
+				const path = (req.url ?? "").split("?")[0] ?? "";
 				if (!DASHBOARD_V2_ROUTE_SET.has(path)) {
 					next();
 					return;
