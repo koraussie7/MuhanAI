@@ -24,9 +24,10 @@ describe("gossipsub topic encoding", () => {
 });
 
 type Msg = { topic: string; data: Uint8Array };
+type Handler = (evt: CustomEvent<Msg>) => void;
 
 class FakePubsub {
-	readonly subscribers = new Map<string, Set<(evt: Event) => void>>();
+	readonly subscribers = new Map<string, Set<Handler>>();
 	readonly published: Array<{ topic: string; data: Uint8Array }> = [];
 	errors: Error[] = [];
 
@@ -44,18 +45,17 @@ class FakePubsub {
 		this.subscribers.delete(topic);
 	}
 
-	addEventListener(topic: string, handler: (evt: Event) => void): void {
+	addEventListener(topic: string, handler: Handler): void {
 		if (!this.subscribers.has(topic)) this.subscribers.set(topic, new Set());
 		this.subscribers.get(topic)?.add(handler);
 	}
 
-	removeEventListener(topic: string, handler: (evt: Event) => void): void {
+	removeEventListener(topic: string, handler: Handler): void {
 		this.subscribers.get(topic)?.delete(handler);
 	}
 
 	fire(topic: string, data: Uint8Array): void {
-		const message: Msg = { topic, data };
-		const evt = new CustomEvent("gossipsub", { detail: message });
+		const evt = new CustomEvent<Msg>("gossipsub", { detail: { topic, data } });
 		for (const handler of this.subscribers.get(topic) ?? []) handler(evt);
 	}
 }

@@ -84,4 +84,16 @@ describe("bridgeCatalogToNodeRegistry", () => {
 		bridge.ingest(envelope("peer-A"));
 		expect(seen).toEqual([]);
 	});
+
+	it("calls dispose to detach the onAccept listener", () => {
+		const catalog = new ModelCatalog();
+		const bridge = bridgeCatalogToNodeRegistry(catalog);
+		const seen: number[] = [];
+		bridge.onChange((snapshot) => seen.push(snapshot.length));
+		bridge.ingest(envelope("peer-A"));
+		expect(seen).toEqual([1]);
+		bridge.dispose();
+		bridge.ingest(envelope("peer-A"));
+		expect(seen).toEqual([1]);
+	});
 });
