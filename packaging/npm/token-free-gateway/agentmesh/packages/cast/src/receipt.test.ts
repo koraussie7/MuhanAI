@@ -66,15 +66,15 @@ describe("canonicalReceiptBytes", () => {
 		const r = makeReceipt();
 		const fakeHash = "a".repeat(64);
 		const id = canonicalReceiptId(r, { hash: () => fakeHash });
-		expect(id).toMatch(/^(blake3|sha256):[a-f0-9]{64}$/);
+		expect(id).toMatch(/^receipt:(blake3|sha256):[a-f0-9]{64}$/);
 	});
 });
 
 describe("ReceiptLedger", () => {
 	it("appends and queries by peer", () => {
 		const ledger = new ReceiptLedger();
-		ledger.append(makeReceipt({ id: "r-1" }), 100);
-		ledger.append(makeReceipt({ id: "r-2", calleePeerId: "peer-C" }), 200);
+		ledger.append(makeReceipt({ id: "r-1" }), { now: 100 });
+		ledger.append(makeReceipt({ id: "r-2", calleePeerId: "peer-C" }), { now: 200 });
 		expect(ledger.byPeer("peer-A")).toHaveLength(2);
 		expect(ledger.byPeer("peer-C")).toHaveLength(1);
 		expect(ledger.size()).toBe(2);
@@ -82,9 +82,9 @@ describe("ReceiptLedger", () => {
 
 	it("trims to maxEntries", () => {
 		const ledger = new ReceiptLedger({ maxEntries: 2 });
-		ledger.append(makeReceipt({ id: "r-1" }), 1);
-		ledger.append(makeReceipt({ id: "r-2" }), 2);
-		ledger.append(makeReceipt({ id: "r-3" }), 3);
+		ledger.append(makeReceipt({ id: "r-1" }), { now: 1 });
+		ledger.append(makeReceipt({ id: "r-2" }), { now: 2 });
+		ledger.append(makeReceipt({ id: "r-3" }), { now: 3 });
 		expect(ledger.size()).toBe(2);
 		expect(ledger.all()[0]?.receipt.id).toBe("r-2");
 	});

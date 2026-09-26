@@ -23,6 +23,15 @@ export interface CallReceipt {
 	id: string;
 	callerPeerId: string;
 	calleePeerId: string;
+	/**
+	 * Local agent id of the agent that produced this hop's result.
+	 * Distinct from `calleePeerId`, which identifies the libp2p peer
+	 * that ultimately invoked the model. When `RecursiveCast` writes a
+	 * receipt, it sets this so `lastReceiptIdFor` can correlate parent
+	 * hops in the same request by agent id (peer ids may be shared by
+	 * many agents).
+	 */
+	calleeAgentId?: string;
 	parentReceiptId?: string;
 	modelId: string;
 	promptTokens: number;
@@ -75,7 +84,7 @@ export function canonicalReceiptId(
 ): string {
 	const bytes = canonicalReceiptBytes(receipt);
 	const digest = options.hash ? options.hash(bytes) : defaultHash(bytes);
-	return `${hashAlgorithm()}:${digest}`;
+	return `receipt:${hashAlgorithm()}:${digest}`;
 }
 
 function defaultHash(bytes: Uint8Array): string {
@@ -129,6 +138,8 @@ export function verifyReceiptStructure(input: VerifyReceiptInput): ReceiptVerifi
 export interface ReceiptLedgerEntry {
 	receipt: CallReceipt;
 	recordedAt: number;
+	/** Correlation id for the AgentRequest that produced this receipt. */
+	requestId?: string;
 }
 
 /**
@@ -145,8 +156,17 @@ export class ReceiptLedger {
 		this.maxEntries = options.maxEntries ?? 10_000;
 	}
 
-	append(receipt: CallReceipt, now: number = Date.now()): void {
-		this.entries.push({ receipt, recordedAt: now });
+	append(
+		receipt: CallReceipt,
+		options: { now?: number; requestId?: string } = {},
+	): void {
+		const recordedAt = options.now ?? Date.now();
+		const entry: ReceiptLedgerEntry = {
+			receipt,
+			recordedAt,
+			...(options.requestId !== undefined ? { requestId: options.requestId } : {}),
+		};
+		this.entries.push(entry);
 		while (this.entries.length > this.maxEntries) this.entries.shift();
 	}
 
@@ -156,6 +176,29 @@ export class ReceiptLedger {
 				entry.receipt.callerPeerId === peerId ||
 				entry.receipt.calleePeerId === peerId,
 		);
+	}
+
+	/**
+	 * Filter ledger entries by optional criteria. Any criterion that is
+	 * omitted is treated as a wildcard. This is the primary lookup used
+	 * by callers correlating receipts back to the AgentRequest that
+	 * produced them.
+	 */
+	query(criteria: { requestId?: string; peerId?: string } = {}): ReceiptLedgerEntry[] {
+		return this.entries.filter((entry) => {
+			if (criteria.requestId !== undefined && entry.requestId !== criteria.requestId) {
+				return false;
+			}
+			if (criteria.peerId !== undefined) {
+				if (
+					entry.receipt.callerPeerId !== criteria.peerId &&
+					entry.receipt.calleePeerId !== criteria.peerId
+				) {
+					return false;
+				}
+			}
+			return true;
+		});
 	}
 
 	all(): ReceiptLedgerEntry[] {

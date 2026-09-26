@@ -23,8 +23,16 @@
  */
 
 import type { AgentExecutor } from "@agentmesh/agent";
+import type { AgentRegistry } from "@agentmesh/agent";
 import type { AgentRequest, AgentResult } from "@agentmesh/core";
 import { fanOut } from "./fanout.js";
+import {
+canonicalReceiptBytes,
+canonicalReceiptId,
+type CallReceipt,
+type ReceiptSigner,
+ReceiptLedger,
+} from "./receipt.js";
 
 export interface RecursiveDelegateInput {
 	request: AgentRequest;
@@ -58,13 +66,42 @@ export type PeerRouter = (input: {
 	depth: number;
 }) => Promise<AgentResult | null> | AgentResult | null;
 
+export interface RecursiveCastOptions {
+	/** Append-only ledger that records a receipt per delegate hop. */
+	receiptLedger?: ReceiptLedger;
+	/** Local signer; if absent, the caller signature is left empty and
+	 *  the receipt is rejected by `verifyReceiptStructure`. */
+	signer?: ReceiptSigner;
+	/** Peer id of the local node (used as `calleePeerId` for hops that
+	 *  originate locally). */
+	localPeerId?: string;
+}
+
+/**
+ * Hook the cast calls to obtain the peer id of the delegated agent.
+ * Without it, the ledger records receipts with `calleePeerId = "local"`,
+ * which is still useful for in-process debugging but won't settle against
+ * remote peer-mesh keys.
+ */
+export type ResolvePeerId = (agentId: string) => string | undefined;
+
 export class RecursiveCast {
 	private budgetUsed = 0;
+	private readonly ledger: ReceiptLedger;
+	private readonly signer?: ReceiptSigner;
+	private readonly localPeerId: string;
 
 	constructor(
 		private readonly executor: AgentExecutor,
+		private readonly registry: AgentRegistry,
 		private readonly peerRouter?: PeerRouter,
-	) { }
+		private readonly resolvePeerId?: ResolvePeerId,
+		options: RecursiveCastOptions = {},
+	) {
+		this.ledger = options.receiptLedger ?? new ReceiptLedger();
+		this.signer = options.signer;
+		this.localPeerId = options.localPeerId ?? "local";
+	}
 
 	/** Read-only view of the running budget consumption (for tests / dashboards). */
 	get consumedBudget(): number {
@@ -94,7 +131,16 @@ export class RecursiveCast {
 				requiredCapability: input.requiredCapability,
 				depth,
 			});
-			if (remote) return { ok: true, result: remote, depth };
+			if (remote) {
+				this.recordReceipt({
+					request: input.request,
+					calleeAgentId: remote.agentId,
+					result: remote,
+					ancestorIds,
+					parentReceiptId: this.lastReceiptIdFor(ancestorIds),
+				});
+				return { ok: true, result: remote, depth };
+			}
 			// fall through to local fan-out
 		}
 
@@ -104,6 +150,7 @@ export class RecursiveCast {
 		const candidates = this.selectCandidates(
 			input.request,
 			input.excludeAgentIds,
+			ancestorIds,
 			input.requiredCapability,
 		);
 
@@ -126,28 +173,112 @@ export class RecursiveCast {
 		if (!winner) {
 			return { ok: false, reason: "no_agent_available", agentIds: candidates };
 		}
+		this.recordReceipt({
+			request: input.request,
+			calleeAgentId: winner.agentId,
+			result: winner,
+			ancestorIds,
+			parentReceiptId: this.lastReceiptIdFor(ancestorIds),
+		});
 		return { ok: true, result: winner, depth };
+	}
+
+	/** Accessor for tests / dashboards; the ledger is appended to in `delegate()`. */
+	get receiptLedger(): ReceiptLedger {
+		return this.ledger;
+	}
+
+	private recordReceipt(input: {
+		request: AgentRequest;
+		calleeAgentId: string;
+		result: AgentResult;
+		ancestorIds: string[];
+		parentReceiptId?: string;
+	}): void {
+		// Caller peer: when a resolvePeerId is provided we map the latest
+		// ancestor's agent id to a peer id; otherwise the ancestor's agent
+		// id is used as the peer id directly so the receipt graph stays
+		// connected end-to-end.
+		const tailAncestor =
+			input.ancestorIds.length === 0 ? undefined : input.ancestorIds[input.ancestorIds.length - 1];
+		const callerPeerId =
+			tailAncestor === undefined
+				? this.localPeerId
+				: (this.resolvePeerId?.(tailAncestor) ?? tailAncestor);
+		// Callee peer: when resolvePeerId is provided we map the callee
+		// agent id to a peer id. For local hops with no resolvePeerId the
+		// peer id is the local peer itself. For non-local hops (an
+		// ancestor already pinned a remote agent) the callee's agent id
+		// doubles as the peer id so the graph stays connected.
+		const calleePeerId =
+			input.ancestorIds.length === 0
+				? (this.resolvePeerId?.(input.calleeAgentId) ?? this.localPeerId)
+				: (this.resolvePeerId?.(input.calleeAgentId) ?? input.calleeAgentId);
+		const modelId = readModelId(input.result);
+
+		const draft: CallReceipt = {
+			id: "",
+			callerPeerId,
+			calleePeerId,
+			calleeAgentId: input.calleeAgentId,
+			parentReceiptId: input.parentReceiptId,
+			modelId,
+			promptTokens: 0,
+			completionTokens: 0,
+			latencyMs: input.result.latencyMs,
+			timestamp: Date.now(),
+			signatures: {},
+		};
+
+		if (this.signer) {
+			const bytes = canonicalReceiptBytes(draft);
+			draft.signatures.caller = this.signer.sign(bytes);
+		}
+
+		draft.id = canonicalReceiptId(draft);
+		this.ledger.append(draft, {
+			now: draft.timestamp,
+			requestId: input.request.id,
+		});
+	}
+
+	/**
+	 * Look up the receipt id of the most recent hop whose `calleeAgentId`
+	 * is the entry-point into the current ancestor chain. Used to wire
+	 * `parentReceiptId` so that downstream verifiers can reconstruct the
+	 * call tree.
+	 *
+	 * Note: this scans the whole ledger rather than filtering by
+	 * `requestId`, because the parent receipt was recorded under the
+	 * parent agent's own request id (which the child doesn't know).
+	 * Ledger scans are O(n) but bounded by `maxEntries`.
+	 */
+	private lastReceiptIdFor(ancestorIds: string[]): string | undefined {
+		const tail = ancestorIds[ancestorIds.length - 1];
+		if (!tail) return undefined;
+		let latest: string | undefined;
+		for (const entry of this.ledger.all()) {
+			if (entry.receipt.calleeAgentId === tail) latest = entry.receipt.id;
+		}
+		return latest;
 	}
 
 	private selectCandidates(
 		request: AgentRequest,
 		excludeAgentIds: string[],
+		ancestorIds: string[] = [],
 		requiredCapability?: string,
 	): string[] {
-		const registry = this.executor["registry"] as unknown as
-			| { list(): Array<{ id: string; capabilities?: string[] }> }
-			| undefined;
-		if (!registry) return [];
-
-		const all = registry.list();
-		const excluded = new Set([...excludeAgentIds, request.id]);
+		const all = this.registry.all();
+		const excluded = new Set([...excludeAgentIds, ...ancestorIds, request.id]);
 		const required = request.requiredCapabilities ?? (requiredCapability ? [requiredCapability] : []);
 		return all
 			.filter((agent) => !excluded.has(agent.id))
-			.filter((agent) =>
-				required.length === 0 ||
-				required.every((cap) => agent.capabilities?.includes(cap) ?? false),
-			)
+			.filter((agent) => {
+				if (required.length === 0) return true;
+				const caps = agent.capabilities();
+				return required.every((cap) => caps.includes(cap));
+			})
 			.map((agent) => agent.id);
 	}
 }
@@ -163,4 +294,9 @@ function pickWinner(results: AgentResult[]): AgentResult | undefined {
 		if (!best || r.confidence > best.confidence) best = r;
 	}
 	return best;
+}
+
+function readModelId(result: AgentResult): string {
+	const meta = result.metadata as { modelId?: unknown } | undefined;
+	return typeof meta?.modelId === "string" ? meta.modelId : "unknown";
 }
