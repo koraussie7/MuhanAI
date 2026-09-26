@@ -323,9 +323,6 @@ importers:
 
   packages/bitterbot:
     dependencies:
-      '@agentmesh/llm-router':
-        specifier: workspace:*
-        version: link:../llm-router
       '@agentmesh/noema':
         specifier: workspace:*
         version: link:../noema
