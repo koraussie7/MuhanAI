@@ -3,10 +3,12 @@ import {
 	BookOpen,
 	Bot,
 	CheckCircle2,
+	Code2,
 	Coins,
 	Cpu,
 	Database,
 	FolderGit,
+	Ghost,
 	GitBranch,
 	GitMerge,
 	Layers,
@@ -94,6 +96,12 @@ export function renderMenuIcon(key: string): React.ReactNode {
 			return <Star size={18} />;
 		case "git-branch":
 			return <GitBranch size={18} />;
+		case "python":
+			return <Code2 size={18} />;
+		case "ghost":
+			return <Ghost size={18} />;
+		case "robot":
+			return <Bot size={18} />;
 		default:
 			return null;
 	}
