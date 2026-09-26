@@ -1,7 +1,7 @@
 import type React from "react";
-import { PageBox } from "./PageBox.js";
 import { useEffect, useState } from "react";
 import { useI18n } from "../i18n";
+import { PageBox } from "./PageBox.js";
 
 interface UnsolvedProblem {
 	id: string;
@@ -19,9 +19,7 @@ interface UnsolvedProblemsProps {
 	maxItems?: number;
 }
 
-export const UnsolvedProblems: React.FC<UnsolvedProblemsProps> = ({
-	maxItems = 4,
-}) => {
+export const UnsolvedProblems: React.FC<UnsolvedProblemsProps> = ({ maxItems = 4 }) => {
 	const { t } = useI18n();
 	const [problems, setProblems] = useState<UnsolvedProblem[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -79,15 +77,9 @@ export const UnsolvedProblems: React.FC<UnsolvedProblemsProps> = ({
 						<h3 className="unsolved-title">{problem.title}</h3>
 						<p className="unsolved-desc">{problem.description}</p>
 						<div className="unsolved-meta">
-							<span className="meta-item">
-								🤖 {problem.aiAgents} AI
-							</span>
-							<span className="meta-item">
-								👤 {problem.humanExperts} Experts
-							</span>
-							<span className="meta-item">
-								📊 {problem.consensus}% Consensus
-							</span>
+							<span className="meta-item">🤖 {problem.aiAgents} AI</span>
+							<span className="meta-item">👤 {problem.humanExperts} Experts</span>
+							<span className="meta-item">📊 {problem.consensus}% Consensus</span>
 						</div>
 					</div>
 				))}

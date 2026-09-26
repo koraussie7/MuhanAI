@@ -106,9 +106,9 @@ export const AgentCast: React.FC = () => {
 			const authToken =
 				typeof localStorage !== "undefined"
 					? localStorage.getItem("muhanai_auth_token") ||
-					  localStorage.getItem("auth_token") ||
-					  localStorage.getItem("token") ||
-					  localStorage.getItem("oauth_token")
+						localStorage.getItem("auth_token") ||
+						localStorage.getItem("token") ||
+						localStorage.getItem("oauth_token")
 					: null;
 			const headers: Record<string, string> = { "Content-Type": "application/json" };
 			if (authToken) headers.Authorization = `Bearer ${authToken}`;

@@ -1,6 +1,6 @@
+import { CheckCircle2, FileText, Loader2, Upload, XCircle } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
-import { Upload, FileText, Loader2, CheckCircle2, XCircle } from "lucide-react";
 
 interface DocumentUploadPanelProps {
 	onUploaded?: (result: { documentId: string; title: string; chunksCount: number }) => void;
@@ -12,7 +12,11 @@ export const DocumentUploadPanel: React.FC<DocumentUploadPanelProps> = ({ onUplo
 	const [status, setStatus] = useState<UploadStatus>("idle");
 	const [fileName, setFileName] = useState("");
 	const [error, setError] = useState("");
-	const [result, setResult] = useState<{ documentId: string; title: string; chunksCount: number } | null>(null);
+	const [result, setResult] = useState<{
+		documentId: string;
+		title: string;
+		chunksCount: number;
+	} | null>(null);
 
 	const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
@@ -51,7 +55,10 @@ export const DocumentUploadPanel: React.FC<DocumentUploadPanelProps> = ({ onUplo
 	};
 
 	return (
-		<div className="panel" style={{ padding: 16, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12 }}>
+		<div
+			className="panel"
+			style={{ padding: 16, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12 }}
+		>
 			<div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
 				<FileText size={18} style={{ color: "var(--cline-green)" }} />
 				<h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>Document Upload</h3>
@@ -73,7 +80,9 @@ export const DocumentUploadPanel: React.FC<DocumentUploadPanelProps> = ({ onUplo
 			>
 				<Upload size={24} style={{ color: "rgba(255,255,255,0.5)" }} />
 				<span style={{ color: "rgba(255,255,255,0.7)", fontSize: 14 }}>
-					{status === "uploading" || status === "parsing" ? "Processing..." : "Click to upload a document"}
+					{status === "uploading" || status === "parsing"
+						? "Processing..."
+						: "Click to upload a document"}
 				</span>
 				<input
 					type="file"
@@ -91,14 +100,30 @@ export const DocumentUploadPanel: React.FC<DocumentUploadPanelProps> = ({ onUplo
 			)}
 
 			{status === "uploading" && (
-				<div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8, color: "var(--cline-green)" }}>
+				<div
+					style={{
+						marginTop: 12,
+						display: "flex",
+						alignItems: "center",
+						gap: 8,
+						color: "var(--cline-green)",
+					}}
+				>
 					<Loader2 size={16} className="spin" />
 					<span style={{ fontSize: 13 }}>Uploading to WeKnora...</span>
 				</div>
 			)}
 
 			{status === "parsing" && (
-				<div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8, color: "var(--cline-green)" }}>
+				<div
+					style={{
+						marginTop: 12,
+						display: "flex",
+						alignItems: "center",
+						gap: 8,
+						color: "var(--cline-green)",
+					}}
+				>
 					<Loader2 size={16} className="spin" />
 					<span style={{ fontSize: 13 }}>Parsing document...</span>
 				</div>
@@ -119,7 +144,8 @@ export const DocumentUploadPanel: React.FC<DocumentUploadPanelProps> = ({ onUplo
 				>
 					<CheckCircle2 size={16} style={{ color: "var(--cline-green)" }} />
 					<span style={{ fontSize: 13 }}>
-						Indexed <strong>{result.chunksCount}</strong> chunks from <strong>{result.title}</strong>
+						Indexed <strong>{result.chunksCount}</strong> chunks from{" "}
+						<strong>{result.title}</strong>
 					</span>
 				</div>
 			)}

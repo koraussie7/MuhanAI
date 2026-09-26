@@ -178,7 +178,7 @@ export interface I18nContent {
 		apiKeyRequired: string;
 		rateLimitedHint: string;
 		noLlmHint: string;
-	},
+	};
 	freeLlm: {
 		settingsTitle: string;
 		settingsDesc: string;
@@ -193,9 +193,8 @@ export interface I18nContent {
 		noneSelected: string;
 		expand: string;
 		collapse: string;
-	},
+	};
 }
-
 
 export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 	ko: {
@@ -300,7 +299,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			rateLimitedHint: "⚠ Rate-Limited · BYOK 권장",
 			noLlmHint: "No LLM · BYOK 추가 필요",
 		},
-	
+
 		freeLlm: {
 			settingsTitle: "무료 LLM 폴백 설정",
 			settingsDesc: "폴백으로 사용할 무료 LLM 공급자를 선택하세요",
@@ -316,11 +315,12 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			expand: "열기",
 			collapse: "닫기",
 		},
-	dashboard: {
+		dashboard: {
 			meshOperational: "● P2P 메쉬 가동 중",
 			gatewayActive: "토큰 프리 게이트웨이 활성",
 			heroTitle: "MuhanAI 자율 에이전트 메쉬",
-			heroDesc: "Cline 스타일의 탈중앙화 AI 메쉬 네트워크입니다. 로컬 및 분산 모델이 WebRTC & libp2p P2P 연결을 통해 자율적으로 합의하고 협력합니다.",
+			heroDesc:
+				"Cline 스타일의 탈중앙화 AI 메쉬 네트워크입니다. 로컬 및 분산 모델이 WebRTC & libp2p P2P 연결을 통해 자율적으로 합의하고 협력합니다.",
 			cosmicMesh: "코스믹 메쉬",
 			launchAgentCast: "에이전트 캐스트 실행",
 			peerNodes: "피어 노드",
@@ -380,7 +380,6 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerModalConnect: "이름 지정 및 연결",
 			close: "닫기",
 		},
-
 	},
 	en: {
 		slogans: {
@@ -486,7 +485,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			rateLimitedHint: "⚠ Rate-Limited · BYOK recommended",
 			noLlmHint: "No LLM · Add BYOK",
 		},
-	
+
 		freeLlm: {
 			settingsTitle: "Free LLM Fallback Settings",
 			settingsDesc: "Select free LLM providers for fallback",
@@ -502,11 +501,12 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			expand: "Expand",
 			collapse: "Collapse",
 		},
-	dashboard: {
+		dashboard: {
 			meshOperational: "● P2P MESH OPERATIONAL",
 			gatewayActive: "TOKEN-FREE GATEWAY ACTIVE",
 			heroTitle: "MuhanAI Autonomous Agent Mesh",
-			heroDesc: "A Cline-style decentralized AI mesh network. Local and distributed models autonomously reach consensus and collaborate over WebRTC & libp2p P2P connections.",
+			heroDesc:
+				"A Cline-style decentralized AI mesh network. Local and distributed models autonomously reach consensus and collaborate over WebRTC & libp2p P2P connections.",
 			cosmicMesh: "Cosmic Mesh",
 			launchAgentCast: "Launch Agent Cast",
 			peerNodes: "Peer Nodes",
@@ -558,7 +558,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerModalPeerPlaceholder: "e.g. Peer-Tokyo-Node...",
 			peerModalRandomTitle: "Generate random cosmic name",
 			peerModalRandom: "🎲 Random",
-			peerModalUserHelp: "The device name shown on the P2P distributed knowledge mesh and WebRTC vault.",
+			peerModalUserHelp:
+				"The device name shown on the P2P distributed knowledge mesh and WebRTC vault.",
 			peerModalPeerHelp: "A unique name to mount as a new peer node onto the knowledge graph.",
 			peerModalDisconnect: "Disconnect",
 			peerModalCancel: "Cancel",
@@ -566,7 +567,6 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerModalConnect: "Set name & connect",
 			close: "Close",
 		},
-
 	},
 	ja: {
 		slogans: {
@@ -671,7 +671,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			rateLimitedHint: "⚠ Rate-Limited · BYOK推奨",
 			noLlmHint: "No LLM · BYOK追加必要",
 		},
-	
+
 		freeLlm: {
 			settingsTitle: "無料LLMフォールバック設定",
 			settingsDesc: "フォールバックに使用する無料LLMプロバイダーを選択",
@@ -687,11 +687,12 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			expand: "展開",
 			collapse: "折りたたみ",
 		},
-	dashboard: {
+		dashboard: {
 			meshOperational: "● P2Pメッシュ稼働中",
 			gatewayActive: "トークンフリーゲートウェイ有効",
 			heroTitle: "MuhanAI 自律エージェントメッシュ",
-			heroDesc: "Clineスタイルの分散型AIメッシュネットワーク。ローカルおよび分散モデルがWebRTCとlibp2pのP2P接続を通じて自律的に合意し協調します。",
+			heroDesc:
+				"Clineスタイルの分散型AIメッシュネットワーク。ローカルおよび分散モデルがWebRTCとlibp2pのP2P接続を通じて自律的に合意し協調します。",
 			cosmicMesh: "コズミックメッシュ",
 			launchAgentCast: "エージェントキャストを起動",
 			peerNodes: "ピアノード",
@@ -751,7 +752,6 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerModalConnect: "名前を設定して接続",
 			close: "閉じる",
 		},
-
 	},
 	zh: {
 		slogans: {
@@ -855,7 +855,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			rateLimitedHint: "⚠ Rate-Limited · 建议使用 BYOK",
 			noLlmHint: "No LLM · 需添加 BYOK",
 		},
-	
+
 		freeLlm: {
 			settingsTitle: "免费LLM回退设置",
 			settingsDesc: "选择用作回退的免费LLM提供商",
@@ -871,11 +871,12 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			expand: "展开",
 			collapse: "收起",
 		},
-	dashboard: {
+		dashboard: {
 			meshOperational: "● P2P 网格运行中",
 			gatewayActive: "免代币网关已启用",
 			heroTitle: "MuhanAI 自治智能体网格",
-			heroDesc: "类 Cline 的去中心化 AI 网格网络。本地与分布式模型通过 WebRTC 与 libp2p 的 P2P 连接自主达成共识并协作。",
+			heroDesc:
+				"类 Cline 的去中心化 AI 网格网络。本地与分布式模型通过 WebRTC 与 libp2p 的 P2P 连接自主达成共识并协作。",
 			cosmicMesh: "宇宙网格",
 			launchAgentCast: "启动 Agent Cast",
 			peerNodes: "对等节点",
@@ -935,7 +936,6 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerModalConnect: "设定名称并连接",
 			close: "关闭",
 		},
-
 	},
 	es: {
 		slogans: {
@@ -1017,7 +1017,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			subtitle: "Topología de Grafo Obsidian & Silueta P2P",
 		},
 		promptBar: {
-			computerUseTitle: "Computer Use (e2b Desktop) — control de escritorio vía modelo de visión BYOK",
+			computerUseTitle:
+				"Computer Use (e2b Desktop) — control de escritorio vía modelo de visión BYOK",
 			byokEnabledTitle: "BYOK habilitado — haz clic para cambiar ajustes",
 			byokSetupTitle: "Ajustes BYOK — usa tu propia clave API",
 			byokSettingsOpenAria: "Abrir ajustes BYOK",
@@ -1041,7 +1042,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			rateLimitedHint: "⚠ Rate-Limited · BYOK recomendado",
 			noLlmHint: "No LLM · Añadir BYOK",
 		},
-	
+
 		freeLlm: {
 			settingsTitle: "Configuración de respaldo LLM gratuito",
 			settingsDesc: "Selecciona proveedores LLM gratuitos para respaldo",
@@ -1057,11 +1058,12 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			expand: "Expandir",
 			collapse: "Contraer",
 		},
-	dashboard: {
+		dashboard: {
 			meshOperational: "● MALLA P2P OPERATIVA",
 			gatewayActive: "PASARELA SIN TOKENS ACTIVA",
 			heroTitle: "Malla de Agentes Autónomos MuhanAI",
-			heroDesc: "Una red mesh de IA descentralizada al estilo de Cline. Los modelos locales y distribuidos alcanzan consenso y colaboran de forma autónoma a través de conexiones P2P WebRTC y libp2p.",
+			heroDesc:
+				"Una red mesh de IA descentralizada al estilo de Cline. Los modelos locales y distribuidos alcanzan consenso y colaboran de forma autónoma a través de conexiones P2P WebRTC y libp2p.",
 			cosmicMesh: "Malla Cósmica",
 			launchAgentCast: "Iniciar Agent Cast",
 			peerNodes: "Nodos P2P",
@@ -1075,7 +1077,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			tabKb: "Base de Conocimiento",
 			tokenBank: {
 				title: "Banco de Tokens",
-				subtitle: "Libro mayor de contribuciones p2ptokens · Anillo de confianza Web of Trust de PinkyBrain",
+				subtitle:
+					"Libro mayor de contribuciones p2ptokens · Anillo de confianza Web of Trust de PinkyBrain",
 				balance: "Saldo",
 				entries: "Entradas",
 				trustScore: "Puntuación de Confianza",
@@ -1113,15 +1116,16 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerModalPeerPlaceholder: "ej. Peer-Tokyo-Node...",
 			peerModalRandomTitle: "Generar nombre cósmico aleatorio",
 			peerModalRandom: "🎲 Aleatorio",
-			peerModalUserHelp: "El nombre del dispositivo mostrado en la malla de conocimiento P2P distribuida y la bóveda WebRTC.",
-			peerModalPeerHelp: "Un nombre único para montar como nuevo nodo peer en el grafo de conocimiento.",
+			peerModalUserHelp:
+				"El nombre del dispositivo mostrado en la malla de conocimiento P2P distribuida y la bóveda WebRTC.",
+			peerModalPeerHelp:
+				"Un nombre único para montar como nuevo nodo peer en el grafo de conocimiento.",
 			peerModalDisconnect: "Desconectar",
 			peerModalCancel: "Cancelar",
 			peerModalApply: "Aplicar cambio de nombre",
 			peerModalConnect: "Definir nombre y conectar",
 			close: "Cerrar",
 		},
-
 	},
 	de: {
 		slogans: {
@@ -1227,7 +1231,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			rateLimitedHint: "⚠ Rate-Limited · BYOK empfohlen",
 			noLlmHint: "No LLM · BYOK hinzufügen",
 		},
-	
+
 		freeLlm: {
 			settingsTitle: "Kostenloser LLM-Fallback-Einstellungen",
 			settingsDesc: "Wählen Sie kostenlose LLM-Anbieter für Fallback",
@@ -1243,11 +1247,12 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			expand: "Erweitern",
 			collapse: "Einklappen",
 		},
-	dashboard: {
+		dashboard: {
 			meshOperational: "● P2P-MESH AKTIV",
 			gatewayActive: "TOKEN-FREIES GATEWAY AKTIV",
 			heroTitle: "MuhanAI Autonomes Agenten-Mesh",
-			heroDesc: "Ein dezentrales KI-Mesh-Netzwerk im Cline-Stil. Lokale und verteilte Modelle erzielen über WebRTC- und libp2p-P2P-Verbindungen autonom Konsens und arbeiten zusammen.",
+			heroDesc:
+				"Ein dezentrales KI-Mesh-Netzwerk im Cline-Stil. Lokale und verteilte Modelle erzielen über WebRTC- und libp2p-P2P-Verbindungen autonom Konsens und arbeiten zusammen.",
 			cosmicMesh: "Cosmic Mesh",
 			launchAgentCast: "Agent Cast starten",
 			peerNodes: "Peer-Knoten",
@@ -1299,15 +1304,16 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerModalPeerPlaceholder: "z. B. Peer-Tokyo-Node...",
 			peerModalRandomTitle: "Zufälligen kosmischen Namen erzeugen",
 			peerModalRandom: "🎲 Zufall",
-			peerModalUserHelp: "Der Gerätename, der im verteilten P2P-Wissensmesh und im WebRTC-Tresor angezeigt wird.",
-			peerModalPeerHelp: "Ein eindeutiger Name zum Einhängen als neuer Peer-Knoten in den Wissensgraphen.",
+			peerModalUserHelp:
+				"Der Gerätename, der im verteilten P2P-Wissensmesh und im WebRTC-Tresor angezeigt wird.",
+			peerModalPeerHelp:
+				"Ein eindeutiger Name zum Einhängen als neuer Peer-Knoten in den Wissensgraphen.",
 			peerModalDisconnect: "Trennen",
 			peerModalCancel: "Abbrechen",
 			peerModalApply: "Namensänderung anwenden",
 			peerModalConnect: "Namen festlegen & verbinden",
 			close: "Schließen",
 		},
-
 	},
 	fr: {
 		slogans: {
@@ -1414,7 +1420,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			rateLimitedHint: "⚠ Rate-Limited · BYOK recommandé",
 			noLlmHint: "No LLM · Ajouter BYOK",
 		},
-	
+
 		freeLlm: {
 			settingsTitle: "Paramètres de secours LLM gratuit",
 			settingsDesc: "Sélectionnez les fournisseurs LLM gratuits pour le secours",
@@ -1430,11 +1436,12 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			expand: "Développer",
 			collapse: "Réduire",
 		},
-	dashboard: {
+		dashboard: {
 			meshOperational: "● MAILLE P2P OPÉRATIONNELLE",
 			gatewayActive: "PASSERELLE SANS JETON ACTIVE",
 			heroTitle: "Maillage d'Agents Autonomes MuhanAI",
-			heroDesc: "Un réseau maillé d'IA décentralisé de style Cline. Les modèles locaux et distribués parviennent à un consensus et collaborent de manière autonome via des connexions P2P WebRTC et libp2p.",
+			heroDesc:
+				"Un réseau maillé d'IA décentralisé de style Cline. Les modèles locaux et distribués parviennent à un consensus et collaborent de manière autonome via des connexions P2P WebRTC et libp2p.",
 			cosmicMesh: "Maillage Cosmique",
 			launchAgentCast: "Lancer Agent Cast",
 			peerNodes: "Nœuds P2P",
@@ -1448,7 +1455,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			tabKb: "Base de Connaissances",
 			tokenBank: {
 				title: "Banque de Jetons",
-				subtitle: "Grand livre des contributions p2ptokens · Anneau de confiance Web of Trust de PinkyBrain",
+				subtitle:
+					"Grand livre des contributions p2ptokens · Anneau de confiance Web of Trust de PinkyBrain",
 				balance: "Solde",
 				entries: "Entrées",
 				trustScore: "Score de Confiance",
@@ -1486,15 +1494,16 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerModalPeerPlaceholder: "ex. Peer-Tokyo-Node...",
 			peerModalRandomTitle: "Générer un nom cosmique aléatoire",
 			peerModalRandom: "🎲 Aléatoire",
-			peerModalUserHelp: "Le nom de l'appareil affiché sur le mesh de connaissances P2P distribué et le coffre WebRTC.",
-			peerModalPeerHelp: "Un nom unique à monter comme nouveau nœud pair sur le graphe de connaissances.",
+			peerModalUserHelp:
+				"Le nom de l'appareil affiché sur le mesh de connaissances P2P distribué et le coffre WebRTC.",
+			peerModalPeerHelp:
+				"Un nom unique à monter comme nouveau nœud pair sur le graphe de connaissances.",
 			peerModalDisconnect: "Déconnecter",
 			peerModalCancel: "Annuler",
 			peerModalApply: "Appliquer le changement de nom",
 			peerModalConnect: "Définir le nom et connecter",
 			close: "Fermer",
 		},
-
 	},
 	pt: {
 		slogans: {
@@ -1575,7 +1584,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			subtitle: "Topologia de Grafo Obsidian & Silhueta P2P",
 		},
 		promptBar: {
-			computerUseTitle: "Computer Use (e2b Desktop) — controle da área de trabalho via modelo de visão BYOK",
+			computerUseTitle:
+				"Computer Use (e2b Desktop) — controle da área de trabalho via modelo de visão BYOK",
 			byokEnabledTitle: "BYOK ativado — clique para alterar configurações",
 			byokSetupTitle: "Configurações BYOK — use sua própria chave de API",
 			byokSettingsOpenAria: "Abrir configurações BYOK",
@@ -1599,7 +1609,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			rateLimitedHint: "⚠ Rate-Limited · BYOK recomendado",
 			noLlmHint: "No LLM · Adicionar BYOK",
 		},
-	
+
 		freeLlm: {
 			settingsTitle: "Configurações de fallback LLM gratuito",
 			settingsDesc: "Selecione provedores LLM gratuitos para fallback",
@@ -1615,11 +1625,12 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			expand: "Expandir",
 			collapse: "Recuar",
 		},
-	dashboard: {
+		dashboard: {
 			meshOperational: "● MALHA P2P OPERACIONAL",
 			gatewayActive: "GATEWAY SEM TOKENS ATIVA",
 			heroTitle: "Malha de Agentes Autônomos MuhanAI",
-			heroDesc: "Uma rede mesh de IA descentralizada no estilo Cline. Modelos locais e distribuídos alcançam consenso e colaboram autonomamente por meio de conexões P2P WebRTC e libp2p.",
+			heroDesc:
+				"Uma rede mesh de IA descentralizada no estilo Cline. Modelos locais e distribuídos alcançam consenso e colaboram autonomamente por meio de conexões P2P WebRTC e libp2p.",
 			cosmicMesh: "Malha Cósmica",
 			launchAgentCast: "Iniciar Agent Cast",
 			peerNodes: "Nós P2P",
@@ -1633,7 +1644,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			tabKb: "Base de Conhecimento",
 			tokenBank: {
 				title: "Banco de Tokens",
-				subtitle: "Livro-razão de contribuições p2ptokens · Anel de Confiança Web of Trust do PinkyBrain",
+				subtitle:
+					"Livro-razão de contribuições p2ptokens · Anel de Confiança Web of Trust do PinkyBrain",
 				balance: "Saldo",
 				entries: "Entradas",
 				trustScore: "Pontuação de Confiança",
@@ -1671,7 +1683,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerModalPeerPlaceholder: "ex. Peer-Tokyo-Node...",
 			peerModalRandomTitle: "Gerar nome cósmico aleatório",
 			peerModalRandom: "🎲 Aleatório",
-			peerModalUserHelp: "O nome do dispositivo exibido na malha de conhecimento P2P distribuída e no cofre WebRTC.",
+			peerModalUserHelp:
+				"O nome do dispositivo exibido na malha de conhecimento P2P distribuída e no cofre WebRTC.",
 			peerModalPeerHelp: "Um nome único para montar como novo nó peer no grafo de conhecimento.",
 			peerModalDisconnect: "Desconectar",
 			peerModalCancel: "Cancelar",
@@ -1679,7 +1692,6 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			peerModalConnect: "Definir nome e conectar",
 			close: "Fechar",
 		},
-
 	},
 };
 

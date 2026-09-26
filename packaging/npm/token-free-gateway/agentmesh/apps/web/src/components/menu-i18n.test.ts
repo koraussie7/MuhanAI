@@ -18,10 +18,7 @@ test("getMenuTranslation: returns Korean translations by default and for 'ko'", 
 test("getMenuTranslation: all sidebar groups and items have valid Korean translations", () => {
 	const ko = MENU_TRANSLATIONS.ko;
 	for (const group of NAV_GROUPS) {
-		assert.ok(
-			ko.groups[group.id],
-			`Expected group '${group.id}' to have a Korean translation`,
-		);
+		assert.ok(ko.groups[group.id], `Expected group '${group.id}' to have a Korean translation`);
 		for (const item of group.items) {
 			assert.ok(
 				ko.items[item.id],

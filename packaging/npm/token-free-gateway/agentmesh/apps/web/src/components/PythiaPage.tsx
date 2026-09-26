@@ -21,14 +21,14 @@ import {
 	type GraphConcept,
 	type GraphEvent,
 	type GraphRelation,
-	type PythiaSession,
-	type PythiaSessionResult,
 	listGraphConcepts,
 	listGraphEvents,
 	listGraphRelations,
 	listPythiaModels,
 	listPythiaProviders,
 	listPythiaSessions,
+	type PythiaSession,
+	type PythiaSessionResult,
 	runPythiaSession,
 	stopPythiaSession,
 } from "../lib/pythia-client";
@@ -139,11 +139,26 @@ export const PythiaPage: React.FC = () => {
 		const items: TickerItem[] = [];
 		if (result) {
 			items.push({ id: "last-provider", label: "provider", value: result.provider, tone: "sky" });
-			items.push({ id: "last-latency", label: "latency", value: `${result.latencyMs}ms`, tone: "sky" });
+			items.push({
+				id: "last-latency",
+				label: "latency",
+				value: `${result.latencyMs}ms`,
+				tone: "sky",
+			});
 		}
-		items.push({ id: "sessions", label: "sessions", value: String(sessions.length), tone: "muted" });
+		items.push({
+			id: "sessions",
+			label: "sessions",
+			value: String(sessions.length),
+			tone: "muted",
+		});
 		items.push({ id: "concepts", label: "concepts", value: String(concepts.length), tone: "sky" });
-		items.push({ id: "relations", label: "relations", value: String(relations.length), tone: "muted" });
+		items.push({
+			id: "relations",
+			label: "relations",
+			value: String(relations.length),
+			tone: "muted",
+		});
 		items.push({
 			id: "amplified",
 			label: "amplified",
@@ -266,7 +281,9 @@ export const PythiaPage: React.FC = () => {
 				relations={relations}
 				worldBrief={worldBrief}
 				onSelectConcept={(name) => {
-					setPrompt((prev) => (prev ? `${prev}\n[참조 개념] ${name}` : `[참조 개념] ${name} 분석 및 파생 예측: `));
+					setPrompt((prev) =>
+						prev ? `${prev}\n[참조 개념] ${name}` : `[참조 개념] ${name} 분석 및 파생 예측: `,
+					);
 				}}
 			/>
 

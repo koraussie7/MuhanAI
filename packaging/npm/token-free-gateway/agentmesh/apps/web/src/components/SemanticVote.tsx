@@ -33,11 +33,7 @@ export function SemanticVote({ onSubmit }: { onSubmit: (route: string, primary: 
 	};
 
 	return (
-		<PageBox
-			iconKey="vote"
-			title="Semantic Vote"
-			subtitle="시맨틱 투표"
-		>
+		<PageBox iconKey="vote" title="Semantic Vote" subtitle="시맨틱 투표">
 			<section className="panel">
 				<h3>Semantic Vote</h3>
 				<div className="search-bar">

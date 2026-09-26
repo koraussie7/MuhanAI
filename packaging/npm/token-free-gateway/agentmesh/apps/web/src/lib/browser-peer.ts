@@ -4,9 +4,9 @@ import { identify } from "@libp2p/identify";
 import { noise } from "@libp2p/noise";
 import { peerIdFromPrivateKey } from "@libp2p/peer-id";
 import { ping } from "@libp2p/ping";
-import { yamux } from "@libp2p/yamux";
 import { webRTC } from "@libp2p/webrtc";
 import { webSockets } from "@libp2p/websockets";
+import { yamux } from "@libp2p/yamux";
 import { multiaddr } from "@multiformats/multiaddr";
 import { createLibp2p, type Libp2p } from "libp2p";
 
@@ -20,7 +20,7 @@ export interface BrowserPeerSession {
 }
 
 interface EnrollmentResponse {
-	peer: { id: string };
+	peer: { id: string; publicKey?: string };
 	token: string;
 	relay?: { multiaddr?: string | null };
 }
@@ -38,7 +38,8 @@ let heartbeatTimer: number | undefined;
 
 async function browserPrivateKey() {
 	const stored = localStorage.getItem(IDENTITY_KEY);
-	if (stored) return privateKeyFromProtobuf(Uint8Array.from(atob(stored), (char) => char.charCodeAt(0)));
+	if (stored)
+		return privateKeyFromProtobuf(Uint8Array.from(atob(stored), (char) => char.charCodeAt(0)));
 	const key = await generateKeyPair("Ed25519");
 	const bytes = privateKeyToProtobuf(key);
 	localStorage.setItem(IDENTITY_KEY, btoa(String.fromCharCode(...bytes)));
@@ -61,18 +62,28 @@ function decodePulse(data: Uint8Array): PulseMessage | null {
 export async function startBrowserPeer(): Promise<BrowserPeerSession | null> {
 	if (node) return null;
 	try {
+		const privateKey = await browserPrivateKey();
+
+		// Get public key in base64 for enrollment
+		const publicKeyProtobuf = await privateKeyToProtobuf(privateKey);
+		const publicKeyBytes = Uint8Array.from(publicKeyProtobuf).slice(42); // Remove protobuf header (42 bytes for Ed25519)
+		const publicKeyB64 = btoa(String.fromCharCode(...publicKeyBytes));
+
 		const enrollment = await fetch("/api/visitors/enroll", {
 			method: "POST",
 			headers: { "content-type": "application/json" },
 			credentials: "include",
-			body: JSON.stringify({ path: window.location.pathname, capabilities: ["presence", "pulse-read", "webrtc"] }),
+			body: JSON.stringify({
+				path: window.location.pathname,
+				capabilities: ["presence", "pulse-read", "webrtc"],
+				publicKey: publicKeyB64,
+			}),
 		});
 		if (!enrollment.ok) return null;
 		const data = (await enrollment.json()) as EnrollmentResponse;
 		const relayAddress = data.relay?.multiaddr;
 		if (!relayAddress) return null;
 
-		const privateKey = await browserPrivateKey();
 		node = await createLibp2p({
 			privateKey,
 			addresses: { listen: ["/p2p-circuit", "/webrtc"] },
@@ -87,7 +98,10 @@ export async function startBrowserPeer(): Promise<BrowserPeerSession | null> {
 		const pubsub = node.services.pubsub as {
 			subscribe(topic: string): void;
 			publish(topic: string, data: Uint8Array): Promise<void>;
-			addEventListener(type: string, listener: (event: CustomEvent<{ topic?: string; data?: Uint8Array }>) => void): void;
+			addEventListener(
+				type: string,
+				listener: (event: CustomEvent<{ topic?: string; data?: Uint8Array }>) => void,
+			): void;
 		};
 		pubsub.subscribe(PULSE_TOPIC);
 		pubsub.addEventListener("message", (event) => {
@@ -98,7 +112,13 @@ export async function startBrowserPeer(): Promise<BrowserPeerSession | null> {
 		});
 		await pubsub.publish(
 			PULSE_TOPIC,
-			encodePulse({ v: 1, kind: "presence", fromPeerId: peerId, payload: { path: window.location.pathname }, ts: Date.now() }),
+			encodePulse({
+				v: 1,
+				kind: "presence",
+				fromPeerId: peerId,
+				payload: { path: window.location.pathname },
+				ts: Date.now(),
+			}),
 		);
 		heartbeatTimer = window.setInterval(() => {
 			void Promise.resolve(

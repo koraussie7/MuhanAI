@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useGossipPulse } from "../hooks/useGossipPulse.js";
-import { formatPeerCountBare, formatHumanCount, ingestApiPayload } from "../lib/mesh-stats.js";
+import { formatHumanCount, formatPeerCountBare, ingestApiPayload } from "../lib/mesh-stats.js";
 
 const API = "";
 
@@ -123,7 +123,7 @@ export function NetworkPulse({ live = false }: Props) {
 				<span className="pulse-title">NETWORK PULSE</span>
 				<span className="pulse-subtitle">
 					(agents online: {formatPeerCountBare(pulse.peers ?? pulse.agentsOnline)} · human:{" "}
-										{formatHumanCount(pulse.humansOnline)}){live ? " · LIVE" : ""}
+					{formatHumanCount(pulse.humansOnline)}){live ? " · LIVE" : ""}
 				</span>
 			</div>
 			<div className="pulse-items">

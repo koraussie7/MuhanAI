@@ -1,4 +1,5 @@
 {
+	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
 		"baseUrl": ".",
 		"target": "ES2022",
@@ -21,8 +22,14 @@
 		],
 		"paths": {
 			"@/*": ["./src/*"],
-			"@agentmesh/*": ["../../packages/*/src"],
-			"@web/*": ["../../web/src/*"]
+			"@web/*": ["../../apps/web/src/*"],
+			"@agentmesh/web": ["../../apps/web/src/index.ts"],
+			"@agentmesh/web/*": ["../../apps/web/src/*"],
+			"@agentmesh/ai-engine/types": ["../../packages/ai-engine/src/types.ts"],
+			"@agentmesh/ai-engine/*": ["../../packages/ai-engine/src/*"],
+			"@agentmesh/shared-types": ["../../packages/shared-types/types/index.ts"],
+			"@agentmesh/shared-types/*": ["../../packages/shared-types/types/*"],
+			"@agentmesh/*": ["../../packages/*/src/index.ts"]
 		}
 	},
 	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

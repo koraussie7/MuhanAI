@@ -200,11 +200,7 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 								onConnectUserPeer();
 							}
 						}}
-						title={
-							userPeerConnected
-								? t.cosmicHud.devicePeerManage
-								: t.cosmicHud.devicePeerConnect
-						}
+						title={userPeerConnected ? t.cosmicHud.devicePeerManage : t.cosmicHud.devicePeerConnect}
 					>
 						<Zap size={13} className={userPeerConnected ? "text-emerald-400" : "text-amber-400"} />
 						<span>
@@ -308,7 +304,9 @@ export const CosmicHud: React.FC<CosmicHudProps> = ({
 
 					{/* Type Filters */}
 					<div className="pt-3 mt-3 border-t border-white/10">
-						<span className="text-[11px] font-mono text-slate-400 block mb-2">{t.cosmicHud.visibleFilters}</span>
+						<span className="text-[11px] font-mono text-slate-400 block mb-2">
+							{t.cosmicHud.visibleFilters}
+						</span>
 						<div className="flex flex-wrap gap-1.5">
 							{(["core", "agent", "note", "tag"] as const).map((t) => (
 								<button

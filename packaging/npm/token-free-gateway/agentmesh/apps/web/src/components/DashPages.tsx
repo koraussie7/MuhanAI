@@ -237,12 +237,12 @@ export function AgentMeshPage() {
 			<SwarmRadar />
 			<div className="peer-canvas-toolbar" style={{ marginBottom: 12 }}>
 				<div className="peer-filter-row">
-						<button
-							className={`policy-chip ${view === "cards" ? "active" : ""}`}
-							onClick={() => setView("cards")}
-						>
-							Identity Cards ({allAgents.length})
-						</button>
+					<button
+						className={`policy-chip ${view === "cards" ? "active" : ""}`}
+						onClick={() => setView("cards")}
+					>
+						Identity Cards ({allAgents.length})
+					</button>
 					<button
 						className={`policy-chip ${view === "topology" ? "active" : ""}`}
 						onClick={() => setView("topology")}
@@ -705,11 +705,7 @@ export function GhostPage() {
 // ---- Droidring P2P ----
 export function DroidringPage() {
 	return (
-		<Page
-			iconKey="robot"
-			title="Droidring P2P"
-			subtitle="Decentralized agent mesh over libp2p"
-		>
+		<Page iconKey="robot" title="Droidring P2P" subtitle="Decentralized agent mesh over libp2p">
 			<div className="droidring-page">
 				<div className="droidring-stats">
 					<div className="stat-card">

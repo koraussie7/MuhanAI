@@ -868,9 +868,9 @@ export const TravelPage: React.FC = () => {
 			setHotelOffers([]);
 
 			try {
-						const controller = new AbortController();
-					// TourMind performs location resolution and live inventory probing in one request.
-					const timeoutId = setTimeout(() => controller.abort(), 30_000);
+				const controller = new AbortController();
+				// TourMind performs location resolution and live inventory probing in one request.
+				const timeoutId = setTimeout(() => controller.abort(), 30_000);
 
 				let data: unknown = null;
 				try {
@@ -894,8 +894,8 @@ export const TravelPage: React.FC = () => {
 					if (res.ok) {
 						data = await res.json();
 					}
-					} catch {
-				// Network/timeout errors are handled by the empty-result state below.
+				} catch {
+					// Network/timeout errors are handled by the empty-result state below.
 				}
 
 				const liveHotels = normalizeHotelOffers(data, dest, inDate, outDate);

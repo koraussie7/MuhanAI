@@ -73,8 +73,9 @@ import { TravelPage } from "./components/find/TravelPage";
 import { getMenuTranslation } from "./components/menu-i18n";
 import { RightPanel } from "./components/RightPanel";
 import { Sidebar } from "./components/Sidebar";
-import { startBrowserPeer, stopBrowserPeer } from "./lib/browser-peer";
+import { VietnamConciergePage } from "./components/VietnamConciergePage";
 import { type SupportedLanguage, useI18n } from "./i18n";
+import { startBrowserPeer, stopBrowserPeer } from "./lib/browser-peer";
 import { ROUTES, routeByPath } from "./routes.js";
 
 // Lazy load heavy pages
@@ -299,16 +300,24 @@ export function App() {
 	};
 
 	useEffect(() => {
-	void startBrowserPeer();
-	const onPopState = () => {
-	setActiveSection(sectionIdFromPath(window.location.pathname));
-	};
-	window.addEventListener("popstate", onPopState);
-	return () => {
-	window.removeEventListener("popstate", onPopState);
-	void stopBrowserPeer();
-	};
+		void startBrowserPeer();
+		const onPopState = () => {
+			setActiveSection(sectionIdFromPath(window.location.pathname));
+		};
+		window.addEventListener("popstate", onPopState);
+		return () => {
+			window.removeEventListener("popstate", onPopState);
+			void stopBrowserPeer();
+		};
 	}, []);
+
+	// Vietnam AI living concierge — dedicated host surface.
+	if (
+		typeof window !== "undefined" &&
+		(window.location.hostname === "vn.kbizhub.com" || window.location.hostname.startsWith("vn."))
+	) {
+		return <VietnamConciergePage />;
+	}
 
 	// 1. Fullscreen Standalone View for find.muhanai.com or /
 	if (activeSection === "find") {

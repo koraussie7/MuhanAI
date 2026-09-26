@@ -31,20 +31,18 @@ export interface CreateSessionRequest {
 export async function listPythiaModels(): Promise<string[]> {
 	const res = await fetch("/api/pythia/models");
 	if (!res.ok) throw new Error(`Models fetch failed: ${res.status}`);
-	const data = await res.json() as { models?: string[] };
+	const data = (await res.json()) as { models?: string[] };
 	return data.models ?? ["auto"];
 }
 
 export async function listPythiaSessions(): Promise<PythiaSession[]> {
 	const res = await fetch("/api/pythia/sessions");
 	if (!res.ok) throw new Error(`Sessions fetch failed: ${res.status}`);
-	const data = await res.json() as { sessions?: PythiaSession[] };
+	const data = (await res.json()) as { sessions?: PythiaSession[] };
 	return data.sessions ?? [];
 }
 
-export async function runPythiaSession(
-	req: CreateSessionRequest,
-): Promise<PythiaSessionResult> {
+export async function runPythiaSession(req: CreateSessionRequest): Promise<PythiaSessionResult> {
 	const res = await fetch("/api/pythia/session", {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },

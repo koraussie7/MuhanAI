@@ -4,8 +4,9 @@
 // comes from the API endpoints. Development defaults to true for local iteration.
 
 const isProduction = import.meta.env.PROD === true;
-export const USE_MOCK_DATA =
-  isProduction ? false : import.meta.env.VITE_USE_MOCK_DATA === "true" || false;
+export const USE_MOCK_DATA = isProduction
+	? false
+	: import.meta.env.VITE_USE_MOCK_DATA === "true" || false;
 
 export interface UnsolvedProblem {
 	id: string;

@@ -1,16 +1,16 @@
 import {
-	Ghost,
-	Code2,
 	Activity,
 	BookOpen,
 	Bot,
 	CheckCircle2,
 	ChevronLeft,
 	ChevronRight,
+	Code2,
 	Coins,
 	Cpu,
 	Database,
 	FolderGit,
+	Ghost,
 	GitBranch,
 	GitMerge,
 	Layers,
@@ -31,9 +31,9 @@ import {
 	Zap,
 } from "lucide-react";
 import type React from "react";
+import { useMeshPulse } from "../hooks/useMeshPulse.js";
 import { useI18n } from "../i18n.js";
 import { formatPeerCountBare } from "../lib/mesh-stats.js";
-import { useMeshPulse } from "../hooks/useMeshPulse.js";
 import { CreditBalance } from "./CreditBalance.js";
 import { getMenuTranslation } from "./menu-i18n.js";
 import {
@@ -243,7 +243,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 					{!isCollapsed ? (
 						<span>
 							{menuI18n.footer.peerMesh}: {formatPeerCountBare(stats.peers ?? stats.agentsOnline)}{" "}
-								{menuI18n.footer.nodes}
+							{menuI18n.footer.nodes}
 						</span>
 					) : (
 						<span>{menuI18n.footer.live}</span>

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { A2UISurface } from "../../components/a2ui/A2UISurface";
 import { dispatchA2UIAction, subscribeToA2UIEvents } from "../../components/a2ui/action-dispatcher";
-import { parseJsonl, type A2UIMessage } from "../../components/a2ui/wire";
-import { load } from "../../services/api";
+import { type A2UIMessage, parseJsonl } from "../../components/a2ui/wire";
 import { SpecPage } from "../../components/common/spec";
+import { load } from "../../services/api";
 
 // =====================================================================
 // 1-Click Factory — dual-surface business node issuance.
@@ -51,7 +51,7 @@ export function FactoryPage() {
 
 	const refresh = useCallback(() => {
 		load<{ total: number; sites: SpawnedSite[] }>("/api/factory/sites").then((d) => {
-				if (d) setSites(d.sites);
+			if (d) setSites(d.sites);
 		});
 	}, []);
 
@@ -61,7 +61,7 @@ export function FactoryPage() {
 		if (!form.name.trim() || !form.subdomain.trim()) {
 			setError("상호명과 서브도메인은 필수입니다.");
 			return;
-	}
+		}
 		setSpawning(true);
 		setError(null);
 		try {
@@ -76,18 +76,18 @@ export function FactoryPage() {
 			}
 			setForm(EMPTY_FORM);
 			refresh();
-	} catch (e) {
+		} catch (e) {
 			setError(e instanceof Error ? e.message : "spawn failed");
-	} finally {
+		} finally {
 			setSpawning(false);
-	}
+		}
 	}
 
 	return (
-	<SpecPage
+		<SpecPage
 			title="1-Click Factory"
 			subtitle="원클릭으로 Hugo 웹사이트 + MCP 에이전트 인터페이스 + A2UI 화면을 발행합니다"
-	>
+		>
 			<section className="spec-panel">
 				<h2>🚀 새 비즈니스 노드 발행</h2>
 				<div className="factory-form">
@@ -159,7 +159,7 @@ export function FactoryPage() {
 					<SpawnedSiteCard key={site.subdomain} site={site} />
 				))}
 			</section>
-	</SpecPage>
+		</SpecPage>
 	);
 }
 
@@ -167,22 +167,26 @@ function SpawnedSiteCard({ site }: { site: SpawnedSite }) {
 	const [actionStatus, setActionStatus] = useState<string | null>(null);
 	const surfaceId = `${site.subdomain}-menu`;
 
-	useEffect(() => subscribeToA2UIEvents(surfaceId, (event) => {
-	if (event.type === "action.accepted") setActionStatus("예약 요청이 접수되었습니다.");
-	}), [surfaceId]);
+	useEffect(
+		() =>
+			subscribeToA2UIEvents(surfaceId, (event) => {
+				if (event.type === "action.accepted") setActionStatus("예약 요청이 접수되었습니다.");
+			}),
+		[surfaceId],
+	);
 
 	const dispatchAction = async (name: string) => {
-	if (name !== "request_reservation") return;
-	setActionStatus("예약 요청을 전송하는 중...");
-	try {
-	await dispatchA2UIAction({
-		surfaceId,
-	name,
-	arguments: { subdomain: site.subdomain },
-	});
-	} catch (error) {
-	setActionStatus(error instanceof Error ? error.message : "예약 요청에 실패했습니다.");
-	}
+		if (name !== "request_reservation") return;
+		setActionStatus("예약 요청을 전송하는 중...");
+		try {
+			await dispatchA2UIAction({
+				surfaceId,
+				name,
+				arguments: { subdomain: site.subdomain },
+			});
+		} catch (error) {
+			setActionStatus(error instanceof Error ? error.message : "예약 요청에 실패했습니다.");
+		}
 	};
 
 	// Parse the A2UI wire once per render of this card.
@@ -190,13 +194,13 @@ function SpawnedSiteCard({ site }: { site: SpawnedSite }) {
 		if (!site.a2uiJsonl) return null;
 		try {
 			return parseJsonl(site.a2uiJsonl);
-	} catch {
+		} catch {
 			return null;
-	}
+		}
 	}, [site.a2uiJsonl]);
 
 	return (
-	<article className="factory-node">
+		<article className="factory-node">
 			<header className="factory-node-head">
 				<h3>{site.subdomain}</h3>
 				<code className="factory-cid">{site.cid.slice(0, 18)}…</code>
@@ -207,14 +211,14 @@ function SpawnedSiteCard({ site }: { site: SpawnedSite }) {
 				</a>
 				<a href={site.mcpUrl}>🤖 MCP</a>
 			</p>
-				{ops ? (
-			<>
-			<A2UISurface ops={ops} onAction={dispatchAction} />
-			{actionStatus && <p role="status">{actionStatus}</p>}
-			</>
+			{ops ? (
+				<>
+					<A2UISurface ops={ops} onAction={dispatchAction} />
+					{actionStatus && <p role="status">{actionStatus}</p>}
+				</>
 			) : (
-			<p className="factory-no-a2ui">이 노드에는 A2UI 화면이 없습니다.</p>
+				<p className="factory-no-a2ui">이 노드에는 A2UI 화면이 없습니다.</p>
 			)}
-	</article>
+		</article>
 	);
 }

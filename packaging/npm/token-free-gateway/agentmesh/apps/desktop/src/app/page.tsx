@@ -1,27 +1,29 @@
 "use client";
 
-import { useState, useEffect, useCallback, type ReactNode } from "react";
-import { Desktop, type WindowData } from "@/components/Desktop";
-import { Taskbar } from "@/components/Taskbar";
-import { StartMenu } from "@/components/StartMenu";
-import {
-	FileExplorerApp,
-	TerminalApp,
-	BrowserApp,
-	EngineMonitorApp,
-	CodeStudioApp,
-	SettingsApp,
-} from "@/components/DesktopApps";
-import { ChatWidget } from "@agentmesh/ai-ui";
 import { AIEngineFactory } from "@agentmesh/ai-engine/factory";
 import type { EngineConfig } from "@agentmesh/ai-engine/types";
+import { ChatWidget } from "@agentmesh/ai-ui";
 import { useI18n } from "@agentmesh/web/i18n.js";
-import { Bot, Folder, Terminal, Globe, Cpu, Code, Settings } from "lucide-react";
+import { Bot, Code, Cpu, Folder, Globe, Settings, Terminal } from "lucide-react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
+import { Desktop, type WindowData } from "@/components/Desktop";
+import {
+	BrowserApp,
+	CodeStudioApp,
+	EngineMonitorApp,
+	FileExplorerApp,
+	SettingsApp,
+	TerminalApp,
+} from "@/components/DesktopApps";
+import { StartMenu } from "@/components/StartMenu";
+import { Taskbar } from "@/components/Taskbar";
 
 export default function Home() {
 	const { lang } = useI18n();
 	const [isLoading, setIsLoading] = useState(true);
-	const [engineStatus, setEngineStatus] = useState<"initializing" | "ready" | "loading" | "error">("initializing");
+	const [engineStatus, setEngineStatus] = useState<"initializing" | "ready" | "loading" | "error">(
+		"initializing",
+	);
 
 	useEffect(() => {
 		document.documentElement.lang = lang;
@@ -81,9 +83,7 @@ export default function Home() {
 		setActiveWindowId(appId);
 
 		if (existing) {
-			setWindows((prev) =>
-				prev.map((w) => (w.id === appId ? { ...w, zIndex: nextZ } : w))
-			);
+			setWindows((prev) => prev.map((w) => (w.id === appId ? { ...w, zIndex: nextZ } : w)));
 			return;
 		}
 
@@ -132,26 +132,16 @@ export default function Home() {
 				content = <div className="p-4 text-gray-300">App {appId} opened.</div>;
 		}
 
-		setWindows((prev) => [
-			...prev,
-			{ id: appId, title, icon, content, zIndex: nextZ },
-		]);
+		setWindows((prev) => [...prev, { id: appId, title, icon, content, zIndex: nextZ }]);
 	};
 
-	const handleOpenWindow = (
-		id: string,
-		title: string,
-		icon: ReactNode,
-		content: ReactNode
-	) => {
+	const handleOpenWindow = (id: string, title: string, icon: ReactNode, content: ReactNode) => {
 		const nextZ = topZIndex + 1;
 		setTopZIndex(nextZ);
 		setActiveWindowId(id);
 
 		if (windows.find((w) => w.id === id)) {
-			setWindows((prev) =>
-				prev.map((w) => (w.id === id ? { ...w, zIndex: nextZ } : w))
-			);
+			setWindows((prev) => prev.map((w) => (w.id === id ? { ...w, zIndex: nextZ } : w)));
 			return;
 		}
 
@@ -169,9 +159,7 @@ export default function Home() {
 		const nextZ = topZIndex + 1;
 		setTopZIndex(nextZ);
 		setActiveWindowId(id);
-		setWindows((prev) =>
-			prev.map((w) => (w.id === id ? { ...w, zIndex: nextZ } : w))
-		);
+		setWindows((prev) => prev.map((w) => (w.id === id ? { ...w, zIndex: nextZ } : w)));
 	};
 
 	if (isLoading) {

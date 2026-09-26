@@ -34,17 +34,120 @@ export interface VisualEdge {
 }
 
 const DEFAULT_NODES: VisualNode[] = [
-	{ id: "pythia-core", x: 480, y: 240, type: "core", label: "pythia·core", tag: "engine", status: "amplified", score: 98 },
-	{ id: "keyless-mesh", x: 260, y: 140, type: "compute", label: "keyless·pool", tag: "0-mht", domain: "routing", score: 92 },
-	{ id: "omniroute", x: 700, y: 130, type: "agent", label: "omniroute·mesh", tag: "1.3k-models", domain: "llm", score: 88 },
-	{ id: "shadowbroker", x: 180, y: 310, type: "agent", label: "shadowbroker·obs", tag: "telemetry", domain: "conflict", score: 84 },
-	{ id: "pythia-forecast", x: 760, y: 330, type: "forecast", label: "pythia·forecast", tag: "mirofish", domain: "prediction", score: 91 },
-	{ id: "graphiti-falkor", x: 340, y: 380, type: "mcp", label: "graphiti·falkor", tag: "temporal-index", domain: "knowledge", score: 86 },
-	{ id: "a2ui-bridge", x: 620, y: 390, type: "mcp", label: "a2ui·surface", tag: "ui-runtime", domain: "code", score: 79 },
-	{ id: "code-repair", x: 480, y: 90, type: "concept", label: "python·ast·repair", tag: "ast-opt", domain: "code", status: "validated", score: 87 },
-	{ id: "gps-jamming", x: 130, y: 190, type: "concept", label: "gulf·gps·jamming", tag: "geo-signal", domain: "conflict", status: "amplified", score: 94 },
-	{ id: "quake-telemetry", x: 280, y: 450, type: "concept", label: "seismic·cluster", tag: "usgs-live", domain: "disaster", status: "validated", score: 76 },
-	{ id: "quantum-optim", x: 840, y: 220, type: "concept", label: "bytecode·opt", tag: "jit-pass", domain: "code", status: "raw", score: 68 },
+	{
+		id: "pythia-core",
+		x: 480,
+		y: 240,
+		type: "core",
+		label: "pythia·core",
+		tag: "engine",
+		status: "amplified",
+		score: 98,
+	},
+	{
+		id: "keyless-mesh",
+		x: 260,
+		y: 140,
+		type: "compute",
+		label: "keyless·pool",
+		tag: "0-mht",
+		domain: "routing",
+		score: 92,
+	},
+	{
+		id: "omniroute",
+		x: 700,
+		y: 130,
+		type: "agent",
+		label: "omniroute·mesh",
+		tag: "1.3k-models",
+		domain: "llm",
+		score: 88,
+	},
+	{
+		id: "shadowbroker",
+		x: 180,
+		y: 310,
+		type: "agent",
+		label: "shadowbroker·obs",
+		tag: "telemetry",
+		domain: "conflict",
+		score: 84,
+	},
+	{
+		id: "pythia-forecast",
+		x: 760,
+		y: 330,
+		type: "forecast",
+		label: "pythia·forecast",
+		tag: "mirofish",
+		domain: "prediction",
+		score: 91,
+	},
+	{
+		id: "graphiti-falkor",
+		x: 340,
+		y: 380,
+		type: "mcp",
+		label: "graphiti·falkor",
+		tag: "temporal-index",
+		domain: "knowledge",
+		score: 86,
+	},
+	{
+		id: "a2ui-bridge",
+		x: 620,
+		y: 390,
+		type: "mcp",
+		label: "a2ui·surface",
+		tag: "ui-runtime",
+		domain: "code",
+		score: 79,
+	},
+	{
+		id: "code-repair",
+		x: 480,
+		y: 90,
+		type: "concept",
+		label: "python·ast·repair",
+		tag: "ast-opt",
+		domain: "code",
+		status: "validated",
+		score: 87,
+	},
+	{
+		id: "gps-jamming",
+		x: 130,
+		y: 190,
+		type: "concept",
+		label: "gulf·gps·jamming",
+		tag: "geo-signal",
+		domain: "conflict",
+		status: "amplified",
+		score: 94,
+	},
+	{
+		id: "quake-telemetry",
+		x: 280,
+		y: 450,
+		type: "concept",
+		label: "seismic·cluster",
+		tag: "usgs-live",
+		domain: "disaster",
+		status: "validated",
+		score: 76,
+	},
+	{
+		id: "quantum-optim",
+		x: 840,
+		y: 220,
+		type: "concept",
+		label: "bytecode·opt",
+		tag: "jit-pass",
+		domain: "code",
+		status: "raw",
+		score: 68,
+	},
 ];
 
 const DEFAULT_EDGES: VisualEdge[] = [
@@ -58,8 +161,18 @@ const DEFAULT_EDGES: VisualEdge[] = [
 	{ source: "shadowbroker", target: "gps-jamming", predicate: "observed", strength: 0.96 },
 	{ source: "shadowbroker", target: "quake-telemetry", predicate: "tracked", strength: 0.8 },
 	{ source: "omniroute", target: "quantum-optim", predicate: "evaluated", strength: 0.7 },
-	{ source: "graphiti-falkor", target: "gps-jamming", predicate: "validity_window", strength: 0.82 },
-	{ source: "pythia-forecast", target: "gps-jamming", predicate: "forecasts_escalation", strength: 0.89 },
+	{
+		source: "graphiti-falkor",
+		target: "gps-jamming",
+		predicate: "validity_window",
+		strength: 0.82,
+	},
+	{
+		source: "pythia-forecast",
+		target: "gps-jamming",
+		predicate: "forecasts_escalation",
+		strength: 0.89,
+	},
 	{ source: "keyless-mesh", target: "code-repair", predicate: "powers", strength: 0.85 },
 ];
 
@@ -130,7 +243,10 @@ export const PythiaVisualCanvas: React.FC<{
 
 		// Also overlay relations if available
 		relations.forEach((rel) => {
-			if (baseNodes.some((n) => n.id === rel.sourceId) && baseNodes.some((n) => n.id === rel.targetId)) {
+			if (
+				baseNodes.some((n) => n.id === rel.sourceId) &&
+				baseNodes.some((n) => n.id === rel.targetId)
+			) {
 				baseEdges.push({
 					source: rel.sourceId,
 					target: rel.targetId,
@@ -173,7 +289,8 @@ export const PythiaVisualCanvas: React.FC<{
 			const midX = (src.x + tgt.x) / 2;
 			const midY = (src.y + tgt.y) / 2 - 25;
 			const path = `M ${src.x} ${src.y} Q ${midX} ${midY} ${tgt.x} ${tgt.y}`;
-			const color = src.type === "core" ? "#38bdf8" : src.type === "concept" ? "#a5b4fc" : "#34d399";
+			const color =
+				src.type === "core" ? "#38bdf8" : src.type === "concept" ? "#a5b4fc" : "#34d399";
 
 			setPulses((prev) => [...prev.slice(-8), { id, path, color }]);
 			setTimeout(() => {
@@ -184,22 +301,24 @@ export const PythiaVisualCanvas: React.FC<{
 	);
 
 	useEffect(() => {
-	if (viewMode !== "topology") return;
-	const interval = setInterval(() => {
-	triggerPulse();
-	}, 2400);
-	return () => clearInterval(interval);
+		if (viewMode !== "topology") return;
+		const interval = setInterval(() => {
+			triggerPulse();
+		}, 2400);
+		return () => clearInterval(interval);
 	}, [viewMode, triggerPulse]);
 
 	useEffect(() => {
-	const onPeerPulse = (event: Event) => {
-	const detail = (event as CustomEvent<{ fromPeerId?: string }>).detail;
-	if (!detail?.fromPeerId) return;
-	setRemotePeers((prev) => (prev.includes(detail.fromPeerId!) ? prev : [...prev, detail.fromPeerId!].slice(-24)));
-	triggerPulse();
-	};
-	window.addEventListener("muhanai:peer-pulse", onPeerPulse);
-	return () => window.removeEventListener("muhanai:peer-pulse", onPeerPulse);
+		const onPeerPulse = (event: Event) => {
+			const detail = (event as CustomEvent<{ fromPeerId?: string }>).detail;
+			if (!detail?.fromPeerId) return;
+			setRemotePeers((prev) =>
+				prev.includes(detail.fromPeerId!) ? prev : [...prev, detail.fromPeerId!].slice(-24),
+			);
+			triggerPulse();
+		};
+		window.addEventListener("muhanai:peer-pulse", onPeerPulse);
+		return () => window.removeEventListener("muhanai:peer-pulse", onPeerPulse);
 	}, [triggerPulse]);
 
 	const connectedEdgeCount = useMemo(() => {
@@ -214,10 +333,10 @@ export const PythiaVisualCanvas: React.FC<{
 				<div style={{ display: "flex", alignItems: "center", gap: 10 }}>
 					<Sparkles size={16} style={{ color: "#38bdf8" }} />
 					<span className="pythia-canvas-title">Visual Mesh & World Surface</span>
-						<span className="pythia-canvas-badge">
-					{viewMode === "topology"
-					? `${nodes.length} NODES · ${edges.length} LINKS · ${remotePeers.length} LIVE PEERS`
-					: "3D EARTH ENGINE"}
+					<span className="pythia-canvas-badge">
+						{viewMode === "topology"
+							? `${nodes.length} NODES · ${edges.length} LINKS · ${remotePeers.length} LIVE PEERS`
+							: "3D EARTH ENGINE"}
 					</span>
 				</div>
 
@@ -278,7 +397,8 @@ export const PythiaVisualCanvas: React.FC<{
 									const isHot =
 										hoveredNodeId === e.source ||
 										hoveredNodeId === e.target ||
-										(selectedNode && (selectedNode.id === e.source || selectedNode.id === e.target));
+										(selectedNode &&
+											(selectedNode.id === e.source || selectedNode.id === e.target));
 									return (
 										<line
 											key={`${e.source}-${e.target}-${idx}`}
@@ -327,13 +447,21 @@ export const PythiaVisualCanvas: React.FC<{
 												<circle
 													r={isCore ? 24 : 16}
 													className="pythia-node-halo"
-													stroke={isCore ? "#38bdf8" : n.status === "amplified" ? "#34d399" : "#a5b4fc"}
+													stroke={
+														isCore ? "#38bdf8" : n.status === "amplified" ? "#34d399" : "#a5b4fc"
+													}
 												/>
 											)}
 
 											{/* Node Core Geometry */}
 											{isCore ? (
-												<circle r={9} fill="#38bdf8" stroke="#ffffff" strokeWidth={2} filter="url(#glow)" />
+												<circle
+													r={9}
+													fill="#38bdf8"
+													stroke="#ffffff"
+													strokeWidth={2}
+													filter="url(#glow)"
+												/>
 											) : n.type === "compute" ? (
 												<rect
 													x={-6}
@@ -391,7 +519,12 @@ export const PythiaVisualCanvas: React.FC<{
 											</text>
 
 											{/* Sub-tag badge */}
-											<text x={0} y={isCore ? 31 : 27} textAnchor="middle" className="pythia-node-tag">
+											<text
+												x={0}
+												y={isCore ? 31 : 27}
+												textAnchor="middle"
+												className="pythia-node-tag"
+											>
 												{n.tag}
 											</text>
 										</g>
