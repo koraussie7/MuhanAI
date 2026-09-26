@@ -34,6 +34,11 @@ export interface ModelAnnouncementResult {
 
 const DEFAULT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
+export type ModelCatalogListener = (
+	envelope: ManifestEnvelope,
+	entry: ModelCatalogEntry,
+) => void;
+
 /**
  * Local model catalog populated by signed manifest announcements.
  *
@@ -44,12 +49,26 @@ const DEFAULT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
  */
 export class ModelCatalog {
 	private readonly entries = new Map<string, ModelCatalogEntry>();
+	private readonly listeners = new Set<ModelCatalogListener>();
 	private readonly maxAgeMs: number;
 	private readonly now: () => number;
 
 	constructor(options: ModelCatalogOptions = {}) {
 	this.maxAgeMs = options.maxAgeMs ?? DEFAULT_MAX_AGE_MS;
 	this.now = options.now ?? Date.now;
+	}
+
+	/**
+	 * Subscribe to accepted announcements. Returns an unsubscribe function.
+	 * Listeners are invoked synchronously inside `announce` and may throw —
+	 * throwing listeners do not affect the announcement's accept/reject
+	 * outcome.
+	 */
+	onAccept(listener: ModelCatalogListener): () => void {
+	this.listeners.add(listener);
+	return () => {
+		this.listeners.delete(listener);
+	};
 	}
 
 	/** Accept and index one wire envelope. Invalid/stale messages are ignored. */
@@ -77,6 +96,13 @@ export class ModelCatalog {
 	lastSeenAt: this.now(),
 	};
 	this.entries.set(key, entry);
+	for (const listener of this.listeners) {
+		try {
+			listener(checked.envelope, entry);
+		} catch {
+			// listener errors do not affect accept/reject outcome
+		}
+	}
 	return { accepted: true, entry };
 	}
 

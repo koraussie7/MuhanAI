@@ -9,13 +9,14 @@
 		"build": "tsc -p tsconfig.json",
 		"typecheck": "tsc -p tsconfig.json --noEmit",
 		"lint": "tsc -p tsconfig.json --noEmit",
-		"test": "cd ../.. && vitest run packages/bitterbot/src/model-catalog.test.ts"
+		"test": "cd ../.. && vitest run packages/bitterbot/src/model-catalog.test.ts packages/bitterbot/src/gossipsub-transport.test.ts packages/bitterbot/src/catalog-bridge.test.ts"
 	},
 	"dependencies": {
 		"@agentmesh/noema": "workspace:*",
 		"@agentmesh/peer-mesh": "workspace:*",
 		"@agentmesh/personal-mcp": "workspace:*",
-		"@agentmesh/shared-types": "workspace:*"
+		"@agentmesh/shared-types": "workspace:*",
+		"@agentmesh/llm-router": "workspace:*"
 	},
 	"devDependencies": {
 		"@types/node": "^22.0.0",

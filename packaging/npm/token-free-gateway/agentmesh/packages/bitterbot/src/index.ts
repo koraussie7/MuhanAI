@@ -9,5 +9,15 @@ export type {
 	ModelBeaconOptions,
 	ModelBeaconTransport,
 	ModelCatalogEntry,
+	ModelCatalogListener,
 	ModelCatalogOptions,
 } from "./model-catalog";
+export {
+	GossipsubModelBeaconTransport,
+	InMemoryModelBeaconTransport,
+	fromGossipsubTopic,
+	toGossipsubTopic,
+} from "./gossipsub-transport";
+export type { GossipsubLike, GossipsubTransportOptions } from "./gossipsub-transport";
+export { bridgeCatalogToNodeRegistry } from "./catalog-bridge";
+export type { CatalogBridge, CatalogBridgeOptions } from "./catalog-bridge";
