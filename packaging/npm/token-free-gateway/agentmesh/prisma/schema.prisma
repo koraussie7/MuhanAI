@@ -400,3 +400,189 @@ model TeachSubmission {
 
   @@index([status])
 }
+
+
+// ---------------------------------------------------------------------------
+// P2P Network Persistence
+// ---------------------------------------------------------------------------
+
+model PeerDescriptor {
+  id              String   @id // peerId
+  displayName     String?
+  protocol        String
+  addresses       String[] // multiaddrs as JSON array
+  capabilities    String[]
+  metadata        Json?
+  publicKey       String?  // base64 encoded Ed25519 public key
+  lastSeen        DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([protocol])
+  @@index([updatedAt])
+}
+
+model PeerConnection {
+  id          String        @id @default(cuid())
+  peerId      String
+  state       String        // disconnected, connecting, connected, reconnecting, closed
+  connectedAt DateTime?
+  latencyMs   Int?
+  lastSeen    DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([peerId])
+  @@index([state])
+}
+
+model PeerAddress {
+  id        String   @id @default(cuid())
+  peerId    String
+  address   String   // multiaddr string
+  addedAt   DateTime @default(now())
+
+  @@index([peerId])
+  @@unique([peerId, address])
+}
+
+model VisitorPeer {
+  id            String   @id // visitor id (e.g., browser-<uuid>)
+  token         String   @unique
+  capabilities  String[]
+  path          String
+  connectedAt   DateTime @default(now())
+  lastSeen      DateTime @default(now())
+  lastSeenAt    DateTime @default(now())
+  ipAddress     String?
+  userAgent     String?
+  relayMultiaddr String?
+
+  @@index([lastSeen])
+  @@index([token])
+}
+
+model PeerReputation {
+  id             String   @id // peerId
+  score          Float    @default(0.0)
+  alpha          Float    @default(1.0)
+  beta           Float    @default(1.0)
+  lastUpdated    DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([score])
+}
+
+// ---------------------------------------------------------------------------
+// P2P Message Queue (Redis Streams backed - persisted here for audit)
+// ---------------------------------------------------------------------------
+
+model P2PMessage {
+  id          String   @id @default(cuid())
+  messageId   String   @unique // P2PMessage.id
+  type        String
+  fromPeerId  String
+  toPeerId     String
+  payload      Json
+  timestamp    DateTime @default(now())
+  ttl          Int?      // seconds
+  replyTo      String?
+  signature    String?   // base64 Ed25519 signature
+  status       String    @default("pending") // pending, delivered, failed, expired
+  deliveredAt  DateTime?
+  createdAt    DateTime  @default(now())
+  deliveredAtNullable DateTime? @map("delivered_at")
+
+  @@index([fromPeerId])
+  @@index([toPeerId])
+  @@index([status])
+  @@index([timestamp])
+}
+
+model P2PMessageDelivery {
+  id          String   @id @default(cuid())
+  messageId   String
+  toPeerId     String
+  status       String   // delivered, failed
+  error        String?
+  deliveredAt  DateTime @default(now())
+
+  @@index([messageId])
+  @@index([toPeerId])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// P2P Credit Account Persistence (extends existing CreditWallet/Ledger)
+// ---------------------------------------------------------------------------
+
+model PeerCreditAccount {
+  id              String   @id // peerId
+  tier             String   @default("free") // free, contributor, power, unlimited
+  monthlyRewards   Int      @default(0)
+  baseAllocation   Int      @default(100)
+  carryOverPct     Float    @default(0.5)
+  balance          Int      @default(0)
+  reputation       Float    @default(0.0)
+  tierUpdatedAt    DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([tier])
+  @@index([reputation])
+}
+
+model CreditAllocationHistory {
+  id            String   @id @default(cuid())
+  peerId        String
+  previousTier  String?
+  newTier       String
+  previousBalance Int
+  newBalance    Int
+  monthlyRewards Int
+  reputation    Float
+  reason        String    // monthly_rollover, reputation_change, manual
+  createdAt     DateTime  @default(now())
+
+  @@index([peerId])
+  @@index([createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// OpenTelemetry Tracing Spans (for distributed tracing audit)
+// ---------------------------------------------------------------------------
+
+model TraceSpan {
+  id           String   @id @default(cuid())
+  traceId      String
+  spanId       String
+  parentSpanId String?
+  operation    String
+  serviceName  String
+  startTime    DateTime
+  endTime      DateTime?
+  durationMs   Int?
+  status       String   @default("ok") // ok, error
+  errorMessage String?
+  attributes   Json?
+  createdAt    DateTime @default(now())
+
+  @@index([traceId])
+  @@index([spanId])
+  @@index([serviceName, operation])
+  @@index([startTime])
+}
+
+model TraceEvent {
+  id        String   @id @default(cuid())
+  traceId   String
+  spanId    String
+  time      DateTime
+  name      String
+  attributes Json?
+  createdAt DateTime @default(now())
+
+  @@index([traceId])
+  @@index([spanId])
+  @@index([time])
+}

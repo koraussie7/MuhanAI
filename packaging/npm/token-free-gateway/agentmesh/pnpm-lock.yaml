@@ -370,6 +370,13 @@ importers:
       '@agentmesh/core':
         specifier: workspace:*
         version: link:../core
+      '@agentmesh/noema':
+        specifier: workspace:*
+        version: link:../noema
+    devDependencies:
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.4)(lightningcss@1.32.0)(terser@5.51.2)
 
   packages/category-engine:
     dependencies:
@@ -674,6 +681,9 @@ importers:
 
   packages/llm-router:
     dependencies:
+      '@agentmesh/bitterbot':
+        specifier: workspace:*
+        version: link:../bitterbot
       '@agentmesh/peer-mesh':
         specifier: workspace:*
         version: link:../peer-mesh
@@ -979,6 +989,9 @@ importers:
       '@noble/curves':
         specifier: ^1.9.0
         version: 1.9.7
+      json-canonicalize:
+        specifier: ^3.0.1
+        version: 3.0.1
       multiformats:
         specifier: ^13.0.0
         version: 13.4.2
@@ -5096,6 +5109,10 @@ packages:
     resolution: {integrity: sha512-/sM3dO2FOzXjKQhJuo0Q173wf2KOo8t4I8vHy6lF9poUp7bKT0/NHE8fPX23PwfhnykfqnC2xRxOnVw5XuGIaA==}
     engines: {node: '>=6'}
     hasBin: true
+
+  json-canonicalize@3.0.1:
+    resolution: {integrity: sha512-xEzkTucfHhDooWOSMOvrlll9oTk6/mXZIerF2DFWA2chHZsnc2zrmAKjVOyDbSYHr0e3Djx9F89nZ3U2Bn+lSw==}
+    engines: {node: '>=8.5'}
 
   json-parse-even-better-errors@2.3.1:
     resolution: {integrity: sha512-xyFwyhro/JEof6Ghe2iz2NcXoj2sloNsWr/XsERDK/oiPCfaNhl5ONfp+jQdAZRQQ0IJWNzH9zIZF7li91kh2w==}
@@ -11664,6 +11681,8 @@ snapshots:
   jsc-safe-url@0.2.4: {}
 
   jsesc@3.1.0: {}
+
+  json-canonicalize@3.0.1: {}
 
   json-parse-even-better-errors@2.3.1: {}
 
