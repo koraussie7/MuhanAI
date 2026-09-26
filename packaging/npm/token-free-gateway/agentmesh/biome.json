@@ -3,15 +3,16 @@
 	"files": {
 		"includes": [
 			"**",
-			"!**/dist/**",
-			"!**/.next/**",
-			"!**/.nx/**",
-			"!**/.wrangler/**",
-			"!**/build/**",
-			"!**/node_modules/**",
-			"!**/coverage/**",
-			"!**/.agentmesh/**",
-			"!**/prisma/migrations/**",
+			"!**/dist",
+			"!**/.next",
+			"!**/.nx",
+			"!**/.wrangler",
+			"!**/build",
+			"!**/node_modules",
+			"!**/coverage",
+			"!**/.agentmesh",
+			"!**/prisma/migrations",
+			"!**/blog",
 			"!**/apps/desktop/src/components/DesktopApps.tsx",
 			"!**/apps/web/src/components/WebDesktopPage.tsx"
 		]

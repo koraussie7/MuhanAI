@@ -55,3 +55,30 @@ agentmesh-identity.json
 *.sqlite
 *.sqlite3
 database.db
+
+# Python bytecode caches
+__pycache__/
+*.pyc
+
+# pnpm content-addressable store (local-only)
+.pnpm-store/
+
+# IDE/agent scratch dirs
+.kilo/
+
+# Generated bundles produced at repo root by deploy scripts
+# (the agentmesh-scoped equivalents are ignored in agentmesh/.gitignore)
+dist-shop1/
+officeDist/
+radata/
+
+# Duplicate / scratch trees kept out of the repo:
+#   web-app/        — older duplicate of packaging/.../agentmesh/apps/web
+#                      (see docs/INTEGRATION-PLAN.md for the migration plan)
+#   grok-workspace/ — vendored third-party agent workspace
+#   genesis-kernel/ — reverse-engineering scratch artifacts (binaries)
+#   auth-changes/   — ad-hoc auth patch scratch files
+web-app/
+grok-workspace/
+genesis-kernel/
+auth-changes/

@@ -1,4 +1,0 @@
-
-> @agentmesh/llm-router@0.1.0 typecheck /Users/brianyeon/muhanai/muhanai/packaging/npm/token-free-gateway/agentmesh/packages/llm-router
-> tsc -p tsconfig.json --noEmit
-

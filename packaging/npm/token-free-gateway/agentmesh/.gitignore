@@ -23,3 +23,9 @@ dist-shop1/
 # danang directory bundle & crawl cache
 dist-danang/
 deploy/.ekoreatown/
+
+# ad-hoc one-off deploy fixup scripts (not part of the deploy pipeline)
+deploy/.fix*.mjs
+deploy/.patch-*.mjs
+# stray bun lockfiles — this workspace is managed by pnpm (packageManager: pnpm@10)
+bun.lock
