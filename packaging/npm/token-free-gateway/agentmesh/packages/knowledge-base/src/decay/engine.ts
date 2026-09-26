@@ -14,7 +14,7 @@
 //
 // MIT — uses fsrs.ts ported from stellavault v0.9.0.
 
-import { FSRS_PARAMS, computeRetrievability, updateStability } from "./fsrs.js";
+import { computeRetrievability, FSRS_PARAMS, updateStability } from "./fsrs.js";
 
 export type AccessType = "search" | "view" | "edit" | "share";
 

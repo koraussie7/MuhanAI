@@ -1,0 +1,19 @@
+{
+	"name": "@agentmesh/anycast-adapter",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "tsc",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"agentanycast": "^0.8.1"
+	},
+	"devDependencies": {
+		"@types/node": "^22.0.0",
+		"typescript": "^5.7.0",
+		"vitest": "^2.0.0"
+	}
+}

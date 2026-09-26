@@ -34,7 +34,12 @@ export class WeKnoraClient {
 	private readonly timeoutMs: number;
 	private readonly fetchImpl: typeof fetch;
 
-	constructor(opts: { baseUrl: string; apiKey?: string; timeoutMs?: number; fetchImpl?: typeof fetch }) {
+	constructor(opts: {
+		baseUrl: string;
+		apiKey?: string;
+		timeoutMs?: number;
+		fetchImpl?: typeof fetch;
+	}) {
 		this.baseUrl = opts.baseUrl.replace(/\/+$/, "");
 		this.apiKey = opts.apiKey ?? "";
 		this.timeoutMs = opts.timeoutMs ?? 60_000;
@@ -123,46 +128,60 @@ export class WeKnoraClient {
 		if (!res.ok && res.status !== 201) throw new Error(`WeKnora wiki create failed: ${res.status}`);
 	}
 
-	async listWikiPages(kbId: string): Promise<Array<{
-		pageId: string;
-		title: string;
-		content: string;
-		revisionId?: string;
-		updatedAt?: string;
-		links?: string[];
-	}>> {
-		const res = await this.request(`GET`, `/api/v1/knowledge_base/${encodeURIComponent(kbId)}/wiki`);
-		if (!res.ok) throw new Error(`WeKnora wiki list failed: ${res.status}`);
-		const data = (await res.json()) as { pages?: Array<{
+	async listWikiPages(kbId: string): Promise<
+		Array<{
 			pageId: string;
 			title: string;
 			content: string;
 			revisionId?: string;
 			updatedAt?: string;
 			links?: string[];
-		}> };
+		}>
+	> {
+		const res = await this.request(
+			`GET`,
+			`/api/v1/knowledge_base/${encodeURIComponent(kbId)}/wiki`,
+		);
+		if (!res.ok) throw new Error(`WeKnora wiki list failed: ${res.status}`);
+		const data = (await res.json()) as {
+			pages?: Array<{
+				pageId: string;
+				title: string;
+				content: string;
+				revisionId?: string;
+				updatedAt?: string;
+				links?: string[];
+			}>;
+		};
 		return data.pages ?? [];
 	}
 
-	async getWikiRevisions(kbId: string, pageId: string): Promise<Array<{
-		pageId: string;
-		title: string;
-		content: string;
-		revisionId?: string;
-		updatedAt?: string;
-	}>> {
-		const res = await this.request(
-			`GET`,
-			`/api/v1/knowledge_base/${encodeURIComponent(kbId)}/wiki/${encodeURIComponent(pageId)}/revisions`,
-		);
-		if (!res.ok) throw new Error(`WeKnora wiki revisions failed: ${res.status}`);
-		const data = (await res.json()) as { revisions?: Array<{
+	async getWikiRevisions(
+		kbId: string,
+		pageId: string,
+	): Promise<
+		Array<{
 			pageId: string;
 			title: string;
 			content: string;
 			revisionId?: string;
 			updatedAt?: string;
-		}> };
+		}>
+	> {
+		const res = await this.request(
+			`GET`,
+			`/api/v1/knowledge_base/${encodeURIComponent(kbId)}/wiki/${encodeURIComponent(pageId)}/revisions`,
+		);
+		if (!res.ok) throw new Error(`WeKnora wiki revisions failed: ${res.status}`);
+		const data = (await res.json()) as {
+			revisions?: Array<{
+				pageId: string;
+				title: string;
+				content: string;
+				revisionId?: string;
+				updatedAt?: string;
+			}>;
+		};
 		return data.revisions ?? [];
 	}
 

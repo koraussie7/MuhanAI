@@ -43,14 +43,10 @@ export class WeKnoraMemorySync {
 	}
 
 	async extractFacts(userId: string, sessionId: string): Promise<WeKnoraMemoryFact[]> {
-		const res = await this.request(
-			"POST",
-			`/api/v1/memory/${encodeURIComponent(userId)}/extract`,
-			{
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ session_id: sessionId }),
-			},
-		);
+		const res = await this.request("POST", `/api/v1/memory/${encodeURIComponent(userId)}/extract`, {
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ session_id: sessionId }),
+		});
 		if (!res.ok) {
 			if (res.status === 404) return [];
 			throw new Error(`WeKnora memory extract failed: ${res.status}`);
@@ -69,7 +65,11 @@ export class WeKnoraMemorySync {
 		}
 	}
 
-	async searchMemories(userId: string, query: string, limit = 10): Promise<WeKnoraMemorySearchResult> {
+	async searchMemories(
+		userId: string,
+		query: string,
+		limit = 10,
+	): Promise<WeKnoraMemorySearchResult> {
 		const res = await this.request(
 			"GET",
 			`/api/v1/memory/${encodeURIComponent(userId)}/search?q=${encodeURIComponent(query)}&limit=${limit}`,

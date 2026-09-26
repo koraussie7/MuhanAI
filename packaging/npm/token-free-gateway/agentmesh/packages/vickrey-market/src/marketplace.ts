@@ -9,18 +9,14 @@
  */
 
 import {
-	createBidCommitment,
-	generateNonce,
-	type BidCommitment,
-} from "./commitment.js";
-import {
-	VickreyAuction,
 	type AuctionListing,
 	type AuctionPhase,
 	type AuctionResult,
 	type PostedCommitment,
 	type PostedReveal,
+	VickreyAuction,
 } from "./auction.js";
+import { type BidCommitment, createBidCommitment, generateNonce } from "./commitment.js";
 
 export interface CreateListingInput {
 	id: string;

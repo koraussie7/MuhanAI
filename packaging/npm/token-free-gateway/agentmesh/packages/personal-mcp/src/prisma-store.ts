@@ -8,24 +8,26 @@
  *   export const userKnowledgeStore = new PrismaUserKnowledgeStore(prisma);
  */
 
-import type { Prisma, PrismaClient } from "@prisma/client";
-import type { CategoryContext, SourceType, Visibility } from "@agentmesh/shared-types";
 import type {
 	AddExpertiseInput,
 	AddMemoryInput,
 	AgentReference,
+	CategoryContext,
 	CreateUserKnowledgeOptions,
 	Expertise,
 	KnowledgeNode,
 	KnowledgePermissions,
 	MemoryNode,
 	Skill,
+	SourceType,
 	Tool,
 	UpsertKnowledgeInput,
 	UserKnowledgeObject,
 	UserProfile,
 	UserStats,
+	Visibility,
 } from "@agentmesh/shared-types";
+import type { Prisma, PrismaClient } from "@prisma/client";
 
 type SourceTypeT = SourceType;
 type VisibilityT = Visibility;

@@ -1,13 +1,13 @@
+import { p2pNodeRegistry } from "@agentmesh/llm-router";
 import type {
-	DeviceNodeInfo,
+	ClusterConfig,
 	DeviceCapabilities,
 	DeviceMetrics,
-	ClusterConfig,
+	DeviceNodeInfo,
 	InferenceRequest,
 	InferenceResponse,
 	InferenceResult,
 } from "@agentmesh/peer-mesh";
-import { p2pNodeRegistry } from "@agentmesh/llm-router";
 
 export const DEVICE_HEARTBEAT_INTERVAL_MS = 5_000;
 export const DEVICE_NODE_TIMEOUT_MS = 30_000;
@@ -34,8 +34,7 @@ export class DeviceNodeDaemon {
 
 	constructor(opts: DeviceNodeDaemonOptions) {
 		this.onInference = opts.onInference;
-		this.heartbeatIntervalMs =
-			opts.config?.healthCheckInterval ?? DEVICE_HEARTBEAT_INTERVAL_MS;
+		this.heartbeatIntervalMs = opts.config?.healthCheckInterval ?? DEVICE_HEARTBEAT_INTERVAL_MS;
 		this.nodeInfo = {
 			id: opts.nodeId,
 			peerId: opts.nodeId,

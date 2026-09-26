@@ -18,8 +18,8 @@
  * uses internally.
  */
 
-import type { ComputerUseAction, ComputerUseStep } from "./e2b-computer-use.js";
 import type { VisionClient } from "./e2b-adapter.js";
+import type { ComputerUseAction, ComputerUseStep } from "./e2b-computer-use.js";
 
 export type ByokProviderId = "openai" | "google" | "groq" | "openrouter";
 
@@ -36,13 +36,11 @@ export interface CreateByokVisionProviderOptions {
 	signal?: AbortSignal;
 }
 
-export interface PlanActionFn {
-	(opts: {
-		goal: string;
-		imageBase64: string;
-		history: ReadonlyArray<ComputerUseStep>;
-	}): Promise<ComputerUseAction>;
-}
+export type PlanActionFn = (opts: {
+	goal: string;
+	imageBase64: string;
+	history: ReadonlyArray<ComputerUseStep>;
+}) => Promise<ComputerUseAction>;
 
 export interface ByokVisionProvider extends VisionClient {
 	planAction: PlanActionFn;
@@ -68,7 +66,9 @@ const PROVIDER_ENDPOINTS: Record<ByokProviderId, { chat: string; messages?: stri
 	openrouter: { chat: "https://openrouter.ai/api/v1/chat/completions" },
 };
 
-export function createByokVisionProvider(opts: CreateByokVisionProviderOptions): ByokVisionProvider {
+export function createByokVisionProvider(
+	opts: CreateByokVisionProviderOptions,
+): ByokVisionProvider {
 	if (!opts.apiKey) {
 		throw new Error("createByokVisionProvider: apiKey is required");
 	}
@@ -87,10 +87,12 @@ export function createByokVisionProvider(opts: CreateByokVisionProviderOptions):
 	throw new Error(`createByokVisionProvider: unknown provider "${opts.provider}"`);
 }
 
-function createOpenAiCompatible(opts: CreateByokVisionProviderOptions & {
-	planModel: string;
-	locateModel: string;
-}): ByokVisionProvider {
+function createOpenAiCompatible(
+	opts: CreateByokVisionProviderOptions & {
+		planModel: string;
+		locateModel: string;
+	},
+): ByokVisionProvider {
 	const endpoint = opts.endpoint ?? PROVIDER_ENDPOINTS[opts.provider].chat;
 	const headers: Record<string, string> = {
 		"Content-Type": "application/json",
@@ -179,10 +181,12 @@ function createOpenAiCompatible(opts: CreateByokVisionProviderOptions & {
 	};
 }
 
-function createGoogleVision(opts: CreateByokVisionProviderOptions & {
-	planModel: string;
-	locateModel: string;
-}): ByokVisionProvider {
+function createGoogleVision(
+	opts: CreateByokVisionProviderOptions & {
+		planModel: string;
+		locateModel: string;
+	},
+): ByokVisionProvider {
 	const endpoint = opts.endpoint ?? PROVIDER_ENDPOINTS.google.chat;
 	const urlFor = (model: string) =>
 		`${endpoint}/${model}:generateContent?key=${encodeURIComponent(opts.apiKey)}`;

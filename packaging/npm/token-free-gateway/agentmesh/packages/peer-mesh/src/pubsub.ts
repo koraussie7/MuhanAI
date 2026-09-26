@@ -1,18 +1,11 @@
 /**
- * libp2p pubsub factory — FLOODSUB (D1 from INTEGRATED-CODE-PLAN.md).
+ * libp2p pubsub factory — GOSSIPSUB (S1 migration from floodsub).
  *
- * Rationale (verbatim from folklore/peer-transport.ts:26-32):
- *   "Gossipsub 14.x still targets @libp2p/interface v2 while folklore uses
- *    v3, so floodsub is the right fit until @chainsafe ships a v3-compatible
- *    gossipsub release. The service API is identical so upgrading later is a
- *    one-line swap."
- *
- * When @chainsafe ships a v3-compatible gossipsub, replace the body of
- * `createPubSub()` with `gossipsub()`. The PULSE_TOPIC / PulseMessage
- * shape stays the same.
+ * Rationale: @libp2p/gossipsub now supports @libp2p/interface v3.
+ * The service API is identical so upgrading is a one-line swap.
  */
 
-import { floodsub } from "@libp2p/floodsub";
+import { gossipsub } from "@libp2p/gossipsub";
 
 export const PULSE_TOPIC = "/agentmesh/pulse/1.0.0";
 
@@ -24,14 +17,20 @@ export interface PulseMessage {
 	fromPeerId: string;
 	payload: unknown;
 	ts: number;
+	signature?: string; // Ed25519 signature of the canonical JSON (excluding signature field)
 }
 
-export function createPubSub(): ReturnType<typeof floodsub> {
-	return floodsub();
+export function createPubSub(): ReturnType<typeof gossipsub> {
+	return gossipsub({
+		allowPublishToZeroTopicPeers: true,
+		emitSelf: true,
+	});
 }
 
 export function encodePulse(msg: PulseMessage): Uint8Array {
-	return new TextEncoder().encode(JSON.stringify(msg));
+	// For signing, we need canonical JSON without the signature field.
+	const { signature, ...msgWithoutSig } = msg;
+	return new TextEncoder().encode(JSON.stringify(msgWithoutSig));
 }
 
 export function decodePulse(data: Uint8Array): PulseMessage | null {
@@ -55,6 +54,7 @@ export function decodePulse(data: Uint8Array): PulseMessage | null {
 			fromPeerId: obj.fromPeerId,
 			payload: obj.payload,
 			ts: obj.ts,
+			signature: obj.signature,
 		};
 	} catch {
 		return null;
@@ -64,7 +64,7 @@ export function decodePulse(data: Uint8Array): PulseMessage | null {
 /**
  * A producer of pulse messages — the libp2p-agnostic contract that callers
  * (e.g. services/api's PulseBridge) consume. Concrete implementations wrap
- * `@libp2p/floodsub` (or future gossipsub) into this shape.
+ * `@libp2p/gossipsub` into this shape.
  *
  * Returned unsubscribe MUST be idempotent and safe to call multiple times.
  */

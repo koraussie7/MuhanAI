@@ -1,5 +1,11 @@
 import type { Tool } from "@agentmesh/shared-types";
-import { getFolkloreMcpClient, FolkloreUnavailableError } from "./folklore-mcp-client";
+import { FolkloreUnavailableError, getFolkloreMcpClient } from "./folklore-mcp-client";
+import {
+	getHotelMcpClient,
+	HotelMcpUnavailableError,
+	type HotelSearchParams,
+	isHotelMcpAvailable,
+} from "./hotel-mcp-client";
 import { getHoundMcpClient, HoundUnavailableError } from "./hound-mcp-client";
 import { personalKnowledgeService } from "./knowledge";
 import { personalMemoryService } from "./memory";
@@ -10,7 +16,6 @@ import {
 	type SearchResult,
 	weknoraMcpClient,
 } from "./weknora-mcp-client";
-import { getHotelMcpClient, type HotelSearchParams, HotelMcpUnavailableError, isHotelMcpAvailable } from "./hotel-mcp-client";
 
 export const PERSONAL_MCP_TOOLS: Tool[] = [
 	{
@@ -302,8 +307,7 @@ export const PERSONAL_MCP_TOOLS: Tool[] = [
 	{
 		id: "hotel_search",
 		name: "hotel_search",
-		description:
-			"Search hotels via Google Hotels API. Requires HOTEL_API_BASE_URL env var.",
+		description: "Search hotels via Google Hotels API. Requires HOTEL_API_BASE_URL env var.",
 		inputSchema: {
 			type: "object",
 			properties: {
@@ -658,7 +662,7 @@ export async function executePersonalTool(
 			return client.listCombos();
 		}
 
-case "hotel_search": {
+		case "hotel_search": {
 			const client = getHotelMcpClient();
 			if (!isHotelMcpAvailable()) {
 				return { hotels: [], totalCount: 0, fallback: "hotel_api_unconfigured" };
@@ -671,7 +675,10 @@ case "hotel_search": {
 					adults: typeof args.adults === "number" ? args.adults : 2,
 					children: typeof args.children === "number" ? args.children : 0,
 					currency: typeof args.currency === "string" ? args.currency : "KRW",
-					sortBy: typeof args.sortBy === "string" ? args.sortBy as "price" | "rating" | "distance" : undefined,
+					sortBy:
+						typeof args.sortBy === "string"
+							? (args.sortBy as "price" | "rating" | "distance")
+							: undefined,
 				};
 				return client.searchHotels(params);
 			} catch (err) {

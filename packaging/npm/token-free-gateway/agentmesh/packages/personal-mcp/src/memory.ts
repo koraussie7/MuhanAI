@@ -40,7 +40,12 @@ export class PersonalMemoryService {
 	async add(
 		userId: string,
 		content: string,
-		options?: { context?: CategoryContext; importance?: number; memoryType?: MemoryType; source?: "user" | "weknora_extracted" },
+		options?: {
+			context?: CategoryContext;
+			importance?: number;
+			memoryType?: MemoryType;
+			source?: "user" | "weknora_extracted";
+		},
 	): Promise<MemoryNode> {
 		const store = await getKnowledgeStore();
 		await store.getOrCreate(userId);
@@ -90,7 +95,11 @@ export class PersonalMemoryService {
 		}
 	}
 
-	async searchWeKnoraMemories(userId: string, query: string, limit = 10): Promise<WeKnoraMemoryFact[]> {
+	async searchWeKnoraMemories(
+		userId: string,
+		query: string,
+		limit = 10,
+	): Promise<WeKnoraMemoryFact[]> {
 		const sync = createWeKnoraMemorySync();
 		if (!sync) return [];
 		try {
@@ -103,4 +112,3 @@ export class PersonalMemoryService {
 }
 
 export const personalMemoryService = new PersonalMemoryService();
-

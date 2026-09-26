@@ -1,3 +1,4 @@
+import type { CastResult, CategoryContext } from "@agentmesh/shared-types";
 import { agentCast } from "../../agent-cast/src";
 import { agentRegistry } from "../../agent-core/src/registry";
 import { listAgentRuns } from "../../agent-core/src/run-store";
@@ -5,7 +6,6 @@ import { agentMesh, DomainAgent } from "../../agent-mesh/src";
 import { categoryRouter } from "../../category-engine/src/router";
 import { hybridSearch } from "../../knowledge-base/src/hybrid-search";
 import { personalMcpRegistry } from "../../personal-mcp/src/server";
-import type { CastResult, CategoryContext } from "@agentmesh/shared-types";
 
 export interface RouteResult {
 	category: CategoryContext & { confidence?: number };

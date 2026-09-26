@@ -7,7 +7,7 @@
  * "what is true now" and "what was true at sequence N".
  */
 
-import { amplify, statusForScore, type ReactionSample } from "./amplification.js";
+import { amplify, type ReactionSample, statusForScore } from "./amplification.js";
 import { conceptIdsOf } from "./log.js";
 import { createConcept, observeConcept, projectRelation, relationId } from "./ontology.js";
 import type {

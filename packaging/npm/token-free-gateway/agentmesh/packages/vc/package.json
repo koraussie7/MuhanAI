@@ -1,0 +1,26 @@
+{
+	"name": "@agentmesh/vc",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"main": "src/index.ts",
+	"types": "src/index.ts",
+	"scripts": {
+		"build": "tsc -p tsconfig.json",
+		"typecheck": "tsc -p tsconfig.json --noEmit",
+		"lint": "tsc -p tsconfig.json --noEmit",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@agentmesh/core": "workspace:*",
+		"@agentmesh/credit-system": "workspace:*",
+		"@noble/curves": "^1.9.0",
+		"json-canonicalize": "^3.0.1",
+		"multiformats": "^13.0.0",
+		"uint8arrays": "^5.0.0"
+	},
+	"devDependencies": {
+		"typescript": "^5.7.2",
+		"vitest": "^2.1.8"
+	}
+}

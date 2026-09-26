@@ -9,10 +9,10 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { a2uiSurfaceBuilder } from "./a2ui-surface.js";
 // The store input lives in deploy/shop1-store.ts so the deployed site and
 // this asserted contract share one source of truth. See deploy/deploy-shop1.mts.
 import { SHOP1 } from "../../../deploy/shop1-store.js";
+import { a2uiSurfaceBuilder } from "./a2ui-surface.js";
 import { hugoMcpFactory } from "./hugo-factory.js";
 
 describe("shop1.kbizhub.com — 초원식당 sample site", () => {

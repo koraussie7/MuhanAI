@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { SippEngine } from "../src/sipp/sipp-engine";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { AIEngineFactory } from "../src/factory";
+import { SippEngine } from "../src/sipp/sipp-engine";
 
 describe("AIEngineFactory", () => {
 	it("should create SippEngine", () => {

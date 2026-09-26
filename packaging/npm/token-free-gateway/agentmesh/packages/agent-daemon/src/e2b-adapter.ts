@@ -49,10 +49,7 @@ export interface E2bSandboxLike {
  */
 export interface VisionClient {
 	/** Return JSON text from a vision model given base64 PNG + prompt. */
-	locate(opts: {
-		imageBase64: string;
-		prompt: string;
-	}): Promise<{ x: number; y: number } | null>;
+	locate(opts: { imageBase64: string; prompt: string }): Promise<{ x: number; y: number } | null>;
 }
 
 export interface E2bBrowserAdapterOptions {

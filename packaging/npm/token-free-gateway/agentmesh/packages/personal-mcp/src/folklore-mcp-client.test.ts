@@ -1,12 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EventEmitter } from "node:events";
 import type { Readable, Writable } from "node:stream";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+	__resetFolkloreMcpClientForTests,
 	FolkloreCallError,
 	FolkloreMcpClient,
 	FolkloreUnavailableError,
 	getFolkloreMcpClient,
-	__resetFolkloreMcpClientForTests,
 } from "./folklore-mcp-client.js";
 
 interface FakeStdio extends EventEmitter {
@@ -120,7 +120,11 @@ describe("FolkloreMcpClient", () => {
 			`${JSON.stringify({
 				jsonrpc: "2.0",
 				id: initReq?.["id"],
-				result: { ok: true, protocolVersion: "2024-11-05", serverInfo: { name: "folklore", version: "0.0.1" } },
+				result: {
+					ok: true,
+					protocolVersion: "2024-11-05",
+					serverInfo: { name: "folklore", version: "0.0.1" },
+				},
 			})}\n`,
 		);
 	}

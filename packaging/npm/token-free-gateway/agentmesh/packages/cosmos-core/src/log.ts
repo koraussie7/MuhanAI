@@ -14,12 +14,7 @@
 
 import { randomUUID } from "node:crypto";
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
-import type {
-	AppendOnlyLog,
-	CosmosEvent,
-	CosmosEventInput,
-	EventFilter,
-} from "./types.js";
+import type { AppendOnlyLog, CosmosEvent, CosmosEventInput, EventFilter } from "./types.js";
 
 // ---------------------------------------------------------------------------
 // Filtering
@@ -309,4 +304,3 @@ export function createJsonlLog(path: string): AppendOnlyLog {
 		},
 	};
 }
-

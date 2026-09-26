@@ -1,4 +1,12 @@
 export {
+	type A2UISurfaceState,
+	type A2UIValidationResult,
+	applyA2UI,
+	parseA2UIJsonl,
+	validateA2UI,
+	validateA2UITree,
+} from "./a2ui-runtime.js";
+export {
 	A2UI_BASIC_CATALOG,
 	A2UI_OPS_CATALOG,
 	A2UI_VERSION,
@@ -10,14 +18,6 @@ export {
 	type StoreSurfaceInput,
 	type Trend,
 } from "./a2ui-surface.js";
-export {
-	applyA2UI,
-	parseA2UIJsonl,
-	validateA2UI,
-	validateA2UITree,
-	type A2UIValidationResult,
-	type A2UISurfaceState,
-} from "./a2ui-runtime.js";
 export {
 	type FactorySpawnResult,
 	HugoMcpFactory,

@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
 	DEFAULT_MCAST_ADDR,
 	DEFAULT_MCAST_PORT,
-	UdpDiscovery,
 	type DiscoveryEnvelope,
+	UdpDiscovery,
 } from "./udp-discovery.js";
 
 const PEER_A = "a".repeat(64);
@@ -48,7 +48,9 @@ describe("UdpDiscovery", () => {
 			).toBeNull();
 			expect(
 				UdpDiscovery.decode(
-					new TextEncoder().encode(JSON.stringify({ v: 1, kind: "BOGUS", peerId: PEER_A, nonce: 1, ts: 0 })),
+					new TextEncoder().encode(
+						JSON.stringify({ v: 1, kind: "BOGUS", peerId: PEER_A, nonce: 1, ts: 0 }),
+					),
 				),
 			).toBeNull();
 			expect(

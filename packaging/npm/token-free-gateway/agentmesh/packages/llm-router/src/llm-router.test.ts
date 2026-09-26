@@ -90,10 +90,10 @@ describe("LLMRouter OpenAI base URL wiring (OmniRoute scenario 2)", () => {
 
 	test("honors OPENAI_BASE_URL when constructing the client", async () => {
 		const fakeClient = buildFakeOpenAIClient(SUCCESS_RESPONSE);
-		const { llmRouter, captured } = await loadRouterWithOpenAIStub(
-			() => fakeClient,
-			{ OPENAI_API_KEY: "sk-test", OPENAI_BASE_URL: "http://localhost:20128/v1" },
-		);
+		const { llmRouter, captured } = await loadRouterWithOpenAIStub(() => fakeClient, {
+			OPENAI_API_KEY: "sk-test",
+			OPENAI_BASE_URL: "http://localhost:20128/v1",
+		});
 
 		const res = await llmRouter.generate({ prompt: "hi", provider: "openai" });
 
@@ -107,10 +107,10 @@ describe("LLMRouter OpenAI base URL wiring (OmniRoute scenario 2)", () => {
 
 	test("honors OMNIROUTE_BASE_URL as a fallback alias", async () => {
 		const fakeClient = buildFakeOpenAIClient(SUCCESS_RESPONSE);
-		const { llmRouter, captured } = await loadRouterWithOpenAIStub(
-			() => fakeClient,
-			{ OPENAI_API_KEY: "sk-test", OMNIROUTE_BASE_URL: "http://localhost:20128/v1" },
-		);
+		const { llmRouter, captured } = await loadRouterWithOpenAIStub(() => fakeClient, {
+			OPENAI_API_KEY: "sk-test",
+			OMNIROUTE_BASE_URL: "http://localhost:20128/v1",
+		});
 
 		await llmRouter.generate({ prompt: "hi", provider: "openai" });
 
@@ -119,14 +119,11 @@ describe("LLMRouter OpenAI base URL wiring (OmniRoute scenario 2)", () => {
 
 	test("OPENAI_BASE_URL takes precedence over OMNIROUTE_BASE_URL", async () => {
 		const fakeClient = buildFakeOpenAIClient(SUCCESS_RESPONSE);
-		const { llmRouter, captured } = await loadRouterWithOpenAIStub(
-			() => fakeClient,
-			{
-				OPENAI_API_KEY: "sk-test",
-				OPENAI_BASE_URL: "http://primary.example/v1",
-				OMNIROUTE_BASE_URL: "http://fallback.example/v1",
-			},
-		);
+		const { llmRouter, captured } = await loadRouterWithOpenAIStub(() => fakeClient, {
+			OPENAI_API_KEY: "sk-test",
+			OPENAI_BASE_URL: "http://primary.example/v1",
+			OMNIROUTE_BASE_URL: "http://fallback.example/v1",
+		});
 
 		await llmRouter.generate({ prompt: "hi", provider: "openai" });
 
@@ -135,10 +132,9 @@ describe("LLMRouter OpenAI base URL wiring (OmniRoute scenario 2)", () => {
 
 	test("omits baseURL when neither env var is set (default OpenAI)", async () => {
 		const fakeClient = buildFakeOpenAIClient(SUCCESS_RESPONSE);
-		const { llmRouter, captured } = await loadRouterWithOpenAIStub(
-			() => fakeClient,
-			{ OPENAI_API_KEY: "sk-test" },
-		);
+		const { llmRouter, captured } = await loadRouterWithOpenAIStub(() => fakeClient, {
+			OPENAI_API_KEY: "sk-test",
+		});
 
 		await llmRouter.generate({ prompt: "hi", provider: "openai" });
 

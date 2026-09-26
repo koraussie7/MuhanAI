@@ -20,11 +20,11 @@
  * the launcher is a no-op passthrough, so a single command works everywhere.
  */
 
-import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-import { existsSync } from "node:fs";
-import type { Readable, Writable } from "node:stream";
 import { spawn as defaultChildSpawn } from "node:child_process";
+import { existsSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import type { Readable, Writable } from "node:stream";
+import { fileURLToPath } from "node:url";
 
 export type FolkloreChildProcess = ReturnType<typeof defaultChildSpawn>;
 
@@ -138,7 +138,11 @@ export class FolkloreMcpClient {
 	/** Pending responses keyed by request id. */
 	private readonly pending = new Map<
 		number,
-		{ resolve: (value: unknown) => void; reject: (err: unknown) => void; timer: ReturnType<typeof setTimeout> }
+		{
+			resolve: (value: unknown) => void;
+			reject: (err: unknown) => void;
+			timer: ReturnType<typeof setTimeout>;
+		}
 	>();
 	private nextId = 1;
 	private initialized = false;
@@ -306,7 +310,10 @@ export class FolkloreMcpClient {
 		}
 	}
 
-	private async sendRequest<T>(method: string, params: Record<string, unknown> | undefined): Promise<T> {
+	private async sendRequest<T>(
+		method: string,
+		params: Record<string, unknown> | undefined,
+	): Promise<T> {
 		const proc = await this.ensureProc();
 		const id = this.nextId++;
 		const msg = { jsonrpc: "2.0", id, method, params };
@@ -345,7 +352,10 @@ export class FolkloreMcpClient {
 		this.initialized = true;
 	}
 
-	private async sendNotification(method: string, params: Record<string, unknown> | undefined): Promise<void> {
+	private async sendNotification(
+		method: string,
+		params: Record<string, unknown> | undefined,
+	): Promise<void> {
 		const proc = await this.ensureProc();
 		const msg = { jsonrpc: "2.0", method, params };
 		const stdin = proc.stdin as Writable | null;
@@ -358,7 +368,10 @@ export class FolkloreMcpClient {
 			await this.ensureInitialized();
 		} catch (err) {
 			if (err instanceof FolkloreUnavailableError) throw err;
-			throw new FolkloreUnavailableError(`Failed to initialize Folklore: ${(err as Error).message}`, err);
+			throw new FolkloreUnavailableError(
+				`Failed to initialize Folklore: ${(err as Error).message}`,
+				err,
+			);
 		}
 		try {
 			return await this.sendRequest<McpCallResult>("tools/call", { name, arguments: arguments_ });
@@ -388,7 +401,9 @@ function parseSearch(raw: unknown): FolkloreSearchResult[] {
 		const parsed = JSON.parse(text) as unknown;
 		const items = Array.isArray(parsed)
 			? parsed
-			: ((parsed as { nodes?: unknown[] }).nodes ?? (parsed as { results?: unknown[] }).results ?? []);
+			: ((parsed as { nodes?: unknown[] }).nodes ??
+				(parsed as { results?: unknown[] }).results ??
+				[]);
 		return (items as Array<Record<string, unknown>>)
 			.filter((r) => r && typeof r === "object" && typeof r.id === "string")
 			.map((r) => ({
@@ -469,7 +484,9 @@ function parseSourcesList(raw: unknown): Array<{ id: string; name?: string; type
 	if (!text) return [];
 	try {
 		const parsed = JSON.parse(text) as unknown;
-		const items = Array.isArray(parsed) ? parsed : ((parsed as { sources?: unknown[] }).sources ?? []);
+		const items = Array.isArray(parsed)
+			? parsed
+			: ((parsed as { sources?: unknown[] }).sources ?? []);
 		return (items as Array<Record<string, unknown>>)
 			.filter((s) => s && typeof s === "object" && typeof s.id === "string")
 			.map((s) => ({
@@ -486,11 +503,9 @@ function parseSourcesList(raw: unknown): Array<{ id: string; name?: string; type
 // Helpers
 // ---------------------------------------------------------------------------
 
-function resolveCommandSpec(
-	opts: FolkloreMcpClientOptions,
-): { command: string; args: string[] } {
-	const fromEnv = (globalThis as { process?: { env?: Record<string, string | undefined> } })
-		.process?.env?.FOLKLORE_COMMAND;
+function resolveCommandSpec(opts: FolkloreMcpClientOptions): { command: string; args: string[] } {
+	const fromEnv = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
+		?.env?.FOLKLORE_COMMAND;
 	if (typeof fromEnv === "string" && fromEnv.length > 0) {
 		const parts = fromEnv.split(/\s+/).filter((s) => s.length > 0);
 		return {
@@ -514,8 +529,8 @@ function resolveCommandSpec(
 }
 
 function findLauncher(): string | null {
-	const fromEnv = (globalThis as { process?: { env?: Record<string, string | undefined> } })
-		.process?.env?.FOLKLORE_LAUNCHER_PATH;
+	const fromEnv = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
+		?.env?.FOLKLORE_LAUNCHER_PATH;
 	if (typeof fromEnv === "string" && fromEnv.length > 0 && existsSync(fromEnv)) return fromEnv;
 
 	// Resolve relative to this file: <agentmesh>/packages/personal-mcp/src/../..

@@ -13,13 +13,9 @@
  */
 
 import { createHash } from "node:crypto";
+import { getCreditBalance, InsufficientCreditsError, spendCredits } from "@agentmesh/credit-system";
 import type { PrismaClient } from "@prisma/client";
-import {
-	InsufficientCreditsError,
-	getCreditBalance,
-	spendCredits,
-} from "@agentmesh/credit-system";
-import { routeQuestion, type RouteResult } from "./pipeline.js";
+import { type RouteResult, routeQuestion } from "./pipeline.js";
 
 /** Base credit cost for one routed question. Tunable per tier later. */
 export const BASE_ROUTE_COST = 10;
@@ -105,10 +101,9 @@ export async function routeQuestionWithCredits(
 			},
 		});
 		return { ...result, creditsSpent: cost, balanceAfter: balance, creditsEnforced: true };
-	}
-	// `InsufficientCreditsError` (balance/required fields) propagates as-is so
-	// the caller can map it to an HTTP 402 with accurate context.
-	catch (err) {
+	} catch (err) {
+		// `InsufficientCreditsError` (balance/required fields) propagates as-is so
+		// the caller can map it to an HTTP 402 with accurate context.
 		throw err;
 	}
 }

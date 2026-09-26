@@ -19,15 +19,15 @@
  */
 
 import type { AgentRunResult, CastResult } from "@agentmesh/shared-types";
-import { ByzantineDetector, VoteTally, type ByzantineReason } from "./byzantine-detector.js";
+import { ByzantineDetector, type ByzantineReason, VoteTally } from "./byzantine-detector.js";
 import {
 	hashPayload,
-	signProposal,
-	verifyProposal,
 	type SignedProposal,
+	signProposal,
 	type UnsignedProposal,
+	verifyProposal,
 } from "./proposal.js";
-import { hasQuorum, quorumFor, type QuorumSpec } from "./quorum.js";
+import { hasQuorum, type QuorumSpec, quorumFor } from "./quorum.js";
 import type { Signer, SignerKeyring } from "./signatures.js";
 
 /** Anything that, given the question, can produce an agent's answer. */
@@ -159,14 +159,13 @@ export class BftOverlay {
 
 		// Determine which payload (if any) cleared the prepare quorum.
 		const preparedLeader = prepareTally.leader();
-		const prepared = preparedLeader && hasQuorum(preparedLeader.votes, spec)
-			? preparedLeader.payloadHash
-			: null;
+		const prepared =
+			preparedLeader && hasQuorum(preparedLeader.votes, spec) ? preparedLeader.payloadHash : null;
 
 		// Phase 3: every participant commits the prepared value (or its own
 		// if no value cleared prepare — honest nodes refuse to commit
 		// uncommitted values).
-		const commitTargetHash = prepared ?? (preparedLeader?.payloadHash ?? null);
+		const commitTargetHash = prepared ?? preparedLeader?.payloadHash ?? null;
 		const rounds: BftParticipantRound[] = [];
 		for (const round of produced) {
 			let committed = false;
@@ -179,7 +178,10 @@ export class BftOverlay {
 				};
 				const commitVote = signProposal(unsigned, this.opts.keyring.signer(round.agentId));
 				commitTally.add(commitVote, round.agentId);
-				if (hasQuorum(commitTally.count(commitVote), spec) && commitVote.payloadHash === commitTargetHash) {
+				if (
+					hasQuorum(commitTally.count(commitVote), spec) &&
+					commitVote.payloadHash === commitTargetHash
+				) {
 					committed = true;
 				}
 			}
@@ -187,13 +189,18 @@ export class BftOverlay {
 				agentId: round.agentId,
 				output: round.output,
 				proposal: preparedProposals.get(round.agentId) ?? round.proposal,
-				prepared: preparedLeader?.payloadHash === (preparedProposals.get(round.agentId)?.payloadHash ?? round.proposal.payloadHash),
+				prepared:
+					preparedLeader?.payloadHash ===
+					(preparedProposals.get(round.agentId)?.payloadHash ?? round.proposal.payloadHash),
 				committed,
 			});
 		}
 
 		const commitLeader = commitTally.leader();
-		const committed = !!prepared && !!commitLeader && hasQuorum(commitLeader.votes, spec) &&
+		const committed =
+			!!prepared &&
+			!!commitLeader &&
+			hasQuorum(commitLeader.votes, spec) &&
 			commitLeader.payloadHash === prepared;
 
 		// Verify every signature on the rounds we recorded (defense-in-depth).
@@ -217,7 +224,8 @@ export class BftOverlay {
 			if (!existing) hashToOutput.set(proposal.payloadHash, output);
 			void agentId;
 		}
-		const committedPayload = committed && commitLeader ? hashToOutput.get(commitLeader.payloadHash) ?? null : null;
+		const committedPayload =
+			committed && commitLeader ? (hashToOutput.get(commitLeader.payloadHash) ?? null) : null;
 
 		return {
 			committed,
@@ -242,15 +250,19 @@ export class BftOverlay {
 	async castAsResult(question: string): Promise<BftCastResult> {
 		const outcome = await this.runConsensus(question);
 		const finalAnswer = outcome.committed
-			? outcome.committedPayload ?? ""
-			: outcome.prepareLeader?.payload ?? "No consensus reached.";
+			? (outcome.committedPayload ?? "")
+			: (outcome.prepareLeader?.payload ?? "No consensus reached.");
 		const consensusScore = outcome.committed
 			? 1
 			: outcome.prepareLeader
 				? Math.min(1, outcome.prepareLeader.votes / outcome.spec.quorum)
 				: 0;
 		const selectedAgents = outcome.participants
-			.filter((p) => p.committed || (outcome.committed && p.proposal.payloadHash === outcome.committedPayloadHash))
+			.filter(
+				(p) =>
+					p.committed ||
+					(outcome.committed && p.proposal.payloadHash === outcome.committedPayloadHash),
+			)
 			.map((p) => p.agentId);
 		return {
 			finalAnswer,

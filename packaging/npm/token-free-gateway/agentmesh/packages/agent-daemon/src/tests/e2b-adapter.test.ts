@@ -208,9 +208,7 @@ describe("E2bBrowserAdapter — Phase 1 shape", () => {
 		for (const capability of visionRequired) {
 			expect(map[capability]).toBeDefined();
 			const noVision = new E2bBrowserAdapter({ sandbox });
-			await expect(
-				noVision.callBrowserTool(capability, { selector: "x" }),
-			).rejects.toThrow();
+			await expect(noVision.callBrowserTool(capability, { selector: "x" })).rejects.toThrow();
 		}
 		const noMapping = ["browser_select_option", "browser_evaluate"];
 		for (const capability of noMapping) {

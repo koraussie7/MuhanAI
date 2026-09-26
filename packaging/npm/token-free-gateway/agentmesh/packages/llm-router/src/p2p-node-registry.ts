@@ -1,4 +1,4 @@
-import type { DeviceNodeInfo, ClusterConfig } from "@agentmesh/peer-mesh";
+import type { ClusterConfig, DeviceNodeInfo } from "@agentmesh/peer-mesh";
 
 const DEFAULT_CONFIG: ClusterConfig = {
 	loadBalancingStrategy: "least_loaded",

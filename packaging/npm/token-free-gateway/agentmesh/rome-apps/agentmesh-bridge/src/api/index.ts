@@ -1,8 +1,4 @@
-import type {
-	RomeAppApiHandler,
-	RomeAppApiRequest,
-	RomeAppContext,
-} from "@rome-os/app-runtime";
+import type { RomeAppApiHandler, RomeAppApiRequest, RomeAppContext } from "@rome-os/app-runtime";
 import { gatewayHealth, routeQuestion } from "../lib/gateway.js";
 
 function json(data: unknown, init?: ResponseInit): Response {
@@ -56,10 +52,13 @@ export function createApiHandler(ctx: RomeAppContext): RomeAppApiHandler {
 				) {
 					return json({ error: "invalid_body" }, { status: 400 });
 				}
-				const result = await routeQuestion({
-					userId: body.userId,
-					question: body.question,
-				}, { env });
+				const result = await routeQuestion(
+					{
+						userId: body.userId,
+						question: body.question,
+					},
+					{ env },
+				);
 				if (!result.ok || !result.data) {
 					return json({ error: result.error ?? "gateway_error" }, { status: 502 });
 				}

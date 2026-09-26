@@ -6,8 +6,8 @@
  */
 
 import type { KnowledgeNode, SourceType } from "@agentmesh/shared-types";
-import { WeKnoraClient } from "./weknora-client";
 import { chunkText } from "./chunking";
+import { WeKnoraClient } from "./weknora-client";
 
 export interface DocumentParseResult {
 	documentId: string;

@@ -1,10 +1,8 @@
-import type { DeviceNodeInfo } from "@agentmesh/peer-mesh";
+import type { GossipsubLike, ModelBeaconTransport } from "@agentmesh/bitterbot";
+import { GossipsubModelBeaconTransport, ModelBeacon, ModelCatalog } from "@agentmesh/bitterbot";
 import type { ModelManifest } from "@agentmesh/noema";
-import { ModelBeacon, ModelCatalog } from "@agentmesh/bitterbot";
-import type {
-	GossipsubLike,
-	ModelBeaconTransport,
-} from "@agentmesh/bitterbot";
+import { envelopeTopic } from "@agentmesh/noema";
+import type { DeviceNodeInfo } from "@agentmesh/peer-mesh";
 import { P2pNodeRegistry } from "./p2p-node-registry.js";
 
 export interface P2pModelRegistryOptions {
@@ -35,14 +33,23 @@ export interface P2pModelRegistry {
 
 const nodeIdFor = (publisher: string, modelId: string) => `gossip:${publisher}:${modelId}`;
 
+/** Cached transport per gossipsub service, so listeners are not stacked. */
+let sharedGossipsubTransport: { gossipsub: GossipsubLike; transport: ModelBeaconTransport } | null =
+	null;
+
+function createTransport(gossipsub: GossipsubLike): ModelBeaconTransport {
+	if (sharedGossipsubTransport?.gossipsub === gossipsub) return sharedGossipsubTransport.transport;
+	const transport = new GossipsubModelBeaconTransport(gossipsub);
+	sharedGossipsubTransport = { gossipsub, transport };
+	return transport;
+}
+
 /**
  * Wires bitterbot's Gossipsub model announcements into the P2P node
  * registry so `P2pLoadBalancer` can route inference to peers that
  * announced a model.
  */
-export function createP2pModelRegistry(
-	options: P2pModelRegistryOptions = {},
-): P2pModelRegistry {
+export function createP2pModelRegistry(options: P2pModelRegistryOptions = {}): P2pModelRegistry {
 	const catalog = options.catalog ?? new ModelCatalog();
 	const registry = options.registry ?? new P2pNodeRegistry();
 	const now = Date.now;
@@ -105,7 +112,7 @@ export function createP2pModelRegistry(
 			const transport = getTransport();
 			// Pass the catalogue-wide wildcard `*`; the transport fans this
 			// out to the libp2p topic that announces every model.
-			stopListening = await catalog.listen(transport, "*");
+			stopListening = await catalog.listen(transport, envelopeTopic("*"));
 			return () => {
 				stopListening?.();
 				stopListening = undefined;
@@ -118,40 +125,3 @@ export function createP2pModelRegistry(
 		},
 	};
 }
-
-function createTransport(gossipsub: GossipsubLike): ModelBeaconTransport {
-	const handlers = new Map<string, (payload: string) => void>();
-	return {
-		async publish(topic, payload) {
-			for (const mapped of mapTopics(topic)) {
-				await gossipsub.publish(mapped, new TextEncoder().encode(payload));
-			}
-		},
-		async subscribe(topic, handler) {
-			const unsubs: Array<() => void> = [];
-			for (const mapped of mapTopics(topic)) {
-				handlers.set(mapped, handler);
-				// Gossipsub's `subscribe(topic)` returns a Promise<void>; the
-				// local listener is registered via `addEventListener`. We
-				// hook delivery through a single per-topic listener that the
-				// subscriber callbacks fan out.
-				gossipsub.addEventListener(mapped, (evt) => {
-					const payload = new TextDecoder().decode(evt.detail.data);
-					handlers.get(mapped)?.(payload);
-				});
-				await gossipsub.subscribe(mapped);
-				unsubs.push(() => gossipsub.unsubscribe(mapped));
-			}
-			return () => {
-				for (const unsub of unsubs) unsub();
-				for (const mapped of mapTopics(topic)) handlers.delete(mapped);
-			};
-		},
-	};
-}
-
-function mapTopics(topic: string): string[] {
-	if (topic === "*") return ["/agentmesh/models/1.0.0"];
-	return [topic];
-}
-

@@ -32,7 +32,10 @@ function validateMessage(message: unknown, index: number): string[] {
 	if (!isRecord(operation) || typeof operation.surfaceId !== "string") {
 		errors.push(`op ${index}: surfaceId is required`);
 	}
-	if ("createSurface" in message && (!isRecord(operation) || typeof operation.catalogId !== "string")) {
+	if (
+		"createSurface" in message &&
+		(!isRecord(operation) || typeof operation.catalogId !== "string")
+	) {
 		errors.push(`op ${index}: createSurface.catalogId is required`);
 	}
 	if ("updateComponents" in message) {
@@ -86,7 +89,8 @@ export function applyA2UI(messages: readonly A2UIMessage[]): A2UISurfaceState {
 		} else if ("updateDataModel" in message) {
 			state.data = message.updateDataModel.value;
 		} else if ("updateComponents" in message) {
-			for (const component of message.updateComponents.components) state.components[component.id] = component;
+			for (const component of message.updateComponents.components)
+				state.components[component.id] = component;
 		} else if ("beginRendering" in message) {
 			state.root = message.beginRendering.root;
 			state.status = state.components[state.root] ? "ready" : "error";
@@ -99,7 +103,8 @@ export function validateA2UITree(state: A2UISurfaceState): A2UIValidationResult 
 	const errors: string[] = [];
 	if (!state.surfaceId) errors.push("surfaceId is required");
 	if (!state.root) errors.push("root is required");
-	if (state.root && !state.components[state.root]) errors.push(`root component not found: ${state.root}`);
+	if (state.root && !state.components[state.root])
+		errors.push(`root component not found: ${state.root}`);
 	const visit = (id: string, path: Set<string>) => {
 		if (path.has(id)) {
 			errors.push(`component cycle detected at: ${id}`);

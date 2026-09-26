@@ -18,13 +18,15 @@ import type { CosmosEvent, WorldEventIngested } from "./types.js";
 
 const T0 = Date.parse("2026-03-01T00:00:00.000Z");
 
-function worldEvent(overrides: {
-	id?: string;
-	sequence?: number;
-	timestamp?: number;
-	source?: CosmosEvent["source"];
-	payload?: Partial<WorldEventIngested["payload"]>;
-} = {}): CosmosEvent {
+function worldEvent(
+	overrides: {
+		id?: string;
+		sequence?: number;
+		timestamp?: number;
+		source?: CosmosEvent["source"];
+		payload?: Partial<WorldEventIngested["payload"]>;
+	} = {},
+): CosmosEvent {
 	const base: WorldEventIngested = {
 		id: "evt-1",
 		sequence: 1,
@@ -48,14 +50,16 @@ function worldEvent(overrides: {
 	} as CosmosEvent;
 }
 
-function predictionEvent(overrides: {
-	id?: string;
-	timestamp?: number;
-	domain?: string;
-	horizon?: "24h" | "1w" | "1m" | "1y";
-	conceptIds?: string[];
-	geo?: { lat: number; lng: number };
-} = {}): CosmosEvent {
+function predictionEvent(
+	overrides: {
+		id?: string;
+		timestamp?: number;
+		domain?: string;
+		horizon?: "24h" | "1w" | "1m" | "1y";
+		conceptIds?: string[];
+		geo?: { lat: number; lng: number };
+	} = {},
+): CosmosEvent {
 	const { domain, conceptIds, geo, ...rest } = overrides;
 
 	const payload: Record<string, unknown> = {
@@ -159,10 +163,13 @@ describe("severity floors", () => {
 	});
 
 	it("escalates an ordinary aircraft record when the item is flagged", () => {
-		const brief = mapTelemetryBrief({ layers: { aircraft: [{ id: "a1", title: "squawk 7700" }] } }, {
-			now: T0,
-			isAnomalous: () => true,
-		});
+		const brief = mapTelemetryBrief(
+			{ layers: { aircraft: [{ id: "a1", title: "squawk 7700" }] } },
+			{
+				now: T0,
+				isAnomalous: () => true,
+			},
+		);
 
 		expect(brief.events[0]?.severity).toBe("watch");
 	});

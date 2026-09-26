@@ -1,7 +1,7 @@
-import { beforeEach, describe, expect, it } from "vitest";
 import type { KnowledgeNode } from "@agentmesh/shared-types";
+import { beforeEach, describe, expect, it } from "vitest";
 import { decayEngine as defaultDecayEngine } from "./decay/engine.js";
-import { fuseHybridResults, type FuseInputs } from "./hybrid-search.js";
+import { type FuseInputs, fuseHybridResults } from "./hybrid-search.js";
 import type { ScoredKnowledge } from "./retrieval.js";
 
 function makeNode(overrides: Partial<KnowledgeNode>): KnowledgeNode {
@@ -135,7 +135,11 @@ describe("fuseHybridResults — entity signal", () => {
 	});
 
 	it("extracts wikilink entities and matches them against query terms", () => {
-		const a = makeNode({ id: "a", title: "Vault A", content: "See [[Reciprocal Rank Fusion]] for ranking." });
+		const a = makeNode({
+			id: "a",
+			title: "Vault A",
+			content: "See [[Reciprocal Rank Fusion]] for ranking.",
+		});
 		const b = makeNode({ id: "b", title: "Vault B", content: "Random text, no wikilinks." });
 		const out = fuseHybridResults({
 			query: "RRF",
@@ -213,9 +217,7 @@ describe("fuseHybridResults — determinism", () => {
 	});
 
 	it("respects the limit argument", () => {
-		const kw = Array.from({ length: 10 }, (_, i) =>
-			makeNode({ id: `n${i}`, title: `Node ${i}` }),
-		);
+		const kw = Array.from({ length: 10 }, (_, i) => makeNode({ id: `n${i}`, title: `Node ${i}` }));
 		const out = fuseHybridResults({
 			query: "Node",
 			keywordHits: kw,

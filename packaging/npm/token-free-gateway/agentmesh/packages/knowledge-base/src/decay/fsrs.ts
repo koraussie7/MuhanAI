@@ -36,13 +36,10 @@ export const FSRS_PARAMS = {
  *
  * Example: computeRetrievability(7, 1) ≈ 0.674.
  */
-export function computeRetrievability(
-	stabilityDays: number,
-	elapsedDays: number,
-): number {
+export function computeRetrievability(stabilityDays: number, elapsedDays: number): number {
 	if (elapsedDays <= 0) return 1.0;
 	if (stabilityDays <= 0) return 0.0;
-	return Math.pow(1 + elapsedDays / (9 * stabilityDays), -1);
+	return (1 + elapsedDays / (9 * stabilityDays)) ** -1;
 }
 
 /**
@@ -56,16 +53,8 @@ export function computeRetrievability(
  * The growth term is clamped at 0 so pathological inputs (negative
  * exponent results, NaN) cannot shrink stability.
  */
-export function updateStability(
-	currentS: number,
-	difficulty: number,
-	currentR: number,
-): number {
+export function updateStability(currentS: number, difficulty: number, currentR: number): number {
 	const { a, b, c, d } = FSRS_PARAMS;
-	const growth =
-		a *
-		Math.pow(difficulty, -b) *
-		Math.pow(currentS, -c) *
-		(Math.exp(d * (1 - currentR)) - 1);
+	const growth = a * difficulty ** -b * currentS ** -c * (Math.exp(d * (1 - currentR)) - 1);
 	return Math.min(currentS * (1 + Math.max(0, growth)), 365);
 }

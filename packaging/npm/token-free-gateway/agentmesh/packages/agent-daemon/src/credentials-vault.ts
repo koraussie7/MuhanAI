@@ -155,11 +155,27 @@ function decodeEntries(bytes: Uint8Array): Map<string, VaultEntry> {
 }
 
 async function aesGcmEncrypt(key: Uint8Array, iv: Uint8Array, pt: Uint8Array): Promise<Uint8Array> {
-	const ck = await crypto.subtle.importKey("raw", new Uint8Array(key), "AES-GCM", false, ["encrypt"]);
-	return new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: new Uint8Array(iv) }, ck, new Uint8Array(pt)));
+	const ck = await crypto.subtle.importKey("raw", new Uint8Array(key), "AES-GCM", false, [
+		"encrypt",
+	]);
+	return new Uint8Array(
+		await crypto.subtle.encrypt(
+			{ name: "AES-GCM", iv: new Uint8Array(iv) },
+			ck,
+			new Uint8Array(pt),
+		),
+	);
 }
 
 async function aesGcmDecrypt(key: Uint8Array, iv: Uint8Array, ct: Uint8Array): Promise<Uint8Array> {
-	const ck = await crypto.subtle.importKey("raw", new Uint8Array(key), "AES-GCM", false, ["decrypt"]);
-	return new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: new Uint8Array(iv) }, ck, new Uint8Array(ct)));
+	const ck = await crypto.subtle.importKey("raw", new Uint8Array(key), "AES-GCM", false, [
+		"decrypt",
+	]);
+	return new Uint8Array(
+		await crypto.subtle.decrypt(
+			{ name: "AES-GCM", iv: new Uint8Array(iv) },
+			ck,
+			new Uint8Array(ct),
+		),
+	);
 }

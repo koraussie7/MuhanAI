@@ -1,4 +1,4 @@
-import type { EngineConfig, ChatOptions, ModelInfo, EngineStatus, Message } from "../types";
+import type { ChatOptions, EngineConfig, EngineStatus, Message, ModelInfo } from "../types";
 import { EventEmitter } from "../utils/events";
 import { Logger } from "../utils/logger";
 

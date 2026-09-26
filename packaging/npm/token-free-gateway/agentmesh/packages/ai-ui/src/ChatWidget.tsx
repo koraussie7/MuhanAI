@@ -5,14 +5,7 @@ export function ChatWidget() {
 	const [input, setInput] = useState("");
 	const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);
 
-	const {
-		status,
-		models,
-		isGenerating,
-		output,
-		loadModel,
-		stream,
-	} = useAIEngine({
+	const { status, models, isGenerating, output, loadModel, stream } = useAIEngine({
 		type: "sipp",
 		backend: "webgpu",
 		model: "llama-3-8b-q4",
@@ -79,10 +72,7 @@ export function ChatWidget() {
 					disabled={!status.ready || isGenerating}
 					placeholder={status.ready ? "메시지 입력..." : "엔진 초기화 중..."}
 				/>
-				<button
-					onClick={handleSend}
-					disabled={!status.ready || isGenerating || !input.trim()}
-				>
+				<button onClick={handleSend} disabled={!status.ready || isGenerating || !input.trim()}>
 					{isGenerating ? "생성 중..." : "전송"}
 				</button>
 			</div>

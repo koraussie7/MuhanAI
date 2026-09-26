@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-import { CreatePaymentRequest, ConfirmPaymentRequest, RefundPaymentRequest } from './types';
+import { PrismaClient } from "@prisma/client";
+import type { ConfirmPaymentRequest, CreatePaymentRequest, RefundPaymentRequest } from "./types";
 
 /**
  * NOTE: `order`/`payment`/`refund` Prisma models will exist once the payment
@@ -10,7 +10,10 @@ import { CreatePaymentRequest, ConfirmPaymentRequest, RefundPaymentRequest } fro
  */
 type PaymentPrismaClient = PrismaClient & {
 	order: {
-		findUnique: (args: { where: { id: string }; select?: Record<string, boolean> }) => Promise<{ id: string } | null>;
+		findUnique: (args: {
+			where: { id: string };
+			select?: Record<string, boolean>;
+		}) => Promise<{ id: string } | null>;
 	};
 	payment: {
 		create: (args: Record<string, unknown>) => Promise<Record<string, unknown>>;
@@ -25,88 +28,88 @@ type PaymentPrismaClient = PrismaClient & {
 export const prisma = new PrismaClient() as PaymentPrismaClient;
 
 export class PaymentService {
-  async createPayment(data: CreatePaymentRequest) {
-    const { orderId, amount, currency, method } = data;
-    
-    // Verify order exists
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-      select: { id: true }
-    });
+	async createPayment(data: CreatePaymentRequest) {
+		const { orderId, amount, currency, method } = data;
 
-    if (!order) {
-      throw new Error(`Order ${orderId} not found`);
-    }
+		// Verify order exists
+		const order = await prisma.order.findUnique({
+			where: { id: orderId },
+			select: { id: true },
+		});
 
-    // Create payment record
-    const payment = await prisma.payment.create({
-      data: {
-        orderId,
-        amount,
-        currency,
-        method,
-        status: 'pending'
-      }
-    });
+		if (!order) {
+			throw new Error(`Order ${orderId} not found`);
+		}
 
-    return payment;
-  }
+		// Create payment record
+		const payment = await prisma.payment.create({
+			data: {
+				orderId,
+				amount,
+				currency,
+				method,
+				status: "pending",
+			},
+		});
 
-  async confirmPayment(data: ConfirmPaymentRequest) {
-    const { paymentId } = data;
-    
-    const payment = await prisma.payment.findUnique({
-      where: { id: paymentId },
-      include: { order: true }
-    });
+		return payment;
+	}
 
-    if (!payment) {
-      throw new Error(`Payment ${paymentId} not found`);
-    }
+	async confirmPayment(data: ConfirmPaymentRequest) {
+		const { paymentId } = data;
 
-    // Update payment status
-    await prisma.payment.update({
-      where: { id: paymentId },
-      data: {
-        status: 'paid',
-        updatedAt: new Date()
-      }
-    });
+		const payment = await prisma.payment.findUnique({
+			where: { id: paymentId },
+			include: { order: true },
+		});
 
-    return payment;
-  }
+		if (!payment) {
+			throw new Error(`Payment ${paymentId} not found`);
+		}
 
-  async refundPayment(data: RefundPaymentRequest) {
-    const { paymentId, amount, currency, reason } = data;
-    
-    const payment = await prisma.payment.findUnique({
-      where: { id: paymentId },
-      include: { order: true }
-    });
+		// Update payment status
+		await prisma.payment.update({
+			where: { id: paymentId },
+			data: {
+				status: "paid",
+				updatedAt: new Date(),
+			},
+		});
 
-    if (!payment) {
-      throw new Error(`Payment ${paymentId} not found`);
-    }
+		return payment;
+	}
 
-    // Create refund record
-    await prisma.refund.create({
-      data: {
-        paymentId,
-        amount: amount || payment.amount,
-        currency: currency || payment.currency,
-        reason
-      }
-    });
+	async refundPayment(data: RefundPaymentRequest) {
+		const { paymentId, amount, currency, reason } = data;
 
-    // Update payment status
-    await prisma.payment.update({
-      where: { id: paymentId },
-      data: {
-        status: 'refunded',
-        updatedAt: new Date()
-      }
-    });
+		const payment = await prisma.payment.findUnique({
+			where: { id: paymentId },
+			include: { order: true },
+		});
 
-    return payment;
-  }
+		if (!payment) {
+			throw new Error(`Payment ${paymentId} not found`);
+		}
+
+		// Create refund record
+		await prisma.refund.create({
+			data: {
+				paymentId,
+				amount: amount || payment.amount,
+				currency: currency || payment.currency,
+				reason,
+			},
+		});
+
+		// Update payment status
+		await prisma.payment.update({
+			where: { id: paymentId },
+			data: {
+				status: "refunded",
+				updatedAt: new Date(),
+			},
+		});
+
+		return payment;
+	}
 }

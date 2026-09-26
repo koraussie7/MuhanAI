@@ -63,19 +63,24 @@ export class PgVectorStore {
 		const { vector } = await this.embedder.embed(query.query);
 		const vectorLiteral = this.embedder.toPgVector(vector);
 
-		// Cosine distance: 1 - (embedding <=> query)  in pgvector with cosine ops
-		// Using <-> L2 or <=> cosine depending on index; we use cosine distance operator <=>
-		const ownerFilter = query.filter?.ownerId
-			? `AND kn."ownerId" = '${query.filter.ownerId.replace(/'/g, "")}'`
-			: "";
-		const categoryFilter = query.filter?.categoryId
-			? `AND kn."categoryId" LIKE '${query.filter.categoryId.replace(/'/g, "")}%'`
-			: "";
-		const visibilityFilter = query.filter?.visibility?.length
-			? `AND kn.visibility = ANY(ARRAY[${query.filter.visibility
-					.map((v) => `'${v}'`)
-					.join(",")}]::text[])`
-			: "";
+		// Cosine distance: 1 - (embedding <=> query) in pgvector with cosine ops.
+		// Use parameterized placeholders to prevent SQL injection.
+		const params: unknown[] = [vectorLiteral, limit];
+		let ownerFilter = "";
+		if (query.filter?.ownerId) {
+			params.push(query.filter.ownerId);
+			ownerFilter = `AND kn."ownerId" = $${params.length}`;
+		}
+		let categoryFilter = "";
+		if (query.filter?.categoryId) {
+			params.push(`${query.filter.categoryId}%`);
+			categoryFilter = `AND kn."categoryId" LIKE $${params.length}`;
+		}
+		let visibilityFilter = "";
+		if (query.filter?.visibility?.length) {
+			params.push(query.filter.visibility);
+			visibilityFilter = `AND kn.visibility = ANY($${params.length}::text[])`;
+		}
 
 		type Row = {
 			knowledge_id: string;
@@ -116,8 +121,7 @@ export class PgVectorStore {
       ORDER BY kc.embedding <=> $1::vector
       LIMIT $2
       `,
-			vectorLiteral,
-			limit,
+			...params,
 		);
 
 		// Dedupe by knowledge id (multiple chunks may match)

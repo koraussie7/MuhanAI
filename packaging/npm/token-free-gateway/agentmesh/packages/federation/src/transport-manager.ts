@@ -10,6 +10,13 @@ export interface TransportManagerOptions extends TransportOptions {
 	httpBaseUrl?: string;
 }
 
+/** Simple in-memory counter for transport fallbacks (can be replaced with OpenTelemetry). */
+let fallbackCount = 0;
+
+export function getFallbackCount(): number {
+	return fallbackCount;
+}
+
 export class TransportManager {
 	private readonly transport: Transport;
 
@@ -19,7 +26,11 @@ export class TransportManager {
 		if (preferred === "libp2p") {
 			try {
 				this.transport = new Libp2pTransport(options);
-			} catch {
+			} catch (e) {
+				fallbackCount++;
+				console.warn(
+					`p2p: libp2p transport initialization failed, falling back to HTTP: ${(e as Error).message}`,
+				);
 				this.transport = new HttpTransport(options);
 			}
 		} else if (preferred === "http") {

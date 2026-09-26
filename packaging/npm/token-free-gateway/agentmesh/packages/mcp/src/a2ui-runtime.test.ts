@@ -4,18 +4,18 @@ import { applyA2UI, parseA2UIJsonl, validateA2UITree } from "./a2ui-runtime.js";
 const JSONL = [
 	JSON.stringify({ version: "v1.0", createSurface: { surfaceId: "s", catalogId: "basic" } }),
 	JSON.stringify({
-	version: "v1.0",
-	updateDataModel: { surfaceId: "s", value: { title: "Hello" } },
+		version: "v1.0",
+		updateDataModel: { surfaceId: "s", value: { title: "Hello" } },
 	}),
 	JSON.stringify({
-	version: "v1.0",
-	updateComponents: {
-		surfaceId: "s",
-	components: [
-	{ id: "root", component: "Column", catalogId: "basic", children: ["title"] },
-	{ id: "title", component: "Text", catalogId: "basic", text: { path: "/title" } },
-	],
-	},
+		version: "v1.0",
+		updateComponents: {
+			surfaceId: "s",
+			components: [
+				{ id: "root", component: "Column", catalogId: "basic", children: ["title"] },
+				{ id: "title", component: "Text", catalogId: "basic", text: { path: "/title" } },
+			],
+		},
 	}),
 	JSON.stringify({ version: "v1.0", beginRendering: { surfaceId: "s", root: "root" } }),
 ].join("\n");
@@ -44,13 +44,21 @@ describe("A2UI runtime", () => {
 		const state = applyA2UI(
 			parseA2UIJsonl(
 				[
-					JSON.stringify({ version: "v1.0", createSurface: { surfaceId: "s", catalogId: "basic" } }),
+					JSON.stringify({
+						version: "v1.0",
+						createSurface: { surfaceId: "s", catalogId: "basic" },
+					}),
 					JSON.stringify({
 						version: "v1.0",
 						updateComponents: {
 							surfaceId: "s",
 							components: [
-								{ id: "root", component: "Column", catalogId: "basic", children: ["root", "missing"] },
+								{
+									id: "root",
+									component: "Column",
+									catalogId: "basic",
+									children: ["root", "missing"],
+								},
 							],
 						},
 					}),

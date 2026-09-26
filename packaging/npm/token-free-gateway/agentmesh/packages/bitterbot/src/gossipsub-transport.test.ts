@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+	fromGossipsubTopic,
 	GossipsubModelBeaconTransport,
 	InMemoryModelBeaconTransport,
-	fromGossipsubTopic,
+	manifestIdFromCatalogTopic,
 	toGossipsubTopic,
 } from "./gossipsub-transport.js";
 
@@ -21,6 +22,20 @@ describe("gossipsub topic encoding", () => {
 	it("returns null for topics outside the agentmesh prefix", () => {
 		expect(fromGossipsubTopic("/other/topic")).toBeNull();
 	});
+
+	it("maps catalogue topics back to manifest ids", () => {
+		expect(manifestIdFromCatalogTopic("agentmesh/models/qwen-q4")).toBe("qwen-q4");
+		expect(manifestIdFromCatalogTopic("agentmesh/models/*")).toBe("*");
+		// Bare ids are tolerated; encoded gossipsub topics are not.
+		expect(manifestIdFromCatalogTopic("qwen-q4")).toBe("qwen-q4");
+		expect(manifestIdFromCatalogTopic("/agentmesh/models/1.0.0/x")).toBeNull();
+		expect(manifestIdFromCatalogTopic("agentmesh/models/")).toBeNull();
+	});
+
+	it("maps the wildcard manifest id to the bare wildcard topic", () => {
+		expect(toGossipsubTopic("*")).toBe("/agentmesh/models/1.0.0");
+		expect(fromGossipsubTopic("/agentmesh/models/1.0.0")).toBe("*");
+	});
 });
 
 type Msg = { topic: string; data: Uint8Array };
@@ -30,6 +45,7 @@ class FakePubsub {
 	readonly subscribers = new Map<string, Set<Handler>>();
 	readonly published: Array<{ topic: string; data: Uint8Array }> = [];
 	errors: Error[] = [];
+	private readonly messageHandlers = new Set<(evt: Event) => void>();
 
 	async publish(topic: string, data: Uint8Array): Promise<void> {
 		if (this.errors.length > 0) throw this.errors.pop();
@@ -54,9 +70,18 @@ class FakePubsub {
 		this.subscribers.get(topic)?.delete(handler);
 	}
 
+	// Real gossipsub relays every message it sees on a subscribed topic
+	// through a single pubsub-wide hook, which is how a wildcard
+	// subscriber observes model-specific topics. Emulate that here.
+	onMessage(handler: (evt: Event) => void): () => void {
+		this.messageHandlers.add(handler);
+		return () => this.messageHandlers.delete(handler);
+	}
+
 	fire(topic: string, data: Uint8Array): void {
 		const evt = new CustomEvent<Msg>("gossipsub", { detail: { topic, data } });
 		for (const handler of this.subscribers.get(topic) ?? []) handler(evt);
+		for (const handler of this.messageHandlers) handler(evt);
 	}
 }
 
@@ -109,8 +134,8 @@ describe("GossipsubModelBeaconTransport", () => {
 	it("unsubscribes once every local handler is removed", async () => {
 		const pubsub = new FakePubsub();
 		const transport = new GossipsubModelBeaconTransport(pubsub);
-		const off1 = await transport.subscribe("model/qwen", () => { });
-		const off2 = await transport.subscribe("model/qwen", () => { });
+		const off1 = await transport.subscribe("model/qwen", () => {});
+		const off2 = await transport.subscribe("model/qwen", () => {});
 		const encoded = toGossipsubTopic("model/qwen");
 		expect(pubsub.subscribers.has(encoded)).toBe(true);
 		off1();
@@ -118,5 +143,26 @@ describe("GossipsubModelBeaconTransport", () => {
 		expect(pubsub.subscribers.has(encoded)).toBe(true);
 		off2();
 		expect(pubsub.subscribers.has(encoded)).toBe(false);
+	});
+
+	it("fans model-specific announcements out to a wildcard subscriber", async () => {
+		const pubsub = new FakePubsub();
+		const transport = new GossipsubModelBeaconTransport(pubsub);
+		const received: string[] = [];
+		await transport.subscribe("agentmesh/models/*", (payload) => {
+			received.push(payload);
+		});
+		pubsub.fire(toGossipsubTopic("qwen-q4"), new TextEncoder().encode("announce"));
+		expect(received).toEqual(["announce"]);
+	});
+
+	it("ignores publishes on non-model topics", async () => {
+		const pubsub = new FakePubsub();
+		const transport = new GossipsubModelBeaconTransport(pubsub);
+		await transport.publish("/some/other/topic", "payload");
+		expect(pubsub.published).toHaveLength(0);
+		await expect(transport.subscribe("/some/other/topic", () => {})).rejects.toThrow(
+			/not a model catalogue topic/,
+		);
 	});
 });

@@ -21,9 +21,7 @@ export interface Signer {
 	verify(digest: Uint8Array, signature: string): boolean;
 }
 
-export interface SignerFactory {
-	(id: string, ...args: unknown[]): Signer;
-}
+export type SignerFactory = (id: string, ...args: unknown[]) => Signer;
 
 /** Minimal in-memory symmetric-key registry. Each signer has its own random secret. */
 export interface SignerKeyring {
@@ -38,7 +36,9 @@ function hmacSha256(secret: Uint8Array, data: Uint8Array): Uint8Array {
 	// implementations are plugged in.
 	// eslint-disable-next-line @typescript-eslint/no-require-imports
 	const nodeCrypto = require("node:crypto") as typeof import("node:crypto");
-	return new Uint8Array(nodeCrypto.createHmac("sha256", Buffer.from(secret)).update(Buffer.from(data)).digest());
+	return new Uint8Array(
+		nodeCrypto.createHmac("sha256", Buffer.from(secret)).update(Buffer.from(data)).digest(),
+	);
 }
 
 /** Constant-time-ish comparison (Node's timingSafeEqual). */
@@ -51,7 +51,8 @@ function constantTimeEq(a: Uint8Array, b: Uint8Array): boolean {
 
 function toHex(bytes: Uint8Array): string {
 	let out = "";
-	for (let i = 0; i < bytes.length; i++) out += (bytes[i]! >>> 4).toString(16) + (bytes[i]! & 0xf).toString(16);
+	for (let i = 0; i < bytes.length; i++)
+		out += (bytes[i]! >>> 4).toString(16) + (bytes[i]! & 0xf).toString(16);
 	return out;
 }
 

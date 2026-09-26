@@ -1,15 +1,15 @@
 import type {
-	EngineConfig,
 	ChatOptions,
-	ModelInfo,
+	EngineConfig,
 	EngineStatus,
-	StreamChunk,
 	Message,
+	ModelInfo,
+	StreamChunk,
 } from "../types";
-import { SippWorker } from "./sipp-worker";
-import { ModelManager } from "./model-manager";
 import { EventEmitter } from "../utils/events";
 import { Logger } from "../utils/logger";
+import { ModelManager } from "./model-manager";
+import { SippWorker } from "./sipp-worker";
 
 export class SippEngine extends EventEmitter {
 	private worker: SippWorker | null = null;
@@ -83,7 +83,6 @@ export class SippEngine extends EventEmitter {
 				this.emit("status", { ...this.status });
 				this.emit("modelLoaded", modelId);
 			});
-
 		} catch (error) {
 			this.logger.error("Init failed:", error);
 			this.status.error = (error as Error).message;
@@ -111,7 +110,6 @@ export class SippEngine extends EventEmitter {
 				path: modelPath,
 				format: model.format,
 			});
-
 		} catch (error) {
 			this.logger.error("Load model failed:", error);
 			this.status.loading = false;
@@ -158,11 +156,7 @@ export class SippEngine extends EventEmitter {
 		});
 	}
 
-	stream(
-		message: string,
-		onToken: (token: string) => void,
-		signal?: AbortSignal
-	): void {
+	stream(message: string, onToken: (token: string) => void, signal?: AbortSignal): void {
 		if (!this.worker || !this.status.ready) {
 			throw new Error("Engine not ready");
 		}

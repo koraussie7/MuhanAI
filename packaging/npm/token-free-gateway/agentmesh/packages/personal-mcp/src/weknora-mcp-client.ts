@@ -93,13 +93,13 @@ export class WeKnoraMcpClient {
 			: Array.isArray(result)
 				? (result as SearchResult[])
 				: [];
-	return items.map((r) => ({
-		knowledgeId: (r as any).knowledgeId ?? (r as any).knowledge_id ?? "",
-		title: (r as any).title ?? "",
-		content: (r as any).content ?? "",
-		score: (r as any).score,
-		source: (r as any).source,
-	}));
+		return items.map((r) => ({
+			knowledgeId: (r as any).knowledgeId ?? (r as any).knowledge_id ?? "",
+			title: (r as any).title ?? "",
+			content: (r as any).content ?? "",
+			score: (r as any).score,
+			source: (r as any).source,
+		}));
 	}
 
 	async readDocument(kbId: string, docId: string): Promise<Document> {
@@ -127,12 +127,12 @@ export class WeKnoraMcpClient {
 			answer: raw.answer ?? raw.content ?? String(result),
 			citations: Array.isArray(raw.citations)
 				? raw.citations.map((c: any) => ({
-					knowledgeId: c.knowledgeId ?? c.knowledge_id ?? "",
-					documentId: c.documentId ?? c.document_id,
-					chunkId: c.chunkId ?? c.chunk_id,
-					content: c.content ?? "",
-					score: c.score,
-				}))
+						knowledgeId: c.knowledgeId ?? c.knowledge_id ?? "",
+						documentId: c.documentId ?? c.document_id,
+						chunkId: c.chunkId ?? c.chunk_id,
+						content: c.content ?? "",
+						score: c.score,
+					}))
 				: [],
 		};
 	}
@@ -156,12 +156,12 @@ export class WeKnoraMcpClient {
 		const timer = setTimeout(() => controller.abort(), this.timeoutMs);
 
 		try {
-		const res = await this.fetchImpl(url, {
-			method: "POST",
-			headers,
-			body: JSON.stringify(body),
-			signal: controller.signal,
-		});
+			const res = await this.fetchImpl(url, {
+				method: "POST",
+				headers,
+				body: JSON.stringify(body),
+				signal: controller.signal,
+			});
 
 			const sessionHeader = res.headers.get("Mcp-Session-Id");
 			if (sessionHeader) this.sessionId = sessionHeader;

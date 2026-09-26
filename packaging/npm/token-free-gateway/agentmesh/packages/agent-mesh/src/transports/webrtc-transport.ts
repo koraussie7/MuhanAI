@@ -37,7 +37,13 @@ import type {
 } from "./types.js";
 
 /** Minimal RTCPeerConnection surface this transport depends on. */
-export type RtcPeerConnectionState = "new" | "connecting" | "connected" | "disconnected" | "failed" | "closed";
+export type RtcPeerConnectionState =
+	| "new"
+	| "connecting"
+	| "connected"
+	| "disconnected"
+	| "failed"
+	| "closed";
 export type RtcDataChannelState = "connecting" | "open" | "closing" | "closed";
 
 export interface RtcConfiguration {
@@ -219,7 +225,10 @@ export class WebRtcTransport implements Transport {
 	 * Returns the answer SDP — callers MUST deliver it back to the peer
 	 * over the signaling channel so they can finalize the connection.
 	 */
-	async acceptOffer(peerId: PeerId, offer: RtcSessionDescriptionLike): Promise<RtcSessionDescriptionLike> {
+	async acceptOffer(
+		peerId: PeerId,
+		offer: RtcSessionDescriptionLike,
+	): Promise<RtcSessionDescriptionLike> {
 		const conn = this.factory(this.rtcConfig);
 		conn.addEventListener("datachannel", (ev: unknown) => {
 			const e = ev as { channel: RtcDataChannelLike };
@@ -279,7 +288,11 @@ export class WebRtcTransport implements Transport {
 		});
 	}
 
-	private wireDataChannel(peerId: PeerId, conn: RtcPeerConnectionLike, channel: RtcDataChannelLike): void {
+	private wireDataChannel(
+		peerId: PeerId,
+		conn: RtcPeerConnectionLike,
+		channel: RtcDataChannelLike,
+	): void {
 		const entry: DataChannelEntry = {
 			channel,
 			conn,

@@ -2,17 +2,17 @@ import { describe, expect, it } from "vitest";
 import {
 	BftOverlay,
 	ByzantineDetector,
-	HmacKeyring,
 	canonicalEncode,
+	HmacKeyring,
 	hashPayload,
 	hasQuorum,
 	quorumFor,
-	signProposal,
-	verifyProposal,
-	staticProvider,
-	VoteTally,
 	type SignedProposal,
+	signProposal,
+	staticProvider,
 	type UnsignedProposal,
+	VoteTally,
+	verifyProposal,
 } from "./index.js";
 
 function makeKeyring(ids: string[]): HmacKeyring {
@@ -68,7 +68,12 @@ describe("proposal signing", () => {
 	it("round-trips sign/verify on a canonical encoding", () => {
 		const keyring = makeKeyring(["a"]);
 		const signer = keyring.signer("a");
-		const unsigned: UnsignedProposal = { view: 0, seq: 0, proposerId: "a", payloadHash: hashPayload("hello") };
+		const unsigned: UnsignedProposal = {
+			view: 0,
+			seq: 0,
+			proposerId: "a",
+			payloadHash: hashPayload("hello"),
+		};
 		const signed = signProposal(unsigned, signer);
 		expect(signed.signature).toMatch(/^[0-9a-f]{64}$/);
 		expect(verifyProposal(signed, signer)).toBe(true);
@@ -192,7 +197,9 @@ describe("BftOverlay — happy path", () => {
 		const overlay = new BftOverlay({
 			participants: ids,
 			keyring,
-			provider: staticProvider({ ...Object.fromEntries(ids.map((id) => [id, "consensus-answer"])) }),
+			provider: staticProvider({
+				...Object.fromEntries(ids.map((id) => [id, "consensus-answer"])),
+			}),
 		});
 		const outcome = await overlay.runConsensus("Q?");
 		expect(outcome.committed).toBe(true);
@@ -222,12 +229,13 @@ describe("BftOverlay — happy path", () => {
 
 	it("rejects duplicate participant ids", () => {
 		const keyring = makeKeyring(["a", "b"]);
-		expect(() =>
-			new BftOverlay({
-				participants: ["a", "a"],
-				keyring,
-				provider: staticProvider({ a: "x", b: "y" }),
-			}),
+		expect(
+			() =>
+				new BftOverlay({
+					participants: ["a", "a"],
+					keyring,
+					provider: staticProvider({ a: "x", b: "y" }),
+				}),
 		).toThrow(/unique/);
 	});
 });

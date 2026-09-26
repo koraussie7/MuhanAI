@@ -227,7 +227,7 @@ export async function createTransport(
 				const now = Date.now();
 				let positive = true;
 				if (pubKey) {
-					const outcome: VerificationOutcome = trustVerifier.verify(id, pubKey);
+					const outcome: VerificationOutcome = trustVerifier.verify(id, pubKey.raw);
 					if (outcome.status === "mismatch") {
 						// eslint-disable-next-line no-console
 						console.warn(`p2p: trust mismatch for ${id} (public key changed)`);

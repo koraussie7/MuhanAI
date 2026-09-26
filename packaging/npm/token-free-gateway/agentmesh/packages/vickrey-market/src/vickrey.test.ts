@@ -1,18 +1,21 @@
 import { describe, expect, it } from "vitest";
 import {
 	AuctionError,
+	type AuctionListing,
 	CommitmentError,
-	VickreyAuction,
-	VickreyMarketplace,
 	commitTo,
 	createBidCommitment,
 	generateNonce,
+	VickreyAuction,
+	VickreyMarketplace,
 	verifyReveal,
-	type AuctionListing,
 } from "./index.js";
 
 /** Build an open auction whose deadlines are entirely in the future. */
-function openListing(overrides: Partial<AuctionListing> = {}, now: number = 1_000_000): AuctionListing {
+function openListing(
+	overrides: Partial<AuctionListing> = {},
+	now: number = 1_000_000,
+): AuctionListing {
 	return {
 		id: "L1",
 		sellerId: "seller",
@@ -198,7 +201,9 @@ describe("VickreyAuction — integrity", () => {
 		const t = clock.now();
 		const auction = new VickreyAuction(openListing({}, t), t);
 		clock.bump(1_000);
-		expect(() => auction.reveal("ghost", 100, generateNonce(), clock.now())).toThrow(/no commitment/);
+		expect(() => auction.reveal("ghost", 100, generateNonce(), clock.now())).toThrow(
+			/no commitment/,
+		);
 	});
 
 	it("rejects a reveal from the same bidder twice", () => {
@@ -217,7 +222,9 @@ describe("VickreyAuction — integrity", () => {
 		const t = clock.now();
 		const auction = new VickreyAuction(openListing({}, t), t);
 		clock.bump(2_000);
-		expect(() => auction.commit("alice", createBidCommitment(100), clock.now())).toThrow(/deadline/);
+		expect(() => auction.commit("alice", createBidCommitment(100), clock.now())).toThrow(
+			/deadline/,
+		);
 	});
 
 	it("rejects late reveal (after revealDeadline)", () => {
@@ -255,11 +262,9 @@ describe("VickreyAuction — integrity", () => {
 	it("rejects revealDeadline <= commitDeadline", () => {
 		const clock = makeClock();
 		const t = clock.now();
-		expect(() =>
-			new VickreyAuction(
-				openListing({ commitDeadline: t + 100, revealDeadline: t + 50 }, t),
-				t,
-			),
+		expect(
+			() =>
+				new VickreyAuction(openListing({ commitDeadline: t + 100, revealDeadline: t + 50 }, t), t),
 		).toThrow();
 	});
 });
@@ -350,7 +355,12 @@ describe("VickreyAuction — tie-break & lifecycle", () => {
 describe("VickreyMarketplace", () => {
 	it("createListing registers and exposes the listing", () => {
 		const mp = new VickreyMarketplace({ now: makeClock().now });
-		const listing = mp.createListing({ id: "L1", sellerId: "s1", title: "GPU Hour", reservePrice: 50 });
+		const listing = mp.createListing({
+			id: "L1",
+			sellerId: "s1",
+			title: "GPU Hour",
+			reservePrice: 50,
+		});
 		expect(listing.id).toBe("L1");
 		expect(mp.list()).toHaveLength(1);
 		expect(mp.getPhase("L1")).toBe("open");

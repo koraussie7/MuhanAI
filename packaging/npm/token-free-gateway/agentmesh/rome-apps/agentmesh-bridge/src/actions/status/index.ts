@@ -1,11 +1,10 @@
-import { createAppLogger, defineAction } from "@rome-os/app-runtime";
 import type {
 	Action,
 	ActionConfig,
 	ActionResult,
 	AppActionRuntimeDeps,
 } from "@rome-os/app-runtime";
-import { z } from "@rome-os/app-runtime";
+import { createAppLogger, defineAction, z } from "@rome-os/app-runtime";
 import { gatewayHealth, resolveGatewayUrl } from "../../lib/gateway.js";
 
 const log = createAppLogger("agentmesh-bridge:status");

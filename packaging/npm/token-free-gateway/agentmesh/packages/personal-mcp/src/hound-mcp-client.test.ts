@@ -1,12 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EventEmitter } from "node:events";
 import type { Readable, Writable } from "node:stream";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+	__resetHoundMcpClientForTests,
 	getHoundMcpClient,
 	HoundCallError,
 	HoundMcpClient,
 	HoundUnavailableError,
-	__resetHoundMcpClientForTests,
 } from "./hound-mcp-client.js";
 
 interface FakeStdio extends EventEmitter {

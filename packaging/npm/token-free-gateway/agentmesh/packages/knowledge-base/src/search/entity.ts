@@ -30,11 +30,57 @@ const MAX_ENTITIES_PER_CHUNK = 30;
 const MAX_QUERY_TERMS = 64;
 
 const STOPWORDS = new Set([
-	"the", "and", "for", "with", "this", "that", "from", "into", "your", "you",
-	"are", "was", "not", "but", "all", "can", "has", "have", "will", "what",
-	"when", "which", "their", "them", "these", "those", "then", "than", "about",
-	"over", "more", "most", "some", "such", "also", "how", "why", "does", "did",
-	"who", "where", "a", "an", "of", "to", "in", "on", "is", "it", "or", "as",
+	"the",
+	"and",
+	"for",
+	"with",
+	"this",
+	"that",
+	"from",
+	"into",
+	"your",
+	"you",
+	"are",
+	"was",
+	"not",
+	"but",
+	"all",
+	"can",
+	"has",
+	"have",
+	"will",
+	"what",
+	"when",
+	"which",
+	"their",
+	"them",
+	"these",
+	"those",
+	"then",
+	"than",
+	"about",
+	"over",
+	"more",
+	"most",
+	"some",
+	"such",
+	"also",
+	"how",
+	"why",
+	"does",
+	"did",
+	"who",
+	"where",
+	"a",
+	"an",
+	"of",
+	"to",
+	"in",
+	"on",
+	"is",
+	"it",
+	"or",
+	"as",
 ]);
 
 /**
@@ -45,7 +91,11 @@ const STOPWORDS = new Set([
  * instead of keeping the parens that blocked exact matching.
  */
 function normalize(s: string): string {
-	return s.replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim().toLowerCase();
+	return s
+		.replace(/[^\p{L}\p{N}\s]/gu, " ")
+		.replace(/\s+/g, " ")
+		.trim()
+		.toLowerCase();
 }
 
 function isMeaningful(n: string): boolean {
@@ -66,7 +116,7 @@ function isMeaningful(n: string): boolean {
  */
 function parseWikilinkTargets(text: string): string[] {
 	const out: string[] = [];
-	const re = /\[\[([^\[\]\n]+)\]\]/g;
+	const re = /\[\[([^[\]\n]+)\]\]/g;
 	let m: RegExpExecArray | null;
 	while ((m = re.exec(text)) !== null) {
 		// `m.index === 0` is safe; we only check the preceding char via
@@ -180,7 +230,9 @@ export function buildAliasIndex(aliases?: Record<string, string[]>): Map<string,
 	const index = new Map<string, string[]>();
 	if (!aliases) return index;
 	for (const [key, arr] of Object.entries(aliases)) {
-		const group = [normalize(key), ...(Array.isArray(arr) ? arr : []).map(normalize)].filter(Boolean);
+		const group = [normalize(key), ...(Array.isArray(arr) ? arr : []).map(normalize)].filter(
+			Boolean,
+		);
 		const uniq = [...new Set(group)];
 		if (uniq.length < 2) continue; // a group needs >=2 members to bridge anything
 		for (const term of uniq) {

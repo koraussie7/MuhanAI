@@ -11,10 +11,10 @@
 //     GHSA-hq66-cqwq-w95j, the PDF → arbitrary JS execution vector).
 //  3. The result shape (text, pageCount, sourceFormat) is plumbed through.
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("unpdf", () => {
 	const getDocumentProxy = vi.fn(async () => ({}));

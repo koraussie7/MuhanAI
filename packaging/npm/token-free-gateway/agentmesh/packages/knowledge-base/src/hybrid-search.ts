@@ -9,9 +9,9 @@
 
 import type { KnowledgeNode } from "@agentmesh/shared-types";
 import { decayEngine } from "./decay/engine.js";
-import { type RankedItem, rrfFusionN } from "./search/rrf.js";
-import { extractEntities, extractQueryTerms } from "./search/entity.js";
 import { type ScoredKnowledge, vectorStore } from "./retrieval";
+import { extractEntities, extractQueryTerms } from "./search/entity.js";
+import { type RankedItem, rrfFusionN } from "./search/rrf.js";
 
 /** Injectable keyword-search provider. Defaults to an empty result when no
  *  provider is registered — personal-mcp registers its own service at
@@ -159,16 +159,11 @@ export function fuseHybridResults(inputs: FuseInputs): HybridSearchHit[] {
 	for (const l of [keywordList, vectorList, entityHits]) for (const r of l) allIds.add(r.id);
 	const recencyScores = decayEngine.getRetrievabilityScores(allIds, now);
 
-	const fused = rrfFusionN(
-		[keywordList, vectorList, entityHits],
-		RRF_K,
-		limit,
-		{
-			weights: [WEIGHTS.keyword, WEIGHTS.vector, WEIGHTS.entity],
-			recencyScores,
-			recencyWeight: RECENCY_WEIGHT,
-		},
-	);
+	const fused = rrfFusionN([keywordList, vectorList, entityHits], RRF_K, limit, {
+		weights: [WEIGHTS.keyword, WEIGHTS.vector, WEIGHTS.entity],
+		recencyScores,
+		recencyWeight: RECENCY_WEIGHT,
+	});
 
 	return fused.map((r) => {
 		const inKeyword = keywordList.some((x) => x.id === r.id);

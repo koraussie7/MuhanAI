@@ -21,5 +21,6 @@ export * from "./ingest.js";
 export * from "./log.js";
 export * from "./ontology.js";
 export * from "./projections.js";
+export * from "./pythia.js";
 export * from "./shadowbroker.js";
 export * from "./types.js";
