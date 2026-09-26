@@ -1,5 +1,6 @@
 ---
 title: "무한한 AI Power를 누가 가지게 될 것인가"
+slug: "ai-power-distribution"
 date: 2026-09-28T09:00:00+09:00
 lastmod: 2026-09-28
 draft: false
