@@ -1,12 +1,10 @@
 # Ghost integration
-
 [Ghost](https://github.com/ghostapp-ai/ghost) desktop/mobile nodes and MuhanAI integrate in **both directions**:
 
-1. **Inbound** — MuhanAI registers Ghost nodes as local-first Agent Mesh workers (discovery, verification, gated dispatch). See *Current scope* below.
+1. **Inbound** — MuhanAI registers Ghost nodes as local-first Agent Mesh workers (discovery, verification, gated dispatch). See *Current scope* and *Task dispatch* below.
 2. **Outbound** — MuhanAI publishes its own Agent Card so a Ghost install can discover and bind it as a remote agent. See *Publishing MuhanAI as a discoverable agent* below.
 
 ## Publishing MuhanAI as a discoverable agent
-
 Ghost discovers remote agents by fetching `/.well-known/agent.json` from a base URL. MuhanAI serves that document so any A2A-protocol client can find it:
 
 ```bash
@@ -48,7 +46,6 @@ local_file_search | local_code_analysis | offline_inference | desktop_automation
 Any value outside that set is **silently dropped** by the client's filter, so keep new entries in sync with `GhostCapability` or they will never be visible to a Ghost install. `skills` is free-form `{id, name, description?}`; malformed rows are dropped rather than failing the whole card, since an unknown skill must never make an otherwise discoverable agent un-registrable.
 
 ### Verifying the outbound card
-
 `deploy/verify-ghost-discovery.mts` exercises the real client code path against the live endpoint — SSRF guard, fetch, `parseGhostAgentCard`, and registry registration — rather than re-implementing the contract:
 
 ```bash
@@ -110,8 +107,49 @@ Errors map to `400` (malformed URL), `403` (`internal_url_blocked`,
 `url_not_allowed`), or `502` (network/DNS/parse failures) with the stable
 error code from `GhostFetchErrorCode` in the body.
 
-The adapter does not send files or credentials to MuhanAI. It only stores the Agent Card and its last-seen timestamp. Task dispatch, AG-UI bridging, A2UI capability negotiation, and offline receipt synchronization should be added after the discovery path is deployed and authenticated.
+The adapter does not send files or credentials to MuhanAI. It only stores the Agent Card and its last-seen timestamp.
+
+## Task dispatch (gated execution)
+
+Dispatch routes live in `services/api/src/ghost-dispatch-routes.ts` and sit entirely on top of the dispatch guard in `@agentmesh/ghost-adapter` (`packages/ghost-adapter/src/dispatch.ts`). All node-bound URLs stay behind the same SSRF guard as discovery.
+
+Routes:
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| `POST` | `/api/ghost/nodes/:nodeId/challenge` | `x-api-key` (operator) | issue a marker challenge for `(nodeId, capability)` |
+| `POST` | `/api/ghost/nodes/:nodeId/verify` | `x-ghost-token` (the node itself) | answer a probe — marker must echo back in `response` |
+| `POST` | `/api/ghost/nodes/:nodeId/tasks` | `x-api-key` (operator) | dispatch a gated task through all four gates |
+| `POST` | `/api/ghost/approvals` | `x-api-key` (operator) | grant `desktop_automation` (only write/execute cap needing approval) |
+| `GET` | `/api/ghost/nodes/:nodeId/status` | `x-api-key` (operator) | claims / verified / approvals / reputation for a node |
+
+Dispatch gates (all implemented, all injectable/testable in isolation):
+
+1. **Claims** — the node's Agent Card must list the requested `capability`;
+2. **Probe verification** — a capability is only *earned* after a marker challenge round-trips through the node (see `challenge`/`verify` routes); verification expires (default 24 h) so a stale node can't reuse an old proof;
+3. **Operator approval** — `desktop_automation` additionally requires an expiring, revocable grant (`POST /api/ghost/approvals`);
+4. **Replay-safe task IDs** — every dispatch mints a fresh single-use UUID via `createTaskLedger`; replays/expiry are rejected and recorded;
+5. **Reputation feedback** — success/failure feeds `peer-mesh`'s `PeerReputationRegistry` under subject `ghost:<capability>` so the mesh learns per-node reliability.
+
+Example flow (operator side):
+
+```bash
+# 1. issue a probe
+probe=$(curl -s -X POST http://localhost:3001/api/ghost/nodes/ghost-mac-01/challenge \
+  -H 'x-api-key: <key>' -H 'content-type: application/json' \
+  -d '{"capability":"local_file_search"}')
+
+# 2. (node side) respond with the marker echoed back
+curl -X POST "http://localhost:3001/api/ghost/nodes/ghost-mac-01/verify?probeId=$probe" \
+  -H 'x-ghost-token: <token>' -H 'content-type: application/json' \
+  -d "{\"probeId\":\"$probe\",\"response\":\"the marker is $MARKER\"}"
+
+# 3. (operator) dispatch a real task
+curl -X POST http://localhost:3001/api/ghost/nodes/ghost-mac-01/tasks \
+  -H 'x-api-key: <key>' -H 'content-type: application/json' \
+  -d '{"capability":"local_file_search","payload":{"query":"muhanai architecture"}}'
+```
 
 ## Security boundary
 
-Keep Ghost file roots and credentials local. Before enabling task execution, add an allowlist for node URLs at the dispatch layer (the discovery allowlist above only gates Agent Card fetches), per-node capability policy, user approval for write/execute actions, and replay-safe task IDs. Capability claims in the Agent Card are self-declared — verify them through actual task execution (and `peer-mesh` reputation) before routing production traffic to a node.
+Keep Ghost file roots and credentials local. The discovery allowlist (`GHOST_NODE_URL_ALLOWLIST`) gates Agent Card fetches; the dispatch layer reuses that policy for node-bound task transport. Capability claims in the Agent Card are self-declared — verify them through actual task execution (the probe/verification flow above) and `peer-mesh` reputation before routing production traffic to a node.
