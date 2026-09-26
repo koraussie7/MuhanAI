@@ -1,0 +1,15 @@
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="{{ "/" | relURL }}">
+      <span class="mark" aria-hidden="true">◈</span>
+      <span>{{ .Site.Title }}</span>
+    </a>
+    <nav aria-label="주 메뉴">
+      <ul class="nav">
+        {{ range .Site.Menus.main }}
+        <li><a href="{{ .URL | relURL }}">{{ .Name }}</a></li>
+        {{ end }}
+      </ul>
+    </nav>
+  </div>
+</header>

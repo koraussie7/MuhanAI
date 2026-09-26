@@ -1,0 +1,21 @@
+{{ define "main" }}
+<h1 class="page-title">{{ .Title }}</h1>
+{{ with .Content }}<div class="post-body">{{ . }}</div>{{ end }}
+{{ $pages := .Pages }}
+{{ if $pages }}
+{{ $ordered := $pages.ByParam "seriesOrder" }}
+<ul class="post-list">
+  {{ range $index, $page := $ordered }}
+  <li class="post-item">
+    <p class="post-meta">
+      {{ if $page.Params.seriesOrder }}Part {{ $page.Params.seriesOrder }} · {{ end }}
+      <time datetime="{{ $page.Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ $page.Date.Format "2006-01-02" }}</time>
+      {{ with $page.ReadingTime }} · {{ . }} min read{{ end }}
+    </p>
+    <h2><a href="{{ $page.RelPermalink }}">{{ $page.Title }}</a></h2>
+    {{ with $page.Description }}<p class="muted">{{ . }}</p>{{ else }}<p class="muted">{{ $page.Summary | plainify | truncate 160 }}</p>{{ end }}
+  </li>
+  {{ end }}
+</ul>
+{{ end }}
+{{ end }}

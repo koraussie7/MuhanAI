@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 /**
  * Windows-safe launcher for the Folklore MCP server.
  *
@@ -17,10 +18,9 @@
  *                             (auto-detected from node_modules when omitted)
  */
 
-import { pathToFileURL } from "node:url";
-import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { existsSync, readdirSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

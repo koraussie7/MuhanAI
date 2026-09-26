@@ -29,9 +29,9 @@ import { describe, expect, it } from "vitest";
 // The sanitizer is plain ESM (no .d.ts) so it can be run directly by bun/node.
 import {
 	CANONICAL_SOURCE,
-	TARGETS,
 	countScaffolding,
 	sanitizeDashboardHtml,
+	TARGETS,
 } from "../deploy/sanitize-dashboard-v2.mjs";
 
 /** `CANONICAL_SOURCE` is `<repo-root>/packaging/muhanai-dashboard-v2.html`. */
@@ -120,7 +120,7 @@ describe("sanitizeDashboardHtml", () => {
 	});
 
 	it("leaves the document structure intact", () => {
-		expect(sanitized.startsWith("<!doctype html>\n<html lang=\"ko\"><head>\n")).toBe(true);
+		expect(sanitized.startsWith('<!doctype html>\n<html lang="ko"><head>\n')).toBe(true);
 		expect(sanitized.trimEnd().endsWith("</body></html>")).toBe(true);
 	});
 
@@ -131,7 +131,7 @@ describe("sanitizeDashboardHtml", () => {
 	it("does not delete a script that merely mentions data-od-", () => {
 		// A page script may legitimately reference the attribute it was stripped
 		// of; only elements *tagged* with data-od-* are host scaffolding.
-		const keep = '<script>const sel = \'[data-od-id]\';</script>';
+		const keep = "<script>const sel = '[data-od-id]';</script>";
 		expect(sanitizeDashboardHtml(keep)).toBe(keep);
 	});
 });
@@ -183,9 +183,7 @@ describe("dashboard v2 URLs — dev server and deploy configs agree", () => {
 
 		// The matcher alone is inert — the block it guards has to rewrite to the
 		// page. Without this the routes could be listed and still serve the SPA.
-		expect(caddy).toMatch(
-			/handle\s+@dashboard\s*\{[^}]*rewrite\s+\*\s+\/dashboard-v2\.html/s,
-		);
+		expect(caddy).toMatch(/handle\s+@dashboard\s*\{[^}]*rewrite\s+\*\s+\/dashboard-v2\.html/s);
 	});
 
 	it("nginx has one exact-match location per path, all serving the v2 page", () => {
@@ -212,9 +210,10 @@ describe("dashboard v2 URLs — dev server and deploy configs agree", () => {
 			const src = readFileSync(script, "utf8");
 			const matchers = [...src.matchAll(/@dashboard\s+path\s+([^\n]+)/g)]
 				.map((match) => match[1]?.trim() ?? "")
-				.filter((matcher) =>
-					matcher.length > 0 &&
-					matcher.split(/\s+/).every((token) => /^\/[A-Za-z0-9/_-]*$/.test(token)),
+				.filter(
+					(matcher) =>
+						matcher.length > 0 &&
+						matcher.split(/\s+/).every((token) => /^\/[A-Za-z0-9/_-]*$/.test(token)),
 				);
 			if (matchers.length === 0) {
 				throw new Error(`\`@dashboard path\` matcher not found in ${script}`);

@@ -1,0 +1,152 @@
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --border: #30363d;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --accent: #e6b422;
+  --accent-dim: #3d3418;
+  --maxw: 780px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+}
+.skip-link:focus {
+  left: 12px;
+  top: 12px;
+  z-index: 10;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 20px; }
+
+.site-header {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 18px;
+  padding-bottom: 18px;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.brand:hover { text-decoration: none; }
+.brand .mark { color: var(--accent); }
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.92rem;
+}
+
+main.wrap { padding: 40px 20px 72px; }
+
+.page-title { font-size: 1.9rem; margin: 0 0 24px; letter-spacing: -0.02em; }
+
+.lede { color: var(--muted); font-size: 1.02rem; margin: 8px 0 0; }
+
+.post-head { border-bottom: 1px solid var(--border); padding-bottom: 22px; margin-bottom: 30px; }
+.post-head h1 { margin: 0; font-size: 2rem; letter-spacing: -0.02em; line-height: 1.25; }
+
+.post-meta { color: var(--muted); font-size: 0.86rem; margin: 10px 0 0; }
+
+.post-body h2 { font-size: 1.25rem; margin: 40px 0 12px; letter-spacing: -0.01em; }
+.post-body h3 { font-size: 1.05rem; margin: 28px 0 10px; }
+.post-body p { margin: 0 0 18px; }
+.post-body ul, .post-body ol { margin: 0 0 18px; padding-left: 22px; }
+.post-body li { margin: 6px 0; }
+.post-body code {
+  font-size: 0.86em;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 2px 6px;
+}
+.post-body pre {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  overflow-x: auto;
+  margin: 0 0 22px;
+}
+.post-body pre code { background: none; border: 0; padding: 0; font-size: 0.84rem; }
+.post-body blockquote {
+  margin: 0 0 20px;
+  padding: 4px 0 4px 18px;
+  border-left: 3px solid var(--accent-dim);
+  color: var(--muted);
+}
+.post-body table { width: 100%; border-collapse: collapse; margin: 0 0 22px; font-size: 0.92rem; }
+.post-body th, .post-body td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; }
+.post-body th { background: var(--surface); }
+.post-body img { max-width: 100%; height: auto; border-radius: 10px; }
+
+.post-list { list-style: none; margin: 0; padding: 0; }
+.post-item { padding: 22px 0; border-bottom: 1px solid var(--border); }
+.post-item:last-child { border-bottom: 0; }
+.post-item h2 { margin: 0 0 6px; font-size: 1.3rem; }
+.post-item h2 a { color: var(--text); }
+.post-item h2 a:hover { color: var(--accent); }
+.muted { color: var(--muted); }
+
+.chip {
+  display: inline-block;
+  font-size: 0.78rem;
+  padding: 3px 10px;
+  margin: 0 6px 6px 0;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  color: var(--muted);
+}
+.chip:hover { color: var(--accent); border-color: var(--accent-dim); text-decoration: none; }
+.post-tags { margin-top: 36px; }
+
+.site-footer {
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+.site-footer .wrap { padding-top: 24px; padding-bottom: 32px; }
+.site-footer p { margin: 0 0 6px; }
+
+@media (max-width: 560px) {
+  main.wrap { padding: 28px 16px 56px; }
+  .post-head h1 { font-size: 1.5rem; }
+  .header-inner { padding-top: 14px; padding-bottom: 14px; }
+  .nav { gap: 14px; font-size: 0.86rem; }
+}

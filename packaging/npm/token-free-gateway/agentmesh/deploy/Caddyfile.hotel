@@ -1,0 +1,37 @@
+# Origin block for hotel.kbizhub.com — Kamra PMS (Frappe) behind Cloudflare.
+#
+# Deployment: `scp Caddyfile.hotel setup-caddy-hotel.sh 110:/tmp/` then
+# `ssh 110 'cd /tmp && sudo bash setup-caddy-hotel.sh'`.
+#
+# DNS: hotel.kbizhub.com A 185.55.240.110 (Proxied / orange cloud).
+# Cloudflare terminates the public TLS; this origin uses Caddy's internal CA
+# (tls internal), the same pattern already in use for danang.kbizhub.com and
+# shop1.kbizhub.com, which is why the public cert never shows up at the origin.
+# Public response was HTTP 525 (CF could not handshake with origin) before this
+# block existed and became 200 once the Kamra stack answered on 8000.
+
+hotel.kbizhub.com {
+	tls internal
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+	}
+
+	# Frappe/Kamra site: product UI at /kamra, booking at /book,
+	# housekeeping at /hk, Desk at /app, MCP connector at /mcp,
+	# whitelisted REST at /api/method/*.
+	reverse_proxy 127.0.0.1:8000 {
+		header_up Host {host}
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+
+	log {
+		output file /var/log/caddy/hotel-kbizhub.log
+	}
+}

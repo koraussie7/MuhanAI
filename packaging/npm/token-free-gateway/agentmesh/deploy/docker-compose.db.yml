@@ -1,0 +1,19 @@
+# Local DB for agentmesh API (dev/testing only)
+# Usage: docker compose -f deploy/docker-compose.db.yml up -d
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: agentmesh-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: agentmesh
+      POSTGRES_PASSWORD: agentmesh_dev_pass
+      POSTGRES_DB: agentmesh
+    ports:
+      - "5432:5432"
+    volumes:
+      - agentmesh_pgdata:/var/lib/postgresql/data
+
+volumes:
+  agentmesh_pgdata:

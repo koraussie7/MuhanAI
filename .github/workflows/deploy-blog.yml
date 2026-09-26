@@ -1,0 +1,110 @@
+name: Deploy Blog
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packaging/npm/token-free-gateway/agentmesh/blog/**"
+      - "packaging/npm/token-free-gateway/agentmesh/deploy/build-blog.sh"
+      - "packaging/npm/token-free-gateway/agentmesh/deploy/Caddyfile.muhanai"
+      - ".github/workflows/deploy-blog.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-blog-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Hugo site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Hugo
+        run: |
+          set -euo pipefail
+          HUGO_VERSION="0.148.1"
+          curl -sSL -o /tmp/hugo.deb \
+            "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_linux-amd64.deb"
+          sudo dpkg -i /tmp/hugo.deb
+          hugo version
+
+      - name: Build (baseURL = production)
+        working-directory: packaging/npm/token-free-gateway/agentmesh
+        env:
+          HUGO_ENV: production
+        run: |
+          set -euo pipefail
+          hugo --source blog \
+                --destination blog/public \
+                --baseURL "https://blog.muhanai.com/" \
+                --cleanDestinationDir \
+                --minify
+
+      - name: Verify build output
+        run: |
+          set -euo pipefail
+          test -f packaging/npm/token-free-gateway/agentmesh/blog/public/index.html
+          test -f packaging/npm/token-free-gateway/agentmesh/blog/public/index.xml
+          echo "files: $(find packaging/npm/token-free-gateway/agentmesh/blog/public -type f | wc -l)"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: blog-public
+          path: packaging/npm/token-free-gateway/agentmesh/blog/public
+          retention-days: 7
+
+  deploy:
+    name: Publish to origin
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: blog-public
+          path: /tmp/blog-public
+
+      - name: Configure SSH
+        env:
+          ORIGIN_SSH_KEY: ${{ secrets.ORIGIN_SSH_KEY }}
+          ORIGIN_HOST: ${{ secrets.ORIGIN_HOST }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          printf '%s\n' "$ORIGIN_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$ORIGIN_HOST" > ~/.ssh/known_hosts
+
+      - name: Upload release and swap symlink
+        env:
+          ORIGIN_USER: ${{ secrets.ORIGIN_USER }}
+          ORIGIN_HOST: ${{ secrets.ORIGIN_HOST }}
+        run: |
+          set -euo pipefail
+          RELEASE="$(date -u +%Y%m%dT%H%M%SZ)"
+          DOC_ROOT="/var/www/blog.muhanai.com"
+          TARGET="${ORIGIN_USER}@${ORIGIN_HOST}"
+
+          echo "==> staging release $RELEASE"
+          ssh "$TARGET" "sudo mkdir -p ${DOC_ROOT}/releases/${RELEASE} /tmp/blog-upload"
+          rsync -az --delete /tmp/blog-public/ "${TARGET}:/tmp/blog-upload/"
+          ssh "$TARGET" "sudo cp -R /tmp/blog-upload/. ${DOC_ROOT}/releases/${RELEASE}/ && rm -rf /tmp/blog-upload"
+          ssh "$TARGET" "sudo ln -sfn ${DOC_ROOT}/releases/${RELEASE} ${DOC_ROOT}/current"
+
+          echo "==> reloading caddy"
+          ssh "$TARGET" "sudo systemctl reload caddy || sudo systemctl restart caddy"
+
+          echo "==> verifying origin response"
+          sleep 2
+          ssh "$TARGET" "sudo curl -sS -o /dev/null -w 'origin status=%{http_code}\n' --resolve blog.muhanai.com:443:127.0.0.1 -k https://blog.muhanai.com/"
+
+      - name: Summary
+        run: |
+          echo "blog.muhanai.com deployed."
+          echo "rollback: ssh to origin, then"
+          echo "  sudo ln -sfn /var/www/blog.muhanai.com/releases/<previous> /var/www/blog.muhanai.com/current && sudo systemctl reload caddy"

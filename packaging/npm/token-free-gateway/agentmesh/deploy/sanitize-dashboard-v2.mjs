@@ -72,12 +72,29 @@ export const CANONICAL_SOURCE = resolve(ROOT, "packaging", "muhanai-dashboard-v2
  * them from drifting apart.
  */
 export const TARGETS = [
-	resolve(ROOT, "packaging", "npm", "token-free-gateway", "agentmesh", "deploy", "dashboard-v2.html"),
+	resolve(
+		ROOT,
+		"packaging",
+		"npm",
+		"token-free-gateway",
+		"agentmesh",
+		"deploy",
+		"dashboard-v2.html",
+	),
 	resolve(ROOT, "web-app", "public", "dashboard-v2.html"),
 	// Production ASSETS root: wrangler.toml serves apps/web/dist, and apps/web
 	// has no public/ dir, so the page is published here and copied into dist/
 	// at build time (see the post-build note in apps/web/package.json).
-	resolve(ROOT, "packaging", "npm", "token-free-gateway", "agentmesh", "apps", "web", "dashboard-v2.html"),
+	resolve(
+		ROOT,
+		"packaging",
+		"npm",
+		"token-free-gateway",
+		"agentmesh",
+		"apps",
+		"web",
+		"dashboard-v2.html",
+	),
 ];
 
 /**

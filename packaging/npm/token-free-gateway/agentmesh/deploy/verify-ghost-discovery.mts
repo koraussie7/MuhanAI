@@ -42,7 +42,10 @@ line("url", card.url);
 line("version", card.version);
 line("description", card.description?.slice(0, 70) + "…");
 line("capabilities", card.capabilities);
-line("skills", card.skills?.map((s) => s.id));
+line(
+	"skills",
+	card.skills?.map((s) => s.id),
+);
 line("protocol", card.protocol);
 
 // Step 2: registration into the same registry the API's POST /api/ghost/nodes
@@ -52,7 +55,10 @@ const node: GhostNode = { nodeId: "muhanai.com", card, lastSeenAt: Date.now() };
 registry.upsert(node);
 
 const listed = registry.list();
-line("registered", listed.map((n) => n.nodeId));
+line(
+	"registered",
+	listed.map((n) => n.nodeId),
+);
 
 // Step 3: assertions that matter for the integration to be real.
 const failures: string[] = [];

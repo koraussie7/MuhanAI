@@ -39,9 +39,16 @@ const DRY_RUN = process.argv.includes("--dry-run");
 const ROLLBACK = process.argv.includes("--rollback");
 const RELOAD_CADDY = process.env.SHOP1_RELOAD_CADDY !== "false";
 
+/** Quote one argument for the remote POSIX shell used by SSH. */
+function shellQuote(value: string): string {
+	return `'${value.replace(/'/g, "'\\''")}'`;
+}
+
 /** Run a command locally, or over ssh when SHOP1_HOST is set. */
 function run(cmd: string, args: string[]): string {
-	const [bin, ...rest] = HOST ? ["ssh", HOST, [cmd, ...args].join(" ")] : [cmd, ...args];
+	const [bin, ...rest] = HOST
+		? ["ssh", HOST, [cmd, ...args].map(shellQuote).join(" ")]
+		: [cmd, ...args];
 	return execFileSync(bin, rest as string[], {
 		encoding: "utf8",
 		stdio: ["ignore", "pipe", "pipe"],
@@ -57,9 +64,9 @@ function run(cmd: string, args: string[]): string {
 function probe(cmd: string, args: string[]): boolean {
 	try {
 		run(cmd, args);
-	return true;
+		return true;
 	} catch {
-	return false;
+		return false;
 	}
 }
 
@@ -89,7 +96,13 @@ if (ROLLBACK) {
 		process.exit(1);
 	}
 	log(`rolling back ${current} -> ${previous}`);
-	run("ln", ["-sfn", `${WEB_ROOT}/releases/${previous}`, `${WEB_ROOT}/current`]);
+	const rollbackLink = `${WEB_ROOT}/current-rollback-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+	run("ln", ["-s", `${WEB_ROOT}/releases/${previous}`, rollbackLink]);
+	run("mv", ["-T", rollbackLink, `${WEB_ROOT}/current`]);
+	const liveRollback = run("readlink", [`${WEB_ROOT}/current`]).trim();
+	if (!liveRollback.endsWith(previous)) {
+		throw new Error(`rollback verification failed: current -> ${liveRollback}`);
+	}
 	if (RELOAD_CADDY) run("caddy", ["reload", "--config", "/etc/caddy/Caddyfile"]);
 	log(`now serving ${previous}`);
 	process.exit(0);
@@ -119,10 +132,13 @@ if (DRY_RUN) {
 }
 
 // ------------------------------------------------------------------ deploy ---
-const release = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
+const release = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 const releasePath = `${WEB_ROOT}/releases/${release}`;
 
 log(`deploying to ${HOST || "local"}:${releasePath}`);
+if (probe("test", ["-e", releasePath]) || probe("test", ["-L", releasePath])) {
+	throw new Error(`release directory already exists: ${releasePath}`);
+}
 run("mkdir", ["-p", releasePath]);
 
 // Copy the bundle we just built (local path) up to the origin.

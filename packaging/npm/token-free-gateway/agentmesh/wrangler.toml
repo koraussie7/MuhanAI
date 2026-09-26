@@ -9,6 +9,15 @@ routes = [
   { pattern = "api.muhanai.com/*", zone_name = "muhanai.com" },
   { pattern = "shop1.kbizhub.com/*", zone_name = "kbizhub.com" },
   { pattern = "travel.kbizhub.com/*", zone_name = "kbizhub.com" },
+  { pattern = "vn.kbizhub.com/*", zone_name = "kbizhub.com" },
+  # The following hostnames are NOT Worker routes. They are proxied A records
+  # pointing at the 110 origin, where Caddy terminates TLS:
+  #   - hotel.kbizhub.com -> reverse-proxies to the Kamra PMS on 127.0.0.1:8000
+  #   - blog.muhanai.com -> serves the Hugo build from
+  #     /var/www/blog.muhanai.com/current (see deploy/Caddyfile.muhanai)
+  # Adding either hostname here would let the Worker hijack it; with no matching
+  # handler inside the Worker the request falls back to the origin path and fails
+  # with 525/522 instead of rendering.
 ]
 workers_dev = false
 

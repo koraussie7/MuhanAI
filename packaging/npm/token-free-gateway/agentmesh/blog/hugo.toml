@@ -1,0 +1,80 @@
+baseURL = "https://blog.muhanai.com/"
+languageCode = "ko-KR"
+defaultContentLanguage = "ko"
+title = "MuhanAI Blog"
+enableRobotsTXT = true
+enableEmoji = true
+enableGitInfo = false
+summaryLength = 30
+timeZone = "Asia/Seoul"
+
+[pagination]
+  pagerSize = 10
+
+[taxonomies]
+  category = "categories"
+  tag = "tags"
+  series = "series"
+
+[params]
+  description = "MuhanAI — 브라우저 기반 P2P 에이전트 메시시, 지식 그래프, MCP 도구를 다루는 기술 블로그."
+  author = "MuhanAI"
+  accent = "#e6b422"
+  heroText = "P2P 에이전트 메시시와 지식 인프라"
+
+[permalinks]
+  posts = "/posts/:slug/"
+
+[minify]
+  disableXML = true
+  minifyOutput = true
+
+[sitemap]
+  changefreq = "daily"
+  filename = "sitemap.xml"
+  priority = 0.6
+
+[outputs]
+  home = ["HTML", "RSS"]
+  section = ["HTML", "RSS"]
+  taxonomy = ["HTML"]
+  term = ["HTML"]
+
+[markup]
+  [markup.goldmark.renderer]
+    unsafe = true
+  [markup.tableOfContents]
+    startLevel = 2
+    endLevel = 4
+  [markup.highlight]
+    noClasses = false
+    style = "github-dark"
+
+[[menu.main]]
+  name = "Home"
+  url = "/"
+  weight = 10
+
+[[menu.main]]
+  name = "Posts"
+  url = "/posts/"
+  weight = 20
+
+[[menu.main]]
+  name = "Categories"
+  url = "/categories/"
+  weight = 30
+
+[[menu.main]]
+  name = "Tags"
+  url = "/tags/"
+  weight = 40
+
+[[menu.main]]
+  name = "Series"
+  url = "/series/"
+  weight = 45
+[[menu.main]]
+  name = "Main Site"
+  url = "https://muhanai.com/"
+  weight = 50

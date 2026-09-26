@@ -1,0 +1,23 @@
+{{ define "main" }}
+<article class="post">
+  <header class="post-head">
+    <h1>{{ .Title }}</h1>
+    <p class="post-meta">
+      <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "2006-01-02" }}</time>
+      {{ with .ReadingTime }} · {{ . }} min read{{ end }}
+      {{ range .Params.categories }} · <a href="{{ (printf "/categories/%s/" (urlize .)) | relURL }}">{{ . }}</a>{{ end }}
+    </p>
+    {{ with .Description }}<p class="lede">{{ . }}</p>{{ end }}
+  </header>
+
+  <div class="post-body">
+    {{ .Content }}
+  </div>
+
+  {{ with .Params.tags }}
+  <footer class="post-tags">
+    {{ range . }}<a class="chip" href="{{ (printf "/tags/%s/" (urlize .)) | relURL }}">{{ . }}</a>{{ end }}
+  </footer>
+  {{ end }}
+</article>
+{{ end }}

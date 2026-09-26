@@ -46,3 +46,51 @@ muhanai.com, www.muhanai.com, find.muhanai.com, travel.kbizhub.com {
 		file_server
 	}
 }
+
+# blog.muhanai.com — Hugo static blog.
+#
+# DNS: blog.muhanai.com A 185.55.240.110 (Proxied / orange cloud).
+# Cloudflare terminates public TLS, so the origin uses Caddy's internal CA
+# (`tls internal`) — the same pattern as hotel.kbizhub.com / danang / shop1.
+# Without it Caddy would try to solve a public ACME challenge behind a proxied
+# hostname and the origin handshake fails (Cloudflare 525).
+#
+# Served straight from the origin, not via the Cloudflare Worker: the blog is a
+# pure static bundle produced by deploy/build-blog.sh, and blog.muhanai.com is
+# deliberately absent from wrangler.toml routes so the Worker never hijacks it.
+# `current` is a symlink swapped atomically per release, so rollbacks are a
+# single `ln -sfn` + reload.
+blog.muhanai.com {
+	tls internal
+	encode zstd gzip
+	root * /var/www/blog.muhanai.com/current
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Frame-Options "SAMEORIGIN"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+	}
+
+	@asset path_regexp asset "\.(css|js|svg|png|jpg|jpeg|webp|woff2)(\?.*)?$"
+	handle @asset {
+		file_server
+		header Cache-Control "public, max-age=604800"
+	}
+
+	@feed path /index.xml /sitemap.xml /robots.txt
+	handle @feed {
+		file_server
+		header Cache-Control "public, max-age=1800"
+	}
+
+	handle {
+		try_files {path} {path}/ {path}.html {path}/index.html =404
+		file_server
+		header Cache-Control "no-cache"
+	}
+
+	log {
+		output file /var/log/caddy/blog-muhanai.log
+	}
+}
