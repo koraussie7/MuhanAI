@@ -1,8 +1,8 @@
 ---
 title: "AI를 보호하는 가장 중요한 방법은 사람의 참여입니다"
 slug: "human-oversight"
-date: 2026-09-29T09:00:00+09:00
-lastmod: 2026-09-29
+date: 2026-09-26T09:20:00+09:00
+lastmod: 2026-09-26
 draft: false
 series: ["Network Needs You"]
 seriesOrder: 3

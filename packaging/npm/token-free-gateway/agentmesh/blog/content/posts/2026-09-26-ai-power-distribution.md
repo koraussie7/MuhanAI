@@ -1,8 +1,8 @@
 ---
 title: "무한한 AI Power를 누가 가지게 될 것인가"
 slug: "ai-power-distribution"
-date: 2026-09-28T09:00:00+09:00
-lastmod: 2026-09-28
+date: 2026-09-26T09:10:00+09:00
+lastmod: 2026-09-26
 draft: false
 series: ["Network Needs You"]
 seriesOrder: 2
