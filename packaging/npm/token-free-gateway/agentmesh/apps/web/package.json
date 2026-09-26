@@ -12,7 +12,7 @@
 		"build": "vite build && cp dashboard-v2.html dist/dashboard-v2.html",
 		"typecheck": "tsc -p tsconfig.json --noEmit",
 		"lint": "tsc -p tsconfig.json --noEmit",
-		"test": "tsx --test src/**/*.test.ts src/*.test.ts"
+		"test": "tsx --test $(find src -name '*.test.ts' -not -path 'src/components/a2ui/*') && cd ../.. && vitest run apps/web/src/components/a2ui"
 	},
 	"dependencies": {
 		"@agentmesh/ai-engine": "workspace:*",
