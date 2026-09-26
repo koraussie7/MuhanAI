@@ -38,6 +38,7 @@ import { routerRoutes } from "./router-routes.js";
 import { securityRoutes } from "./security-routes.js";
 import { semanticRoutes } from "./semantic-routes.js";
 import { shoppingRoutes } from "./shopping-routes.js";
+import { vietnamRoutes } from "./vietnam-routes.js";
 import { visitorRoutes } from "./visitor-routes.js";
 import { worldRoutes } from "./world-routes.js";
 
@@ -247,6 +248,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	await app.register(openaiCompatRoutes);
 	await app.register(worldRoutes);
 	await app.register(visitorRoutes);
+	await app.register(vietnamRoutes);
 	await app.register(paymentRoutes);
 	await app.register(routerRoutes);
 	await app.register(mcpRoutes);

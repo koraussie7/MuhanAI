@@ -39,6 +39,7 @@ import {
 	type ReactionSample,
 	type ReactionType,
 	statusForScore,
+	validatePythiaConcept,
 } from "@agentmesh/cosmos-core";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
@@ -342,7 +343,19 @@ export function conceptViews(live: ConceptProjection): GraphConceptView[] {
 	return [...live.concepts.values()]
 		.map((concept) => {
 			const signalScore = computeBreakdown(live, concept.id).signalScore;
-			return { ...concept, signalScore, effectiveStatus: statusForScore(signalScore) };
+			const view = { ...concept, signalScore, effectiveStatus: statusForScore(signalScore) };
+			// Ontology gate: an invalid node is downgraded to `raw` / score 0 rather
+			// than dropped, so clients still see the concept and can debug it.
+			const validation = validatePythiaConcept({
+				id: view.id,
+				label: view.label,
+				domain: view.domain,
+				nodeType: "concept",
+				status: view.effectiveStatus,
+				signalScore: view.signalScore,
+				sourceEventIds: view.upstreamIds,
+			});
+			return validation.valid ? view : { ...view, status: "raw" as const, signalScore: 0 };
 		})
 		.sort((a, b) => b.signalScore - a.signalScore || a.id.localeCompare(b.id));
 }

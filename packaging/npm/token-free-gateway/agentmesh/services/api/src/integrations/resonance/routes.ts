@@ -23,11 +23,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { clientError, formatZodError } from "../../error-shapes.js";
-import {
-	DEFAULT_CONFIG,
-	DEFAULT_DIAL,
-	ResonanceGovernor,
-} from "./governor.js";
+import { DEFAULT_CONFIG, DEFAULT_DIAL, ResonanceGovernor } from "./governor.js";
 import { rankCorpus, resolveQueryEmbedding } from "./ranking.js";
 import type {
 	AutonomyAction,
@@ -176,17 +172,17 @@ export async function resonanceRoutes(app: FastifyInstance): Promise<void> {
 		if (!parse.success) {
 			return clientError(reply, 400, formatZodError(parse.error), request.id);
 		}
-		const updatedBy =
-			(request.headers["x-resonance-actor"] as string | undefined) ?? "user";
-		const next = parse.data as AutonomyLevel | { level: AutonomyLevel; perAction?: AutonomyDial["perAction"] };
+		const updatedBy = (request.headers["x-resonance-actor"] as string | undefined) ?? "user";
+		const next = parse.data as
+			| AutonomyLevel
+			| { level: AutonomyLevel; perAction?: AutonomyDial["perAction"] };
 		const dial = getGovernor().setDial(next, updatedBy);
 		return dial;
 	});
 
 	app.post("/api/integrations/resonance/autonomy/reset", async (request, reply) => {
 		if (!(await gated(request, reply))) return;
-		const updatedBy =
-			(request.headers["x-resonance-actor"] as string | undefined) ?? "system";
+		const updatedBy = (request.headers["x-resonance-actor"] as string | undefined) ?? "system";
 		const dial = getGovernor().setDial(DEFAULT_DIAL.level, updatedBy);
 		return dial;
 	});

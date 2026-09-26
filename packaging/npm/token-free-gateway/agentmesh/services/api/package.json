@@ -12,6 +12,7 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
+		"@muhanai/ontology": "workspace:*",
 		"@agentmesh/agent-cast": "workspace:*",
 		"@agentmesh/agent-daemon": "workspace:*",
 		"@agentmesh/agent-router": "workspace:*",

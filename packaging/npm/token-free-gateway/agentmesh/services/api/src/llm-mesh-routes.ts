@@ -40,8 +40,14 @@ interface LlmMeshSnapshot {
 }
 
 // Configuration-driven gateway list
-const GATEWAY_CONFIG: Array<Omit<GatewayProvider, "latencyMs" | "status"> & { healthEndpoint?: string }> = [
-	{ name: "Gemini", costTier: "low", healthEndpoint: "https://generativelanguage.googleapis.com/v1beta/models" },
+const GATEWAY_CONFIG: Array<
+	Omit<GatewayProvider, "latencyMs" | "status"> & { healthEndpoint?: string }
+> = [
+	{
+		name: "Gemini",
+		costTier: "low",
+		healthEndpoint: "https://generativelanguage.googleapis.com/v1beta/models",
+	},
 	{ name: "Claude", costTier: "paid", healthEndpoint: "https://api.anthropic.com/v1/messages" },
 	{ name: "GPT", costTier: "paid", healthEndpoint: "https://api.openai.com/v1/models" },
 	{ name: "Mistral", costTier: "low", healthEndpoint: "https://api.mistral.ai/v1/models" },
@@ -79,11 +85,12 @@ interface KVNamespace {
 	put(key: string, value: string): Promise<void>;
 }
 
-
 /**
  * Probe a single gateway's health with timeout
  */
-async function probeGatewayHealth(endpoint?: string): Promise<{ status: "healthy" | "degraded" | "offline"; latencyMs: number }> {
+async function probeGatewayHealth(
+	endpoint?: string,
+): Promise<{ status: "healthy" | "degraded" | "offline"; latencyMs: number }> {
 	if (!endpoint) {
 		return { status: "healthy", latencyMs: 100 };
 	}
@@ -96,7 +103,7 @@ async function probeGatewayHealth(endpoint?: string): Promise<{ status: "healthy
 		const response = await fetch(endpoint, {
 			method: "GET",
 			signal: controller.signal,
-			headers: { "Accept": "application/json" },
+			headers: { Accept: "application/json" },
 		});
 
 		clearTimeout(timeout);
@@ -143,7 +150,7 @@ async function buildSnapshot(kv?: KVNamespace): Promise<LlmMeshSnapshot> {
 	const now = Date.now();
 
 	// Return cached snapshot if fresh
-	if (cachedSnapshot && (now - lastProbeTime) < CACHE_TTL_MS) {
+	if (cachedSnapshot && now - lastProbeTime < CACHE_TTL_MS) {
 		return cachedSnapshot;
 	}
 
@@ -157,7 +164,7 @@ async function buildSnapshot(kv?: KVNamespace): Promise<LlmMeshSnapshot> {
 				status: health.status,
 				latencyMs: health.latencyMs,
 			} satisfies GatewayProvider;
-		})
+		}),
 	);
 
 	const gateways: GatewayProvider[] = gatewayResults.map((result, index) => {
@@ -174,11 +181,14 @@ async function buildSnapshot(kv?: KVNamespace): Promise<LlmMeshSnapshot> {
 
 	// Map routes with dynamic status
 	const routes: LlmMeshRoute[] = ROUTE_CONFIG.map((route) => {
-		const gateway = gateways.find(g => route.provider.includes(g.name));
+		const gateway = gateways.find((g) => route.provider.includes(g.name));
 		const baseLatency = gateway?.latencyMs ?? 200;
-		const status = gateway?.status === "healthy" ? "optimal"
-			: gateway?.status === "degraded" ? "acceptable"
-			: "degraded";
+		const status =
+			gateway?.status === "healthy"
+				? "optimal"
+				: gateway?.status === "degraded"
+					? "acceptable"
+					: "degraded";
 
 		return {
 			...route,
@@ -216,8 +226,12 @@ export async function llmMeshRoutes(app: FastifyInstance) {
 				return { ...cachedSnapshot, stale: true };
 			}
 			return {
-				gateways: GATEWAY_CONFIG.map(g => ({ ...g, status: "offline" as const, latencyMs: 9999 })),
-				routes: ROUTE_CONFIG.map(r => ({ ...r, status: "degraded" as const, latencyMs: 9999 })),
+				gateways: GATEWAY_CONFIG.map((g) => ({
+					...g,
+					status: "offline" as const,
+					latencyMs: 9999,
+				})),
+				routes: ROUTE_CONFIG.map((r) => ({ ...r, status: "degraded" as const, latencyMs: 9999 })),
 				vault: DEFAULT_VAULT,
 				timestamp: Date.now(),
 				error: "Failed to probe gateways",
@@ -244,4 +258,3 @@ export async function llmMeshRoutes(app: FastifyInstance) {
 		return reply.code(204).send();
 	});
 }
-

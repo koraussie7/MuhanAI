@@ -10,10 +10,10 @@
  * - Agent execution telemetry
  */
 
-import type { FastifyInstance } from "fastify";
-import { z } from "zod";
 import { hierarchicalAgentCast } from "@agentmesh/agent-cast";
 import type { AgentRunResult } from "@agentmesh/shared-types";
+import type { FastifyInstance } from "fastify";
+import { z } from "zod";
 import { clientError, formatZodError } from "./error-shapes.js";
 
 const AskSchema = z.object({
@@ -195,8 +195,7 @@ export async function quorumRoutes(app: FastifyInstance) {
 				error: "Quorum service failed",
 				requestId: request.id,
 				details: err instanceof Error ? err.message : String(err),
-				suggestion:
-					"The multi-agent pipeline timed out. Try a simpler question or retry later.",
+				suggestion: "The multi-agent pipeline timed out. Try a simpler question or retry later.",
 			});
 		}
 	});
@@ -215,4 +214,3 @@ export async function quorumRoutes(app: FastifyInstance) {
 		return { ok: true };
 	});
 }
-

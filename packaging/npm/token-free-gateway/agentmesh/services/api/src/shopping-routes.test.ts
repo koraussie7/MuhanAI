@@ -7,8 +7,8 @@
  */
 import { pino } from "pino";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { resetShoppingJobs } from "./shopping-routes.js";
 import { buildApp } from "./server.js";
+import { resetShoppingJobs } from "./shopping-routes.js";
 
 async function makeApp() {
 	return buildApp({ enableTransport: false, logger: pino({ level: "silent" }) });

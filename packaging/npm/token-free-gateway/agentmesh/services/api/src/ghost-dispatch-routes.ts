@@ -22,11 +22,11 @@ import {
 	createApprovalStore,
 	createCapabilityVerifier,
 	createTaskLedger,
-	runGhostDispatch,
 	type GhostReputationSink,
+	runGhostDispatch,
 } from "@agentmesh/ghost-adapter";
-import type { FastifyInstance } from "fastify";
 import { PeerReputationRegistry } from "@agentmesh/peer-mesh";
+import type { FastifyInstance } from "fastify";
 import { ghostFetchPolicy, ghostRegistry, registrationAuthorized } from "./ghost-routes.js";
 
 export const ghostReputation = new PeerReputationRegistry();

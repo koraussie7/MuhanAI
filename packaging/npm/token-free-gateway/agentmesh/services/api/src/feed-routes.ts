@@ -266,41 +266,46 @@ export async function feedRoutes(app: FastifyInstance) {
 		}
 	});
 
-		// ===========================================================================
-		// Trending Questions
-		// ===========================================================================
+	// ===========================================================================
+	// Trending Questions
+	// ===========================================================================
 
-		function trendingScore(item: { humanAnswers: number; aiConfidence: number; category: string; answers: unknown[] }) {
-			return (
-				item.answers.length +
-				(item.category === "info_conflict" ? 25 : 0) +
-				item.humanAnswers * 3 +
-				Math.round((1 - item.aiConfidence) * 40)
-			);
-		}
-
-		app.get("/api/trending", async (_request, reply) => {
-			try {
-				const prisma = await getPrisma();
-				const items = await prisma.helpNeeded.findMany({
-					include: { answers: true },
-					orderBy: { createdAt: "desc" },
-					take: 50,
-				});
-				return [...items]
-					.map((item) => ({
-						id: item.id,
-						question: item.question,
-						topic: item.question,
-						participants: item.answers.length,
-						score: trendingScore(item),
-						category: item.category,
-						trend: "stable" as const,
-					}))
-					.sort((a, b) => b.score - a.score)
-					.slice(0, 20);
-			} catch {
-				return reply.code(503).send({ error: "Database unavailable" });
-			}
-		});
+	function trendingScore(item: {
+		humanAnswers: number;
+		aiConfidence: number;
+		category: string;
+		answers: unknown[];
+	}) {
+		return (
+			item.answers.length +
+			(item.category === "info_conflict" ? 25 : 0) +
+			item.humanAnswers * 3 +
+			Math.round((1 - item.aiConfidence) * 40)
+		);
 	}
+
+	app.get("/api/trending", async (_request, reply) => {
+		try {
+			const prisma = await getPrisma();
+			const items = await prisma.helpNeeded.findMany({
+				include: { answers: true },
+				orderBy: { createdAt: "desc" },
+				take: 50,
+			});
+			return [...items]
+				.map((item) => ({
+					id: item.id,
+					question: item.question,
+					topic: item.question,
+					participants: item.answers.length,
+					score: trendingScore(item),
+					category: item.category,
+					trend: "stable" as const,
+				}))
+				.sort((a, b) => b.score - a.score)
+				.slice(0, 20);
+		} catch {
+			return reply.code(503).send({ error: "Database unavailable" });
+		}
+	});
+}

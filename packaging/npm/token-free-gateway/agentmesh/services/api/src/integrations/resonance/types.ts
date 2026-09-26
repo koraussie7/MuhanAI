@@ -20,12 +20,7 @@ export const RESONANCE_EMBEDDING_DIM = 768;
 
 export type AutonomyLevel = "off" | "suggest" | "autopilot";
 
-export type AutonomyAction =
-	| "read"
-	| "decide"
-	| "execute"
-	| "broadcast"
-	| "settle";
+export type AutonomyAction = "read" | "decide" | "execute" | "broadcast" | "settle";
 
 export interface AutonomyDial {
 	level: AutonomyLevel;

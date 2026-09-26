@@ -29,11 +29,11 @@
  */
 
 import {
+	type Correlation,
+	correlateEvents,
 	ingestWorldBrief,
 	mapTelemetryBrief,
-	type Correlation,
 	type WorldFeedBrief,
-	correlateEvents,
 } from "@agentmesh/cosmos-core";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
@@ -87,28 +87,31 @@ function asFeedBrief(brief: WorldBrief): WorldFeedBrief {
 async function ingestLiveBrief(brief: WorldBrief): Promise<void> {
 	if (brief.source === "offline") return;
 	try {
-	const { cosmosLog, cosmosProjection } = await import("./cosmos-routes.js");
-	const log = cosmosLog();
-	const sources = brief.source === "merged" ? ["pythia", "shadowbroker"] as const : [brief.source];
-	for (const source of sources) {
-	const events = brief.events.filter((event) =>
-		source === "shadowbroker" ? event.source === "shadowbroker" : event.source !== "shadowbroker",
-	);
-	const predictions = source === "pythia" ? brief.predictions : [];
-	if (events.length === 0 && predictions.length === 0) continue;
-	const sourceBrief: WorldFeedBrief = {
-		source,
-		summary: brief.summary,
-		domains: brief.domains,
-		events,
-	predictions,
-	fetchedAt: brief.fetchedAt,
-	};
-	await ingestWorldBrief(log, sourceBrief, { source });
-	}
-	await cosmosProjection();
+		const { cosmosLog, cosmosProjection } = await import("./cosmos-routes.js");
+		const log = cosmosLog();
+		const sources =
+			brief.source === "merged" ? (["pythia", "shadowbroker"] as const) : [brief.source];
+		for (const source of sources) {
+			const events = brief.events.filter((event) =>
+				source === "shadowbroker"
+					? event.source === "shadowbroker"
+					: event.source !== "shadowbroker",
+			);
+			const predictions = source === "pythia" ? brief.predictions : [];
+			if (events.length === 0 && predictions.length === 0) continue;
+			const sourceBrief: WorldFeedBrief = {
+				source,
+				summary: brief.summary,
+				domains: brief.domains,
+				events,
+				predictions,
+				fetchedAt: brief.fetchedAt,
+			};
+			await ingestWorldBrief(log, sourceBrief, { source });
+		}
+		await cosmosProjection();
 	} catch {
-	// Cosmic persistence is an enrichment path, never a world-feed outage.
+		// Cosmic persistence is an enrichment path, never a world-feed outage.
 	}
 }
 
@@ -210,16 +213,16 @@ async function tryLiveBrief(): Promise<WorldBrief | null> {
 				source: typeof e.source === "string" ? e.source : "pythia",
 				timestamp: typeof e.timestamp === "string" ? e.timestamp : new Date().toISOString(),
 			};
-				if (typeof e.location === "string") evt.location = e.location;
+			if (typeof e.location === "string") evt.location = e.location;
 			if (e.geo && typeof e.geo === "object") {
-			const geo = e.geo as Record<string, unknown>;
-			if (typeof geo.lat === "number" && typeof geo.lng === "number") {
-				evt.geo = {
-			lat: geo.lat,
-			lng: geo.lng,
-			...(typeof geo.altitudeM === "number" ? { altitudeM: geo.altitudeM } : {}),
-			};
-			}
+				const geo = e.geo as Record<string, unknown>;
+				if (typeof geo.lat === "number" && typeof geo.lng === "number") {
+					evt.geo = {
+						lat: geo.lat,
+						lng: geo.lng,
+						...(typeof geo.altitudeM === "number" ? { altitudeM: geo.altitudeM } : {}),
+					};
+				}
 			}
 			return evt;
 		});
@@ -382,7 +385,7 @@ export async function worldRoutes(app: FastifyInstance) {
 		if (!parse.success) {
 			return clientError(reply, 400, formatZodError(parse.error), request.id);
 		}
-			const brief = await mergedBrief();
+		const brief = await mergedBrief();
 		await ingestLiveBrief(brief);
 		const { domain } = parse.data;
 		return domain
@@ -398,7 +401,7 @@ export async function worldRoutes(app: FastifyInstance) {
 		if (!parse.success) {
 			return clientError(reply, 400, formatZodError(parse.error), request.id);
 		}
-			const brief = await mergedBrief();
+		const brief = await mergedBrief();
 		await ingestLiveBrief(brief);
 		const { domain, limit } = parse.data;
 		let events = domain ? brief.events.filter((e) => e.domain === domain) : brief.events;
@@ -411,7 +414,7 @@ export async function worldRoutes(app: FastifyInstance) {
 		if (!parse.success) {
 			return clientError(reply, 400, formatZodError(parse.error), request.id);
 		}
-			const brief = await mergedBrief();
+		const brief = await mergedBrief();
 		await ingestLiveBrief(brief);
 		return { source: brief.source, predictions: brief.predictions, fetchedAt: brief.fetchedAt };
 	});

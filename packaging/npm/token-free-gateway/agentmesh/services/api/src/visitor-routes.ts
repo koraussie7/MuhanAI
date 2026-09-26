@@ -5,6 +5,7 @@ import { z } from "zod";
 const VisitorEnrollSchema = z.object({
 	capabilities: z.array(z.string().min(1).max(64)).max(20).optional(),
 	path: z.string().min(1).max(256).optional(),
+	publicKey: z.string().optional(),
 });
 
 const VisitorHeartbeatSchema = z.object({
@@ -25,6 +26,7 @@ interface VisitorPeer {
 	path: string;
 	connectedAt: number;
 	lastSeen: number;
+	publicKey?: string;
 }
 
 const VISITOR_TTL_MS = 90_000;
@@ -45,6 +47,7 @@ export function getVisitorPeers(): Array<{
 	registeredAt: number;
 	capabilities: string[];
 	path: string;
+	publicKey?: string;
 }> {
 	pruneVisitors();
 	return Array.from(visitors.values()).map((visitor) => ({
@@ -56,6 +59,7 @@ export function getVisitorPeers(): Array<{
 		registeredAt: visitor.connectedAt,
 		capabilities: visitor.capabilities,
 		path: visitor.path,
+		publicKey: visitor.publicKey,
 	}));
 }
 
@@ -77,6 +81,7 @@ export async function visitorRoutes(app: FastifyInstance): Promise<void> {
 			path: parse.data.path ?? "/",
 			connectedAt: now,
 			lastSeen: now,
+			publicKey: parse.data.publicKey,
 		};
 		visitors.set(id, visitor);
 
@@ -86,17 +91,18 @@ export async function visitorRoutes(app: FastifyInstance): Promise<void> {
 				type: "browser",
 				role: "visitor",
 				connectedAt: new Date(now).toISOString(),
+				publicKey: visitor.publicKey,
 			},
 			token,
 			heartbeatEveryMs: 30_000,
 			expiresAfterMs: VISITOR_TTL_MS,
-					relay: {
-			transport: process.env.VISITOR_RELAY_MULTIADDR ? "libp2p-webrtc" : "presence",
-			websocket: Boolean(process.env.VISITOR_RELAY_MULTIADDR),
-			multiaddr: process.env.VISITOR_RELAY_MULTIADDR ?? null,
-			message: process.env.VISITOR_RELAY_MULTIADDR
-			? "Browser WebRTC relay is available."
-			: "Browser presence is enrolled; WebRTC relay is not configured on this deployment.",
+			relay: {
+				transport: process.env.VISITOR_RELAY_MULTIADDR ? "libp2p-webrtc" : "presence",
+				websocket: Boolean(process.env.VISITOR_RELAY_MULTIADDR),
+				multiaddr: process.env.VISITOR_RELAY_MULTIADDR ?? null,
+				message: process.env.VISITOR_RELAY_MULTIADDR
+					? "Browser WebRTC relay is available."
+					: "Browser presence is enrolled; WebRTC relay is not configured on this deployment.",
 			},
 		});
 	});
@@ -117,26 +123,26 @@ export async function visitorRoutes(app: FastifyInstance): Promise<void> {
 	});
 
 	app.post("/api/visitors/pulse", async (request, reply) => {
-	const parse = VisitorPulseSchema.safeParse(request.body);
-	if (!parse.success) return reply.code(400).send({ error: "Invalid visitor pulse" });
-	pruneVisitors();
-	const visitor = Array.from(visitors.values()).find((item) => item.token === parse.data.token);
-	if (!visitor) return reply.code(404).send({ error: "Visitor session expired" });
-	visitor.lastSeen = Date.now();
-	return {
-	ok: true,
-	message: {
-	v: 1,
-	kind: parse.data.kind,
-	fromPeerId: visitor.id,
-	payload: parse.data.payload,
-		ts: visitor.lastSeen,
-	},
-	};
+		const parse = VisitorPulseSchema.safeParse(request.body);
+		if (!parse.success) return reply.code(400).send({ error: "Invalid visitor pulse" });
+		pruneVisitors();
+		const visitor = Array.from(visitors.values()).find((item) => item.token === parse.data.token);
+		if (!visitor) return reply.code(404).send({ error: "Visitor session expired" });
+		visitor.lastSeen = Date.now();
+		return {
+			ok: true,
+			message: {
+				v: 1,
+				kind: parse.data.kind,
+				fromPeerId: visitor.id,
+				payload: parse.data.payload,
+				ts: visitor.lastSeen,
+			},
+		};
 	});
 
 	app.get("/api/visitors/peers", async () => ({
-	peers: getVisitorPeers(),
+		peers: getVisitorPeers(),
 		ttlMs: VISITOR_TTL_MS,
 	}));
 }

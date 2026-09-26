@@ -20,16 +20,16 @@ export async function agentsRoutes(app: FastifyInstance) {
 	});
 
 	app.get("/api/nodes", async (_request, _reply) => {
-	const identities = identityService.getAll();
-	const agentNodes = identities.map((identity) => ({
-	id: identity.peerId,
-	name: identity.peerId,
-		type: "agent",
-	role: "node",
-		hostname: identity.peerId,
-	lastSeen: Date.now(),
-	registeredAt: Date.now(),
-	}));
-	return [...agentNodes, ...getVisitorPeers()];
+		const identities = identityService.getAll();
+		const agentNodes = identities.map((identity) => ({
+			id: identity.peerId,
+			name: identity.peerId,
+			type: "agent",
+			role: "node",
+			hostname: identity.peerId,
+			lastSeen: Date.now(),
+			registeredAt: Date.now(),
+		}));
+		return [...agentNodes, ...getVisitorPeers()];
 	});
 }

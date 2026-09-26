@@ -13,11 +13,8 @@
  *     worst-case route cost, with balance/required fields attached.
  */
 
+import { type CreditGateOptions, routeQuestionWithCredits } from "@agentmesh/agent-router";
 import { InsufficientCreditsError } from "@agentmesh/credit-system";
-import {
-	routeQuestionWithCredits,
-	type CreditGateOptions,
-} from "@agentmesh/agent-router";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "./db.js";

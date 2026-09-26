@@ -103,9 +103,9 @@ async function callAgent(job: ShoppingJob): Promise<void> {
 					}
 				}
 			}
-	} finally {
+		} finally {
 			clearTimeout(timer);
-	}
+		}
 		job.status = job.result ? "completed" : "failed";
 		if (job.status === "failed") job.error = "agent stream ended without a result event";
 	} catch (e) {
@@ -123,15 +123,20 @@ export async function shoppingRoutes(app: FastifyInstance) {
 				"shopping agent not configured — set SHOPPING_AGENT_URL",
 				request.id,
 			);
-	}
+		}
 		const body = (request.body ?? {}) as { url?: unknown };
 		const url = typeof body.url === "string" ? body.url.trim() : "";
 		if (!url) {
 			return clientError(reply, 400, "url: required", request.id);
-	}
+		}
 		if (!isValidAmazonUrl(url)) {
-			return clientError(reply, 400, "url: must be an Amazon product URL (dp or gp/product)", request.id);
-	}
+			return clientError(
+				reply,
+				400,
+				"url: must be an Amazon product URL (dp or gp/product)",
+				request.id,
+			);
+		}
 
 		const job: ShoppingJob = {
 			id: `sa-${randomUUID().slice(0, 8)}`,
@@ -141,14 +146,14 @@ export async function shoppingRoutes(app: FastifyInstance) {
 			result: null,
 			error: null,
 			createdAt: new Date().toISOString(),
-	};
+		};
 		jobs.set(job.id, job);
 		if (jobs.size > JOB_LIMIT) {
 			const oldest = jobs.keys().next().value;
 			if (oldest) jobs.delete(oldest);
-	}
+		}
 
-	// Fire-and-forget: the caller polls GET /api/shopping/analyze/:id.
+		// Fire-and-forget: the caller polls GET /api/shopping/analyze/:id.
 		void callAgent(job);
 		return reply.code(202).send({ id: job.id, status: job.status });
 	});
@@ -158,13 +163,13 @@ export async function shoppingRoutes(app: FastifyInstance) {
 		const job = jobs.get(id);
 		if (!job) {
 			return clientError(reply, 404, "not found", request.id);
-	}
+		}
 		return {
 			id: job.id,
 			url: job.url,
 			status: job.status,
 			error: job.error,
 			result: job.result,
-	};
+		};
 	});
 }

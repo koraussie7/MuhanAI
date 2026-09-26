@@ -13,15 +13,11 @@
  */
 
 import { agentCast } from "@agentmesh/agent-cast";
-import { PeerReputationRegistry } from "@agentmesh/peer-mesh";
-import {
-	getCreditBalance,
-	grantCredits,
-	spendCredits,
-} from "@agentmesh/credit-system";
-import { prisma } from "./db.js";
-import type { FastifyInstance, FastifyRequest } from "fastify";
+import { getCreditBalance, grantCredits, spendCredits } from "@agentmesh/credit-system";
 import type { PulseMessage } from "@agentmesh/peer-mesh";
+import { PeerReputationRegistry } from "@agentmesh/peer-mesh";
+import type { FastifyInstance, FastifyRequest } from "fastify";
+import { prisma } from "./db.js";
 
 /**
  * Local copies of the elizaOS adapter types to avoid a runtime dependency
@@ -66,7 +62,6 @@ interface HeartbeatEnvelope {
 	tags?: string[];
 }
 
-
 declare module "fastify" {
 	interface FastifyInstance {
 		rpcReputation: PeerReputationRegistry;
@@ -105,15 +100,15 @@ export async function elizaosRpcRoutes(app: FastifyInstance) {
 		const body = (await request.body) as JsonRpcRequest | undefined;
 
 		if (!body || typeof body.jsonrpc !== "string" || body.jsonrpc !== "2.0") {
-			return reply.status(400).send(
-				makeError(body?.id ?? null, -32700, "Parse error: invalid JSON-RPC 2.0 envelope"),
-			);
+			return reply
+				.status(400)
+				.send(makeError(body?.id ?? null, -32700, "Parse error: invalid JSON-RPC 2.0 envelope"));
 		}
 
 		if (typeof body.method !== "string" || body.method !== method) {
-			return reply.status(400).send(
-				makeError(body.id, -32600, "Method mismatch: body.method and URL must match"),
-			);
+			return reply
+				.status(400)
+				.send(makeError(body.id, -32600, "Method mismatch: body.method and URL must match"));
 		}
 
 		const id = body.id;
@@ -135,9 +130,7 @@ export async function elizaosRpcRoutes(app: FastifyInstance) {
 	});
 }
 
-interface RpcHandler {
-	(params: Record<string, unknown>, app: FastifyInstance): Promise<unknown>;
-}
+type RpcHandler = (params: Record<string, unknown>, app: FastifyInstance) => Promise<unknown>;
 
 const RPC_HANDLERS: Record<string, RpcHandler> = {
 	"cast.run": async (params) => {

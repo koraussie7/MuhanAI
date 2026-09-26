@@ -151,8 +151,11 @@ export async function factoryRoutes(app: FastifyInstance) {
 					...result,
 				};
 			} catch (err) {
-				return reply.code(502).send({ error: "pythia_call_failed", message: err instanceof Error ? err.message : String(err) });
+				return reply.code(502).send({
+					error: "pythia_call_failed",
+					message: err instanceof Error ? err.message : String(err),
+				});
 			}
-		}
+		},
 	);
 }
