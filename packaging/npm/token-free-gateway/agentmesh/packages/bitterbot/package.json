@@ -9,9 +9,10 @@
 		"build": "tsc -p tsconfig.json",
 		"typecheck": "tsc -p tsconfig.json --noEmit",
 		"lint": "tsc -p tsconfig.json --noEmit",
-		"test": "vitest run"
+		"test": "cd ../.. && vitest run packages/bitterbot/src/model-catalog.test.ts"
 	},
 	"dependencies": {
+		"@agentmesh/noema": "workspace:*",
 		"@agentmesh/peer-mesh": "workspace:*",
 		"@agentmesh/personal-mcp": "workspace:*",
 		"@agentmesh/shared-types": "workspace:*"
