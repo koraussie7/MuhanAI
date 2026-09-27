@@ -4,8 +4,78 @@
  * depends on.
  */
 import { pino } from "pino";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildApp } from "./server.js";
+
+// `credits.record` is the only test in this file that reaches a database, and
+// this file only asserts the JSON-RPC 2.0 contract (the elizaOS adapter client
+// depends on `amount` arriving as a string). Neither `pnpm test` locally nor CI
+// provides a `DATABASE_URL` -- services/api/src/db.ts always builds a real
+// PrismaClient, so the un-mocked call returned 500
+// "Environment variable not found: DATABASE_URL". Substituting the two models
+// the credit ledger uses keeps the contract assertions honest without making
+// the suite depend on a postgres service.
+const creditDb = vi.hoisted(() => {
+	type Wallet = { id: string; userId: string; balance: bigint };
+	const wallets = new Map<string, Wallet>();
+	const seenIdempotencyKeys = new Set<string>();
+	let seq = 0;
+
+	const prisma = {
+		creditWallet: {
+			findUnique: async ({ where }: { where: { userId: string } }) =>
+				wallets.get(where.userId) ?? null,
+			upsert: async ({
+				where,
+				create,
+			}: {
+				where: { userId: string };
+				create: { balance: bigint };
+			}) => {
+				if (!wallets.has(where.userId)) {
+					wallets.set(where.userId, {
+						id: `w${++seq}`,
+						userId: where.userId,
+						balance: create.balance,
+					});
+				}
+				return wallets.get(where.userId);
+			},
+			update: async ({
+				where,
+				data,
+			}: {
+				where: { id: string };
+				data: { balance: { increment: bigint } };
+			}) => {
+				const wallet = [...wallets.values()].find((w) => w.id === where.id);
+				if (!wallet) throw new Error(`fake prisma: no wallet ${where.id}`);
+				wallet.balance += data.balance.increment;
+				return wallet;
+			},
+		},
+		creditLedger: {
+			findUnique: async ({ where }: { where: { idempotencyKey: string } }) =>
+				seenIdempotencyKeys.has(where.idempotencyKey) ? { id: "existing" } : null,
+			create: async ({ data }: { data: { idempotencyKey: string } }) => {
+				seenIdempotencyKeys.add(data.idempotencyKey);
+				return { id: `l${++seq}` };
+			},
+		},
+		$transaction: (fn: (tx: unknown) => Promise<unknown>) => fn(prisma),
+	};
+
+	return {
+		prisma,
+		reset() {
+			wallets.clear();
+			seenIdempotencyKeys.clear();
+			seq = 0;
+		},
+	};
+});
+
+vi.mock("./db.js", () => ({ prisma: creditDb.prisma }));
 
 async function makeApp() {
 	return buildApp({ enableTransport: false, logger: pino({ level: "silent" }) });
@@ -14,6 +84,7 @@ async function makeApp() {
 describe("elizaOS RPC bridge", () => {
 	beforeEach(() => {
 		process.env.DISABLE_AUTH = "true";
+		creditDb.reset();
 	});
 
 	afterEach(() => {
