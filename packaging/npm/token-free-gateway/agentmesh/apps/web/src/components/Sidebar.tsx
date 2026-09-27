@@ -242,7 +242,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 					<span className="pulse-dot" />
 					{!isCollapsed ? (
 						<span>
-							{menuI18n.footer.peerMesh}: {formatPeerCountBare(stats.peers ?? stats.agentsOnline)}{" "}
+							{menuI18n.footer.peerMesh}: {formatPeerCountBare(stats.agentsOnline)}{" "}
 								{menuI18n.footer.nodes}
 						</span>
 					) : (

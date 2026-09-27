@@ -357,18 +357,15 @@ function mcpRpcPlugin(): Plugin {
 /**
  * Every URL path that serves the v2 dashboard page.
  *
- * `/dashboard` is the original injection point. `/dashboard2` is an additive
- * alias for the same self-contained page: it lets v2 be linked and shared on
- * its own URL without taking over `/dashboard` from the React SPA route, and
- * without the two shadowing each other.
+ * `/dashboard2` is the only path the static page answers on. `/dashboard`
+ * deliberately stays with the React SPA `<Dashboard>` route, so v2 cannot
+ * shadow it (deploy/Caddyfile.muhanai, commit ca13383).
  *
  * Kept as the single list the dev-server middleware matches against so the
  * Vite and production (Caddy/nginx) rules cannot disagree about which paths
  * resolve to the static page.
  */
 export const DASHBOARD_V2_ROUTES = [
-	"/dashboard",
-	"/dashboard/",
 	"/dashboard2",
 	"/dashboard2/",
 ] as const;
@@ -376,7 +373,7 @@ export const DASHBOARD_V2_ROUTES = [
 const DASHBOARD_V2_ROUTE_SET: ReadonlySet<string> = new Set(DASHBOARD_V2_ROUTES);
 
 /**
- * /dashboard, /dashboard2 — MuhanAI Dashboard v2 (static, self-contained).
+ * /dashboard2 — MuhanAI Dashboard v2 (static, self-contained).
  *
  * In production Caddy serves `dashboard-v2.html` directly for these paths
  * (see deploy/Caddyfile.muhanai). The Vite dev server has no such rule, so

@@ -55,7 +55,7 @@ src = open(path, encoding="utf-8").read()
 if "@dashboard" in src:
     sys.exit(0)
 
-block = """\t@dashboard path /dashboard /dashboard/ /dashboard2 /dashboard2/
+block = """\t@dashboard path /dashboard2 /dashboard2/
 \thandle @dashboard {
 \t\trewrite * /dashboard-v2.html
 \t\tfile_server

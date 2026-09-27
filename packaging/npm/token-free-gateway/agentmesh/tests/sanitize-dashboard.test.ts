@@ -12,8 +12,8 @@
  * stale deploy silently loses every BYOK key the operator saves.
  *
  * The final block cross-checks the *URL* rules that publish that file. The
- * `dashboard-v2.html` page answers on `/dashboard` and `/dashboard2`, and that
- * mapping is written down three times — Vite middleware for dev, Caddy and
+ * `dashboard-v2.html` page answers on `/dashboard2` only, and that
+ * mapping is written down four times — Vite middleware for dev, Caddy and
  * nginx for production. A path added to one and missed in another gives a page
  * that renders locally and 404s in production, so the deploy configs are
  * grepped against the Vite config's `DASHBOARD_V2_ROUTES` list here.
@@ -163,7 +163,7 @@ describe("dashboard v2 URLs — dev server and deploy configs agree", () => {
 	const routes = viteDashboardRoutes();
 
 	it("reads the canonical route list from the Vite config", () => {
-		expect(routes).toEqual(["/dashboard", "/dashboard/", "/dashboard2", "/dashboard2/"]);
+		expect(routes).toEqual(["/dashboard2", "/dashboard2/"]);
 	});
 
 	it("Caddy matches exactly those paths and serves the v2 page for them", () => {
