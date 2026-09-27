@@ -8,7 +8,7 @@ A comprehensive audit of the `agentmesh` monorepo identified **60 issues** acros
 
 ## 🔴 CRITICAL (3 issues — deployment-blockers)
 
-| # | File | Issue | 
+| # | File | Issue |
 |---|------|-------|
 | 1 | `deploy/docker-compose.yml` | References `deploy/api.Dockerfile` and `deploy/relay.Dockerfile` — **neither file exists**. `docker compose up` fails immediately. |
 | 2 | `services/api/src/server.ts:45-53,206-212` | `timingSafeEqual("","")` returns `true` → empty `x-api-key` header passes global auth. `API_KEY` unset via `${API_KEY}` expansion in compose → `401` bypasses for all protected routes. |
@@ -133,7 +133,7 @@ All 52 tests pass (4 test files total in the openhydra directory).
 
 ### Part C: bitterbot engine integration
 - Update `packages/ai-engine/src/types.ts` — add `"openhydra"` to `EngineConfig.type`
-- Update `packages/ai-engine/src/factory.ts` — add `case "openhydra"` 
+- Update `packages/ai-engine/src/factory.ts` — add `case "openhydra"`
 - Update `packages/ai-engine/src/index.ts` — re-export `OpenHydraEngine`
 - Update `apps/web/src/lib/bitterbot-engine.ts` — insert P2P fallback in chain
 - Add regression tests
