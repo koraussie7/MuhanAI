@@ -22,7 +22,6 @@ export default defineConfig({
 					find: "@agentmesh/category-engine",
 					replacement: resolve("packages/category-engine/src/index.ts"),
 				},
-				{ find: "@agentmesh/core", replacement: resolve("packages/core/src/index.ts") },
 			],
 		},
 	test: {

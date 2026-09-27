@@ -135,18 +135,6 @@ importers:
         specifier: ^22.0.0
         version: 22.20.4
 
-  packages/adapters:
-    dependencies:
-      '@agentmesh/core':
-        specifier: workspace:*
-        version: link:../core
-
-  packages/agent:
-    dependencies:
-      '@agentmesh/core':
-        specifier: workspace:*
-        version: link:../core
-
   packages/agent-cast:
     dependencies:
       '@agentmesh/llm-router':
@@ -320,15 +308,6 @@ importers:
         specifier: ^1.40.0
         version: 1.63.0
 
-  packages/cast:
-    dependencies:
-      '@agentmesh/agent':
-        specifier: workspace:*
-        version: link:../agent
-      '@agentmesh/core':
-        specifier: workspace:*
-        version: link:../core
-
   packages/category-engine:
     dependencies:
       '@agentmesh/llm-router':
@@ -362,8 +341,6 @@ importers:
       e2b:
         specifier: ^1.0.0
         version: 1.13.2
-
-  packages/core: {}
 
   packages/cosmos-core:
     devDependencies:
@@ -519,12 +496,6 @@ importers:
       vitest:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.20.4)(lightningcss@1.32.0)
-
-  packages/ipfs:
-    dependencies:
-      '@agentmesh/core':
-        specifier: workspace:*
-        version: link:../core
 
   packages/knowledge-base:
     dependencies:
@@ -707,9 +678,6 @@ importers:
 
   packages/mcp:
     dependencies:
-      '@agentmesh/core':
-        specifier: workspace:*
-        version: link:../core
       '@modelcontextprotocol/sdk':
         specifier: ^1.0.0
         version: 1.30.0(@cfworker/json-schema@4.1.1)(zod@4.6.5)

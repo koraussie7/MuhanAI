@@ -1,4 +1,4 @@
-import type { McpTool, ToolDiscovery } from "@agentmesh/core";
+import type { McpTool, ToolDiscovery } from "./core-types.js";
 
 /**
  * HTTP / catalog tool discovery.

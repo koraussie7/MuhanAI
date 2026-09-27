@@ -16,7 +16,6 @@ import { factoryRoutes } from "./factory-routes.js";
 import { elizaosRpcRoutes } from "./elizaos-rpc-routes.js";
 import { feedRoutes } from "./feed-routes.js";
 import { ghostRoutes } from "./ghost-routes.js";
-import { ghostDispatchRoutes } from "./ghost-dispatch-routes.js";
 import { PulseBridge } from "./gossip-bridge.js";
 import { happyRoutes } from "./happy-routes.js";
 import { hivebearRoutes } from "./hivebear-routes.js";
@@ -220,7 +219,6 @@ export async function buildApp(options: BuildAppOptions = {}) {
 
 	await app.register(a2uiRoutes);
 	await app.register(ghostRoutes);
-	await app.register(ghostDispatchRoutes);
 	await app.register(noemaRoutes);
 	await app.register(semanticRoutes);
 	await app.register(hivebearRoutes);

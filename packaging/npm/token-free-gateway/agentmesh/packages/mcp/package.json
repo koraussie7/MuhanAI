@@ -11,9 +11,6 @@
     "lint": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run"
   },
-  "dependencies": {
-    "@agentmesh/core": "workspace:*"
-  },
   "peerDependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0"
   },

@@ -1,4 +1,4 @@
-import type { McpServerConfig, McpTool } from "@agentmesh/core";
+import type { McpServerConfig, McpTool } from "./core-types.js";
 import { InMemoryToolRegistry } from "./tool-registry.js";
 
 /**

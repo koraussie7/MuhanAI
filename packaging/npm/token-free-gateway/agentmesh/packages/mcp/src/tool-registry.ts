@@ -1,4 +1,4 @@
-import type { McpTool, ToolRegistry } from "@agentmesh/core";
+import type { McpTool, ToolRegistry } from "./core-types.js";
 
 type ToolHandler = (input: Record<string, unknown>) => Promise<unknown> | unknown;
 
