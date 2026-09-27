@@ -9,6 +9,7 @@ set -euo pipefail
 CADDYFILE="/etc/caddy/Caddyfile"
 SITE_BLOCK='muhanai.com, www.muhanai.com, find.muhanai.com, travel.kbizhub.com {
 	auto_https disable_redirect
+	tls internal
 	root * /var/www/muhanai.com/current
 	encode zstd gzip
 	header {
@@ -19,9 +20,11 @@ SITE_BLOCK='muhanai.com, www.muhanai.com, find.muhanai.com, travel.kbizhub.com {
 		Permissions-Policy "camera=(), microphone=(), geolocation=()"
 	}
 
+	# Reverse-proxy /api/* to the Fastify API on port 3001.
+	# Do NOT strip the /api prefix — Fastify registers routes under /api/*
+	# (e.g. /api/vietnam/insight, /api/pulse, /api/auth/login).
 	@api path /api/*
 	handle @api {
-		uri strip_prefix /api
 		reverse_proxy 127.0.0.1:3001 {
 			header_up Host {upstream_hostport}
 			header_up X-Real-IP {remote_host}

@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomUUID, timingSafeEqual } from "node:crypto";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 
@@ -30,12 +30,35 @@ interface VisitorPeer {
 }
 
 const VISITOR_TTL_MS = 90_000;
+const VISITOR_MAX_SIZE = 10_000;
 const visitors = new Map<string, VisitorPeer>();
+const visitorTokens = new Map<string, string>(); // token -> id, for O(1) lookup
 
 function pruneVisitors(now = Date.now()): void {
 	for (const [id, visitor] of visitors) {
-		if (now - visitor.lastSeen > VISITOR_TTL_MS) visitors.delete(id);
+		if (now - visitor.lastSeen > VISITOR_TTL_MS) {
+			visitors.delete(id);
+			visitorTokens.delete(visitor.token);
+		}
 	}
+}
+
+function findVisitorByToken(token: string): VisitorPeer | undefined {
+	const id = visitorTokens.get(token);
+	if (!id) return undefined;
+	const visitor = visitors.get(id);
+	if (!visitor) {
+		visitorTokens.delete(token);
+		return undefined;
+	}
+	return visitor;
+}
+
+function isTokenMatch(a: string, b: string): boolean {
+	const ab = Buffer.from(a);
+	const bb = Buffer.from(b);
+	if (ab.length !== bb.length) return false;
+	return timingSafeEqual(ab, bb);
 }
 
 export function getVisitorPeers(): Array<{
@@ -84,6 +107,15 @@ export async function visitorRoutes(app: FastifyInstance): Promise<void> {
 			publicKey: parse.data.publicKey,
 		};
 		visitors.set(id, visitor);
+		visitorTokens.set(token, id);
+
+		if (visitors.size > VISITOR_MAX_SIZE) {
+			for (const [oldId, oldVisitor] of Array.from(visitors.entries()).reverse()) {
+				if (visitors.size <= VISITOR_MAX_SIZE) break;
+				visitors.delete(oldId);
+				visitorTokens.delete(oldVisitor.token);
+			}
+		}
 
 		return reply.code(201).send({
 			peer: {
@@ -99,7 +131,6 @@ export async function visitorRoutes(app: FastifyInstance): Promise<void> {
 			relay: {
 				transport: process.env.VISITOR_RELAY_MULTIADDR ? "libp2p-webrtc" : "presence",
 				websocket: Boolean(process.env.VISITOR_RELAY_MULTIADDR),
-				multiaddr: process.env.VISITOR_RELAY_MULTIADDR ?? null,
 				message: process.env.VISITOR_RELAY_MULTIADDR
 					? "Browser WebRTC relay is available."
 					: "Browser presence is enrolled; WebRTC relay is not configured on this deployment.",
@@ -113,30 +144,30 @@ export async function visitorRoutes(app: FastifyInstance): Promise<void> {
 			return reply.code(400).send({ error: "Invalid visitor heartbeat payload" });
 		}
 
-		pruneVisitors();
-		const visitor = Array.from(visitors.values()).find((item) => item.token === parse.data.token);
-		if (!visitor) return reply.code(404).send({ error: "Visitor session expired" });
+		const candidate = Array.from(visitors.values()).find((item) =>
+			isTokenMatch(item.token, parse.data.token),
+		);
+		if (!candidate) return reply.code(404).send({ error: "Visitor session expired" });
 
-		visitor.lastSeen = Date.now();
-		if (parse.data.path !== undefined) visitor.path = parse.data.path;
-		return { ok: true, peerId: visitor.id, expiresAfterMs: VISITOR_TTL_MS };
+		candidate.lastSeen = Date.now();
+		if (parse.data.path !== undefined) candidate.path = parse.data.path;
+		return { ok: true, peerId: candidate.id, expiresAfterMs: VISITOR_TTL_MS };
 	});
 
 	app.post("/api/visitors/pulse", async (request, reply) => {
 		const parse = VisitorPulseSchema.safeParse(request.body);
 		if (!parse.success) return reply.code(400).send({ error: "Invalid visitor pulse" });
-		pruneVisitors();
-		const visitor = Array.from(visitors.values()).find((item) => item.token === parse.data.token);
-		if (!visitor) return reply.code(404).send({ error: "Visitor session expired" });
-		visitor.lastSeen = Date.now();
+		const candidate = findVisitorByToken(parse.data.token);
+		if (!candidate) return reply.code(404).send({ error: "Visitor session expired" });
+		candidate.lastSeen = Date.now();
 		return {
 			ok: true,
 			message: {
 				v: 1,
 				kind: parse.data.kind,
-				fromPeerId: visitor.id,
+				fromPeerId: candidate.id,
 				payload: parse.data.payload,
-				ts: visitor.lastSeen,
+				ts: candidate.lastSeen,
 			},
 		};
 	});

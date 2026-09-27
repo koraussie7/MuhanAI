@@ -134,11 +134,13 @@ async function callTourMind({
 export async function handleTravelApi(
 	request: Request,
 	pathname: string,
+	env?: { TOURMIND_USER_KEY?: string },
 ): Promise<Response | null> {
 	const corsHeaders = {
-		"Access-Control-Allow-Origin": "*",
+		"Access-Control-Allow-Origin": "https://travel.kbizhub.com",
 		"Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-		"Access-Control-Allow-Headers": "Content-Type, Authorization",
+		"Access-Control-Allow-Headers": "Content-Type",
+		"Vary": "Origin",
 	};
 
 	if (request.method === "OPTIONS" && pathname.startsWith("/api/travel/")) {
@@ -255,7 +257,7 @@ export async function handleTravelApi(
 				);
 			}
 
-			const userKey = process.env.TOURMIND_USER_KEY || "";
+			const userKey = env?.TOURMIND_USER_KEY ?? "";
 
 			// 1. Resolve the free-text destination to a TourMind region id.
 			const locRes = await callTourMind({
@@ -408,7 +410,7 @@ export async function handleTravelApi(
 				);
 			}
 
-			const userKey = process.env.TOURMIND_USER_KEY || "";
+			const userKey = env?.TOURMIND_USER_KEY ?? "";
 
 			const ratesRes = await callTourMind({
 				path: "/skill/toc/query_room_rates",
@@ -484,7 +486,7 @@ export async function handleTravelApi(
 				);
 			}
 
-			const userKey = process.env.TOURMIND_USER_KEY || "";
+			const userKey = env?.TOURMIND_USER_KEY ?? "";
 
 			// Recheck the exact product; the checked values, not the earlier query
 			// values, are what create_booking must use.

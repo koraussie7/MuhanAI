@@ -16,6 +16,7 @@ import {
 	Layers,
 	LayoutDashboard,
 	ListTodo,
+	MessageCircle,
 	Monitor,
 	Network,
 	Package,
@@ -108,8 +109,10 @@ function renderIcon(key: string): React.ReactNode {
 			return <BookOpen size={18} />;
 		case "folder-git":
 			return <FolderGit size={18} />;
-		case "list-todo":
-			return <ListTodo size={18} />;
+			case "list-todo":
+		return <ListTodo size={18} />;
+		case "message-circle":
+		return <MessageCircle size={18} />;
 		case "star":
 			return <Star size={18} />;
 		case "git-branch":
@@ -215,8 +218,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 										key={item.id}
 										type="button"
 										className={`nav-item-btn ${isActive ? "active" : ""}`}
-										onClick={() => {
+												onClick={() => {
+										if (item.externalUrl) {
+										window.open(item.externalUrl, "_blank", "noopener,noreferrer");
+										} else {
 											onItemClick(item.path);
+										}
 											onCloseMobile?.();
 										}}
 										title={isCollapsed ? itemLabel : undefined}

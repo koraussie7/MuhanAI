@@ -91,6 +91,7 @@ describe("GET /api/llm-mesh", () => {
 	it("requires the x-api-key header in production", async () => {
 		process.env.NODE_ENV = "production";
 		process.env.API_KEY = "test-key-12345";
+		process.env.AUTH_SECRET = "test-secret-for-production-test";
 		const prodApp = await buildApp({
 			logger: pino({ level: "silent" }),
 			enableTransport: false,

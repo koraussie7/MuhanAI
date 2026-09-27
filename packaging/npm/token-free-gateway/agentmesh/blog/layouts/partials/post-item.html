@@ -1,0 +1,12 @@
+{{/* Renders a single post list entry. Context: dict "page" <page> "part" <string> */}}
+{{ $page := .page }}
+{{ $part := .part | default "" }}
+<li class="post-item">
+  <p class="post-meta">
+    {{ with $part }}Part {{ . }} · {{ end }}
+    {{ with $page.Date }}<time datetime="{{ .Format "2006-01-02T15:04:05Z07:00" }}">{{ .Format "2006-01-02" }}</time>{{ end }}
+    {{ with $page.ReadingTime }} · {{ . }} min read{{ end }}
+  </p>
+  <h2><a href="{{ $page.RelPermalink }}">{{ or $page.Title $page.RelPermalink }}</a></h2>
+  {{ with $page.Description }}<p class="muted">{{ . }}</p>{{ else }}<p class="muted">{{ $page.Summary | plainify | truncate 160 }}</p>{{ end }}
+</li>

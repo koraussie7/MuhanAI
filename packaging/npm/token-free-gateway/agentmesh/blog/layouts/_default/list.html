@@ -2,19 +2,15 @@
 <h1 class="page-title">{{ .Title }}</h1>
 {{ with .Content }}<div class="post-body">{{ . }}</div>{{ end }}
 
-{{ $pages := .RegularPages }}
-{{ if not $pages }}{{ $pages = .Pages }}{{ end }}
+  {{ $pages := .RegularPages }}
+  {{ if not $pages }}{{ $pages = .Pages }}{{ end }}
+  {{ if eq .Kind "home" }}
+    {{ $pages = where site.RegularPages "Section" "posts" }}
+  {{ end }}
 {{ if $pages }}
 <ul class="post-list">
   {{ range $pages }}
-  <li class="post-item">
-    <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
-    <p class="post-meta">
-      <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "2006-01-02" }}</time>
-      {{ with .ReadingTime }} · {{ . }} min read{{ end }}
-    </p>
-    {{ with .Description }}<p class="muted">{{ . }}</p>{{ else }}<p class="muted">{{ .Summary | plainify | truncate 160 }}</p>{{ end }}
-  </li>
+  {{ partial "post-item.html" (dict "page" .) }}
   {{ end }}
 </ul>
 {{ end }}

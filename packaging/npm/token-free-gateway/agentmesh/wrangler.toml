@@ -10,6 +10,10 @@ routes = [
   { pattern = "shop1.kbizhub.com/*", zone_name = "kbizhub.com" },
   { pattern = "travel.kbizhub.com/*", zone_name = "kbizhub.com" },
   { pattern = "vn.kbizhub.com/*", zone_name = "kbizhub.com" },
+  # chat.muhanai.com — Bitterbot SSR shell. See deploy/chat-handler.ts.
+  # The Worker renders a minimal HTML shell on "/" and falls back to
+  # ASSETS for /assets/* (same Vite-built bundle the main SPA uses).
+  { pattern = "chat.muhanai.com/*", zone_name = "muhanai.com" },
   # The following hostnames are NOT Worker routes. They are proxied A records
   # pointing at the 110 origin, where Caddy terminates TLS:
   #   - hotel.kbizhub.com -> reverse-proxies to the Kamra PMS on 127.0.0.1:8000
@@ -24,6 +28,9 @@ workers_dev = false
 # NOTE: API_ORIGIN is intentionally left unset until api.muhanai.com is deployed.
 # Leaving this empty prevents the worker from proxying /api/* requests to a dead origin,
 # which was causing HTTP 522 Cloudflare origin timeouts.
+
+# TOURMIND_USER_KEY is bound as a secret (wrangler secret put TOURMIND_USER_KEY).
+# Used by the travel-api.ts hotel booking endpoints.
 
 [[kv_namespaces]]
 binding = "FEED_KV"

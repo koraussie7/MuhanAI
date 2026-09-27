@@ -27,8 +27,8 @@
 | `web/manifest.json` | ✅ **빌드 산출물** — 소스에 두지 않는다 |
 | Rome 앱 반입 경로 | ✅ `app_management { op:"create" }` → `op:"install"` (`packages/app-template` → `~/.rome/<profile>/projects/apps/`) |
 | 라이브 왕복 (API 3001 + DB) | ✅ **확인** — 200/401/402/502 전부 실측 (`ROME-PART-C-PRECONDITIONS.md` §7) |
-| 라이브 왕복 (Rome dev 스택 경유) | ❌ 미검증 |
-| Docker 네트워킹 (Rome compose ↔ agentmesh) | ❌ 미검증 |
+| 라이브 왕복 (Rome dev 스택 경유) | ✅ **확인** (2026-09-27: main-rome-1 컨테이너 ↔ Host AgentMesh API 라이브 통신 실측) |
+| Docker 네트워킹 (Rome compose ↔ agentmesh) | ✅ **확인** (2026-09-27: Colima 브릿지 IP `192.168.5.2:3001` 경로 도달, 401 가드 및 크레딧 파이프라인 진입 실측) |
 
 ### 공유 계약 (A/B/C 모두 이 이름·모양을 지킨다)
 
@@ -100,9 +100,9 @@ Rome의 **실제 앱 설치 경로**(`app_management op:create` → `op:install`
    - `POST /route` → `{category, cast, credits:{spent,balanceAfter,enforced}}`; 402 `insufficient_credits` 는 정상 비즈니스 결과로 표시
    - `app.yaml` 에 `web.entry: App.tsx` 명시 (경로는 `src/` 기준 *상대* 경로 — `web/App.tsx` 로 쓰면 실패한다)
    - `web/manifest.json` 은 **작성하지 않는다** — `rome build` 가 생성한다
-5. **zod 이중 의존성 검토** (⏳ 남음)
-   - 브리지 소스는 `import { z } from "@rome-os/app-runtime"` 를 쓰므로 `zod@^4.3.6` 직접 의존성은 불필요할 수 있다
-   - 제거 가능 여부를 `tsc` 로 판정
+5. **zod 이중 의존성 검토** (✅ 완료)
+   - 브리지 소스는 `import { z } from "@rome-os/app-runtime"` 를 쓰므로 `package.json` 에서 `zod` 직접 의존성을 완전히 제거.
+   - `tsc --noEmit` exit 0 및 `pnpm test` (13/13) 통과로 정상 동작 검증 완료.
 
 ### 검증 절차
 
@@ -124,7 +124,7 @@ test -f dist/actions/route/action.yaml && test -f dist/actions/status/action.yam
 - [x] `action.yaml` 이 `dist` 로 복사됨 — ✅ 실측 확인 (`dist/actions/{route,status}/action.yaml`)
 - [x] `dist/web/manifest.json` 생성됨 — ✅ 실측 확인 (수동 작성 대상이 아님)
 - [x] agentmesh 코어 코드에 Rome 의존성이 추가되지 않음 (경계 유지) — ✅ 확인
-- [ ] zod 직접 의존성 제거 가능 여부 판정
+- [x] zod 직접 의존성 제거 완료 — ✅ `@rome-os/app-runtime` 내장 zod 사용으로 정리 완료 (`tsc --noEmit` exit 0)
 - [ ] `app_management { op: "install" }` 로 대시보드에 노출 — ⏳ Rome 런타임 필요
 
 > ⚠️ Rome 런타임 검증 시 확인할 것: `dist/actions/*/action.yaml` 의 `entry: ./index.ts` 가
@@ -237,11 +237,12 @@ curl -X POST http://127.0.0.1:3001/api/route \
 
 ### 완료 판정 (Exit criteria)
 
+- [x] Docker 네트워크 상호 도달 확인 — ✅ Colima 환경 컨테이너(`main-rome-1`) ↔ Host AgentMesh API(`192.168.5.2:3001`) 간 `/health` 200 및 `POST /api/route` 실측 완료 (미인가 401 차단 / Bearer 토큰 주입 시 크레딧 파이프라인 진입 확인)
+- [x] 환경변수 문서화 — ✅ `agentmesh/.env.example` 에 `AGENTMESH_BRIDGE_TOKEN`, `AGENTMESH_GATEWAY_URL` 반영 완료
+- [x] agentmesh 코어에 Rome 의존성 없음 — ✅ `@rome-os/*` 는 `rome-apps/agentmesh-bridge` 내에만 격리
 - [ ] `POST /api/route` 가 Rome action에서 200 왕복 (크레딧 영수증 포함)
 - [ ] Rome 대시보드에서 앱 설치 + action이 모델 툴로 노출
 - [ ] guardian 가드 동작 확인
-- [ ] Docker 네트워크 상호 도달 확인 (또는 로컬 단일 호스트 대체 검증을 문서에 명시)
-- [ ] agentmesh 코어에 Rome 의존성 없음
 
 ---
 

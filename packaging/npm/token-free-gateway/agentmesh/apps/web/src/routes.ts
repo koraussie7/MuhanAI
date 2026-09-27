@@ -16,6 +16,7 @@ export interface RouteDefinition {
 	iconKey: string;
 	badge?: string;
 	page: string;
+	externalUrl?: string;
 }
 
 /** Single source of truth for navigation, routing, translations, and lazy pages. */
@@ -64,16 +65,26 @@ export const ROUTES: readonly RouteDefinition[] = [
 		page: "desktop",
 	},
 	{
-		id: "bitterbot",
-		path: "/bitterbot",
-		group: "core",
-		label: "Bitterbot Agent",
-		iconKey: "package",
-		badge: "Beta",
-		page: "bitterbot",
+	id: "bitterbot",
+	path: "/bitterbot",
+	group: "core",
+	label: "Bitterbot Agent",
+	iconKey: "package",
+	badge: "Beta",
+	page: "bitterbot",
 	},
 	{
-		id: "agents",
+	id: "bitterbot-chat",
+	path: "/chat",
+	group: "core",
+	label: "Bitterbot Chat",
+	iconKey: "message-circle",
+	badge: "LIVE",
+	page: "bitterbot-chat",
+		externalUrl: "https://chat.muhanai.com/",
+	},
+	{
+	id: "agents",
 		path: "/agents",
 		group: "core",
 		label: "Agents",

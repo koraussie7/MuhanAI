@@ -1,5 +1,6 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import { resolve } from "node:path";
 import { defineConfig, type Plugin } from "vite";
 
 /**
@@ -351,14 +352,25 @@ function mcpRpcPlugin(): Plugin {
 export default defineConfig({
 	plugins: [react(), tailwindcss(), llmChatPlugin(), mcpRpcPlugin()],
 	server: { port: 5173, proxy: { "/api": "http://localhost:3001" } },
+	// Multi-page build: the default apps/web/index.html remains the main
+	// SPA, and chat-entry.tsx is a tiny shell that mounts only
+	// BitterbotChat. Vite emits dist/index.html and dist/chat/index.html
+	// so the Worker can route chat.muhanai.com to a small bundle.
 	build: {
 		outDir: "dist",
 		rollupOptions: {
-			output: {
-				manualChunks: {
-					"mcp-vendor": ["@agentmesh/personal-mcp", "@agentmesh/shared-types"],
-					vendor: ["lucide-react"],
-				},
+			input: {
+				main: resolve(__dirname, "index.html"),
+				chat: resolve(__dirname, "chat.html"),
+			},
+				output: {
+			entryFileNames: "assets/[name].js",
+			chunkFileNames: "assets/[name]-[hash].js",
+			assetFileNames: "assets/[name]-[hash][extname]",
+			manualChunks: {
+			"mcp-vendor": ["@agentmesh/personal-mcp", "@agentmesh/shared-types"],
+			vendor: ["lucide-react"],
+			},
 			},
 		},
 		chunkSizeWarningLimit: 1000,

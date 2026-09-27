@@ -1,5 +1,6 @@
 import { handleFediverseRequest } from "./fediverse";
 import { handleFeedApi } from "./feed-api";
+import { isChatRequest, renderChatShell } from "./chat-handler";
 import { handleMcpRequest } from "./mcp-server";
 import { handleTravelApi } from "./travel-api";
 
@@ -16,12 +17,18 @@ interface Env {
 	ASSETS: AssetBinding;
 	API_ORIGIN: string;
 	FEED_KV?: KVNamespace;
+	TOURMIND_USER_KEY?: string;
 }
 
 export default {
 	async fetch(request: Request, env: Env): Promise<Response> {
 		const url = new URL(request.url);
-
+		// chat.muhanai.com — minimal SSR shell that hydrates BitterbotChat.
+		// Runs BEFORE every other branch so /api/* on this host still routes
+		// to the chat shell unless the inner branches match.
+		if (isChatRequest(url.hostname, url.pathname)) {
+			return renderChatShell(request);
+		}
 		// ActivityPub & Fediverse Protocols (.well-known/webfinger, nodeinfo, actor, inbox/outbox)
 		const fediverseResponse = await handleFediverseRequest(request, url, env.FEED_KV);
 		if (fediverseResponse) return fediverseResponse;
@@ -74,13 +81,34 @@ export default {
 		}
 
 		if (url.pathname.startsWith("/api/")) {
-			const travelResponse = await handleTravelApi(request, url.pathname);
+			const travelResponse = await handleTravelApi(request, url.pathname, env);
 			if (travelResponse) return travelResponse;
 
 			const feedResponse = await handleFeedApi(request, url.pathname, env.FEED_KV);
 			if (feedResponse) return feedResponse;
 
 			if (!env.API_ORIGIN) {
+				if (url.pathname.startsWith("/api/vietnam/")) {
+					return new Response(
+						JSON.stringify({
+							query: new URL(request.url).searchParams.get("q") ?? "",
+							category: "news",
+							items: [],
+							fetchedAt: new Date().toISOString(),
+							configured: false,
+							message:
+								"Set NAVER_CLIENT_ID and NAVER_CLIENT_SECRET on the API service, then set API_ORIGIN.",
+						}),
+						{
+							status: 200,
+							headers: {
+								"content-type": "application/json",
+								"Access-Control-Allow-Origin": "*",
+							},
+						},
+					);
+				}
+
 				return new Response(
 					JSON.stringify({
 						error: "origin-not-configured",

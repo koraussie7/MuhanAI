@@ -1,5 +1,6 @@
 muhanai.com, www.muhanai.com, find.muhanai.com, travel.kbizhub.com {
 	auto_https disable_redirect
+	tls internal
 	root * /var/www/muhanai.com/current
 	encode zstd gzip
 	header {
@@ -10,9 +11,13 @@ muhanai.com, www.muhanai.com, find.muhanai.com, travel.kbizhub.com {
 		Permissions-Policy "camera=(), microphone=(), geolocation=()"
 	}
 
+	# Reverse-proxy /api/* to the Fastify API on port 3001.
+	# Do NOT strip the /api prefix — Fastify registers routes under /api/*
+	# (e.g. /api/vietnam/insight, /api/pulse, /api/auth/login).
+	# Append X-Forwarded-For to preserve the client chain for Fastify's
+	# trustProxy-based rate limiting.
 	@api path /api/*
 	handle @api {
-		uri strip_prefix /api
 		reverse_proxy 127.0.0.1:3001 {
 			header_up Host {upstream_hostport}
 			header_up X-Real-IP {remote_host}
@@ -92,5 +97,46 @@ blog.muhanai.com {
 
 	log {
 		output file /var/log/caddy/blog-muhanai.log
+	}
+}
+# chat.muhanai.com — Bitterbot chat shell.
+#
+# chat.muhanai.com IS a Cloudflare Worker route — the Worker renders the
+# chat shell HTML on "/" and proxies /assets/* to the Vite-built bundle
+# (see deploy/chat-handler.ts). The Worker fronts the host with Cloudflare's
+# public TLS.
+#
+# This Caddy block is the **origin fallback** for /assets/* requests and for
+# cases where the Worker is bypassed. Because the DNS A record is proxied
+# (orange cloud), Cloudflare terminates public TLS and only needs a valid
+# origin certificate for the Cloudflare→origin hop. `tls internal` (Caddy's
+# internal CA) is used here, matching blog.muhanai.com — Cloudflare accepts
+# it in "Full" SSL mode. Without `tls` Caddy would default to ACME, which
+# fails behind a proxied DNS record and produces Cloudflare 525.
+#
+# DNS: chat.muhanai.com A 185.55.240.110 (Proxied / orange cloud).
+chat.muhanai.com {
+	tls internal
+	encode zstd gzip
+	root * /var/www/chat.muhanai.com/current
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Frame-Options "SAMEORIGIN"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+	}
+	@asset path_regexp asset "\.(css|js|svg|png|jpg|jpeg|webp|woff2|wasm)(\?.*)?$"
+	handle @asset {
+		file_server
+		header Cache-Control "public, max-age=604800"
+	}
+	handle {
+		try_files {path} {path}/ {path}.html {path}/index.html =404
+		file_server
+		header Cache-Control "no-cache"
+	}
+	log {
+		output file /var/log/caddy/chat-muhanai.log
 	}
 }

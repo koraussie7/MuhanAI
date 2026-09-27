@@ -96,7 +96,8 @@ export default defineConfig({
 		include: [
 			"packages/**/*.test.ts",
 			"services/**/*.test.ts",
-			"apps/web/src/**/*.test.{ts,tsx}",
+				"apps/web/src/**/*.test.{ts,tsx}",
+			"deploy/**/*.test.ts",
 			// Workspace-level operational tests (gated by env var; see file header).
 			"tests/**/*.test.ts",
 		],

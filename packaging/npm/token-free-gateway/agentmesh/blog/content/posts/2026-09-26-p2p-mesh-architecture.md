@@ -1,5 +1,6 @@
 ---
 title: "MuhanAI P2P 메시시: 브라우저에서 시작되는 에이전트 네트워크"
+slug: "p2p-mesh-architecture"
 date: 2026-09-26T09:00:00+09:00
 draft: false
 categories: ["Architecture"]

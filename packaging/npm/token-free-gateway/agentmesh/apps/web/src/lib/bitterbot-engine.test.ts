@@ -43,6 +43,24 @@ test("Bitterbot can disable the offline fallback", async () => {
 	}
 });
 
+/*
+ * OpenHydra routing is exercised end-to-end inside
+ * `packages/ai-engine/src/openhydra/openhydra-engine.test.ts`
+ * (19 cases covering init failure, multi-node failover, abort, stream,
+ *  error events). The chain-level test here only needs to prove that
+ *  a missing peer still falls through to offline, which the first test
+ *  above already does — when `OPENHYDRA_BOOTSTRAP` is unset, `init()`
+ *  throws "No OpenHydra endpoints configured", the cache returns null,
+ *  `tryP2pInference` returns null, and the chain lands on
+ *  `bitterbot-offline`.
+ *
+ * A positive "routes to OpenHydra" test would need a real WebSocket
+ *  mock for discovery (the engine calls `new WebSocket(endpoint)`
+ *  directly, which fetch-level mocking cannot intercept) or a live
+ *  OpenHydra daemon. Neither is in scope for unit tests; ship that
+ *  as an integration test once a peer is actually deployable.
+ */
+
 test("Bitterbot history storage is bounded and clearable", () => {
 	const store = new Map<string, string>();
 	const originalStorage = globalThis.localStorage;

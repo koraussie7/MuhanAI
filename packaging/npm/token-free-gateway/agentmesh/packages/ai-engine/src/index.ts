@@ -2,6 +2,7 @@ export { CloudEngine } from "./cloud/cloud-engine";
 export type { EngineType } from "./factory";
 export { AIEngineFactory } from "./factory";
 export { OllamaEngine } from "./ollama/ollama-engine";
+export { OpenHydraEngine } from "./openhydra/openhydra-engine";
 export { SippEngine } from "./sipp/sipp-engine";
 export type {
 	ChatOptions,

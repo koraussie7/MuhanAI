@@ -44,6 +44,7 @@ import { worldRoutes } from "./world-routes.js";
 
 function timingSafeEqual(a: string | undefined, b: string | undefined): boolean {
 	if (typeof a !== "string" || typeof b !== "string") return false;
+	if (a.length === 0 || b.length === 0) return false;
 	if (a.length !== b.length) return false;
 	let result = 0;
 	for (let i = 0; i < a.length; i++) {
@@ -84,6 +85,7 @@ const PUBLIC_PATH_PREFIXES = [
 	"/api/visitors",
 	"/api/auth",
 	"/api/health",
+	"/api/vietnam",
 	"/rpc",
 	"/api/mcp",
 ];
@@ -116,6 +118,30 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	const enableTransport = options.enableTransport ?? process.env.NODE_ENV !== "test";
 	const identityPath = options.identityPath ?? "./.agentmesh/identity.json";
 
+	const placeholderPattern = /^(your-|change-me|placeholder|fake-|secret-key-here|example-key)/i;
+	if (isProduction) {
+		if (!process.env.API_KEY) {
+			throw new Error(
+				"API_KEY env var is unset in production — refusing to start. Set API_KEY before serving traffic.",
+			);
+		}
+		if (placeholderPattern.test(process.env.API_KEY)) {
+			throw new Error(
+				"API_KEY matches a known placeholder pattern in production — refusing to start. Set a secure random API key.",
+			);
+		}
+		if (!process.env.AUTH_SECRET) {
+			throw new Error(
+				"AUTH_SECRET env var is unset in production — refusing to start. Generate with: openssl rand -hex 32",
+			);
+		}
+		if (placeholderPattern.test(process.env.AUTH_SECRET)) {
+			throw new Error(
+				"AUTH_SECRET matches a known placeholder pattern in production — refusing to start.",
+			);
+		}
+	}
+
 	const app = Fastify({
 		loggerInstance: logger,
 		bodyLimit: 1024 * 1024, // 1MB explicit body cap (DoS protection)
@@ -143,12 +169,20 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	});
 
 	// CORS: restrict to known origins in production, allow localhost in development
+	const defaultProdOrigins = ["https://muhanai.com", "https://www.muhanai.com"];
 	const allowedOrigins = isProduction
-		? (process.env.ALLOWED_ORIGINS?.split(",") ?? [
-				"https://muhanai.com",
-				"https://www.muhanai.com",
-			])
+		? (process.env.ALLOWED_ORIGINS
+				? process.env.ALLOWED_ORIGINS.split(",")
+						.map((s) => s.trim())
+						.filter(Boolean)
+				: defaultProdOrigins)
 		: ["http://localhost:3000", "http://localhost:5173", "http://localhost:3001"];
+
+	if (isProduction && allowedOrigins.length === 0) {
+		throw new Error(
+			"ALLOWED_ORIGINS is empty in production — refusing to start. Set ALLOWED_ORIGINS to a comma-separated list of trusted origins.",
+		);
+	}
 
 	await app.register(cors, {
 		origin: (origin, cb) => {
@@ -181,23 +215,17 @@ export async function buildApp(options: BuildAppOptions = {}) {
 		},
 	});
 
-	// API Key authentication for non-public routes. Fail-closed: an unset
-	// API_KEY blocks every protected request rather than serving them open.
-	if (!process.env.API_KEY && isProduction) {
-		logger.warn(
-			"API_KEY env var is unset in production — every protected request will be rejected with 401. Set API_KEY before serving traffic.",
-		);
-	}
-
-	if (process.env.DISABLE_AUTH === "true" && isProduction) {
-		logger.warn(
-			"DISABLE_AUTH=true is set in production but will be ignored. Auth is mandatory in production.",
-		);
+	// API Key authentication for non-public routes.
+	// Auth is always required in production; disableAuth is dev-only.
+	let disableAuth = false;
+	if (process.env.DISABLE_AUTH === "true" && !isProduction) {
+		disableAuth = true;
+		logger.warn("Auth is DISABLED — dev mode. Set DISABLE_AUTH=false or NODE_ENV=production to enforce API key auth.");
 	}
 
 	app.addHook("onRequest", async (request, reply) => {
 		if (isPublicPath(request.url)) return;
-		if (!isProduction && process.env.DISABLE_AUTH === "true") return;
+		if (disableAuth) return;
 
 		// Rome bridge 앱 전용 가드: AGENTMESH_BRIDGE_TOKEN Bearer 토큰
 		if (bridgeToken && isBridgeAuth(request, bridgeToken)) return;

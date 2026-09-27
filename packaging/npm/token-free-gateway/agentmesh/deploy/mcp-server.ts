@@ -473,19 +473,10 @@ export async function handleMcpRequest(
 				} else if (toolName === "muhanai_search_knowledge") {
 					content = JSON.stringify({
 						query: args.query,
-						matches: [
-							{
-								title: "Zero-Token Routing Architecture",
-								snippet: "Local WebGPU session pairing eliminates API token cost.",
-								relevance: 0.98,
-							},
-							{
-								title: "CRDT Knowledge Lake",
-								snippet:
-									"State-based OR-Set and LWW merge guarantee conflict-free synchronization.",
-								relevance: 0.94,
-							},
-						],
+						matches: [],
+						_demo: true,
+						message:
+							"Knowledge search is not configured on this Worker. Deploy the API service and set API_ORIGIN for live results.",
 					});
 				} else if (toolName === "muhanai_ask_quorum") {
 					const question = String(args.question || "");
@@ -517,16 +508,25 @@ export async function handleMcpRequest(
 					}
 
 					if (!handled) {
-						content =
-							`🤖 [MuhanAI Multi-Agent Quorum Consensus]\n\n` +
-							`Question: "${question}"\n\n` +
-							`• Claude 3.7 Sonnet: Architecture & cognitive intent verified.\n` +
-							`• DeepSeek R1: Logical inference and edge verification complete.\n` +
-							`• Gemini 2.5 Pro: Multilingual consensus validated.\n\n` +
-							`Consensus Agreement: 99.2% | Zero-Token execution verified.`;
+						content = JSON.stringify({
+							_demo: true,
+							message:
+								"Quorum service is not configured on this Worker. Deploy the API service and set API_ORIGIN for live multi-agent consensus.",
+						});
 					}
 				} else if (toolName === "muhanai_publish_note") {
-					content = `✨ Successfully published [[${args.title}.md]] to MuhanAI cosmic knowledge topology. Node ID: note-${Date.now()}`;
+					return new Response(
+						JSON.stringify({
+							jsonrpc: "2.0",
+							id,
+							error: {
+								code: -32601,
+								message:
+									"muhanai_publish_note is not available on this Worker. Deploy the API service and set API_ORIGIN.",
+							},
+						}),
+						{ status: 501, headers: { "content-type": "application/json" } },
+					);
 				} else {
 					return new Response(
 						JSON.stringify({
@@ -564,7 +564,7 @@ export async function handleMcpRequest(
 				}),
 				{ status: 400, headers: { "content-type": "application/json" } },
 			);
-		} catch (_err: any) {
+		} catch {
 			return new Response(
 				JSON.stringify({
 					jsonrpc: "2.0",

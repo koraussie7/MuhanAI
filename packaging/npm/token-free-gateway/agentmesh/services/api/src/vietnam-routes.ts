@@ -27,7 +27,23 @@ interface NaverResponse {
 }
 
 const CACHE_TTL_MS = 5 * 60_000;
+const CACHE_MAX_SIZE = 1000;
 const cache = new Map<string, { expiresAt: number; data: VietnamInsightResponse }>();
+
+function cacheSet(key: string, value: { expiresAt: number; data: VietnamInsightResponse }): void {
+	if (cache.size >= CACHE_MAX_SIZE) {
+		for (const [k, v] of cache) {
+			if (v.expiresAt < Date.now()) {
+				cache.delete(k);
+			}
+		}
+	}
+	if (cache.size >= CACHE_MAX_SIZE) {
+		const oldestKey = cache.keys().next().value;
+		if (oldestKey !== undefined) cache.delete(oldestKey);
+	}
+	cache.set(key, value);
+}
 
 export interface VietnamInsightItem {
 	title: string;
@@ -124,7 +140,7 @@ export async function vietnamRoutes(app: FastifyInstance): Promise<void> {
 				fetchedAt: new Date().toISOString(),
 				configured: true,
 			};
-			cache.set(cacheKey, { expiresAt: Date.now() + CACHE_TTL_MS, data: result });
+			cacheSet(cacheKey, { expiresAt: Date.now() + CACHE_TTL_MS, data: result });
 			return result;
 		} catch (error) {
 			request.log.warn({ err: error }, "Naver Vietnam insight search failed");

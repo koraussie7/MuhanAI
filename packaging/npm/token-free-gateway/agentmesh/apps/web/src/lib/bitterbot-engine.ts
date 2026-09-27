@@ -1,6 +1,7 @@
-import type { SippEngine } from "@agentmesh/ai-engine";
+import type { OpenHydraEngine, SippEngine } from "@agentmesh/ai-engine";
 import { AIEngineFactory } from "@agentmesh/ai-engine/factory";
 import { answerOffline, type BitterbotMessage as OfflineMessage } from "./offline-brain.js";
+import { createCachedEngine } from "./engine-cache.js";
 
 export type BitterbotRole = "system" | "user" | "assistant";
 
@@ -13,7 +14,18 @@ export interface BitterbotMessage {
 
 export interface BitterbotResponse {
 	text: string;
-	provider: string;
+	/**
+	 * Provider label. The union is intentionally exhaustive so Part C's
+	 * OpenHydra wiring adds a new variant with a typecheck, not a free
+	 * string. If you need a new provider, add it here AND in the chain
+	 * that returns it.
+	 */
+	provider:
+		| "bitterbot-webgpu"
+		| "bitterbot-local"
+		| "nanos-local"
+		| "bitterbot-offline"
+		| "bitterbot-openhydra";
 	model: string;
 	tier: string;
 	latencyMs: number;
@@ -97,6 +109,96 @@ function offlineResponse(messages: BitterbotMessage[]): BitterbotResponse {
 		tier: "offline",
 		latencyMs: 0,
 	};
+}
+
+/**
+ * P2P inference step placeholder.
+ *
+ * Part C will:
+ *   1. Import `OpenHydraEngine` from `@agentmesh/ai-engine`.
+ *   2. Wire a CachedEngine<OpenHydraEngine> via `createCachedEngine`.
+ *   3. Implement this function using the cached engine.
+ *
+ * NOTE on scope: this is *inference*, not *model download*. Part A's
+ * `downloadFromManifest` (noema/src/download.ts) downloads model
+ * weights and verifies them; that's a separate pipeline that runs
+ * once before any engine can chat. OpenHydra nodes run inference on
+ * weights they already host, so the P2P step here just dispatches a
+ * prompt and returns the generated text. No `downloadFromManifest`
+ * call belongs in this function.
+ *
+ * The signature is fixed now so the fallback chain in
+ * `answerWithBitterbot` can call it without further changes when
+ * Part B is merged.
+ *
+ * Contract:
+ *   - Returns null if P2P is unavailable (no engine, init failed, or
+ *     no peer responded) so the caller can fall through to the next
+ *     provider.
+ *   - Returns a fully-populated BitterbotResponse on success.
+ *   - Never throws — all errors are swallowed and mapped to null.
+ */
+/**
+ * OpenHydra bootstrap endpoints. Lazy: read on every `get()` so test
+ * code can set `process.env.OPENHYDRA_BOOTSTRAP` before the first
+ * `tryP2pInference` call without restarting the module.
+ *
+ * Format: comma-separated `ws://` or `wss://` URLs.
+ *   e.g. VITE_OPENHYDRA_BOOTSTRAP=wss://hydra-a.example,wss://hydra-b.example
+ */
+function readOpenHydraBootstrap(): string[] {
+	if (typeof process === "undefined") return [];
+	const raw = process.env?.OPENHYDRA_BOOTSTRAP ?? process.env?.VITE_OPENHYDRA_BOOTSTRAP ?? "";
+	return raw
+		.split(",")
+		.map((s) => s.trim())
+		.filter(Boolean);
+}
+
+/**
+ * Cached OpenHydraEngine. Single instance, single init promise —
+ * see `engine-cache.ts` for the contract. `init` failures map to
+ * null, so a transient discovery timeout does not poison subsequent
+ * `tryP2pInference` calls until `reset()` is invoked.
+ *
+ * `endpoints` is read lazily inside `init` so process.env changes
+ * between tests are picked up.
+ */
+const openHydraCache = createCachedEngine<OpenHydraEngine>({
+	init: async () => {
+		const engine = AIEngineFactory.create({
+			type: "openhydra",
+			endpoints: readOpenHydraBootstrap(),
+			systemPrompt: SYSTEM_PROMPT,
+		}) as OpenHydraEngine;
+		await engine.init();
+		return engine;
+	},
+});
+
+async function tryP2pInference(
+	messages: BitterbotMessage[],
+	options: BitterbotChatOptions,
+	started: number,
+): Promise<BitterbotResponse | null> {
+	const engine = await openHydraCache.get();
+	if (!engine) return null;
+	const lastUser =
+		[...messages].reverse().find((message) => message.role === "user")?.content ?? "";
+	if (lastUser.trim().length === 0) return null;
+	try {
+		const text = await engine.chat(lastUser, { stream: false });
+		if (!validText(text)) return null;
+		return {
+			text,
+			provider: "bitterbot-openhydra",
+			model: "peer-inference",
+			tier: "p2p",
+			latencyMs: Math.round(now() - started),
+		};
+	} catch {
+		return null;
+	}
 }
 
 export function loadBitterbotHistory(): BitterbotMessage[] {
@@ -186,6 +288,17 @@ export async function answerWithBitterbot(
 			}
 		} catch {
 			// Try the next local provider.
+		}
+	}
+
+	// P2P inference (OpenHydra). Disabled in non-browser contexts to
+	// keep SSR and worker-boot deterministic. Failures are silent.
+	if (typeof navigator !== "undefined") {
+		try {
+			const p2p = await tryP2pInference(messages, options, started);
+			if (p2p) return p2p;
+		} catch {
+			// Fall through to offline.
 		}
 	}
 

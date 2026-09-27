@@ -1,8 +1,19 @@
 export interface EngineConfig {
-	type: "sipp" | "ollama" | "cloud";
+	type: "sipp" | "ollama" | "cloud" | "openhydra";
 	model?: string;
 	backend?: "webgpu" | "wasm" | "cpu";
 	endpoint?: string;
+	/**
+	 * OpenHydra bootstrap endpoints. The engine pings each one on init
+	 * and only retains those that respond. Multiple endpoints enable
+	 * transparent failover on `chat` and `stream`.
+	 */
+	endpoints?: string[];
+	/**
+	 * OpenHydra discovery timeout in milliseconds. Defaults to 3000
+	 * inside `OpenHydraDiscoveryImpl`.
+	 */
+	discoveryTimeoutMs?: number;
 	maxTokens?: number;
 	temperature?: number;
 	topP?: number;
