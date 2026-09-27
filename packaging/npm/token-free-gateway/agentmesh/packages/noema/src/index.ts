@@ -44,3 +44,22 @@ export {
 	verifyEnvelope,
 } from "./export.js";
 export type { ManifestEnvelope } from "./export.js";
+
+// Mesh source abstraction, source resolver, and verified download
+export {
+	DEFAULT_PIECE_SIZE,
+	MESH_DOWNLOAD_PROTOCOL,
+	fetchFromMeshSource,
+} from "./mesh-source.js";
+export type {
+	MeshPeerConnection,
+	MeshSourceOptions,
+	MeshSourceRef,
+} from "./mesh-source.js";
+
+export { orderSources, resolveSource } from "./source-resolver.js";
+export type { ResolvedSourceResult, SourceResolverOptions } from "./source-resolver.js";
+
+export { downloadFromManifest } from "./download.js";
+export type { DownloadOptions } from "./download.js";
+
