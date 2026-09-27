@@ -28,5 +28,13 @@ export {
 	type StoreFactoryInput,
 } from "./hugo-factory.js";
 export { createMuhanAIServer, MuhanAIServer } from "./mcp-server.js";
+export {
+	buildLystBotTools,
+	createLystBotRestCall,
+	type LystBotCall,
+	type LystBotToolDefinition,
+	type LystBotToolName,
+	type LystBotToolRegistration,
+} from "./lystbot-tool.js";
 export { createToolDiscovery, HttpToolDiscovery } from "./tool-discovery.js";
 export { createToolRegistry, InMemoryToolRegistry } from "./tool-registry.js";

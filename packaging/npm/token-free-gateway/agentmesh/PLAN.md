@@ -123,6 +123,31 @@ Created 5 new files in `packages/ai-engine/src/openhydra/`:
 
 All 52 tests pass (4 test files total in the openhydra directory).
 
+## chat.muhanai.com 525 fix (completed)
+
+### Root cause
+The `chat.muhanai.com` Caddy block had **no `tls` directive**. Caddy defaulted
+to ACME certificate issuance (Let's Encrypt), which fails behind a proxied DNS
+record (orange cloud) — the HTTP-01 challenge on port 80 is intercepted by
+Cloudflare, not delivered to the origin. Result: no certificate served →
+Cloudflare 525 SSL Handshake Failed.
+
+### Fix
+Added `tls internal` to the `chat.muhanai.com` Caddy block, matching the
+pattern used by `blog.muhanai.com` and `muhanai.com`. Cloudflare terminates
+public TLS and trusts Caddy's internal CA in "Full" SSL mode.
+
+### Files changed
+- `deploy/Caddyfile.muhanai:119` — added `tls internal` to the chat block
+- `deploy/Caddyfile.muhanai:102-117` — corrected misleading comment that
+  claimed `tls internal` would cause 525 (it works because Cloudflare uses
+  "Full" SSL mode, same as blog.muhanai.com)
+- `deploy/setup-chat-origin.sh:4-13` — same comment fix in the origin setup script
+
+Note: `chat.muhanai.com` is a Cloudflare Worker route (`wrangler.toml:16`).
+In normal operation the Worker serves the chat shell and proxies `/assets/*`
+from the Workers ASSETS binding — the Caddy origin is only a fallback.
+
 ## Remaining Work (documented for future sprints)
 
 ### Part A: Noema mesh source abstraction

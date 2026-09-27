@@ -354,3 +354,16 @@ export {
 } from "./p2p-node-registry.js";
 export { createP2pModelRegistry } from "./p2p-model-registry.js";
 export type { P2pModelRegistry, P2pModelRegistryOptions } from "./p2p-model-registry.js";
+export {
+	XLangRegistry,
+	validateXLangManifest,
+	type XLangAgentManifest,
+	type XLangManifestFailure,
+	type XLangManifestValidation,
+} from "./xlang-registry.js";
+export {
+	XLANG_CAPABILITY_TOPIC,
+	XLangBeacon,
+	createXLangBeaconTransport,
+	type XLangBeaconTransport,
+} from "./xlang-beacon.js";

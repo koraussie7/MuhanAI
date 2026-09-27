@@ -1,8 +1,10 @@
+import { isChatRequest, renderChatShell } from "./chat-handler";
+import { handleP2pInferenceRequest } from "./p2p-inference";
 import { handleFediverseRequest } from "./fediverse";
 import { handleFeedApi } from "./feed-api";
-import { isChatRequest, renderChatShell } from "./chat-handler";
 import { handleMcpRequest } from "./mcp-server";
 import { handleTravelApi } from "./travel-api";
+import { handleXLangPeersRequest } from "./xlang-peers";
 
 interface KVNamespace {
 	get(key: string): Promise<string | null>;
@@ -18,6 +20,24 @@ interface Env {
 	API_ORIGIN: string;
 	FEED_KV?: KVNamespace;
 	TOURMIND_USER_KEY?: string;
+	/**
+	 * Public JSON snapshot of XLang peers, published by the AgentMesh node
+	 * process from `XLangRegistry`. Optional: when unset the endpoint returns
+	 * an empty peer list so the dashboard degrades instead of failing.
+	 */
+	XLANG_PEERS_JSON?: string;
+	/**
+	 * Public JSON snapshot of P2P inference peers (`P2pNodeRegistry` +
+	 * OpenHydra nodes). When unset, `/api/p2p/peers` falls back to the XLang
+	 * capability snapshot so XLang peers still appear.
+	 */
+	P2P_PEERS_JSON?: string;
+	/**
+	 * Mesh gateway that forwards prompts to peers. Required before
+	 * `POST /api/p2p/inference` can dispatch; without it the endpoint returns
+	 * 503 `dispatch-not-configured` rather than pretending to succeed.
+	 */
+	P2P_INFERENCE_ORIGIN?: string;
 }
 
 export default {
@@ -81,6 +101,12 @@ export default {
 		}
 
 		if (url.pathname.startsWith("/api/")) {
+			const p2pResponse = await handleP2pInferenceRequest(request, env);
+			if (p2pResponse.status !== 404) return p2pResponse;
+
+			const xlangPeersResponse = handleXLangPeersRequest(request, env);
+			if (xlangPeersResponse.status !== 404) return xlangPeersResponse;
+
 			const travelResponse = await handleTravelApi(request, url.pathname, env);
 			if (travelResponse) return travelResponse;
 

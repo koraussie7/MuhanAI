@@ -1,5 +1,5 @@
 export interface EngineConfig {
-	type: "sipp" | "ollama" | "cloud" | "openhydra";
+	type: "sipp" | "ollama" | "cloud" | "openhydra" | "xlang";
 	model?: string;
 	backend?: "webgpu" | "wasm" | "cpu";
 	endpoint?: string;

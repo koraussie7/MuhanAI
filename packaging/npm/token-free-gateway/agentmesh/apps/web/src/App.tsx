@@ -74,6 +74,7 @@ import { getMenuTranslation } from "./components/menu-i18n";
 import { RightPanel } from "./components/RightPanel";
 import { Sidebar } from "./components/Sidebar";
 import { VietnamConciergePage } from "./components/VietnamConciergePage";
+import { XLangPeersPage } from "./components/XLangPeersPage";
 import { type SupportedLanguage, useI18n } from "./i18n";
 import { startBrowserPeer, stopBrowserPeer } from "./lib/browser-peer";
 import { ROUTES, routeByPath } from "./routes.js";
@@ -539,11 +540,12 @@ export function App() {
 								<P2pNetworkPageLazy />
 							</Suspense>
 						)}
-						{activeSection === "network-monitor" && (
-							<Suspense fallback={<PageSkeleton />}>
-								<NetworkMonitorPageLazy />
-							</Suspense>
+							{activeSection === "network-monitor" && (
+						<Suspense fallback={<PageSkeleton />}>
+						<NetworkMonitorPageLazy />
+						</Suspense>
 						)}
+						{activeSection === "xlang-peers" && <XLangPeersPage />}
 						{activeSection === "ghost" && (
 							<Suspense fallback={<PageSkeleton />}>
 								<GhostPageLazy />

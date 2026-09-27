@@ -3,6 +3,17 @@ export type { EngineType } from "./factory";
 export { AIEngineFactory } from "./factory";
 export { OllamaEngine } from "./ollama/ollama-engine";
 export { OpenHydraEngine } from "./openhydra/openhydra-engine";
+export { XLangClient, XLangEngine } from "./xlang";
+export type {
+	XLangCapability,
+	XLangChatOptions,
+	XLangClientOptions,
+	XLangPeerInfo,
+	XLangPeerRequest,
+	XLangPeerResponse,
+	XLangRequestMethod,
+	XLangStreamEvent,
+} from "./xlang";
 export { SippEngine } from "./sipp/sipp-engine";
 export type {
 	ChatOptions,
