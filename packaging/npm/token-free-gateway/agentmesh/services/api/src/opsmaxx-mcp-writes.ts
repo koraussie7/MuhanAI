@@ -561,6 +561,8 @@ const jsonRpcError = (id: unknown, code: number, message: string) => ({
 export type OpsmaxxWritesOptions = {
 	/** Bridge to gate against. Defaults to the factory bridge (memory in dev). */
 	bridge?: OpsMaxxBridge;
+	/** Optional factory options for production IPC/HTTP wiring. */
+	bridgeOptions?: Parameters<typeof createOpsMaxxBridge>[0];
 };
 
 /**
@@ -574,7 +576,7 @@ export const opsmaxxWritesRoutes: FastifyPluginAsync<OpsmaxxWritesOptions> = asy
 	app: FastifyInstance,
 	opts,
 ) => {
-	const bridge = opts.bridge ?? (await createOpsMaxxBridge());
+	const bridge = opts.bridge ?? (await createOpsMaxxBridge(opts.bridgeOptions));
 	const handler = createWriteToolHandler(bridge);
 
 	app.post("/api/opsmaxx-mcp/writes", async (req, reply) => {

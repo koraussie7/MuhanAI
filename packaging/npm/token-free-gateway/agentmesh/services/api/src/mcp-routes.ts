@@ -21,9 +21,23 @@
  * consistent. Replace `runToolCall` with a live provider when one is available.
  */
 
+import type { OpsMaxxBridge } from "@agentmesh/opsmaxx-bridge";
 import { identityService } from "@agentmesh/knowledge-base";
 import type { FastifyInstance } from "fastify";
 import { OPSMAXX_WRITE_TOOL_NAMES, opsmaxxWritesRoutes } from "./opsmaxx-mcp-writes.js";
+
+/**
+ * Optional dependencies accepted by `mcpRoutes`. The OpsMaxx write
+ * surface (`opsmaxxWritesRoutes`) needs a live bridge instance.
+ *
+ * Production wiring (`server.ts`) decorates `app.opsmaxxBridge` and
+ * passes the same instance through. Tests inject a mock bridge via
+ * `buildApp({ opsmaxxBridge })` so `register(opsmaxxWritesRoutes, …)`
+ * uses the bridge the assertion expects.
+ */
+export interface McpRoutesOptions {
+	opsmaxxBridge?: OpsMaxxBridge;
+}
 
 interface MCPToolDefinition {
 	name: string;
@@ -371,7 +385,16 @@ const jsonRpcError = (id: unknown, code: number, message: string) => ({
 	error: { code, message },
 });
 
-export async function mcpRoutes(app: FastifyInstance): Promise<void> {
+export async function mcpRoutes(
+	app: FastifyInstance,
+	options: McpRoutesOptions = {},
+): Promise<void> {
+	const bridge: OpsMaxxBridge | undefined =
+		options.opsmaxxBridge ??
+		(app as FastifyInstance & { opsmaxxBridge?: OpsMaxxBridge }).opsmaxxBridge;
+	// `bridge` may be `undefined`; `opsmaxxWritesRoutes` is registered last
+	// (line 593) and tolerates the absence by skipping its routes.
+
 	app.get("/api/mcp/manifest.json", async (_req, reply) => {
 		const manifest = {
 			schema_version: "v1",
@@ -590,7 +613,7 @@ export async function mcpRoutes(app: FastifyInstance): Promise<void> {
 	// T3-B (opsmaxx-mcp-shaper-risky): write surface. T3-A registers its read
 	// surface at /api/opsmaxx-mcp/rpc; the shared config block above documents
 	// both. T3-B is the merge owner of this file's coordinated edits.
-	await app.register(opsmaxxWritesRoutes);
+	await app.register(opsmaxxWritesRoutes, { bridge });
 }
 
 export const _internalsForTest = {

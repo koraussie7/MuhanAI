@@ -27,6 +27,7 @@
 		"@agentmesh/llm-router": "workspace:*",
 		"@agentmesh/mcp": "workspace:*",
 		"@agentmesh/noema": "workspace:*",
+		"@agentmesh/opsmaxx-bridge": "workspace:*",
 		"@agentmesh/payment": "workspace:*",
 		"@agentmesh/peer-mesh": "workspace:*",
 		"@agentmesh/personal-mcp": "workspace:*",
