@@ -23,6 +23,7 @@ import { happyRoutes } from "./happy-routes.js";
 import { hivebearRoutes } from "./hivebear-routes.js";
 import { resonanceRoutes } from "./integrations/resonance/routes.js";
 import { knowledgeRoutes } from "./knowledge-routes.js";
+import { listRoutes } from "./list-routes.js";
 import { llmMeshRoutes } from "./llm-mesh-routes.js";
 import { llmRoutes } from "./llm-routes.js";
 import { mcpRoutes } from "./mcp-routes.js";
@@ -30,6 +31,7 @@ import { networkRoutes } from "./network-routes.js";
 import { noemaRoutes } from "./noema-routes.js";
 import { omniRouteRoutes } from "./omniroute-routes.js";
 import { openaiCompatRoutes } from "./openai-compat-routes.js";
+import { opsmaxxMcpRoutes } from "./opsmaxx-mcp-routes.js";
 import { paymentRoutes } from "./payment-routes.js";
 import pulseRoutes from "./pulse-routes.js";
 import { pythiaRoutes } from "./pythia-routes.js";
@@ -109,6 +111,13 @@ export interface BuildAppOptions {
 	enableTransport?: boolean;
 	/** Path to the local node identity file. */
 	identityPath?: string;
+	/**
+	 * Inject an OpsMaxx bridge for tests and for production wiring.
+	 * When omitted, the MCP routes fall back to an in-memory bridge.
+	 * Production should pass the IPC client (T1-P2) created from
+	 * `@agentmesh/opsmaxx-bridge`.
+	 */
+	opsmaxxBridge?: unknown;
 }
 
 export async function buildApp(options: BuildAppOptions = {}) {
@@ -161,6 +170,13 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	app.decorate("pulseBridge", new PulseBridge({ logger: logger as never }));
 	app.pulseBridge.start();
 
+	// OpsMaxx bridge: when caller injects one (T1-P2 IPC client or
+	// test mock), decorate so the MCP routes pick it up. Otherwise
+	// the routes fall back to a fresh in-memory bridge per call.
+	if (options.opsmaxxBridge) {
+		app.decorate("opsmaxxBridge", options.opsmaxxBridge as never);
+	}
+
 	// Security headers (helmet). CSP off — when a real policy is wired it should
 	// be passed explicitly so it can be reviewed in one place.
 	await app.register(helmet, {
@@ -171,11 +187,11 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	// CORS: restrict to known origins in production, allow localhost in development
 	const defaultProdOrigins = ["https://muhanai.com", "https://www.muhanai.com"];
 	const allowedOrigins = isProduction
-		? (process.env.ALLOWED_ORIGINS
-				? process.env.ALLOWED_ORIGINS.split(",")
-						.map((s) => s.trim())
-						.filter(Boolean)
-				: defaultProdOrigins)
+		? process.env.ALLOWED_ORIGINS
+			? process.env.ALLOWED_ORIGINS.split(",")
+					.map((s) => s.trim())
+					.filter(Boolean)
+			: defaultProdOrigins
 		: ["http://localhost:3000", "http://localhost:5173", "http://localhost:3001"];
 
 	if (isProduction && allowedOrigins.length === 0) {
@@ -220,7 +236,9 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	let disableAuth = false;
 	if (process.env.DISABLE_AUTH === "true" && !isProduction) {
 		disableAuth = true;
-		logger.warn("Auth is DISABLED — dev mode. Set DISABLE_AUTH=false or NODE_ENV=production to enforce API key auth.");
+		logger.warn(
+			"Auth is DISABLED — dev mode. Set DISABLE_AUTH=false or NODE_ENV=production to enforce API key auth.",
+		);
 	}
 
 	app.addHook("onRequest", async (request, reply) => {
@@ -277,9 +295,13 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	await app.register(worldRoutes);
 	await app.register(visitorRoutes);
 	await app.register(vietnamRoutes);
+	await app.register(listRoutes);
 	await app.register(paymentRoutes);
 	await app.register(routerRoutes);
 	await app.register(mcpRoutes);
+	await app.register(opsmaxxMcpRoutes, {
+		opsmaxxBridge: options.opsmaxxBridge,
+	});
 	await app.register(catalogRoutes);
 	await app.register(resonanceRoutes);
 

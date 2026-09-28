@@ -35,6 +35,7 @@ describe("POST /api/llm/chat — user prompt wiring", () => {
 		}
 		globalThis.fetch = originalFetch;
 		process.env.NODE_ENV = "test";
+		delete process.env.DISABLE_AUTH;
 	});
 
 	it("routes a question through the keyless free tier and returns the LLM text", async () => {
