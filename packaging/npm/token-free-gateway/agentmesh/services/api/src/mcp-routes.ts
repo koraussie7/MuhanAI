@@ -23,6 +23,7 @@
 
 import { identityService } from "@agentmesh/knowledge-base";
 import type { FastifyInstance } from "fastify";
+import { OPSMAXX_WRITE_TOOL_NAMES, opsmaxxWritesRoutes } from "./opsmaxx-mcp-writes.js";
 
 interface MCPToolDefinition {
 	name: string;
@@ -489,6 +490,17 @@ export async function mcpRoutes(app: FastifyInstance): Promise<void> {
 					},
 				},
 			},
+			// T3-A: opsmaxxConfig for safe tools (T3-A) + write tools (T3-B).
+			// T3-A adds opsmaxx-safe line; T3-B adds opsmaxx-write line.
+			// Coordinate via shared comment; do not overwrite each other's additions.
+			// T3-B (opsmaxx-mcp-shaper-risky) is the merge owner of this block.
+			opsmaxxConfig: {
+				safe: { url: `${baseUrl}/api/opsmaxx-mcp/rpc` },
+				write: {
+					url: `${baseUrl}/api/opsmaxx-mcp/writes`,
+					tools: OPSMAXX_WRITE_TOOL_NAMES,
+				},
+			},
 			curlExample: `curl -X POST ${rpc} -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'`,
 			selectedClient: client,
 		};
@@ -574,6 +586,11 @@ export async function mcpRoutes(app: FastifyInstance): Promise<void> {
 			reply.raw.end();
 		});
 	});
+
+	// T3-B (opsmaxx-mcp-shaper-risky): write surface. T3-A registers its read
+	// surface at /api/opsmaxx-mcp/rpc; the shared config block above documents
+	// both. T3-B is the merge owner of this file's coordinated edits.
+	await app.register(opsmaxxWritesRoutes);
 }
 
 export const _internalsForTest = {
