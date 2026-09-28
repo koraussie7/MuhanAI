@@ -1725,3 +1725,93 @@ footer {
 	\tpadding: 20px;
 	\toverflow-y: auto;
 }
+/* ── Desktop wallpaper (/desktop) ──────────────────────────────────────
+   The backdrop is the bottom layer of the desktop shell: absolutely
+   positioned, non-interactive, and painted before any window or icon.
+   `pointer-events: none` keeps clicks reaching the desktop surface so
+   the "click empty space to close the start menu" behaviour still works.
+   ──────────────────────────────────────────────────────────────────── */
+
+.desktop-backdrop {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	overflow: hidden;
+	pointer-events: none;
+}
+
+.desktop-backdrop-plain {
+	/* Matches the shell's own gradient so switching to `plain` is a
+	   no-op relative to the pre-backdrop look. */
+	background: linear-gradient(135deg, #090a14 0%, #111428 50%, #0d1222 100%);
+}
+
+.desktop-backdrop-visual {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/* The reused visualiser components size themselves for a card in a
+	   page flow; stretching them to the viewport is what turns the same
+	   component into a wallpaper. */
+	height: 100%;
+	width: 100%;
+}
+
+.desktop-backdrop-visual > * {
+	height: 100%;
+	width: 100%;
+}
+
+/* The knowledge graph renders an <svg> inside a <section.panel>. Drop the
+   panel chrome when it is acting as a wallpaper. */
+.kg-canvas-bg {
+	background: transparent;
+	border: none;
+	padding: 0;
+	margin: 0;
+	height: 100%;
+	display: flex;
+}
+
+.desktop-backdrop-vignette {
+	position: absolute;
+	inset: 0;
+	/* Radial vignette darkens the edges, not the centre — the middle of
+	   the screen is where windows live, so that is where contrast must
+	   be preserved. */
+	background: radial-gradient(
+		ellipse at center,
+		rgba(6, 8, 18, 0.1) 0%,
+		rgba(6, 8, 18, 0.55) 100%
+	);
+}
+
+.desktop-backdrop-badge {
+	position: absolute;
+	bottom: 58px;
+	right: 16px;
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+	padding: 0.25rem 0.6rem;
+	border-radius: 999px;
+	background: rgba(9, 10, 20, 0.55);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	color: #94a3b8;
+	font-size: 11px;
+	backdrop-filter: blur(8px);
+}
+
+.desktop-backdrop.is-dimmed .desktop-backdrop-visual {
+	filter: saturate(0.7) brightness(0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	/* globe.gl animates continuously; the reduced-motion contract says
+	   we should not force that on anyone. */
+	.desktop-backdrop-visual {
+		opacity: 0.55;
+	}
+}

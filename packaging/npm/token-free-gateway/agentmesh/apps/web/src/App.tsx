@@ -83,6 +83,16 @@ import { ROUTES, routeByPath } from "./routes.js";
 const P2pNetworkPageLazy = React.lazy(() =>
 	import("./components/DashPages").then((m) => ({ default: m.P2pNetworkPage })),
 );
+// Dedicated visualiser entry points for the /viz/* menu group. Both reuse
+// the existing graph components — `P2pNetworkPage` renders `MeshTopology`
+// and `KnowledgePage` renders `KnowledgeGraphCanvas` — so the menu surfaces
+// the same data without a second implementation to keep in sync.
+const MeshGraphPageLazy = React.lazy(() =>
+	import("./components/DashPages").then((m) => ({ default: m.P2pNetworkPage })),
+);
+const KnowledgeGraphVizPageLazy = React.lazy(() =>
+	import("./components/SpecPages").then((m) => ({ default: m.KnowledgePage })),
+);
 const AgentCastLazy = React.lazy(() =>
 	import("./components/AgentCast").then((m) => ({ default: m.AgentCast })),
 );
@@ -540,10 +550,15 @@ export function App() {
 								<P2pNetworkPageLazy />
 							</Suspense>
 						)}
-							{activeSection === "network-monitor" && (
-						<Suspense fallback={<PageSkeleton />}>
-						<NetworkMonitorPageLazy />
-						</Suspense>
+						{activeSection === "network-monitor" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<NetworkMonitorPageLazy />
+							</Suspense>
+						)}
+						{activeSection === "mesh-graph" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<MeshGraphPageLazy />
+							</Suspense>
 						)}
 						{activeSection === "xlang-peers" && <XLangPeersPage />}
 						{activeSection === "ghost" && (
@@ -583,6 +598,11 @@ export function App() {
 						{activeSection === "knowledge" && (
 							<Suspense fallback={<PageSkeleton />}>
 								<KnowledgePageLazy />
+							</Suspense>
+						)}
+						{activeSection === "knowledge-graph-viz" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<KnowledgeGraphVizPageLazy />
 							</Suspense>
 						)}
 						{activeSection === "verification" && (

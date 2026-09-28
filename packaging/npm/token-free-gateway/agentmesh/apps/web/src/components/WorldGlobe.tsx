@@ -10,7 +10,6 @@
  */
 
 import type { GlobeInstance } from "globe.gl";
-import GlobeChart from "globe.gl";
 import { RefreshCw, ScanLine } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { WorldEvent } from "../lib/world-types";
@@ -241,6 +240,13 @@ export interface WorldGlobeProps {
 	onRefresh?: () => void | Promise<void>;
 	/** true면 이벤트가 비었을 때 오프라인 데모 마커를 그린다. */
 	demoFallback?: boolean;
+	/**
+	 * `panel` keeps the framed 16:9 card used by `/world` and `/pythia`.
+	 * `background` drops the frame, the aspect ratio, and the status
+	 * chrome, and fills its container — for use as the `/desktop`
+	 * wallpaper where a fixed 16:9 box would letterbox the viewport.
+	 */
+	variant?: "panel" | "background";
 }
 
 const LegendDot = ({ color, label }: { color: string; label: string }) => (
@@ -264,9 +270,13 @@ export const WorldGlobe = ({
 	lastUpdated,
 	onRefresh,
 	demoFallback = true,
+	variant = "panel",
 }: WorldGlobeProps) => {
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const globeRef = useRef<GlobeInstance | null>(null);
+	// Latest marker set, readable from the async init closure so a data
+	// update that lands mid-load is not lost.
+	const pointsRef = useRef<GlobePoint[]>([]);
 	const [ready, setReady] = useState(false);
 	const [refreshing, setRefreshing] = useState(false);
 
@@ -278,53 +288,74 @@ export const WorldGlobe = ({
 	);
 
 	// 글로브 초기화 — 마운트 시 1회. 컨테이너 크기는 ResizeObserver로 동기화.
+	//
+	// `globe.gl` 은 three.js를 함께 끌어오는 무거운 의존성이라 정적
+	// import를 쓰면 이 컴포넌트를 참조하는 모든 청크가 커진다 (특히
+	// /world·/pythia·/desktop 번들). 그래서 실제로 글로브를 그릴 때만
+	// 동적으로 불러온다 — 타입은 `import type`으로 남겨 컴파일 타임
+	// 안전성은 그대로 유지된다.
 	useEffect(() => {
 		const el = containerRef.current;
 		if (!el) return;
 
-		const chart = new GlobeChart(el, { animateIn: true, waitForGlobeReady: false });
-		chart
-			.globeImageUrl(GLOBE_TEXTURE)
-			.backgroundColor(GLOBE_BACKGROUND)
-			.showAtmosphere(true)
-			.atmosphereColor("#38bdf8")
-			.pointsMerge(false)
-			.pointsTransitionDuration(600)
-			.pointAltitude(0.015)
-			.pointColor((point) => (point as GlobePoint).color)
-			.pointRadius((point) => (point as GlobePoint).radius)
-			.pointLabel((point) => (point as GlobePoint).label)
-			.width(el.clientWidth || FALLBACK_WIDTH)
-			.height(el.clientHeight || FALLBACK_HEIGHT);
+		let cancelled = false;
+		let chart: GlobeInstance | null = null;
+		let observer: ResizeObserver | null = null;
 
-		chart.pointOfView({ lat: 25, lng: 20, altitude: 2.4 });
+		void (async () => {
+			const { default: GlobeChart } = await import("globe.gl");
+			// The component may have unmounted while three.js was loading.
+			if (cancelled) return;
 
-		// Osiris 느낌의 자동 회전 — 마커에 hover하면 잠시 멈춘다.
-		const controls = chart.controls();
-		controls.autoRotate = true;
-		controls.autoRotateSpeed = 0.6;
-		controls.enablePan = false;
-		chart.onPointHover((point) => {
-			controls.autoRotate = point === null;
-		});
+			chart = new GlobeChart(el, { animateIn: true, waitForGlobeReady: false });
+			chart
+				.globeImageUrl(GLOBE_TEXTURE)
+				.backgroundColor(GLOBE_BACKGROUND)
+				.showAtmosphere(true)
+				.atmosphereColor("#38bdf8")
+				.pointsMerge(false)
+				.pointsTransitionDuration(600)
+				.pointAltitude(0.015)
+				.pointColor((point) => (point as GlobePoint).color)
+				.pointRadius((point) => (point as GlobePoint).radius)
+				.pointLabel((point) => (point as GlobePoint).label)
+				.width(el.clientWidth || FALLBACK_WIDTH)
+				.height(el.clientHeight || FALLBACK_HEIGHT);
 
-		globeRef.current = chart;
-		setReady(true);
+			chart.pointOfView({ lat: 25, lng: 20, altitude: 2.4 });
 
-		const observer = new ResizeObserver(() => {
-			chart.width(el.clientWidth || FALLBACK_WIDTH).height(el.clientHeight || FALLBACK_HEIGHT);
-		});
-		observer.observe(el);
+			// Osiris 느낌의 자동 회전 — 마커에 hover하면 잠시 멈춘다.
+			const controls = chart.controls();
+			controls.autoRotate = true;
+			controls.autoRotateSpeed = 0.6;
+			controls.enablePan = false;
+			chart.onPointHover((point) => {
+				controls.autoRotate = point === null;
+			});
+
+			globeRef.current = chart;
+			setReady(true);
+			// Marker data may have changed while the import was in flight;
+			// re-apply the latest so the globe does not render empty.
+			chart.pointsData(pointsRef.current);
+
+			observer = new ResizeObserver(() => {
+				chart?.width(el.clientWidth || FALLBACK_WIDTH).height(el.clientHeight || FALLBACK_HEIGHT);
+			});
+			observer.observe(el);
+		})();
 
 		return () => {
-			observer.disconnect();
+			cancelled = true;
+			observer?.disconnect();
 			globeRef.current = null;
-			chart._destructor();
+			chart?._destructor();
 		};
 	}, []);
 
 	// 이벤트/데모 변경 시 마커만 갱신 (globe 재생성 없음)
 	useEffect(() => {
+		pointsRef.current = points;
 		globeRef.current?.pointsData(points);
 	}, [points]);
 
@@ -337,17 +368,26 @@ export const WorldGlobe = ({
 		}
 	}, [onRefresh]);
 
+	const isBackground = variant === "background";
+
 	return (
 		<div
-			className="relative h-full w-full min-h-[280px] overflow-hidden rounded-xl border border-white/5 bg-[#0a0a12]"
-			style={{ aspectRatio: "16 / 9" }}
+			className={
+				isBackground
+					? "relative h-full w-full overflow-hidden bg-[#0a0a12]"
+					: "relative h-full w-full min-h-[280px] overflow-hidden rounded-xl border border-white/5 bg-[#0a0a12]"
+			}
+			style={isBackground ? undefined : { aspectRatio: "16 / 9" }}
 			data-testid="world-globe"
 		>
 			{/* globe.gl이 이 컨테이너를 캔버스로 채운다 */}
 			<div ref={containerRef} className="absolute inset-0" />
 
-			{/* 상태 배지 + 마지막 갱신 시각 */}
-			<div className="absolute top-3 left-3 flex items-center gap-2">
+			{/* 상태 배지 + 마지막 갱신 시각 — 배경 모드에서는 시각적 소음이
+			    되므로 생략한다. */}
+			{!isBackground && (
+				<>
+					<div className="absolute top-3 left-3 flex items-center gap-2">
 				<span
 					className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium backdrop-blur-sm"
 					style={{
@@ -387,6 +427,8 @@ export const WorldGlobe = ({
 				<LegendDot color={INFO_STYLE.color} label="정보" />
 				<span className="text-white/50">{points.length} markers</span>
 			</div>
+				</>
+			)}
 
 			{/* 로딩 인디케이터 */}
 			{!ready && (

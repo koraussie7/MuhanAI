@@ -35,11 +35,20 @@ const KIND_COLORS: Record<Node["kind"], string> = {
 	knowledge: "#10b981",
 };
 
-export function KnowledgeGraphCanvas() {
+export function KnowledgeGraphCanvas({
+	variant = "panel",
+}: {
+	/**
+	 * `panel` keeps the framed card used by the standalone `/knowledge`
+	 * page. `background` drops the heading and panel chrome and fills
+	 * whatever box it is given, for use as the `/desktop` wallpaper.
+	 */
+	variant?: "panel" | "background";
+} = {}) {
 	const [hovered, setHovered] = useState<string | null>(null);
 
-	const width = 800;
-	const height = 420;
+	const width = variant === "background" ? 1600 : 800;
+	const height = variant === "background" ? 900 : 420;
 	const cx = width / 2;
 	const cy = height / 2;
 	const radius = Math.min(width, height) * 0.35;
@@ -53,21 +62,28 @@ export function KnowledgeGraphCanvas() {
 		});
 	});
 
+	const isBackground = variant === "background";
+
 	return (
-		<section className="panel">
-			<div className="section-heading compact">
-				<span className="section-label">KNOWLEDGE / GRAPH</span>
-				<h2>
-					Knowledge <em>Graph</em>
-				</h2>
-			</div>
+		<section className={isBackground ? "panel kg-canvas-bg" : "panel"}>
+			{!isBackground && (
+				<div className="section-heading compact">
+					<span className="section-label">KNOWLEDGE / GRAPH</span>
+					<h2>
+						Knowledge <em>Graph</em>
+					</h2>
+				</div>
+			)}
 			<svg
 				viewBox={`0 0 ${width} ${height}`}
 				className="w-full"
 				style={{
-					height: 420,
-					border: "1px solid #1f1f1f",
-					borderRadius: 12,
+					// The standalone page uses a fixed 420px canvas; the wallpaper
+					// stretches to the viewport so the graph reads as a backdrop
+					// rather than a card floating in the middle of the desktop.
+					height: isBackground ? "100%" : 420,
+					border: isBackground ? "none" : "1px solid #1f1f1f",
+					borderRadius: isBackground ? 0 : 12,
 					background: "#0a0a0a",
 				}}
 			>

@@ -5,6 +5,7 @@ import { useI18n } from "../i18n.js";
 import { getMenuTranslation } from "./menu-i18n.js";
 import { DownloadBanner } from "./DownloadBanner.js";
 import { BitterbotChat } from "./bitterbot/BitterbotChat.js";
+import { DesktopBackdrop, type BackdropMode } from "./DesktopBackdrop.js";
 import {
 	Bot,
 	Folder,
@@ -119,6 +120,9 @@ export const WebDesktopPage: React.FC<WebDesktopPageProps> = ({ initialApp }) =>
 	const [topZIndex, setTopZIndex] = useState(100);
 	const [time, setTime] = useState(new Date());
 	const [showDownloadBanner, setShowDownloadBanner] = useState(true);
+	// Wallpaper selection. `plain` keeps the original gradient so the
+	// change is opt-in and the pre-existing look stays reachable.
+	const [backdrop, setBackdrop] = useState<BackdropMode>("plain");
 
 	const localizedApps = DESKTOP_APPS.map((app) => {
 		const appTrans = menuI18n.desktop?.apps[app.id];
@@ -239,6 +243,10 @@ export const WebDesktopPage: React.FC<WebDesktopPageProps> = ({ initialApp }) =>
 				userSelect: "none",
 			}}
 		>
+			{/* Wallpaper layer. Rendered first and absolutely positioned so
+			    icons, windows, and the taskbar all paint above it. */}
+			<DesktopBackdrop mode={backdrop} />
+
 			{/* Download DaedalOS Banner */}
 			{showDownloadBanner && (
 				<DownloadBanner onClose={() => setShowDownloadBanner(false)} />
@@ -887,6 +895,62 @@ export const WebDesktopPage: React.FC<WebDesktopPageProps> = ({ initialApp }) =>
 						>
 							<Terminal size={14} className="text-cyan-400" />
 						</button>
+					</div>
+
+					{/* Wallpaper switcher — picks which visualiser paints behind
+					    the windows. `plain` restores the original gradient. */}
+					<div
+						style={{
+							display: "flex",
+							alignItems: "center",
+							gap: "0.2rem",
+							marginLeft: "0.6rem",
+							paddingLeft: "0.6rem",
+							borderLeft: "1px solid rgba(255,255,255,0.08)",
+						}}
+						role="group"
+						aria-label="바탕화면"
+					>
+						{(
+							[
+								["plain", "기본", Power],
+								["globe", "Pythia 지구본", Globe],
+								["knowledge", "지식그래프", Sparkles],
+							] as const
+						).map(([value, label, Icon]) => {
+							const isActive = backdrop === value;
+							return (
+								<button
+									key={value}
+									type="button"
+									onClick={(e) => {
+										e.stopPropagation();
+										setBackdrop(value);
+									}}
+									aria-pressed={isActive}
+									title={`바탕화면: ${label}`}
+									style={{
+										display: "flex",
+										alignItems: "center",
+										gap: "0.25rem",
+										background: isActive
+											? "rgba(14, 165, 233, 0.25)"
+											: "rgba(255, 255, 255, 0.04)",
+										border: isActive
+											? "1px solid rgba(56, 189, 248, 0.5)"
+											: "1px solid rgba(255, 255, 255, 0.08)",
+										borderRadius: "4px",
+										padding: "0.25rem 0.45rem",
+										color: isActive ? "#38bdf8" : "#94a3b8",
+										fontSize: "11px",
+										cursor: "pointer",
+									}}
+								>
+									<Icon size={13} />
+									<span>{label}</span>
+								</button>
+							);
+						})}
 					</div>
 				</div>
 
