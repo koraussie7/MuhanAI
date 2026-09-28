@@ -17,12 +17,15 @@ import { PulseBridge } from "./gossip-bridge.js";
 import { happyRoutes } from "./happy-routes.js";
 import { hivebearRoutes } from "./hivebear-routes.js";
 import { knowledgeRoutes } from "./knowledge-routes.js";
+import { listRoutes } from "./list-routes.js";
 import { llmMeshRoutes } from "./llm-mesh-routes.js";
 import { llmRoutes } from "./llm-routes.js";
 import { mcpRoutes } from "./mcp-routes.js";
 import { networkRoutes } from "./network-routes.js";
 import { noemaRoutes } from "./noema-routes.js";
 import { omniRouteRoutes } from "./omniroute-routes.js";
+import { openaiCompatRoutes } from "./openai-compat-routes.js";
+import { opsmaxxMcpRoutes } from "./opsmaxx-mcp-routes.js";
 import { paymentRoutes } from "./payment-routes.js";
 import pulseRoutes from "./pulse-routes.js";
 import { quorumRoutes } from "./quorum-routes.js";
@@ -68,6 +71,13 @@ export interface BuildAppOptions {
 	enableTransport?: boolean;
 	/** Path to the local node identity file. */
 	identityPath?: string;
+	/**
+	 * Inject an OpsMaxx bridge for tests and for production wiring.
+	 * When omitted, the MCP routes fall back to an in-memory bridge.
+	 * Production should pass the IPC client (T1-P2) created from
+	 * `@agentmesh/opsmaxx-bridge`.
+	 */
+	opsmaxxBridge?: unknown;
 }
 
 export async function buildApp(options: BuildAppOptions = {}) {
@@ -95,6 +105,13 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	app.decorate("pulseBridge", new PulseBridge({ logger: logger as never }));
 	app.pulseBridge.start();
 
+	// OpsMaxx bridge: when caller injects one (T1-P2 IPC client or
+	// test mock), decorate so the MCP routes pick it up. Otherwise
+	// the routes fall back to a fresh in-memory bridge per call.
+	if (options.opsmaxxBridge) {
+		app.decorate("opsmaxxBridge", options.opsmaxxBridge as never);
+	}
+
 	// Security headers (helmet). CSP off — when a real policy is wired it should
 	// be passed explicitly so it can be reviewed in one place.
 	await app.register(helmet, {
@@ -104,11 +121,10 @@ export async function buildApp(options: BuildAppOptions = {}) {
 
 	// CORS: restrict to known origins in production, allow localhost in development
 	const allowedOrigins = isProduction
-		? (process.env.ALLOWED_ORIGINS?.split(",") ?? [
-				"https://muhanai.com",
-				"https://www.muhanai.com",
-			])
-		: ["http://localhost:3000", "http://localhost:5173", "http://localhost:3001"];
+	? process.env.ALLOWED_ORIGINS
+	? process.env.ALLOWED_ORIGINS.split(",").map((s) => s.trim()).filter(Boolean)
+	: ["https://muhanai.com", "https://www.muhanai.com"]
+	: ["http://localhost:3000", "http://localhost:5173", "http://localhost:3001"];
 
 	await app.register(cors, {
 		origin: (origin, cb) => {
@@ -141,19 +157,18 @@ export async function buildApp(options: BuildAppOptions = {}) {
 		},
 	});
 
-	// API Key authentication for non-public routes. Fail-closed: an unset
-	// API_KEY blocks every protected request rather than serving them open.
-	if (!process.env.API_KEY && isProduction) {
-		logger.warn(
-			"API_KEY env var is unset in production — every protected request will be rejected with 401. Set API_KEY before serving traffic.",
-		);
-	}
-
-	if (process.env.DISABLE_AUTH === "true" && isProduction) {
-		logger.warn(
-			"DISABLE_AUTH=true is set in production but will be ignored. Auth is mandatory in production.",
-		);
-	}
+// API Key authentication for non-public routes. Fail-closed: an unset
+// API_KEY blocks every protected request rather than serving them open.
+if (!process.env.API_KEY && isProduction) {
+logger.warn(
+"API_KEY env var is unset in production — every protected request will be rejected with 401. Set API_KEY before serving traffic.",
+);
+}
+if (process.env.DISABLE_AUTH === "true" && isProduction) {
+logger.warn(
+"DISABLE_AUTH=true is set in production but will be ignored. Auth is mandatory in production.",
+);
+}
 
 	app.addHook("onRequest", async (request, reply) => {
 		if (isPublicPath(request.url)) return;
@@ -194,9 +209,17 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	await app.register(pulseRoutes);
 	await app.register(quorumRoutes);
 	await app.register(omniRouteRoutes);
+	await app.register(openaiCompatRoutes);
+	await app.register(worldRoutes);
+	await app.register(visitorRoutes);
+	await app.register(vietnamRoutes);
+	await app.register(listRoutes);
 	await app.register(paymentRoutes);
 	await app.register(routerRoutes);
 	await app.register(mcpRoutes);
+	await app.register(opsmaxxMcpRoutes, {
+		opsmaxxBridge: options.opsmaxxBridge,
+	});
 	await app.register(catalogRoutes);
 	await app.register(resonanceRoutes);
 
