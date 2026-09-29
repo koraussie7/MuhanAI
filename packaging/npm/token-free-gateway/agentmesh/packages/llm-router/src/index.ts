@@ -346,6 +346,12 @@ export type {
 } from "@agentmesh/peer-mesh";
 export { FastDecider, fastDecider } from "./fast-decider/client.js";
 export { LAYA_CONFIG } from "./fast-decider/config.js";
+export {
+	createSwarmLlmProvider,
+	getSwarmLlmEndpoint,
+	type SwarmLlmProviderConfig,
+	type SwarmLlmRequest,
+} from "./swarmllm-provider.js";
 export { P2pLoadBalancer, p2pLoadBalancer } from "./p2p-load-balancer.js";
 export type { P2pModelRegistry, P2pModelRegistryOptions } from "./p2p-model-registry.js";
 export { createP2pModelRegistry } from "./p2p-model-registry.js";

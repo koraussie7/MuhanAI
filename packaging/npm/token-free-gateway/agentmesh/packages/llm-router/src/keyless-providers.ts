@@ -15,6 +15,10 @@
  *   const result = await callKeylessProviders({ prompt: "Hello" });
  */
 
+import { createSwarmLlmProvider, getSwarmLlmEndpoint } from "./swarmllm-provider.js";
+
+export { createSwarmLlmProvider, getSwarmLlmEndpoint } from "./swarmllm-provider.js";
+
 export interface KeylessRequest {
 	prompt: string;
 	system?: string;
@@ -69,12 +73,9 @@ export function getOmniRouteEndpoint(): string | null {
 /**
  * Build the active keyless provider list at call time.
  *
- * `omniroute-auto` is inserted at index 1 (after the local mesh-llm node,
- * before the pollinations fallback) so that the 1.47 B-token/month free
- * pool is preferred over the slower pollinations fallback.  The provider is
- * only added when OMNIROUTE_BASE_URL is configured, so a fresh local dev
- * install without OmniRoute sees exactly the original two-provider surface:
- * `["mesh-llm", "pollinations-api"]`.
+ * `swarmllm-local` is inserted first when explicitly configured because it
+ * keeps inference on the user's own SwarmLLM node. OmniRoute is inserted
+ * after the other local provider and before the pollinations fallback.
  */
 export function buildKeylessProviders(): KeylessProviderConfig[] {
 	const providers: KeylessProviderConfig[] = [
@@ -112,6 +113,14 @@ export function buildKeylessProviders(): KeylessProviderConfig[] {
 			parse: (data) => data?.choices?.[0]?.message?.content ?? "",
 		},
 	];
+
+	const swarmProvider = createSwarmLlmProvider();
+	if (swarmProvider) {
+		providers.unshift({
+			...swarmProvider,
+			body: (req) => swarmProvider.body(req),
+		});
+	}
 
 	// OmniRoute free-tier mesh (OpenCode Zen — minimax-m3, gpt-5, …)
 	// Inserted after mesh-llm so the free pool is preferred over pollinations.

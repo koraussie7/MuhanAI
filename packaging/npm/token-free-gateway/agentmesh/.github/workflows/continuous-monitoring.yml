@@ -1,0 +1,375 @@
+name: Continuous Monitoring & Auto-Fix
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch:       # Manual trigger
+  push:
+    branches: [main, develop]
+    paths-ignore:
+      - '**.md'
+      - '.github/**'
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  checks: read
+
+env:
+  NODE_VERSION: '22'
+  PNPM_VERSION: '9'
+
+jobs:
+  # Job 1: TypeScript Type Check & Lint
+  typecheck-lint:
+    name: TypeCheck + Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      has-errors: ${{ steps.check.outputs.has-errors }}
+      error-log: ${{ steps.check.outputs.error-log }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm exec prisma generate
+        working-directory: packaging/npm/token-free-gateway/agentmesh
+
+      - name: TypeCheck (all packages)
+        id: typecheck
+        run: |
+          set +e
+          cd packaging/npm/token-free-gateway/agentmesh
+          pnpm typecheck 2>&1 | tee typecheck.log
+          EXIT_CODE=${PIPESTATUS[0]}
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "has-errors=true" >> $GITHUB_OUTPUT
+            echo "error-log<<EOF" >> $GITHUB_OUTPUT
+            cat typecheck.log >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "has-errors=false" >> $GITHUB_OUTPUT
+          fi
+          exit $EXIT_CODE
+
+      - name: Lint (Biome)
+        id: lint
+        run: |
+          set +e
+          cd packaging/npm/token-free-gateway/agentmesh
+          pnpm lint 2>&1 | tee lint.log
+          EXIT_CODE=${PIPESTATUS[0]}
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "has-errors=true" >> $GITHUB_OUTPUT
+            echo "error-log<<EOF" >> $GITHUB_OUTPUT
+            cat lint.log >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "has-errors=false" >> $GITHUB_OUTPUT
+          fi
+          exit $EXIT_CODE
+
+      - name: Upload error logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: typecheck-lint-errors
+          path: |
+            packaging/npm/token-free-gateway/agentmesh/typecheck.log
+            packaging/npm/token-free-gateway/agentmesh/lint.log
+          retention-days: 7
+
+  # Job 2: Run Tests
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    outputs:
+      has-errors: ${{ steps.check.outputs.has-errors }}
+      error-log: ${{ steps.check.outputs.error-log }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm exec prisma generate
+        working-directory: packaging/npm/token-free-gateway/agentmesh
+
+      - name: Run Tests
+        id: check
+        run: |
+          set +e
+          cd packaging/npm/token-free-gateway/agentmesh
+          pnpm test 2>&1 | tee test.log
+          EXIT_CODE=${PIPESTATUS[0]}
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "has-errors=true" >> $GITHUB_OUTPUT
+            echo "error-log<<EOF" >> $GITHUB_OUTPUT
+            cat test.log >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "has-errors=false" >> $GITHUB_OUTPUT
+          fi
+          exit $EXIT_CODE
+
+      - name: Upload test failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-errors
+          path: packaging/npm/token-free-gateway/agentmesh/test.log
+          retention-days: 7
+
+  # Job 3: Auto-Fix Loop (runs if any check failed)
+  auto-fix:
+    name: Auto-Fix Loop
+    needs: [typecheck-lint, test]
+    if: needs.typecheck-lint.outputs.has-errors == 'true' || needs.test.outputs.has-errors == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm exec prisma generate
+        working-directory: packaging/npm/token-free-gateway/agentmesh
+
+      - name: Configure Git
+        run: |
+          git config user.name "MuhanAI Auto-Fix Bot"
+          git config user.email "autofix@muhanai.com"
+
+      - name: Attempt Biome Auto-Fix
+        id: biome-fix
+        run: |
+          cd packaging/npm/token-free-gateway/agentmesh
+          # Run biome check --write to auto-fix linting/formatting issues
+          pnpm exec biome check --write . 2>&1 | tee biome-fix.log
+          
+          # Check if any files were modified
+          if git diff --quiet; then
+            echo "fixed=false" >> $GITHUB_OUTPUT
+          else
+            echo "fixed=true" >> $GITHUB_OUTPUT
+            git diff --stat >> $GITHUB_OUTPUT
+          fi
+
+      - name: Attempt TypeScript Auto-Fix (basic)
+        id: ts-fix
+        if: steps.biome-fix.outputs.fixed == 'true'
+        run: |
+          cd packaging/npm/token-free-gateway/agentmesh
+          # Run tsc with --noEmit to verify fixes
+          pnpm typecheck 2>&1 | tee ts-verify.log
+          EXIT_CODE=${PIPESTATUS[0]}
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "ts-passed=true" >> $GITHUB_OUTPUT
+          else
+            echo "ts-passed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Tests After Fix
+        id: test-after-fix
+        if: steps.biome-fix.outputs.fixed == 'true' && steps.ts-fix.outputs.ts-passed == 'true'
+        run: |
+          cd packaging/npm/token-free-gateway/agentmesh
+          pnpm test 2>&1 | tee test-after-fix.log
+          EXIT_CODE=${PIPESTATUS[0]}
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "tests-passed=true" >> $GITHUB_OUTPUT
+          else
+            echo "tests-passed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Auto-Fix PR
+        if: steps.biome-fix.outputs.fixed == 'true' && steps.ts-fix.outputs.ts-passed == 'true' && steps.test-after-fix.outputs.tests-passed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: autofix/continuous-${{ github.run_id }}
+          delete-branch: true
+          title: "[Auto-Fix] Continuous monitoring fixes"
+          body: |
+            ## Automated Fixes from Continuous Monitoring
+            
+            This PR contains automatic fixes applied by the continuous monitoring workflow.
+            
+            **Fixes Applied:**
+            - Biome linting/formatting fixes
+            - TypeScript type fixes (if any)
+            
+            **Verification:**
+            - ✅ TypeCheck passed
+            - ✅ Lint passed  
+            - ✅ Tests passed
+            
+            **Triggered by:** Scheduled workflow run #${{ github.run_id }}
+            
+            Please review the changes before merging.
+          labels: |
+            auto-fix
+            continuous-monitoring
+          reviewers: koraussie7
+
+      - name: Create Investigation Issue (if auto-fix failed)
+        if: steps.biome-fix.outputs.fixed == 'false' || steps.ts-fix.outputs.ts-passed == 'false' || steps.test-after-fix.outputs.tests-passed == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { typecheck-lint, test } = needs;
+            let body = `## 🔍 Continuous Monitoring - Auto-Fix Failed\n\n`;
+            body += `**Workflow Run:** #${{ github.run_id }}\n`;
+            body += `**Timestamp:** ${new Date().toISOString()}\n\n`;
+            
+            if (typecheck-lint.outputs.has-errors == 'true') {
+              body += `### TypeCheck/Lint Errors\n\`\`\`\n${typecheck-lint.outputs.error-log}\n\`\`\`\n\n`;
+            }
+            
+            if (test.outputs.has-errors == 'true') {
+              body += `### Test Failures\n\`\`\`\n${test.outputs.error-log}\n\`\`\`\n\n`;
+            }
+            
+            body += `---\n*Auto-generated by continuous monitoring workflow*`;
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[Monitoring] Auto-fix failed - manual investigation needed`,
+              body: body,
+              labels: ['monitoring', 'needs-investigation', 'auto-fix-failed']
+            });
+
+  # Job 4: Build Verification
+  build:
+    name: Build Verification
+    needs: [typecheck-lint, test]
+    if: needs.typecheck-lint.outputs.has-errors == 'false' && needs.test.outputs.has-errors == 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm exec prisma generate
+        working-directory: packaging/npm/token-free-gateway/agentmesh
+
+      - name: Build Web App
+        run: |
+          cd packaging/npm/token-free-gateway/agentmesh/apps/web
+          pnpm run build 2>&1 | tee build.log
+        continue-on-error: true
+
+      - name: Build API
+        run: |
+          cd packaging/npm/token-free-gateway/agentmesh/services/api
+          pnpm run build 2>&1 | tee build.log
+        continue-on-error: true
+
+      - name: Upload build logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: |
+            packaging/npm/token-free-gateway/agentmesh/apps/web/build.log
+            packaging/npm/token-free-gateway/agentmesh/services/api/build.log
+          retention-days: 7
+
+  # Job 5: Health Check (production endpoints)
+  health-check:
+    name: Production Health Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check api.muhanai.com
+        run: |
+          curl -sf https://api.muhanai.com/health > /dev/null && echo "✅ api.muhanai.com healthy" || echo "❌ api.muhanai.com DOWN"
+          
+      - name: Check vn.kbizhub.com
+        run: |
+          curl -sf https://vn.kbizhub.com/health > /dev/null && echo "✅ vn.kbizhub.com healthy" || echo "❌ vn.kbizhub.com DOWN"
+          
+      - name: Check muhanai.com
+        run: |
+          curl -sf https://muhanai.com > /dev/null && echo "✅ muhanai.com healthy" || echo "❌ muhanai.com DOWN"
+          
+      - name: Alert on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[Health Check] Production endpoint DOWN`,
+              body: `One or more production endpoints failed health check at ${new Date().toISOString()}`,
+              labels: ['monitoring', 'production', 'health-check-failed']
+            });

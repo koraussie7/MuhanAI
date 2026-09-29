@@ -88,6 +88,38 @@ describe("GET /api/llm-mesh", () => {
 		}
 	});
 
+	it("reports configured SwarmLLM health and sends its bearer token", async () => {
+		process.env.SWARMLLM_BASE_URL = "http://localhost:8800";
+		process.env.SWARMLLM_KEY = "swarm-test-token";
+		const seenRequests: Array<{ url: string; authorization?: string }> = [];
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+				const headers = new Headers(init?.headers);
+				seenRequests.push({
+					url: String(input),
+					authorization: headers.get("Authorization") ?? undefined,
+				});
+				return new Response(null, { status: 200 });
+			}),
+		);
+
+		const res = await app?.inject({ method: "GET", url: "/api/llm-mesh" });
+		expect(res?.statusCode).toBe(200);
+		const body = res?.json() as { gateways: Array<{ name: string; status: string }> };
+		const swarm = body.gateways.find((gateway) => gateway.name === "SwarmLLM (local)");
+		expect(swarm).toEqual({
+			name: "SwarmLLM (local)",
+			costTier: "free",
+			status: "healthy",
+			latencyMs: expect.any(Number),
+		});
+		expect(seenRequests).toContainEqual({
+			url: "http://localhost:8800/v1/models",
+			authorization: "Bearer swarm-test-token",
+		});
+	});
+
 	it("requires the x-api-key header in production", async () => {
 		process.env.NODE_ENV = "production";
 		process.env.API_KEY = "test-key-12345";

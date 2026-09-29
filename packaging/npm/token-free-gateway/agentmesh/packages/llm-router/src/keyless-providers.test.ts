@@ -18,11 +18,18 @@ import {
 	callKeylessProviders,
 	getKeylessProviderNames,
 	getOmniRouteEndpoint,
+	getSwarmLlmEndpoint,
 } from "./keyless-providers.js";
 
 // The suite shares the vitest fork with sibling suites, so snapshot and
 // restore the OmniRoute envs around every test.
-const ENV_KEYS = ["OMNIROUTE_BASE_URL", "OMNIROUTE_API_KEY"] as const;
+const ENV_KEYS = [
+	"OMNIROUTE_BASE_URL",
+	"OMNIROUTE_API_KEY",
+	"SWARMLLM_BASE_URL",
+	"SWARMLLM_KEY",
+	"SWARMLLM_MODEL",
+] as const;
 const ENV_SNAPSHOT = Object.fromEntries(ENV_KEYS.map((k) => [k, process.env[k]])) as Record<
 	(typeof ENV_KEYS)[number],
 	string | undefined
@@ -70,6 +77,48 @@ describe("getOmniRouteEndpoint", () => {
 	test("returns null for an unparseable base URL", () => {
 		process.env.OMNIROUTE_BASE_URL = "not a url";
 		expect(getOmniRouteEndpoint()).toBeNull();
+	});
+});
+
+describe("getSwarmLlmEndpoint", () => {
+	test("returns null when SWARMLLM_BASE_URL is unset", () => {
+		delete process.env.SWARMLLM_BASE_URL;
+		expect(getSwarmLlmEndpoint()).toBeNull();
+	});
+
+	test("builds the default v1 chat completions endpoint", () => {
+		process.env.SWARMLLM_BASE_URL = "http://localhost:8800";
+		expect(getSwarmLlmEndpoint()).toBe("http://localhost:8800/v1/chat/completions");
+	});
+
+	test("preserves an existing v1 path prefix", () => {
+		process.env.SWARMLLM_BASE_URL = "http://localhost:8800/v1/";
+		expect(getSwarmLlmEndpoint()).toBe("http://localhost:8800/v1/chat/completions");
+	});
+});
+
+describe("buildKeylessProviders — SwarmLLM integration", () => {
+	test("adds SwarmLLM first only when explicitly configured", () => {
+		process.env.SWARMLLM_BASE_URL = "http://localhost:8800";
+		const providers = buildKeylessProviders();
+		expect(providers.map((p) => p.name)).toEqual([
+			"swarmllm-local",
+			"mesh-llm",
+			"pollinations-api",
+		]);
+		expect(providers[0]?.endpoint).toBe("http://localhost:8800/v1/chat/completions");
+	});
+
+	test("passes the SwarmLLM bearer key and model", () => {
+		process.env.SWARMLLM_BASE_URL = "http://localhost:8800";
+		process.env.SWARMLLM_KEY = "swarm-test";
+		process.env.SWARMLLM_MODEL = "qwen-test";
+		const entry = buildKeylessProviders().find((p) => p.name === "swarmllm-local");
+		expect(entry).toBeDefined();
+		expect(entry?.headers.Authorization).toBe("Bearer swarm-test");
+		expect(
+			entry ? (entry.body({ prompt: "hi" }) as Record<string, unknown>).model : undefined,
+		).toBe("qwen-test");
 	});
 });
 

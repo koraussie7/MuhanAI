@@ -1,0 +1,18 @@
+[Unit]
+Description=MuhanAI Continuous Monitoring & Auto-Fix
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=brianyeon
+WorkingDirectory=/Users/brianyeon/token-free-gateway.worktrees/muhanai-com-bug-fix-investigation/packaging/npm/token-free-gateway/agentmesh
+ExecStart=/Users/brianyeon/token-free-gateway.worktrees/muhanai-com-bug-fix-investigation/packaging/npm/token-free-gateway/agentmesh/scripts/continuous-monitor.sh
+Environment=MUHANAI_MONITOR_WEBHOOK=
+# Optional: Add Discord/Slack webhook URL above
+StandardOutput=journal
+StandardError=journal
+TimeoutSec=600
+
+[Install]
+WantedBy=multi-user.target

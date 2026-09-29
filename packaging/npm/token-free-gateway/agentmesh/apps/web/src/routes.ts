@@ -374,6 +374,15 @@ export const ROUTES: readonly RouteDefinition[] = [
 		badge: "NEW",
 		page: "world",
 	},
+	{
+		id: "logs",
+		path: "/logs",
+		group: "system",
+		label: "Logs & Monitoring",
+		iconKey: "file-text",
+		badge: "NEW",
+		page: "logs",
+	},
 ];
 
 export const ROUTE_COUNT = ROUTES.length;

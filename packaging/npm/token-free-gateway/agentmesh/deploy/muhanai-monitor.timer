@@ -1,0 +1,12 @@
+[Unit]
+Description=Run MuhanAI Continuous Monitoring every 6 hours
+Requires=muhanai-monitor.service
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=6h
+RandomizedDelaySec=30min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

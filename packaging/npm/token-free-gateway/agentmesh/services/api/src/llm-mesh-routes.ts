@@ -78,7 +78,23 @@ const DEFAULT_VAULT: LlmMeshVaultEntry[] = [
 // Cache for health probe results
 let cachedSnapshot: LlmMeshSnapshot | null = null;
 let lastProbeTime = 0;
+let lastProbeConfig = "";
 const CACHE_TTL_MS = 30_000;
+
+function getSwarmLlmHealthEndpoint(): string | undefined {
+	const baseUrl = process.env.SWARMLLM_BASE_URL;
+	if (!baseUrl) return undefined;
+	const trimmed = baseUrl.replace(/\/+$/, "");
+	if (trimmed.endsWith("/chat/completions")) {
+		return trimmed.replace(/\/chat\/completions$/, "/models");
+	}
+	try {
+		const path = trimmed.endsWith("/v1") ? "models" : "v1/models";
+		return new URL(path, `${trimmed}/`).toString();
+	} catch {
+		return undefined;
+	}
+}
 
 interface KVNamespace {
 	get(key: string): Promise<string | null>;
@@ -90,6 +106,7 @@ interface KVNamespace {
  */
 async function probeGatewayHealth(
 	endpoint?: string,
+	headers?: Record<string, string>,
 ): Promise<{ status: "healthy" | "degraded" | "offline"; latencyMs: number }> {
 	if (!endpoint) {
 		return { status: "healthy", latencyMs: 100 };
@@ -103,7 +120,7 @@ async function probeGatewayHealth(
 		const response = await fetch(endpoint, {
 			method: "GET",
 			signal: controller.signal,
-			headers: { Accept: "application/json" },
+			headers: { Accept: "application/json", ...headers },
 		});
 
 		clearTimeout(timeout);
@@ -116,7 +133,7 @@ async function probeGatewayHealth(
 		} else {
 			return { status: "offline", latencyMs };
 		}
-	} catch (err) {
+	} catch {
 		const latencyMs = Date.now() - start;
 		if (latencyMs >= 5_000) {
 			return { status: "offline", latencyMs: 9999 };
@@ -148,16 +165,32 @@ async function fetchVault(kv?: KVNamespace): Promise<LlmMeshVaultEntry[]> {
  */
 async function buildSnapshot(kv?: KVNamespace): Promise<LlmMeshSnapshot> {
 	const now = Date.now();
+	const probeConfig = `${process.env.SWARMLLM_BASE_URL ?? ""}|${process.env.SWARMLLM_KEY ?? ""}`;
 
-	// Return cached snapshot if fresh
-	if (cachedSnapshot && now - lastProbeTime < CACHE_TTL_MS) {
+	// Return cached snapshot if fresh and the optional local provider config is unchanged.
+	if (cachedSnapshot && now - lastProbeTime < CACHE_TTL_MS && probeConfig === lastProbeConfig) {
 		return cachedSnapshot;
 	}
 
 	// Probe all gateways in parallel
+	const swarmHealthEndpoint = getSwarmLlmHealthEndpoint();
+	const configuredGateways = swarmHealthEndpoint
+		? [
+				...GATEWAY_CONFIG,
+				{
+					name: "SwarmLLM (local)",
+					costTier: "free" as const,
+					healthEndpoint: swarmHealthEndpoint,
+				},
+			]
+		: GATEWAY_CONFIG;
 	const gatewayResults = await Promise.allSettled(
-		GATEWAY_CONFIG.map(async (gw) => {
-			const health = await probeGatewayHealth(gw.healthEndpoint);
+		configuredGateways.map(async (gw) => {
+			const apiKey = gw.name === "SwarmLLM (local)" ? process.env.SWARMLLM_KEY : undefined;
+			const health = await probeGatewayHealth(
+				gw.healthEndpoint,
+				apiKey ? { Authorization: `Bearer ${apiKey}` } : undefined,
+			);
 			return {
 				name: gw.name,
 				costTier: gw.costTier,
@@ -171,9 +204,10 @@ async function buildSnapshot(kv?: KVNamespace): Promise<LlmMeshSnapshot> {
 		if (result.status === "fulfilled") {
 			return result.value;
 		}
+		const gatewayConfig = configuredGateways[index];
 		return {
-			name: GATEWAY_CONFIG[index]!.name,
-			costTier: GATEWAY_CONFIG[index]!.costTier,
+			name: gatewayConfig?.name ?? "unknown",
+			costTier: gatewayConfig?.costTier ?? "free",
 			status: "offline",
 			latencyMs: 9999,
 		} satisfies GatewayProvider;
@@ -209,6 +243,7 @@ async function buildSnapshot(kv?: KVNamespace): Promise<LlmMeshSnapshot> {
 
 	cachedSnapshot = snapshot;
 	lastProbeTime = now;
+	lastProbeConfig = probeConfig;
 
 	return snapshot;
 }

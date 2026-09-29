@@ -48,6 +48,19 @@ MuhanAI is a **decentralized AI agent mesh platform** combining zero-token infer
 
 ---
 
+## 🧠 SwarmLLM local inference
+MuhanAI can use [SwarmLLM](https://github.com/enapt/SwarmLLM) as a local OpenAI-compatible provider. Start SwarmLLM separately, then configure the AgentMesh process:
+
+```bash
+export SWARMLLM_BASE_URL=http://localhost:8800
+export SWARMLLM_KEY=your-access-token
+export SWARMLLM_MODEL=auto
+```
+
+When enabled, requests use `http://localhost:8800/v1/chat/completions` before the other keyless providers. The access token is sent as a Bearer token when `SWARMLLM_KEY` is set. If SwarmLLM is not running or the variables are unset, the existing fallback chain remains active.
+
+---
+
 ## 🏛️ System Architecture
 
 <div align="center">
