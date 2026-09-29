@@ -5,10 +5,12 @@ import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import Fastify from "fastify";
+import a2aRoutes, { setAgentRegistry } from "./a2a-routes.js";
 import { a2uiRoutes } from "./a2ui-routes.js";
 import { agentsRoutes } from "./agents-routes.js";
 import { authRoutes } from "./auth-routes.js";
 import { catalogRoutes } from "./catalog-routes.js";
+import { collaborationRoutes } from "./collaboration-routes.js";
 import { computeRoutes } from "./compute-routes.js";
 import { computerUseRoutes } from "./computer-use-routes.js";
 import { cosmosRoutes } from "./cosmos-routes.js";
@@ -61,7 +63,7 @@ function isBridgeAuth(
 	bridgeToken: string | undefined,
 ): boolean {
 	if (!bridgeToken) return false;
-	const authHeader = request.headers["authorization"];
+	const authHeader = request.headers.authorization;
 	if (!authHeader || typeof authHeader !== "string") return false;
 	if (!authHeader.startsWith("Bearer ")) return false;
 	const token = authHeader.slice("Bearer ".length);
@@ -80,6 +82,7 @@ function resolveBridgeToken(): string | undefined {
 }
 
 const PUBLIC_PATH_PREFIXES = [
+	"/api/collaboration",
 	"/api/pulse",
 	"/api/network",
 	"/api/agents",
@@ -300,10 +303,12 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	await app.register(routerRoutes);
 	await app.register(mcpRoutes);
 	await app.register(opsmaxxMcpRoutes, {
-	opsmaxxBridge: options.opsmaxxBridge,
+		opsmaxxBridge: options.opsmaxxBridge,
 	});
 	await app.register(catalogRoutes);
+	await app.register(collaborationRoutes);
 	await app.register(resonanceRoutes);
+	await app.register(a2aRoutes);
 
 	// Liveness probes. Both are public + rate-limit exempt (see above) so
 	// orchestrators and the Rome agentmesh-bridge `status` action
@@ -360,6 +365,66 @@ export async function buildApp(options: BuildAppOptions = {}) {
 		}
 		app.pulseBridge.stop();
 	});
+
+	// Simple agent registry for A2A discovery
+	const agentRegistry = {
+		getAgentCard() {
+			return {
+				name: "MuhanAI Agent",
+				description:
+					"MuhanAI mesh agent with P2P inference, MCP tools, and knowledge graph capabilities",
+				url: process.env.AGENT_CARD_URL ?? "https://api.muhanai.com",
+				version: "1.0.0",
+				capabilities: {
+					streaming: true,
+					pushNotifications: true,
+					stateTransitionHistory: false,
+				},
+				authentication: {
+					schemes: ["bearer"],
+				},
+				skills: [
+					{
+						id: "p2p-inference",
+						name: "P2P Distributed Inference",
+						description:
+							"Run LLM inference across decentralized peer network (XLang, OpenHydra, Ollama, libp2p)",
+						tags: ["llm", "inference", "p2p", "distributed"],
+						inputModes: ["text"],
+						outputModes: ["text"],
+					},
+					{
+						id: "mcp-tools",
+						name: "MCP Tool Execution",
+						description: "Execute Model Context Protocol tools registered in the mesh",
+						tags: ["mcp", "tools", "execution"],
+						inputModes: ["text", "data"],
+						outputModes: ["text", "data"],
+					},
+					{
+						id: "knowledge-graph",
+						name: "Knowledge Graph Query",
+						description: "Query the distributed knowledge graph (Noema + vector + graph)",
+						tags: ["knowledge", "graph", "query", "rag"],
+						inputModes: ["text"],
+						outputModes: ["text", "data"],
+					},
+					{
+						id: "agent-cast",
+						name: "Agent Cast Consensus",
+						description: "Multi-agent consensus via recursive CAST protocol",
+						tags: ["consensus", "multi-agent", "cast"],
+						inputModes: ["text"],
+						outputModes: ["text", "data"],
+					},
+				],
+				defaultInputModes: ["text"],
+				defaultOutputModes: ["text"],
+			};
+		},
+	};
+
+	setAgentRegistry(agentRegistry);
 
 	return app;
 }

@@ -6,6 +6,7 @@
 	"scripts": {
 		"build": "cd packaging/npm/token-free-gateway/agentmesh && pnpm -r --filter './packages/**' run build",
 		"typecheck": "cd packaging/npm/token-free-gateway/agentmesh && pnpm -r run typecheck",
+		"test": "cd packaging/npm/token-free-gateway/agentmesh && pnpm test",
 		"build:web": "cd packaging/npm/token-free-gateway/agentmesh && pnpm --filter @agentmesh/web run build",
 		"deploy:worker": "cd packaging/npm/token-free-gateway/agentmesh && pnpm build:web && wrangler deploy",
 		"dev:web": "cd packaging/npm/token-free-gateway/agentmesh && pnpm --filter @agentmesh/web run dev",

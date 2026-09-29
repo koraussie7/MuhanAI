@@ -28,7 +28,9 @@
 			"@agentmesh/ai-engine/types": ["../../packages/ai-engine/src/types.ts"],
 			"@agentmesh/ai-engine/*": ["../../packages/ai-engine/src/*"],
 			"@agentmesh/shared-types": ["../../packages/shared-types/types/index.ts"],
-			"@agentmesh/shared-types/*": ["../../packages/shared-types/types/*"],
+				"@agentmesh/shared-types/*": ["../../packages/shared-types/types/*"],
+			"@agentmesh/opsmaxx-bridge/mock": ["../../packages/opsmaxx-bridge/src/mock.ts"],
+			"@agentmesh/opsmaxx-bridge/types": ["../../packages/opsmaxx-bridge/src/types.ts"],
 			"@agentmesh/*": ["../../packages/*/src/index.ts"]
 		}
 	},

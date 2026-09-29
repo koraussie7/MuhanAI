@@ -177,6 +177,9 @@ const HappyPageLazy = React.lazy(() =>
 const WorldPageLazy = React.lazy(() =>
 	import("./components/WorldPage").then((m) => ({ default: m.WorldPage })),
 );
+const OntologyPageLazy = React.lazy(() =>
+	import("./components/OntologyPage").then((m) => ({ default: m.OntologyPage })),
+);
 const SearchPageLazy = React.lazy(() =>
 	import("./components/SpecPages").then((m) => ({ default: m.SearchPage })),
 );
@@ -611,6 +614,11 @@ export function App() {
 						{activeSection === "knowledge-graph-viz" && (
 							<Suspense fallback={<PageSkeleton />}>
 								<KnowledgeGraphVizPageLazy />
+							</Suspense>
+						)}
+						{activeSection === "ontology" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<OntologyPageLazy />
 							</Suspense>
 						)}
 						{activeSection === "verification" && (

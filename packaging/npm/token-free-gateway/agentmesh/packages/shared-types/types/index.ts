@@ -1,6 +1,21 @@
 // Core shared types for MuhanAI
-
 export type Visibility = "private" | "shared" | "public";
+
+// Registry / discovery contracts (R1 registry, R2 ARD, R3 A2A).
+// `resource.ts` intentionally re-exports nothing from here — these are
+// the canonical declarations.
+export type {
+	ResourceDescriptor,
+	ResourceKind,
+	ResourceStatus,
+} from "./resource.js";
+export type {
+	AgentDescriptor,
+	AgentResponse,
+	AgentTask,
+} from "./agent.js";
+export type { McpAuth, McpServer, McpTool, McpToolAnnotations } from "./mcp.js";
+export type { ModelManifest, ModelFormat } from "./model.js";
 
 export type RiskLevel = "low" | "medium" | "high";
 

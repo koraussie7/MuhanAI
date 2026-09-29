@@ -160,6 +160,11 @@ export function createIpcClient(options: IpcClientOptions): OpsMaxxBridge {
 						} else {
 							resolve(err(mapWireError(envelope.error)));
 						}
+					} else if (raw && typeof raw === "object" && "error" in raw) {
+						// A JSON-RPC 200 response can still carry an error
+						// envelope. Resolve it as a failure instead of
+						// handing the caller `{ ok: true, value: <error> }`.
+						resolve(err(mapWireError((raw as { error: unknown }).error)));
 					} else {
 						resolve(ok(raw as T));
 					}
@@ -257,8 +262,13 @@ export function createIpcClient(options: IpcClientOptions): OpsMaxxBridge {
  */
 export function stableStringify(value: unknown): string {
 	if (value === null || value === undefined) return "null";
-	if (typeof value !== "object" || Array.isArray(value)) {
+	if (typeof value !== "object") {
 		return JSON.stringify(value);
+	}
+	if (Array.isArray(value)) {
+		// Route elements through the same key-sorting path so plain
+		// objects nested inside arrays get sorted keys too.
+		return `[${value.map((item) => stableStringify(item)).join(",")}]`;
 	}
 	// Sort keys for deterministic output
 	const obj = value as Record<string, unknown>;

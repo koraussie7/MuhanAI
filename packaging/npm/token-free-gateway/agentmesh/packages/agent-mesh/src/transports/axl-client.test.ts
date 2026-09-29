@@ -21,8 +21,10 @@ function mockJsonResponse(body: unknown, init: ResponseInit = {}): Response {
 }
 
 function mockBinaryResponse(buf: Uint8Array, init: ResponseInit = {}): Response {
-	return new Response(buf, {
-		status: 200,
+	const copy = new Uint8Array(buf.byteLength);
+	copy.set(buf);
+	return new Response(copy.buffer as ArrayBuffer, {
+	status: 200,
 		headers: { "Content-Type": "application/octet-stream", ...(init.headers ?? {}) },
 		...init,
 	});

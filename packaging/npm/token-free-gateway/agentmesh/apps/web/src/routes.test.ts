@@ -5,8 +5,8 @@ import { ROUTE_COUNT, ROUTES, routeByPath } from "./routes.js";
 
 test("route registry has unique ids and paths", () => {
 	// 38 base routes + the two /viz/* visualiser entries
-	// (`mesh-graph`, `knowledge-graph-viz`).
-	assert.equal(ROUTE_COUNT, 40);
+	// (`mesh-graph`, `knowledge-graph-viz`) + `p2p-inference` + `ontology`.
+	assert.equal(ROUTE_COUNT, 42);
 	assert.equal(new Set(ROUTES.map((route) => route.id)).size, ROUTE_COUNT);
 	assert.equal(new Set(ROUTES.map((route) => route.path)).size, ROUTE_COUNT);
 	assert.equal(new Set(ROUTES.map((route) => route.page)).size, ROUTE_COUNT);

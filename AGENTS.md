@@ -45,9 +45,9 @@ From the repo root:
 
 - `bun run dev` — run with hot reload (`bun --hot index.ts`).
 - `bun run start` — run in foreground (`bun index.ts`).
-- `bun run test` — run all tests (`bun test`).
-- `bun test test/foo.test.ts` — run one test file.
-- `bun run typecheck` — type-check (`bunx tsc --noEmit`).
+- `pnpm test` — run the project-wide Vitest suite through the AgentMesh workspace.
+- `cd packaging/npm/token-free-gateway/agentmesh && pnpm vitest run path/to/file.test.ts` — run one test file.
+- `pnpm run typecheck` — type-check all AgentMesh workspaces.
 - `bun run check` — biome check + auto-fix
   (`bunx @biomejs/biome check --write .`).
 - `bun run lint` / `bun run lint:fix` — biome lint; `lint:fix` includes
@@ -86,20 +86,16 @@ From the repo root:
   DOM input helpers, and a session manager.
 
 ## Testing guidelines
-
-- Run tests with `bun test`.
-- Use Bun test's `test`/`expect` API.
-- Tests live in `test/`.
-- If you touch auth flows, browser CDP, provider streaming, or tool
-  parsing/conversion, add or update tests in `test/` rather than leaving
-  coverage in `src/` as inline-only checks.
+- Run the project-wide suite with `pnpm test` from the repository root; it delegates to the AgentMesh Vitest configuration.
+- Tests use Vitest's `test`/`expect` API and are colocated across `packaging/npm/token-free-gateway/agentmesh/`.
+- Prioritize regression coverage for the gateway entrypoint and API routes, provider/client adapters, and browser/session-management code when changing those areas.
+- Keep deterministic unit tests beside the implementation and add integration coverage for route registration, provider fallback/streaming, and browser lifecycle boundaries.
 
 ## Commit and pull request guidelines
 
 - There is no enforced commit message convention or PR template currently
   visible in the repo.
-- Before committing, run `bun run check` (or at least `bun run typecheck`)
-  so formatting/lint and types are clean.
+- Before committing, run `pnpm test` and `pnpm run typecheck` so tests and types are clean.
 - Keep the gateway core and the separate `agentmesh` monorepo clearly
   separated. If a change touches both, state it explicitly in the commit/PR
   description.

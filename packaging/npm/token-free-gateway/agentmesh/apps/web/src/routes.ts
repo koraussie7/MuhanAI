@@ -211,6 +211,15 @@ export const ROUTES: readonly RouteDefinition[] = [
 		page: "knowledge-graph-viz",
 	},
 	{
+		id: "ontology",
+		path: "/ontology",
+		group: "knowledge",
+		label: "Ontology",
+		iconKey: "layers",
+		badge: "NEW",
+		page: "ontology",
+	},
+	{
 		id: "verification",
 		path: "/verification",
 		group: "knowledge",

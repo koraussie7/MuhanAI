@@ -9,6 +9,8 @@
  *   2. `put` writes the local blob first, then mirrors to OpsMaxx.
  *   3. Resync does not crash when the bridge is unreachable.
  *   4. A newer OpsMaxx entry evicts the local metadata entry.
+ *   5. `get` is OpsMaxx-backed: a missing local entry is served from
+ *      the bridge as metadata only.
  */
 
 import { createInMemoryBridge } from "@agentmesh/opsmaxx-bridge/mock";
@@ -53,7 +55,7 @@ describe("opsmaxx-vault-adapter (T2)", () => {
 		});
 
 		expect(blob).toBeDefined();
-		expect(adapter.get("anthropic")?.secret).toBe("sk-anthropic-xyz");
+		expect((await adapter.get("anthropic"))?.secret).toBe("sk-anthropic-xyz");
 
 		// Mirror should have run.
 		const remoteList = await bridge.vault.list();
@@ -108,8 +110,35 @@ describe("opsmaxx-vault-adapter (T2)", () => {
 		expect(report.conflicts).toContain("openai");
 		expect(report.evictedLocally).toContain("openai");
 
-		// After eviction, the local entry is gone.
-		expect(adapter.get("openai")).toBeNull();
+		// After eviction, the local entry is gone…
+		expect(adapter.list().find((e) => e.service === "openai")).toBeUndefined();
+		// …but `get` falls back to OpsMaxx and returns metadata only.
+		const remoteBacked = await adapter.get("openai");
+		expect(remoteBacked).not.toBeNull();
+		expect(remoteBacked?.service).toBe("openai");
+		expect(remoteBacked?.hasSecret).toBe(true);
+		expect(remoteBacked?.secret).toBe("");
+
+		await adapter.close();
+	});
+
+	it("get() fetches remote metadata when the local entry is missing", async () => {
+		const bridge = createInMemoryBridge();
+		const adapter = await createOpsMaxxVaultAdapter({
+			bridge,
+			passphrase: PASSPHRASE,
+		});
+
+		// Service exists only on the OpsMaxx side, created after the
+		// construction-time resync so it was never seeded locally.
+		await bridge.vault.set("anthropic", "sk-anthropic", "remote note");
+
+		const entry = await adapter.get("anthropic");
+		expect(entry).not.toBeNull();
+		expect(entry?.service).toBe("anthropic");
+		expect(entry?.hasSecret).toBe(true);
+		// Metadata only — never the raw secret.
+		expect(entry?.secret === "sk-anthropic").toBe(false);
 
 		await adapter.close();
 	});

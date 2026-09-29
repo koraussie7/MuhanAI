@@ -63,10 +63,17 @@ export interface OpsMaxxVaultAdapterConfig {
 	blob?: VaultBlob;
 }
 
+export type SyncedVaultEntry = VaultEntry & { hasSecret?: boolean };
+
 export interface SyncedVaultHandle {
 	/** Local vault handle — same shape as `credentials-vault.VaultHandle`. */
 	list(): VaultEntry[];
-	get(service: string): VaultEntry | null;
+	/**
+	 * Local-first, OpsMaxx-backed: when the local entry is missing
+	 * (e.g. evicted during a conflict), round-trip through
+	 * `bridge.vault.get` and return remote metadata only.
+	 */
+	get(service: string): Promise<SyncedVaultEntry | null>;
 	put(entry: VaultEntry): Promise<VaultBlob>;
 	remove(service: string): Promise<VaultBlob>;
 	/** Force a re-sync against OpsMaxx; returns the diff OpsMaxx reported. */
@@ -160,7 +167,21 @@ export async function createOpsMaxxVaultAdapter(
 	return {
 		list: () => local.list(),
 
-		get: (service) => local.get(service),
+			async get(service): Promise<SyncedVaultEntry | null> {
+		const localEntry = local.get(service);
+		if (localEntry) return localEntry;
+			// Evicted (or never synced): OpsMaxx wins, so fetch remote
+			// metadata so the caller still sees the entry exists.
+						const remote = await config.bridge.vault.get(service);
+					if (!remote.ok || !remote.value) return null;
+					return {
+					service: remote.value.service,
+					secret: "",
+						note: remote.value.note,
+					updatedAt: remote.value.updatedAt,
+						hasSecret: remote.value.hasSecret,
+					};
+		},
 
 		async put(entry) {
 			const nextBlob = await local.put(entry);

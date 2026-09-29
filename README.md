@@ -112,14 +112,17 @@ pnpm --filter @agentmesh/web dev
 ```
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-### 4. Build & Typecheck
+### 4. Test, Build & Typecheck
 ```bash
+# Run the project-wide Vitest suite across the AgentMesh workspace
+pnpm test
 # Run strict TypeScript checks
 pnpm --filter @agentmesh/web run typecheck
-
 # Build production bundle
 pnpm --filter @agentmesh/web run build
 ```
+
+The root `pnpm test` command delegates to `packaging/npm/token-free-gateway/agentmesh` and runs all configured workspace tests, including API routes, agent packages, browser-use integrations, and web components. Prefer adding regression tests beside the gateway entrypoint, provider adapters, and browser/session-management code when changing those areas.
 
 ### 5. Deploy to Cloudflare Workers
 ```bash

@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BrowserProfilePanel } from "./BrowserProfilePanel.js";
 import { TaskDispatchBoard } from "./harvest/A/TaskDispatchBoard.js";
 import { WorkflowDAG } from "./harvest/A/WorkflowDAG.js";
@@ -13,6 +13,7 @@ import { ReputationMatrix } from "./harvest/C/ReputationMatrix.js";
 import { SecuritySettings } from "./harvest/C/SecuritySettings.js";
 import { MuhanSettingsPanel } from "./MuhanSettingsPanel.js";
 import { PageBox } from "./PageBox.js";
+import { postJson, load } from "../services/api.js";
 import { InteractiveKnowledgeGraph } from "./visuals/InteractiveKnowledgeGraph.js";
 
 function PageShell({
@@ -223,48 +224,165 @@ export function ReputationPage() {
 }
 
 // 7. /projects, /tasks, /workflows (AgentFM Workspaces)
+type CollaborationProject = {
+	id: string;
+	title: string;
+	desc: string;
+	progress: number;
+	status: "active" | "review";
+	agents: string[];
+	nextTask: string;
+};
+
+const INITIAL_COLLABORATION_PROJECTS: CollaborationProject[] = [
+	{
+	id: "gateway-hardening",
+		title: "Token-Free Gateway hardening",
+		desc: "OpenAI 호환 게이트웨이, provider fallback, 브라우저 세션 경계 테스트",
+	progress: 68,
+	status: "active",
+		agents: ["Astra", "Claude Web", "MuhanAI QA"],
+		nextTask: "Fix duplicate A2A route registration",
+	},
+	{
+	id: "public-mesh",
+		title: "Public Agent Mesh",
+		desc: "다른 에이전트가 이슈를 고르고 브랜치에서 작업하는 공개 협업 공간",
+	progress: 42,
+	status: "review",
+		agents: ["Pythia", "Code Runner"],
+		nextTask: "Review contribution permissions",
+	},
+];
+
+type CollaborationResponse = {
+	projects: CollaborationProject[];
+	tasks: Array<{ id: string; title: string; status: "open"; createdAt: string }>;
+};
+
 export function ProjectsPage() {
-	const projects: Array<{
-		id: string;
-		title: string;
-		desc: string;
-		progress: number;
-	}> = [];
+	const [projects, setProjects] = useState(INITIAL_COLLABORATION_PROJECTS);
+	const [joined, setJoined] = useState(false);
+	const [taskTitle, setTaskTitle] = useState("");
+	const [notice, setNotice] = useState("");
+
+	useEffect(() => {
+	void load<CollaborationResponse>("/api/collaboration/projects").then((response) => {
+	if (response) setProjects(response.projects);
+	});
+	}, []);
+
+	const joinWorkspace = () => {
+	setJoined(true);
+	setNotice("참여 완료 — 새 작업은 격리된 브랜치와 PR 검토를 거칩니다.");
+	};
+
+	const publishTask = async () => {
+	const title = taskTitle.trim();
+	if (!title) {
+	setNotice("작업 제목을 입력해주세요.");
+	return;
+	}
+	try {
+	await postJson("/api/collaboration/tasks", { title });
+	setNotice(`공개 작업이 등록되었습니다: ${title}`);
+	setTaskTitle("");
+	} catch (error) {
+	setNotice(error instanceof Error ? error.message : "작업 등록에 실패했습니다.");
+	}
+	};
+
+	const requestAgent = async (projectId: string) => {
+	try {
+	await postJson(`/api/collaboration/projects/${projectId}/invitations`, {});
+	setProjects((current) =>
+	current.map((project) =>
+	project.id === projectId && !project.agents.includes("Incoming Agent")
+	? { ...project, agents: [...project.agents, "Incoming Agent"] }
+	: project,
+	),
+	);
+	setNotice("참여 가능한 에이전트에게 작업 초대를 보냈습니다.");
+	} catch (error) {
+	setNotice(error instanceof Error ? error.message : "에이전트 초대에 실패했습니다.");
+	}
+	};
+
 	return (
-		<PageShell
-			iconKey="folder-git"
-			title="Workspace Projects"
-			subtitle="AgentFM 협업 에이전트 프로젝트 풀"
-			badge="AgentFM"
-		>
-			<div className="peer-grid">
-				{projects.map((p) => (
-					<article className="peer-card" key={p.id}>
-						<div className="peer-card-head">
-							<strong className="peer-name">{p.title}</strong>
-							<span className="protocol-badge proto-webrtc">{p.progress}%</span>
-						</div>
-						<p style={{ fontSize: 13, color: "#8f9188" }}>{p.desc}</p>
-						<div
-							style={{
-								height: 4,
-								background: "#222",
-								borderRadius: 2,
-								overflow: "hidden",
-							}}
-						>
-							<div
-								style={{
-									width: `${p.progress}%`,
-									height: "100%",
-									background: "#e6ff87",
-								}}
-							/>
-						</div>
-					</article>
-				))}
-			</div>
-		</PageShell>
+	<PageShell
+	iconKey="folder-git"
+		title="Open Collaboration Workspace"
+		subtitle="사람과 에이전트가 공개 작업을 고르고, 격리 브랜치에서 함께 만드는 공간"
+	badge="PUBLIC BETA"
+	>
+	<div style={{ display: "grid", gap: 18 }}>
+	<section className="peer-card" style={{ borderColor: "rgba(230,255,135,.35)" }}>
+	<div className="peer-card-head">
+	<div>
+	<strong className="peer-name">Join the next build</strong>
+	<p style={{ margin: "6px 0 0", color: "#a8aaa0", fontSize: 13 }}>
+	작업 선택 → 에이전트 배정 → 테스트 → PR 리뷰 → 공개 배포
+	</p>
+	</div>
+	<button type="button" className="btn-primary" onClick={joinWorkspace} disabled={joined}>
+	{joined ? "참여 중" : "워크스페이스 참여"}
+	</button>
+	</div>
+	{notice && <p style={{ color: "#e6ff87", fontSize: 13, margin: "14px 0 0" }}>{notice}</p>}
+	</section>
+
+	<section>
+	<div className="peer-card-head" style={{ marginBottom: 10 }}>
+	<strong className="peer-name">Active projects</strong>
+	<span className="protocol-badge proto-memory">{projects.length} open</span>
+	</div>
+	<div className="peer-grid">
+	{projects.map((project) => (
+	<article className="peer-card" key={project.id}>
+	<div className="peer-card-head">
+	<strong className="peer-name">{project.title}</strong>
+	<span className={`protocol-badge ${project.status === "active" ? "proto-webrtc" : "proto-memory"}`}>
+	{project.status === "active" ? "BUILDING" : "REVIEW"}
+	</span>
+	</div>
+	<p style={{ fontSize: 13, color: "#8f9188", minHeight: 40 }}>{project.desc}</p>
+	<div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#a8aaa0" }}>
+	<span>진행률</span><strong style={{ color: "#e6ff87" }}>{project.progress}%</strong>
+	</div>
+	<div style={{ height: 5, background: "#222", borderRadius: 2, overflow: "hidden", margin: "7px 0 12px" }}>
+	<div style={{ width: `${project.progress}%`, height: "100%", background: "#e6ff87" }} />
+	</div>
+	<p style={{ fontSize: 12, color: "#c4c7bc", margin: "0 0 10px" }}>
+	<strong>다음 작업:</strong> {project.nextTask}
+	</p>
+	<div className="peer-caps">
+	{project.agents.map((agent) => <span className="cap-chip sm" key={agent}>{agent}</span>)}
+	</div>
+	<button type="button" className="btn-secondary sm" style={{ marginTop: 12 }} onClick={() => requestAgent(project.id)}>
+	에이전트 초대
+	</button>
+	</article>
+	))}
+	</div>
+	</section>
+
+	<section className="peer-card">
+	<strong className="peer-name">Publish a task for the mesh</strong>
+	<p style={{ color: "#8f9188", fontSize: 13 }}>작은 작업부터 공개 등록하면 다른 에이전트가 맡아 PR을 제안합니다.</p>
+	<div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+	<input
+	value={taskTitle}
+		onChange={(event) => setTaskTitle(event.target.value)}
+		onKeyDown={(event) => event.key === "Enter" && publishTask()}
+	placeholder="예: provider streaming 회귀 테스트 추가"
+	aria-label="새 공개 작업 제목"
+	style={{ flex: "1 1 280px", minWidth: 0, padding: "10px 12px", background: "#151613", border: "1px solid #393b34", borderRadius: 6, color: "#f4f5ed" }}
+	/>
+	<button type="button" className="btn-primary" onClick={publishTask}>작업 공개</button>
+	</div>
+	</section>
+	</div>
+	</PageShell>
 	);
 }
 
