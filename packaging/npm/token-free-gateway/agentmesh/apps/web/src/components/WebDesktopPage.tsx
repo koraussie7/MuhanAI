@@ -122,7 +122,16 @@ export const WebDesktopPage: React.FC<WebDesktopPageProps> = ({ initialApp }) =>
 	const [showDownloadBanner, setShowDownloadBanner] = useState(true);
 	// Wallpaper selection. `plain` keeps the original gradient so the
 	// change is opt-in and the pre-existing look stays reachable.
-	const [backdrop, setBackdrop] = useState<BackdropMode>("plain");
+	const [backdrop, setBackdrop] = useState<BackdropMode>(() => {
+	if (typeof window === "undefined") return "plain";
+	try {
+	const saved = window.localStorage.getItem("muhanai.desktop.backdrop");
+	return saved === "globe" || saved === "knowledge" ? saved : "plain";
+	} catch {
+	return "plain";
+	}
+	});
+	const [backdropRefresh, setBackdropRefresh] = useState(0);
 
 	const localizedApps = DESKTOP_APPS.map((app) => {
 		const appTrans = menuI18n.desktop?.apps[app.id];
@@ -140,6 +149,14 @@ export const WebDesktopPage: React.FC<WebDesktopPageProps> = ({ initialApp }) =>
 	const timer = setInterval(() => setTime(new Date()), 1000);
 	return () => clearInterval(timer);
 	}, []);
+
+	useEffect(() => {
+	try {
+	window.localStorage.setItem("muhanai.desktop.backdrop", backdrop);
+	} catch {
+	// Storage can be unavailable in private/embedded contexts.
+	}
+	}, [backdrop]);
 
 	useEffect(() => {
 	if (initialApp) launchApp(initialApp);
@@ -245,7 +262,7 @@ export const WebDesktopPage: React.FC<WebDesktopPageProps> = ({ initialApp }) =>
 		>
 			{/* Wallpaper layer. Rendered first and absolutely positioned so
 			    icons, windows, and the taskbar all paint above it. */}
-			<DesktopBackdrop mode={backdrop} />
+			<DesktopBackdrop mode={backdrop} refreshToken={backdropRefresh} />
 
 			{/* Download DaedalOS Banner */}
 			{showDownloadBanner && (
@@ -951,10 +968,29 @@ export const WebDesktopPage: React.FC<WebDesktopPageProps> = ({ initialApp }) =>
 								</button>
 							);
 						})}
+						<button
+						type="button"
+						onClick={(e) => {
+						e.stopPropagation();
+					setBackdropRefresh((value) => value + 1);
+					}}
+						disabled={backdrop !== "globe"}
+						title="Pythia 이벤트 새로고침"
+					aria-label="Pythia 이벤트 새로고침"
+					style={{
+					background: "transparent",
+					border: "none",
+					color: backdrop === "globe" ? "#38bdf8" : "#475569",
+					cursor: backdrop === "globe" ? "pointer" : "not-allowed",
+					padding: "0.2rem",
+					}}
+					>
+					<RefreshCw size={13} />
+					</button>
 					</div>
-				</div>
+					</div>
 
-				{/* Taskbar Center: Active Windows */}
+					{/* Taskbar Center: Active Windows */}
 				<div
 					style={{
 						display: "flex",
