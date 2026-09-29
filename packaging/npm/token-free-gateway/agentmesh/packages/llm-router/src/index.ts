@@ -347,23 +347,23 @@ export type {
 export { FastDecider, fastDecider } from "./fast-decider/client.js";
 export { LAYA_CONFIG } from "./fast-decider/config.js";
 export { P2pLoadBalancer, p2pLoadBalancer } from "./p2p-load-balancer.js";
+export type { P2pModelRegistry, P2pModelRegistryOptions } from "./p2p-model-registry.js";
+export { createP2pModelRegistry } from "./p2p-model-registry.js";
 export {
 	P2pNodeRegistry,
 	type P2pNodesChangeCallback,
 	p2pNodeRegistry,
 } from "./p2p-node-registry.js";
-export { createP2pModelRegistry } from "./p2p-model-registry.js";
-export type { P2pModelRegistry, P2pModelRegistryOptions } from "./p2p-model-registry.js";
 export {
-	XLangRegistry,
+	createXLangBeaconTransport,
+	XLANG_CAPABILITY_TOPIC,
+	XLangBeacon,
+	type XLangBeaconTransport,
+} from "./xlang-beacon.js";
+export {
 	validateXLangManifest,
 	type XLangAgentManifest,
 	type XLangManifestFailure,
 	type XLangManifestValidation,
+	XLangRegistry,
 } from "./xlang-registry.js";
-export {
-	XLANG_CAPABILITY_TOPIC,
-	XLangBeacon,
-	createXLangBeaconTransport,
-	type XLangBeaconTransport,
-} from "./xlang-beacon.js";

@@ -1,10 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import {
-	DEFAULT_PIECE_SIZE,
-	fetchFromMeshSource,
-	type MeshPeerConnection,
-} from "./mesh-source.js";
+import { DEFAULT_PIECE_SIZE, fetchFromMeshSource, type MeshPeerConnection } from "./mesh-source.js";
 
 describe("mesh-source", () => {
 	it("downloads pieces from a mock connection", async () => {

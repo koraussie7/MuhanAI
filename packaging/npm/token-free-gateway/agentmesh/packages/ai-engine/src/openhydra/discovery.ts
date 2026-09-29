@@ -1,7 +1,4 @@
-import type {
-	OpenHydraDiscoveryOptions,
-	OpenHydraNode,
-} from "./protocol";
+import type { OpenHydraDiscoveryOptions, OpenHydraNode } from "./protocol";
 
 const DEFAULT_DISCOVERY_TIMEOUT_MS = 3000;
 
@@ -134,8 +131,6 @@ export class OpenHydraDiscoveryImpl implements OpenHydraDiscovery {
 /**
  * Simple factory for creating a discovery instance.
  */
-export function createOpenHydraDiscovery(
-	options: OpenHydraDiscoveryOptions,
-): OpenHydraDiscovery {
+export function createOpenHydraDiscovery(options: OpenHydraDiscoveryOptions): OpenHydraDiscovery {
 	return new OpenHydraDiscoveryImpl(options);
 }

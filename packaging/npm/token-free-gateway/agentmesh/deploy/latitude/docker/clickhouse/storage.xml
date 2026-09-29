@@ -1,0 +1,25 @@
+<!-- Vendored verbatim from latitude-dev/latitude-llm development
+     docker/clickhouse/storage.xml — hot/cold tiering policy expected by the
+     upstream Latitude ClickHouse migrations. -->
+<clickhouse>
+  <storage_configuration>
+    <disks>
+      <default/>
+      <cold>
+        <path>/var/lib/clickhouse/cold/</path>
+      </cold>
+    </disks>
+    <policies>
+      <tiered>
+        <volumes>
+          <hot>
+            <disk>default</disk>
+          </hot>
+          <cold>
+            <disk>cold</disk>
+          </cold>
+        </volumes>
+      </tiered>
+    </policies>
+  </storage_configuration>
+</clickhouse>

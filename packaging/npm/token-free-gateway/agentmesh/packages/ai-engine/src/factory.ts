@@ -1,9 +1,9 @@
 import { CloudEngine } from "./cloud/cloud-engine";
 import { OllamaEngine } from "./ollama/ollama-engine";
 import { OpenHydraEngine } from "./openhydra/openhydra-engine";
-import { XLangEngine } from "./xlang/xlang-engine";
 import { SippEngine } from "./sipp/sipp-engine";
 import type { EngineConfig } from "./types";
+import { XLangEngine } from "./xlang/xlang-engine";
 export type EngineType = "sipp" | "ollama" | "cloud" | "openhydra" | "xlang";
 export class AIEngineFactory {
 	static create(config: EngineConfig) {
@@ -14,10 +14,10 @@ export class AIEngineFactory {
 				return new OllamaEngine(config);
 			case "cloud":
 				return new CloudEngine(config);
-				case "openhydra":
-			return new OpenHydraEngine(config);
+			case "openhydra":
+				return new OpenHydraEngine(config);
 			case "xlang":
-			return new XLangEngine(config);
+				return new XLangEngine(config);
 			default:
 				throw new Error(`Unknown engine type: ${config.type as string}`);
 		}

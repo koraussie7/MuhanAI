@@ -1,7 +1,5 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { buildManifest, canonicalJson, resolveHashAlgorithm } from "./manifest.js";
-import { signManifest, verifyManifest } from "./verify.js";
 import {
 	buildEnvelope,
 	decodeEnvelope,
@@ -10,7 +8,9 @@ import {
 	envelopeTopic,
 	verifyEnvelope,
 } from "./export.js";
+import { buildManifest, canonicalJson, resolveHashAlgorithm } from "./manifest.js";
 import type { ManifestSource } from "./types.js";
+import { signManifest, verifyManifest } from "./verify.js";
 
 const blake3Hex = "9".repeat(64);
 
@@ -89,7 +89,10 @@ describe("end-to-end manifest + envelope", () => {
 	});
 
 	it("emits a topic that includes the manifest id", () => {
-		assert.equal(envelopeTopic("qwen2.5-7b-instruct-q4_k_m"), "agentmesh/models/qwen2.5-7b-instruct-q4_k_m");
+		assert.equal(
+			envelopeTopic("qwen2.5-7b-instruct-q4_k_m"),
+			"agentmesh/models/qwen2.5-7b-instruct-q4_k_m",
+		);
 	});
 
 	it("re-exports canonicalJson", () => {

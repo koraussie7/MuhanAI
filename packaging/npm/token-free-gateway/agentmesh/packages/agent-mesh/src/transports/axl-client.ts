@@ -140,7 +140,11 @@ export class AxlClient implements Transport {
 		this.assertPeerId(message.destinationPeerId);
 		const res = await this.request("POST", "/send", {
 			headers: { "X-Destination-Peer-Id": message.destinationPeerId },
-			body: message.payload,
+			// Fresh ArrayBuffer-backed view: TS 5.7 typed arrays are
+			// generic, and a plain Uint8Array (ArrayBufferLike) does not
+			// satisfy BodyInit under programs that include lib.dom
+			// (services/api). Copies once; fetch would copy anyway.
+			body: new Uint8Array(message.payload),
 			binary: true,
 		});
 		if (!res.ok) {

@@ -21,8 +21,8 @@
 
 import { createHash } from "node:crypto";
 import { canonicalJson, resolveHashAlgorithm } from "./manifest.js";
-import { signManifest, verifyManifest } from "./verify.js";
 import type { ModelManifest } from "./types.js";
+import { signManifest, verifyManifest } from "./verify.js";
 
 export const ENVELOPE_SCHEMA = "agentmesh.model-manifest/envelope.v1" as const;
 export const ENVELOPE_TOPIC_PREFIX = "agentmesh/models/" as const;
@@ -48,9 +48,7 @@ export function buildEnvelope(
 	publisher: string,
 	options: { signer?: { sign(bytes: Uint8Array): string } } = {},
 ): ManifestEnvelope {
-	const signed = options.signer
-		? signManifest(manifest, options.signer)
-		: manifest;
+	const signed = options.signer ? signManifest(manifest, options.signer) : manifest;
 	return {
 		schema: ENVELOPE_SCHEMA,
 		publisher,
@@ -85,7 +83,8 @@ export function envelopeId(envelope: ManifestEnvelope): string {
 export function verifyEnvelope(
 	envelope: unknown,
 ): { ok: true; envelope: ManifestEnvelope } | { ok: false; reason: string } {
-	if (!envelope || typeof envelope !== "object") return { ok: false, reason: "envelope must be an object" };
+	if (!envelope || typeof envelope !== "object")
+		return { ok: false, reason: "envelope must be an object" };
 	const e = envelope as Record<string, unknown>;
 	if (e.schema !== ENVELOPE_SCHEMA) {
 		return { ok: false, reason: `unsupported schema: ${String(e.schema)}` };
@@ -110,7 +109,9 @@ export function encodeEnvelope(envelope: ManifestEnvelope): string {
 	return JSON.stringify(envelope);
 }
 
-export function decodeEnvelope(json: string): { ok: true; envelope: ManifestEnvelope } | { ok: false; reason: string } {
+export function decodeEnvelope(
+	json: string,
+): { ok: true; envelope: ManifestEnvelope } | { ok: false; reason: string } {
 	try {
 		const parsed = JSON.parse(json);
 		return verifyEnvelope(parsed);

@@ -39,13 +39,16 @@ function isNonEmptyString(value: unknown): value is string {
 function isCapability(value: unknown): value is XLangCapability {
 	if (!value || typeof value !== "object") return false;
 	const candidate = value as Record<string, unknown>;
-	return isNonEmptyString(candidate.name) && VALID_KINDS.has(candidate.kind as XLangCapability["kind"]);
+	return (
+		isNonEmptyString(candidate.name) && VALID_KINDS.has(candidate.kind as XLangCapability["kind"])
+	);
 }
 
 export function validateXLangManifest(
 	value: unknown,
 ): XLangManifestValidation | XLangManifestFailure {
-	if (!value || typeof value !== "object") return { ok: false, reason: "manifest must be an object" };
+	if (!value || typeof value !== "object")
+		return { ok: false, reason: "manifest must be an object" };
 	const candidate = value as Record<string, unknown>;
 	if (candidate.runtime !== "xlang") return { ok: false, reason: "runtime must be xlang" };
 	for (const field of ["id", "peerId", "endpoint", "protocol", "createdAt"]) {
@@ -56,7 +59,7 @@ export function validateXLangManifest(
 	}
 	try {
 		const endpoint = new URL(candidate.endpoint as string);
-		if (!(["http:", "https:", "ws:", "wss:"].includes(endpoint.protocol))) {
+		if (!["http:", "https:", "ws:", "wss:"].includes(endpoint.protocol)) {
 			return { ok: false, reason: "endpoint scheme is not supported" };
 		}
 	} catch {
@@ -78,7 +81,10 @@ export function validateXLangManifest(
 	if (typeof candidate.supportsStreaming !== "boolean") {
 		return { ok: false, reason: "supportsStreaming must be boolean" };
 	}
-	if (candidate.models !== undefined && (!Array.isArray(candidate.models) || !candidate.models.every(isNonEmptyString))) {
+	if (
+		candidate.models !== undefined &&
+		(!Array.isArray(candidate.models) || !candidate.models.every(isNonEmptyString))
+	) {
 		return { ok: false, reason: "models are invalid" };
 	}
 	return { ok: true, manifest: candidate as unknown as XLangAgentManifest };
@@ -120,7 +126,9 @@ export class XLangRegistry {
 	}
 
 	findByCapability(name: string): XLangAgentManifest[] {
-		return this.list().filter((manifest) => manifest.capabilities.some((capability) => capability.name === name));
+		return this.list().filter((manifest) =>
+			manifest.capabilities.some((capability) => capability.name === name),
+		);
 	}
 
 	findByModel(modelId: string): XLangAgentManifest[] {

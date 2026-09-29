@@ -13,9 +13,7 @@ interface ExecutorLike {
 	execute(agentId: string, request: AgentRequest): Promise<AgentResult>;
 }
 
-function makeExecutor(
-	agents: AgentLike[],
-): ExecutorLike {
+function makeExecutor(agents: AgentLike[]): ExecutorLike {
 	const map = new Map(agents.map((a) => [a.id, a]));
 	return {
 		async execute(agentId: string, request: AgentRequest) {
@@ -90,11 +88,14 @@ describe("RecursiveCast", () => {
 	});
 
 	it("respects maxDepth and returns depth_exceeded", async () => {
-		const result = await cast.delegate({
-			request: { id: "req-1", question: "x", requiredCapabilities: ["summarize"] },
-			excludeAgentIds: [],
-			maxDepth: 1,
-		}, ["self", "agent-a"]);
+		const result = await cast.delegate(
+			{
+				request: { id: "req-1", question: "x", requiredCapabilities: ["summarize"] },
+				excludeAgentIds: [],
+				maxDepth: 1,
+			},
+			["self", "agent-a"],
+		);
 		expect(result.ok).toBe(false);
 		if (result.ok) return;
 		expect(result.reason).toBe("depth_exceeded");

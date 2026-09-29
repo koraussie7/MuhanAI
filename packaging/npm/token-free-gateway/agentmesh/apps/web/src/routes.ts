@@ -185,6 +185,15 @@ export const ROUTES: readonly RouteDefinition[] = [
 		page: "hivebear",
 	},
 	{
+		id: "p2p-inference",
+		path: "/p2p-inference",
+		group: "resources",
+		label: "P2P Inference",
+		iconKey: "cpu",
+		badge: "P2P",
+		page: "p2p-inference",
+	},
+	{
 		id: "knowledge",
 		path: "/knowledge",
 		group: "knowledge",

@@ -1,9 +1,9 @@
-import { createHash } from "node:crypto";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { describe, it } from "node:test";
 import { buildManifest, recomputeContentId, resolveHashAlgorithm } from "./manifest.js";
-import { signManifest, verifyFile, verifyManifest, verifyStream } from "./verify.js";
 import type { ManifestSource } from "./types.js";
+import { signManifest, verifyFile, verifyManifest, verifyStream } from "./verify.js";
 
 const blake3Hex = "b".repeat(64);
 const sha256Hex = "c".repeat(64);
@@ -136,9 +136,7 @@ describe("verifyFile", () => {
 		m.sizeBytes = buf.byteLength;
 		m.hashes = {
 			algorithm: preferred,
-			...(preferred === "blake3"
-				? { blake3: createHash("blake3").update(buf).digest("hex") }
-				: {}),
+			...(preferred === "blake3" ? { blake3: createHash("blake3").update(buf).digest("hex") } : {}),
 			sha256: createHash("sha256").update(buf).digest("hex"),
 		};
 		const r = verifyFile(m, buf);

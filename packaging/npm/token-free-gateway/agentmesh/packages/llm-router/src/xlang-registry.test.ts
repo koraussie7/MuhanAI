@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { XLangRegistry, validateXLangManifest } from "./xlang-registry.js";
+import { validateXLangManifest, XLangRegistry } from "./xlang-registry.js";
 
 const manifest = {
 	id: "xlang-agent-1",
@@ -23,8 +23,12 @@ describe("validateXLangManifest", () => {
 	});
 
 	it("rejects invalid protocol, endpoint, and duplicate capabilities", () => {
-		expect(validateXLangManifest({ ...manifest, protocol: "xlang-peer-v0" })).toMatchObject({ ok: false });
-		expect(validateXLangManifest({ ...manifest, endpoint: "ftp://peer.test" })).toMatchObject({ ok: false });
+		expect(validateXLangManifest({ ...manifest, protocol: "xlang-peer-v0" })).toMatchObject({
+			ok: false,
+		});
+		expect(validateXLangManifest({ ...manifest, endpoint: "ftp://peer.test" })).toMatchObject({
+			ok: false,
+		});
 		expect(
 			validateXLangManifest({
 				...manifest,

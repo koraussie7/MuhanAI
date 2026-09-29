@@ -156,10 +156,7 @@ export class ReceiptLedger {
 		this.maxEntries = options.maxEntries ?? 10_000;
 	}
 
-	append(
-		receipt: CallReceipt,
-		options: { now?: number; requestId?: string } = {},
-	): void {
+	append(receipt: CallReceipt, options: { now?: number; requestId?: string } = {}): void {
 		const recordedAt = options.now ?? Date.now();
 		const entry: ReceiptLedgerEntry = {
 			receipt,
@@ -172,9 +169,7 @@ export class ReceiptLedger {
 
 	byPeer(peerId: string): ReceiptLedgerEntry[] {
 		return this.entries.filter(
-			(entry) =>
-				entry.receipt.callerPeerId === peerId ||
-				entry.receipt.calleePeerId === peerId,
+			(entry) => entry.receipt.callerPeerId === peerId || entry.receipt.calleePeerId === peerId,
 		);
 	}
 

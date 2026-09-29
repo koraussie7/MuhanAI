@@ -1,6 +1,6 @@
+import { resolve } from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import { resolve } from "node:path";
 import { defineConfig, type Plugin } from "vite";
 
 /**
@@ -363,14 +363,14 @@ export default defineConfig({
 				main: resolve(__dirname, "index.html"),
 				chat: resolve(__dirname, "chat.html"),
 			},
-				output: {
-			entryFileNames: "assets/[name].js",
-			chunkFileNames: "assets/[name]-[hash].js",
-			assetFileNames: "assets/[name]-[hash][extname]",
-			manualChunks: {
-			"mcp-vendor": ["@agentmesh/personal-mcp", "@agentmesh/shared-types"],
-			vendor: ["lucide-react"],
-			},
+			output: {
+				entryFileNames: "assets/[name].js",
+				chunkFileNames: "assets/[name]-[hash].js",
+				assetFileNames: "assets/[name]-[hash][extname]",
+				manualChunks: {
+					"mcp-vendor": ["@agentmesh/personal-mcp", "@agentmesh/shared-types"],
+					vendor: ["lucide-react"],
+				},
 			},
 		},
 		chunkSizeWarningLimit: 1000,

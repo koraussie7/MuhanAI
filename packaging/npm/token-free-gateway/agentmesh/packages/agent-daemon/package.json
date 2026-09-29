@@ -20,7 +20,8 @@
 		"@agentmesh/llm-router": "workspace:*",
 		"@agentmesh/credit-system": "workspace:*",
 		"@agentmesh/shared-types": "workspace:*",
-		"@agentmesh/personal-mcp": "workspace:*"
+		"@agentmesh/personal-mcp": "workspace:*",
+		"@agentmesh/opsmaxx-bridge": "workspace:*"
 	},
 	"devDependencies": {
 		"@types/node": "^22.10.0",

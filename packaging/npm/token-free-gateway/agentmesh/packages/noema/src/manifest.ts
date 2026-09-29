@@ -18,8 +18,8 @@
 
 import { createHash } from "node:crypto";
 import type {
-	ContentHashes,
 	ContentHashAlgorithm,
+	ContentHashes,
 	ManifestSource,
 	ModelManifest,
 } from "./types.js";
@@ -33,7 +33,7 @@ export const MANIFEST_HASH_ALGORITHM: ContentHashAlgorithm = "blake3";
  * BLAKE3 even though Node 22+ supports it. We probe once and cache.
  */
 let probed = false;
-let supported: Record<string, boolean> = {};
+const supported: Record<string, boolean> = {};
 
 function probeAlgorithms(): Record<string, boolean> {
 	if (probed) return supported;
@@ -123,10 +123,7 @@ export function canonicalManifestBytes(manifest: ModelManifest): Uint8Array {
  * available in the runtime we fall back to SHA-256 — `node:crypto` always
  * has SHA-256 and the resulting `contentId` is still content-addressed.
  */
-export function hashManifest(
-	manifest: ModelManifest,
-	algorithm?: ContentHashAlgorithm,
-): string {
+export function hashManifest(manifest: ModelManifest, algorithm?: ContentHashAlgorithm): string {
 	const algo = algorithm ?? resolveHashAlgorithm();
 	const bytes = canonicalManifestBytes(manifest);
 	const digest = createHash(algo).update(bytes).digest("hex");

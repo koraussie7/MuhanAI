@@ -1,7 +1,7 @@
 import type { ChatOptions, EngineConfig, EngineStatus, ModelInfo } from "../types";
 import { EventEmitter } from "../utils/events";
 import { Logger } from "../utils/logger";
-import { XLangClient, type XLangChatOptions } from "./client";
+import { type XLangChatOptions, XLangClient } from "./client";
 import type { XLangPeerInfo } from "./protocol";
 
 export class XLangEngine extends EventEmitter {

@@ -207,11 +207,15 @@ describe("OpenHydraEngine", () => {
 					.fn()
 					.mockResolvedValueOnce({
 						done: false,
-						value: new TextEncoder().encode('{"jsonrpc":"2.0","id":"s1","result":{"token":"Hello "}}'),
+						value: new TextEncoder().encode(
+							'{"jsonrpc":"2.0","id":"s1","result":{"token":"Hello "}}',
+						),
 					})
 					.mockResolvedValueOnce({
 						done: false,
-						value: new TextEncoder().encode('{"jsonrpc":"2.0","id":"s1","result":{"token":"world!"}}'),
+						value: new TextEncoder().encode(
+							'{"jsonrpc":"2.0","id":"s1","result":{"token":"world!"}}',
+						),
 					})
 					.mockResolvedValueOnce({ done: true, value: undefined }),
 				releaseLock: vi.fn(),
@@ -269,7 +273,9 @@ describe("OpenHydraEngine", () => {
 					.mockResolvedValueOnce({ done: false, value: new TextEncoder().encode("not-json") })
 					.mockResolvedValueOnce({
 						done: false,
-						value: new TextEncoder().encode('{"jsonrpc":"2.0","id":"s1","result":{"token":"valid"}}'),
+						value: new TextEncoder().encode(
+							'{"jsonrpc":"2.0","id":"s1","result":{"token":"valid"}}',
+						),
 					})
 					.mockResolvedValueOnce({ done: true, value: undefined }),
 				releaseLock: vi.fn(),

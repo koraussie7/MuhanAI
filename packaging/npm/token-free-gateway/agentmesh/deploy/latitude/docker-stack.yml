@@ -1,0 +1,242 @@
+# Vendored from https://github.com/latitude-dev/latitude-llm (development,
+# 2026-09) docker-stack.yml, with muhanai-specific adjustments:
+#   1. Run with `docker compose --env-file .env.production` on the 110 box
+#      (NOT `docker stack deploy`): Swarm `deploy:` blocks are replaced by
+#      compose `restart:` + `mem_limit:` — the box also runs Kamra, LiteLLM
+#      and the muhanai API; limits are kill-switches, not reservations.
+#   2. Published ports remapped to 127.0.0.1:4100/4101/4102 — host ports
+#      3000-3012, 4000, 4001 and 4003 (LiteLLM) are already taken on the 110
+#      box, and Caddy (not Docker) must be the public TLS endpoint.
+#      Infra services (Postgres/ClickHouse/Redis/Temporal) publish NOTHING.
+#   3. extra_hosts host-gateway on app services so Latitude can register the
+#      existing host LiteLLM gateway as a custom OpenAI-compatible provider
+#      (LAT_CUSTOM_AI_BASE_URL=http://host.docker.internal:4003/v1).
+#   4. SeaweedFS block DROPPED — storage uses the `fs` driver on a shared
+#      named volume (latitude_storage) mounted into every app service.
+#      Saves one container + ~256 MB on a RAM-tight single host.
+# Upstream file is licensed LGPL-3.0; we run it unmodified as a separate
+# service (no linking, no source obligations triggered).
+name: latitude
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+x-app: &app
+  restart: unless-stopped
+  env_file:
+    - .env.production
+  environment:
+    LAT_IMAGE_TAG: ${LAT_IMAGE_TAG:-latest}
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  volumes:
+    - latitude_storage:/var/lib/latitude/storage
+  logging: *logging
+  depends_on:
+    migrations:
+      condition: service_completed_successfully
+
+services:
+  # ======================== Application services ========================
+  web:
+    <<: *app
+    image: latitudedata/web:${LAT_IMAGE_TAG:-latest}
+    ports:
+      - "127.0.0.1:4100:3000"
+    mem_limit: 768m
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:$${LAT_WEB_PORT:-3000}/api/health || exit 1",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  api:
+    <<: *app
+    image: latitudedata/api:${LAT_IMAGE_TAG:-latest}
+    ports:
+      - "127.0.0.1:4101:3001"
+    mem_limit: 512m
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:$${LAT_API_PORT:-3001}/health || exit 1",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  ingest:
+    <<: *app
+    image: latitudedata/ingest:${LAT_IMAGE_TAG:-latest}
+    ports:
+      - "127.0.0.1:4102:3002"
+    mem_limit: 512m
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:$${LAT_INGEST_PORT:-3002}/health || exit 1",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  workers:
+    <<: *app
+    image: latitudedata/workers:${LAT_IMAGE_TAG:-latest}
+    mem_limit: 768m
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:$${LAT_WORKERS_HEALTH_PORT:-9090}/health || exit 1",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  workflows:
+    <<: *app
+    image: latitudedata/workflows:${LAT_IMAGE_TAG:-latest}
+    mem_limit: 512m
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:$${LAT_WORKFLOWS_HEALTH_PORT:-9091}/health || exit 1",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  # One-shot: Postgres (Drizzle) + ClickHouse (goose) migrations, then exit.
+  migrations:
+    image: latitudedata/migrations:${LAT_IMAGE_TAG:-latest}
+    env_file:
+      - .env.production
+    logging: *logging
+    restart: "no"
+    mem_limit: 256m
+    depends_on:
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+
+  # ======================== Infrastructure ==================================
+  # Bundled here because the muhanai Postgres/Redis live in other compose
+  # projects (isolated networks + shared RAM budgets). Latitude needs its own
+  # Postgres with schema-create admin rights + logical WAL, which we do not
+  # want to grant on the muhanai primary DB.
+
+  # --- Postgres (primary OLTP store + pgvector) -----------------------------
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    mem_limit: 384m
+    command: postgres -c wal_level=logical
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    logging: *logging
+
+  # --- ClickHouse (OLAP span/telemetry store) -------------------------------
+  clickhouse:
+    image: clickhouse/clickhouse-server:26.2
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    mem_limit: 1280m
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./docker/clickhouse/storage.xml:/etc/clickhouse-server/config.d/storage.xml:ro
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'clickhouse-client --user "$$CLICKHOUSE_USER" --password "$$CLICKHOUSE_PASSWORD" --query ''SELECT 1''',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    logging: *logging
+
+  # --- Redis: cache (distributed locks, rate limiters, budgets) -------------
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    mem_limit: 128m
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    logging: *logging
+
+  # --- Redis: BullMQ queue (durable; appendonly + noeviction) ---------------
+  redis-bullmq:
+    image: redis:7
+    restart: unless-stopped
+    mem_limit: 128m
+    command: redis-server --maxmemory 96mb --maxmemory-policy noeviction --appendonly yes
+    volumes:
+      - redis_bullmq_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    logging: *logging
+
+  # --- Temporal (workflow engine; Postgres-backed, no Elasticsearch) --------
+  # auto-setup creates the `temporal` + `temporal_visibility` databases on the
+  # bundled Postgres and the `default` namespace. ${...} values interpolate
+  # from --env-file .env.production at compose parse time — always pass it.
+  temporal:
+    image: temporalio/auto-setup:1.27.2
+    restart: unless-stopped
+    mem_limit: 512m
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB: postgres12
+      DB_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-latitude}
+      POSTGRES_PWD: ${POSTGRES_PASSWORD:-secret}
+      POSTGRES_SEEDS: postgres
+      DBNAME: temporal
+      VISIBILITY_DBNAME: temporal_visibility
+    logging: *logging
+
+volumes:
+  postgres_data:
+  clickhouse_data:
+  redis_bullmq_data:
+  latitude_storage:

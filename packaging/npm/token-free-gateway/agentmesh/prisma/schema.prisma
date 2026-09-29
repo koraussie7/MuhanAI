@@ -40,6 +40,60 @@ model User {
   stats           UserStatsRow?
   creditWallet    CreditWallet?
   creditLedger    CreditLedger[]
+  lists           AgentList[]
+  listShares      AgentListShare[]
+}
+
+// ---------------------------------------------------------------------------
+// Agent lists (bot.muhanai.com)
+// ---------------------------------------------------------------------------
+// Shared shopping/todo lists that agents can read and write through the MCP
+// tool surface. Distinct from CatalogItem: that model backs the marketplace,
+// these are per-user mutable documents with a share code.
+
+model AgentList {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  listType    String        @default("custom") // shopping | todo | custom
+  description String?
+  items       AgentListItem[]
+  shares      AgentListShare[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([userId, updatedAt])
+}
+
+model AgentListItem {
+  id        String    @id @default(cuid())
+  listId    String
+  list      AgentList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  name      String
+  quantity  Float?
+  note      String?
+  done      Boolean   @default(false)
+  position  Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([listId, done, position])
+}
+
+model AgentListShare {
+  id        String    @id @default(cuid())
+  listId    String
+  list      AgentList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  code      String    @unique
+  ownerId   String
+  owner     User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  expiresAt DateTime?
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([listId])
+  @@index([ownerId])
 }
 
 // ---------------------------------------------------------------------------

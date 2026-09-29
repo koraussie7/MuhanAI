@@ -4,7 +4,7 @@ import { AIEngineFactory } from "@agentmesh/ai-engine/factory";
 import type { EngineConfig } from "@agentmesh/ai-engine/types";
 import { ChatWidget } from "@agentmesh/ai-ui";
 import { useI18n } from "@agentmesh/web/i18n.js";
-import { Bot, Code, Cpu, Folder, Globe, Settings, Terminal } from "lucide-react";
+import { Bot, Code, Cpu, Folder, Globe, Network, Settings, Terminal } from "lucide-react";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
 import { Desktop, type WindowData } from "@/components/Desktop";
 import {
@@ -12,6 +12,7 @@ import {
 	CodeStudioApp,
 	EngineMonitorApp,
 	FileExplorerApp,
+	OpsMaxxApp,
 	SettingsApp,
 	TerminalApp,
 } from "@/components/DesktopApps";
@@ -126,6 +127,11 @@ export default function Home() {
 				title = "System Settings";
 				icon = <Settings size={18} className="text-gray-400" />;
 				content = <SettingsApp />;
+				break;
+			case "opsmaxx":
+				title = "OpsMaxx Bridge";
+				icon = <Network size={18} className="text-amber-400" />;
+				content = <OpsMaxxApp mode="panel" />;
 				break;
 			default:
 				title = appId;

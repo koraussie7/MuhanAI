@@ -1,0 +1,63 @@
+# Origin blocks for the Latitude self-host on the 110 server — behind Cloudflare.
+#
+# Deployment: `scp Caddyfile.latitude setup-caddy-latitude.sh 110:/tmp/` then
+# `ssh 110 'cd /tmp && sudo bash setup-caddy-latitude.sh'`.
+#
+# DNS (Cloudflare, Proxied / orange cloud, same pattern as hotel.kbizhub.com):
+#   prompt.kbizhub.com      A 185.55.240.110   -> Latitude web  (127.0.0.1:4100)
+#   prompt-api.kbizhub.com  A 185.55.240.110   -> Latitude api  (127.0.0.1:4101)
+# These must NOT be added as Worker routes in wrangler.toml — the muhanai
+# Worker has no handler for them and would fall through with 525/522.
+#
+# `tls internal`: Cloudflare terminates public TLS; Caddy's internal CA covers
+# the Cloudflare -> origin leg. Cloudflare SSL/TLS mode must be Full (strict).
+#
+# ingest (OTLP, 127.0.0.1:4102) is intentionally NOT exposed publicly — only
+# on-host services (services/api OTLP exporter) push traces to it.
+
+prompt.kbizhub.com {
+	tls internal
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+	}
+
+	reverse_proxy 127.0.0.1:4100 {
+		header_up Host {host}
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+
+	log {
+		output file /var/log/caddy/prompt-kbizhub.log
+	}
+}
+
+prompt-api.kbizhub.com {
+	tls internal
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+
+	# Latitude API + MCP server (/v1/mcp). Web origin is allowlisted via
+	# LAT_TRUSTED_ORIGINS / LAT_CORS_ALLOWED_ORIGINS in .env.production.
+	reverse_proxy 127.0.0.1:4101 {
+		header_up Host {host}
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+
+	log {
+		output file /var/log/caddy/prompt-api-kbizhub.log
+	}
+}

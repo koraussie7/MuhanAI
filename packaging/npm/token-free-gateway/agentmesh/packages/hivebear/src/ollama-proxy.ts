@@ -194,7 +194,13 @@ export class OllamaProxy {
 				const response = await fetch(targetUrl, {
 					method: req.method,
 					headers: normalizeHeaders(req.headers),
-					body: req.method !== "GET" && req.method !== "HEAD" ? await streamBody(req) : undefined,
+					// Fresh ArrayBuffer-backed view so the body satisfies
+					// BodyInit in programs that include lib.dom (TS 5.7
+					// typed arrays are generic over ArrayBufferLike).
+					body:
+						req.method !== "GET" && req.method !== "HEAD"
+							? new Uint8Array(await streamBody(req))
+							: undefined,
 				});
 
 				res.statusCode = response.status;

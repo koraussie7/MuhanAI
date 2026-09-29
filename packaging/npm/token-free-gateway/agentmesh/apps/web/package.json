@@ -17,6 +17,7 @@
 	"dependencies": {
 		"@agentmesh/ai-engine": "workspace:*",
 		"@agentmesh/knowledge-base": "workspace:*",
+		"@agentmesh/opsmaxx-bridge": "workspace:*",
 		"@agentmesh/personal-mcp": "workspace:*",
 		"@agentmesh/shared-types": "workspace:*",
 		"@libp2p/circuit-relay-v2": "^4.2.0",

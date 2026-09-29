@@ -123,6 +123,9 @@ const McpSkillsPageLazy = React.lazy(() =>
 const NetworkMonitorPageLazy = React.lazy(() =>
 	import("./components/DashPages").then((m) => ({ default: m.NetworkMonitorPage })),
 );
+const P2pInferencePageLazy = React.lazy(() =>
+	import("./components/P2pInferencePage").then((m) => ({ default: m.P2pInferencePage })),
+);
 const VerificationPageLazy = React.lazy(() =>
 	import("./components/DashPages").then((m) => ({ default: m.VerificationPage })),
 );
@@ -586,6 +589,11 @@ export function App() {
 						{activeSection === "mcp-skills" && (
 							<Suspense fallback={<PageSkeleton />}>
 								<McpSkillsPageLazy />
+							</Suspense>
+						)}
+						{activeSection === "p2p-inference" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<P2pInferencePageLazy />
 							</Suspense>
 						)}
 						{activeSection === "llm-mesh" && (

@@ -100,11 +100,8 @@ describe("source-resolver", () => {
 			throw new Error("failed network request");
 		};
 
-		await assert.rejects(
-			async () => {
-				await resolveSource([httpsSource, meshSource], { customFetcher });
-			},
-			/All sources failed to resolve/,
-		);
+		await assert.rejects(async () => {
+			await resolveSource([httpsSource, meshSource], { customFetcher });
+		}, /All sources failed to resolve/);
 	});
 });

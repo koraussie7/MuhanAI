@@ -34,9 +34,7 @@ describe("downloadFromManifest", () => {
 
 	it("completes download and verifies valid hash successfully", async () => {
 		const hashPart = blake3Hash ? `blake3:${blake3Hash}` : `sha256:${sha256Hash}`;
-		const manifest = createTestManifest([
-			{ kind: "mesh", peer: "peer-ok", contentId: hashPart },
-		]);
+		const manifest = createTestManifest([{ kind: "mesh", peer: "peer-ok", contentId: hashPart }]);
 
 		const mockConn: MeshPeerConnection = {
 			async dial() {
@@ -78,9 +76,7 @@ describe("downloadFromManifest", () => {
 	it("fails verification and returns failed status on corrupted content", async () => {
 		const corruptedContent = new Uint8Array([9, 9, 9, 9, 9, 9, 9, 9]);
 		const hashPart = blake3Hash ? `blake3:${blake3Hash}` : `sha256:${sha256Hash}`;
-		const manifest = createTestManifest([
-			{ kind: "mesh", peer: "peer-bad", contentId: hashPart },
-		]);
+		const manifest = createTestManifest([{ kind: "mesh", peer: "peer-bad", contentId: hashPart }]);
 
 		const mockConn: MeshPeerConnection = {
 			async dial() {
@@ -118,4 +114,3 @@ describe("downloadFromManifest", () => {
 		assert.match(result.error ?? "", /user canceled|Download aborted/);
 	});
 });
-

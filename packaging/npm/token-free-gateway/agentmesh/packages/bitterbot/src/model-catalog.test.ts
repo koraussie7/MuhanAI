@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
-import { buildManifest } from "@agentmesh/noema";
 import type { ManifestSource } from "@agentmesh/noema";
+import { buildManifest } from "@agentmesh/noema";
+import { describe, expect, it } from "vitest";
 import { ModelBeacon, ModelCatalog } from "./model-catalog";
 
 const sources: ManifestSource[] = [
@@ -27,7 +27,10 @@ class MemoryBeaconTransport {
 		for (const handler of this.handlers.get(topic) ?? []) await handler(payload);
 	}
 
-	async subscribe(topic: string, handler: (payload: string) => void | Promise<void>): Promise<() => void> {
+	async subscribe(
+		topic: string,
+		handler: (payload: string) => void | Promise<void>,
+	): Promise<() => void> {
 		const handlers = this.handlers.get(topic) ?? new Set();
 		handlers.add(handler);
 		this.handlers.set(topic, handlers);
@@ -90,7 +93,10 @@ describe("ModelCatalog", () => {
 		return Promise.all([a.publish(manifest()), b.publish(manifest())]).then(([ea, eb]) => {
 			expect(catalog.announce(ea).accepted).toBe(true);
 			expect(catalog.announce(eb).accepted).toBe(true);
-			expect(catalog.get("qwen-q4").map((entry) => entry.envelope.publisher)).toEqual(["peer-A", "peer-B"]);
+			expect(catalog.get("qwen-q4").map((entry) => entry.envelope.publisher)).toEqual([
+				"peer-A",
+				"peer-B",
+			]);
 		});
 	});
 
@@ -107,7 +113,9 @@ describe("ModelCatalog", () => {
 		const staleTime = Date.parse("2025-12-31T23:00:00.000Z");
 		const futureTime = Date.parse("2026-01-01T01:00:00.000Z");
 		const stale = new ModelBeacon(new MemoryBeaconTransport(), "stale", { now: () => staleTime });
-		const future = new ModelBeacon(new MemoryBeaconTransport(), "future", { now: () => futureTime });
+		const future = new ModelBeacon(new MemoryBeaconTransport(), "future", {
+			now: () => futureTime,
+		});
 
 		return Promise.all([
 			stale.publish(manifest("stale", "2025-12-31T23:00:00.000Z")),

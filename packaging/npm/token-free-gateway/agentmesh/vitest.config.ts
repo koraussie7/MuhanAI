@@ -75,6 +75,18 @@ export default defineConfig({
 			{ find: "@agentmesh/llm-router", replacement: resolve("packages/llm-router/src/index.ts") },
 			{ find: "@agentmesh/mcp", replacement: resolve("packages/mcp/src/index.ts") },
 			{ find: "@agentmesh/noema", replacement: resolve("packages/noema/src/index.ts") },
+			{
+				find: /^@agentmesh\/opsmaxx-bridge\/mock$/,
+				replacement: resolve("packages/opsmaxx-bridge/src/mock.ts"),
+			},
+			{
+				find: /^@agentmesh\/opsmaxx-bridge\/types$/,
+				replacement: resolve("packages/opsmaxx-bridge/src/types.ts"),
+			},
+			{
+				find: "@agentmesh/opsmaxx-bridge",
+				replacement: resolve("packages/opsmaxx-bridge/src/index.ts"),
+			},
 			{ find: "@agentmesh/payment", replacement: resolve("packages/payment/src/index.ts") },
 			{ find: "@agentmesh/peer-mesh", replacement: resolve("packages/peer-mesh/src/index.ts") },
 			{
@@ -96,7 +108,7 @@ export default defineConfig({
 		include: [
 			"packages/**/*.test.ts",
 			"services/**/*.test.ts",
-				"apps/web/src/**/*.test.{ts,tsx}",
+			"apps/web/src/**/*.test.{ts,tsx}",
 			"deploy/**/*.test.ts",
 			// Workspace-level operational tests (gated by env var; see file header).
 			"tests/**/*.test.ts",

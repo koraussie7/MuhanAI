@@ -14,6 +14,7 @@
 		"@agentmesh/ai-engine": "workspace:*",
 		"@agentmesh/ai-ui": "workspace:*",
 		"@agentmesh/bitterbot": "workspace:*",
+		"@agentmesh/opsmaxx-bridge": "workspace:*",
 		"@agentmesh/web": "workspace:*",
 		"lucide-react": "^0.457.0",
 		"next": "^15.0.0",

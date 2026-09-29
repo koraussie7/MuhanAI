@@ -655,3 +655,8 @@ export function DownloadBanner() {
     </div>
   );
 }
+
+
+// T5 — OpsMaxx bridge window for the DaedalOS desktop shell.
+// See docs/agentmesh/T5-OPSMAXX-DESKTOP-EMBED.md.
+export { OpsMaxxApp, type OpsMaxxAppProps, type OpsMaxxEmbedMode } from "./DesktopApps/OpsMaxxApp.js";

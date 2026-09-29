@@ -140,7 +140,7 @@ export async function handleTravelApi(
 		"Access-Control-Allow-Origin": "https://travel.kbizhub.com",
 		"Access-Control-Allow-Methods": "GET, POST, OPTIONS",
 		"Access-Control-Allow-Headers": "Content-Type",
-		"Vary": "Origin",
+		Vary: "Origin",
 	};
 
 	if (request.method === "OPTIONS" && pathname.startsWith("/api/travel/")) {

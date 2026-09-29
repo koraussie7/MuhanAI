@@ -938,6 +938,8 @@ h1, h2, h3, h4 { text-wrap: balance; margin: 0; }
       <button class="nav-item" data-space="mcp" data-od-id="path-0-0-2-4"><span class="dot" aria-hidden="true"></span>MCP 마켓<span class="count">142</span></button>
       <button class="nav-item" data-space="llm" data-od-id="path-0-0-2-5"><span class="dot" aria-hidden="true"></span>LLM 허브<span class="count">6</span></button>
       <button class="nav-item" data-space="factory" data-od-id="path-0-0-2-6"><span class="dot" aria-hidden="true"></span>1-Click 팩토리<span class="count" id="factory-count">0</span></button>
+      <button class="nav-item" data-space="viz-mesh" data-od-id="path-0-0-2-7"><span class="dot" aria-hidden="true"></span>메시 그래프<span class="count">23</span></button>
+      <button class="nav-item" data-space="viz-knowledge" data-od-id="path-0-0-2-8"><span class="dot" aria-hidden="true"></span>지식 그래프<span class="count">1.2K</span></button>
     </nav>
 
     <div class="sidebar-foot" data-od-id="path-0-0-3">
@@ -1387,7 +1389,9 @@ h1, h2, h3, h4 { text-wrap: balance; margin: 0; }
     fed:       ["연방",        "mesh://federation · 4 rabbit-holes · 2 nations"],
     mcp:       ["MCP 마켓",    "mesh://mcp · 142 tools · 12 runtimes"],
     llm:       ["LLM 허브",    "mesh://llm · 6 models · keyless pool on"],
-    factory:   ["1-Click 팩토리", "mesh://factory · 상점 노드 스폰 · shop?.kbizhub.com"]
+    factory:   ["1-Click 팩토리", "mesh://factory · 상점 노드 스폰 · shop?.kbizhub.com"],
+    "viz-mesh":      ["메시 그래프", "mesh://viz · 23 peers · 토폴로지 렌즈"],
+    "viz-knowledge": ["지식 그래프", "mesh://viz · 1,284 노드 · CRDT journal v214"]
   };
 
   const FACTORY_SITES = [];
@@ -1506,6 +1510,39 @@ h1, h2, h3, h4 { text-wrap: balance; margin: 0; }
           '</div>' +
         '</div>' +
         siteCards;
+    } else if (space === "viz-mesh" || space === "viz-knowledge") {
+      // Focus lenses reuse the existing topology data (`GRAPH.nodes`
+      // feeds the main graph, `JOURNAL` feeds the knowledge space)
+      // instead of introducing a second dataset that could drift.
+      const lens =
+        space === "viz-mesh"
+          ? GRAPH.nodes.filter((n) => n.spaces.split(" ").includes("mesh"))
+          : GRAPH.nodes.filter((n) => n.spaces.split(" ").includes("knowledge"));
+      const rows = lens
+        .slice(0, 12)
+        .map((n) =>
+          '<div class="jrn-row"><span class="jrn-op">node·' + esc(n.id) + '</span>' +
+          '<span class="jrn-key"><b>' + esc(n.label || n.id) + '</b></span>' +
+          '<span class="jrn-ops">' + esc(n.spaces.split(" ").join(" · ")) +
+          '<span class="state-pill ok" style="margin-left:8px">live</span></span></div>',
+        )
+        .join("");
+      const journalRows =
+        space === "viz-knowledge"
+          ? JOURNAL.slice(0, 6)
+              .map(([op, key, ops, st]) =>
+                '<div class="jrn-row"><span class="jrn-op">op·' + op + '</span>' +
+                '<span class="jrn-key"><b>' + esc(key) + '</b></span>' +
+                '<span class="jrn-ops">' + ops + '<span class="state-pill ok" style="margin-left:8px">' + st + '</span></span></div>',
+              )
+              .join("")
+          : "";
+      html =
+        '<div class="table-head"><span>노드</span><span>라벨</span><span>스페이스</span><span>상태</span></div>' +
+        rows +
+        (journalRows
+          ? '<div class="table-head" style="margin-top:14px"><span>op</span><span>키</span><span>ops</span><span>상태</span></div>' + journalRows
+          : "");
     }
     moduleBody.innerHTML = html;
     if (space === "factory") {
@@ -1558,13 +1595,21 @@ h1, h2, h3, h4 { text-wrap: balance; margin: 0; }
   }
 
   function applySpace(space) {
+    // The /viz spaces are lenses over the existing topology rather than a
+    // second graph: `viz-mesh` spotlights peers, `viz-knowledge` spotlights
+    // the knowledge-bearing nodes. Mapping them here keeps one source of
+    // truth for node membership (each node's own `data-spaces` list).
+    const lens = space === "viz-mesh" ? "mesh" : space === "viz-knowledge" ? "knowledge" : space;
     $$(".node", mesh).forEach((g) => {
-      const ok = g.dataset.spaces.split(" ").includes(space);
-      g.classList.toggle("dim", !ok);
+      // A lens space never fully dims the rest of the graph; it only
+      // narrows the spotlight, so operators keep spatial context.
+      const ok = g.dataset.spaces.split(" ").includes(lens);
+      g.classList.toggle("dim", !ok && space !== "viz-mesh" && space !== "viz-knowledge");
+      g.classList.toggle("focus", ok && lens !== space);
     });
     $$(".edge", mesh).forEach((l) => {
-      const ok = l.dataset.spaces.split(" ").includes(space);
-      l.classList.toggle("dim", !ok);
+      const ok = l.dataset.spaces.split(" ").includes(lens);
+      l.classList.toggle("dim", !ok && space !== "viz-mesh" && space !== "viz-knowledge");
       l.classList.toggle("hot", ok && l.dataset.a === "you");
     });
   }

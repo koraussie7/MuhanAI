@@ -300,7 +300,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	await app.register(routerRoutes);
 	await app.register(mcpRoutes);
 	await app.register(opsmaxxMcpRoutes, {
-		opsmaxxBridge: options.opsmaxxBridge,
+	opsmaxxBridge: options.opsmaxxBridge,
 	});
 	await app.register(catalogRoutes);
 	await app.register(resonanceRoutes);

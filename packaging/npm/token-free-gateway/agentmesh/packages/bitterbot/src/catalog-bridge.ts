@@ -1,6 +1,5 @@
 import type { DeviceNodeInfo } from "@agentmesh/peer-mesh";
-import { ModelCatalog } from "./model-catalog.js";
-import type { ModelAnnouncementResult } from "./model-catalog.js";
+import type { ModelAnnouncementResult, ModelCatalog } from "./model-catalog.js";
 
 export interface CatalogBridgeOptions {
 	/** Default port a provider exposes its local inference endpoint on. */

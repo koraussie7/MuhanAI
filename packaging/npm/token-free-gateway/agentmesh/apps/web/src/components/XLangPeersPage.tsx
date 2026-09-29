@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
 import type { XLangPeerInfo } from "@agentmesh/ai-engine";
+import { useCallback, useEffect, useState } from "react";
 import { fetchXLangRegistrySnapshot } from "../lib/xlang-registry-client.js";
 
 const STORAGE_KEY = "muhanai.xlang.peers";

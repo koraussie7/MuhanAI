@@ -48,10 +48,10 @@ export const NAV_GROUPS: NavGroup[] = Object.entries(
 			id: route.id,
 			label: route.label,
 			path: route.path,
-				iconKey: route.iconKey,
+			iconKey: route.iconKey,
 			badge: route.badge,
-				externalUrl: route.externalUrl,
-			});
+			externalUrl: route.externalUrl,
+		});
 		return groups;
 	}, {}),
 ).map(([id, items]) => ({ id, title: GROUP_TITLES[id] ?? id, items }));

@@ -5,8 +5,8 @@
  * verifying content hash integrity against the ModelManifest.
  */
 
-import { resolveSource } from "./source-resolver.js";
 import type { MeshPeerConnection } from "./mesh-source.js";
+import { resolveSource } from "./source-resolver.js";
 import type { DownloadStatus, ManifestSource, ModelManifest } from "./types.js";
 import { verifyFile } from "./verify.js";
 

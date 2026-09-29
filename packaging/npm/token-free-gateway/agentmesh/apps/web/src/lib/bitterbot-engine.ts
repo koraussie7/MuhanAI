@@ -1,7 +1,7 @@
 import type { OpenHydraEngine, SippEngine, XLangEngine } from "@agentmesh/ai-engine";
 import { AIEngineFactory } from "@agentmesh/ai-engine/factory";
-import { answerOffline, type BitterbotMessage as OfflineMessage } from "./offline-brain.js";
 import { createCachedEngine } from "./engine-cache.js";
+import { answerOffline, type BitterbotMessage as OfflineMessage } from "./offline-brain.js";
 
 export type BitterbotRole = "system" | "user" | "assistant";
 
@@ -26,7 +26,7 @@ export interface BitterbotResponse {
 		| "nanos-local"
 		| "bitterbot-offline"
 		| "bitterbot-openhydra"
-	| "bitterbot-xlang";
+		| "bitterbot-xlang";
 	model: string;
 	tier: string;
 	latencyMs: number;
@@ -167,20 +167,24 @@ function readOpenHydraBootstrap(): string[] {
  */
 const xlangCache = createCachedEngine<XLangEngine>({
 	init: async () => {
-	const endpoint = readPublicEndpoints("XLANG_ENDPOINTS")[0];
-	if (!endpoint) throw new Error("No XLang endpoints configured");
-	const engine = AIEngineFactory.create({ type: "xlang", endpoint, systemPrompt: SYSTEM_PROMPT }) as XLangEngine;
-	await engine.init();
-	return engine;
+		const endpoint = readPublicEndpoints("XLANG_ENDPOINTS")[0];
+		if (!endpoint) throw new Error("No XLang endpoints configured");
+		const engine = AIEngineFactory.create({
+			type: "xlang",
+			endpoint,
+			systemPrompt: SYSTEM_PROMPT,
+		}) as XLangEngine;
+		await engine.init();
+		return engine;
 	},
 });
 
 function readPublicEndpoints(name: string): string[] {
 	if (typeof process === "undefined") return [];
 	return (process.env?.[name] ?? process.env?.[`VITE_${name}`] ?? "")
-	.split(",")
-	.map((value) => value.trim())
-	.filter(Boolean);
+		.split(",")
+		.map((value) => value.trim())
+		.filter(Boolean);
 }
 
 const openHydraCache = createCachedEngine<OpenHydraEngine>({
@@ -203,11 +207,17 @@ async function tryXLangInference(
 	if (!engine) return null;
 	const prompt = [...messages].reverse().find((message) => message.role === "user")?.content ?? "";
 	try {
-	const text = await engine.chat(prompt, { stream: false });
-	if (!validText(text)) return null;
-	return { text, provider: "bitterbot-xlang", model: "xlang-peer", tier: "workflow-peer", latencyMs: Math.round(now() - started) };
+		const text = await engine.chat(prompt, { stream: false });
+		if (!validText(text)) return null;
+		return {
+			text,
+			provider: "bitterbot-xlang",
+			model: "xlang-peer",
+			tier: "workflow-peer",
+			latencyMs: Math.round(now() - started),
+		};
 	} catch {
-	return null;
+		return null;
 	}
 }
 
@@ -329,14 +339,14 @@ export async function answerWithBitterbot(
 	// P2P inference (OpenHydra). Disabled in non-browser contexts to
 	// keep SSR and worker-boot deterministic. Failures are silent.
 	if (typeof navigator !== "undefined") {
-	try {
-	const p2p = await tryP2pInference(messages, options, started);
-	if (p2p) return p2p;
-	const xlang = await tryXLangInference(messages, started);
-	if (xlang) return xlang;
-	} catch {
-	// Fall through to offline.
-	}
+		try {
+			const p2p = await tryP2pInference(messages, options, started);
+			if (p2p) return p2p;
+			const xlang = await tryXLangInference(messages, started);
+			if (xlang) return xlang;
+		} catch {
+			// Fall through to offline.
+		}
 	}
 
 	if (options.allowOffline === false) return null;

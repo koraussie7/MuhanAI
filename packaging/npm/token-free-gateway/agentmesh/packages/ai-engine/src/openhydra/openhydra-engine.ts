@@ -1,10 +1,4 @@
-import type {
-	ChatOptions,
-	EngineConfig,
-	EngineStatus,
-	Message,
-	ModelInfo,
-} from "../types";
+import type { ChatOptions, EngineConfig, EngineStatus, Message, ModelInfo } from "../types";
 import { EventEmitter } from "../utils/events";
 import { Logger } from "../utils/logger";
 import { OpenHydraDiscoveryImpl } from "./discovery";
@@ -60,8 +54,7 @@ export class OpenHydraEngine extends EventEmitter {
 
 		const bootstrap = this.config.bootstrap ?? this.config.endpoints ?? [];
 		if (bootstrap.length === 0) {
-			this.status.error =
-				"No OpenHydra endpoints configured (set endpoint or bootstrap in config)";
+			this.status.error = "No OpenHydra endpoints configured (set endpoint or bootstrap in config)";
 			this.status.loading = false;
 			this.emit("status", { ...this.status });
 			throw new Error(this.status.error);
@@ -114,17 +107,12 @@ export class OpenHydraEngine extends EventEmitter {
 				return await this.chatFromNode(node.endpoint, messages, options);
 			} catch (err: unknown) {
 				lastError = err instanceof Error ? err : new Error(String(err));
-				this.logger.warn(
-					`Chat failed on node ${node.endpoint}:`,
-					lastError.message,
-				);
+				this.logger.warn(`Chat failed on node ${node.endpoint}:`, lastError.message);
 				this.emit("error", lastError);
 			}
 		}
 
-		throw new Error(
-			`All OpenHydra nodes failed. Last error: ${lastError?.message ?? "unknown"}`,
-		);
+		throw new Error(`All OpenHydra nodes failed. Last error: ${lastError?.message ?? "unknown"}`);
 	}
 
 	private async chatFromNode(
@@ -301,13 +289,13 @@ export class OpenHydraEngine extends EventEmitter {
 				const response = await fetch(node.endpoint, {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
-						body: JSON.stringify({
-							jsonrpc: "2.0",
-							id: `models-${Date.now()}`,
-							method: "models",
-							params: { model: this.config.model ?? "" },
-						} satisfies OpenHydraRequest),
-					});
+					body: JSON.stringify({
+						jsonrpc: "2.0",
+						id: `models-${Date.now()}`,
+						method: "models",
+						params: { model: this.config.model ?? "" },
+					} satisfies OpenHydraRequest),
+				});
 
 				if (!response.ok) continue;
 

@@ -28,7 +28,10 @@ function abortError(): Error {
 	return new DOMException("The XLang request was aborted", "AbortError");
 }
 
-function withTimeout(signal: AbortSignal | undefined, timeoutMs: number): {
+function withTimeout(
+	signal: AbortSignal | undefined,
+	timeoutMs: number,
+): {
 	signal: AbortSignal;
 	cleanup: () => void;
 } {
@@ -79,7 +82,9 @@ export class XLangClient {
 			runtime: "xlang",
 			...(typeof peer.version === "string" ? { version: peer.version } : {}),
 			capabilities: capabilities as XLangCapability[],
-			...(Array.isArray(peer.models) ? { models: peer.models.filter((model): model is string => typeof model === "string") } : {}),
+			...(Array.isArray(peer.models)
+				? { models: peer.models.filter((model): model is string => typeof model === "string") }
+				: {}),
 			supportsStreaming: peer.supportsStreaming === true,
 		};
 	}

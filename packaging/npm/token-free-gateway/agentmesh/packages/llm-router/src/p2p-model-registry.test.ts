@@ -1,12 +1,10 @@
+import { InMemoryModelBeaconTransport } from "@agentmesh/bitterbot";
 import { buildManifest } from "@agentmesh/noema";
 import { describe, expect, it } from "vitest";
-import { InMemoryModelBeaconTransport } from "@agentmesh/bitterbot";
 import { createP2pModelRegistry } from "./p2p-model-registry.js";
 import { P2pNodeRegistry } from "./p2p-node-registry.js";
 
-const sources = [
-	{ kind: "hf" as const, repo: "Qwen/Qwen2.5-7B-Instruct-GGUF", file: "qwen.gguf" },
-];
+const sources = [{ kind: "hf" as const, repo: "Qwen/Qwen2.5-7B-Instruct-GGUF", file: "qwen.gguf" }];
 
 function makeManifest(id: string) {
 	return buildManifest({

@@ -60,7 +60,8 @@ export function verifyManifest(manifest: unknown): VerificationResult {
 		if (!(field in m)) return fail(field, `missing required field`);
 	}
 	if (typeof m.id !== "string" || m.id.length === 0) return fail("id", "must be non-empty string");
-	if (typeof m.name !== "string" || m.name.length === 0) return fail("name", "must be non-empty string");
+	if (typeof m.name !== "string" || m.name.length === 0)
+		return fail("name", "must be non-empty string");
 	if (typeof m.sizeBytes !== "number" || m.sizeBytes <= 0) {
 		return fail("sizeBytes", "must be a positive number");
 	}

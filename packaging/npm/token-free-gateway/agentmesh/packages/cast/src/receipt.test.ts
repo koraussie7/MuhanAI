@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+	type CallReceipt,
 	canonicalReceiptBytes,
 	canonicalReceiptId,
 	ReceiptLedger,
 	verifyReceiptStructure,
-	type CallReceipt,
 } from "./receipt.js";
 
 function makeReceipt(overrides: Partial<CallReceipt> = {}): CallReceipt {

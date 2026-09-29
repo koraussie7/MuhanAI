@@ -4,9 +4,7 @@ import { describe, expect, it } from "vitest";
 import { bridgeCatalogToNodeRegistry } from "./catalog-bridge.js";
 import { ModelCatalog } from "./model-catalog.js";
 
-const sources = [
-	{ kind: "hf" as const, repo: "Qwen/Qwen2.5-7B-Instruct-GGUF", file: "qwen.gguf" },
-];
+const sources = [{ kind: "hf" as const, repo: "Qwen/Qwen2.5-7B-Instruct-GGUF", file: "qwen.gguf" }];
 
 function manifest(id = "qwen-q4", name?: string) {
 	return buildManifest({

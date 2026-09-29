@@ -161,11 +161,7 @@ export function P2pNetworkPage() {
 						<form onSubmit={submit} className="router-form">
 							<div className="form-group">
 								<label htmlFor="p2p-peer">대상 피어</label>
-								<select
-									id="p2p-peer"
-									value={peerId}
-									onChange={(e) => setPeerId(e.target.value)}
-								>
+								<select id="p2p-peer" value={peerId} onChange={(e) => setPeerId(e.target.value)}>
 									<option value="">자동 선택 (healthiest)</option>
 									{peers.map((peer) => (
 										<option key={peer.id} value={peer.id}>

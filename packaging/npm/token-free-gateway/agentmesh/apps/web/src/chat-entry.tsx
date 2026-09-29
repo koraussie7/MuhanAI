@@ -21,11 +21,11 @@ import { BitterbotChat } from "./components/bitterbot/BitterbotChat";
 
 const container = document.getElementById("root");
 if (!container) {
-  throw new Error("chat.muhanai.com: #root element missing from SSR shell");
+	throw new Error("chat.muhanai.com: #root element missing from SSR shell");
 }
 
 createRoot(container).render(
-  <StrictMode>
-    <BitterbotChat />
-  </StrictMode>,
+	<StrictMode>
+		<BitterbotChat />
+	</StrictMode>,
 );

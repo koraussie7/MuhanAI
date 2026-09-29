@@ -1,8 +1,8 @@
 import { isChatRequest, renderChatShell } from "./chat-handler";
-import { handleP2pInferenceRequest } from "./p2p-inference";
 import { handleFediverseRequest } from "./fediverse";
 import { handleFeedApi } from "./feed-api";
 import { handleMcpRequest } from "./mcp-server";
+import { handleP2pInferenceRequest } from "./p2p-inference";
 import { handleTravelApi } from "./travel-api";
 import { handleXLangPeersRequest } from "./xlang-peers";
 

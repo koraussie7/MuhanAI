@@ -1,9 +1,13 @@
 export type { Skill } from "@agentmesh/shared-types";
-export type { BitterbotStatus, BitterbotWorkerConfig, RememberOptions } from "./types";
+export type { CatalogBridge, CatalogBridgeOptions } from "./catalog-bridge";
+export { bridgeCatalogToNodeRegistry } from "./catalog-bridge";
+export type { GossipsubLike, GossipsubTransportOptions } from "./gossipsub-transport";
 export {
-	ModelBeacon,
-	ModelCatalog,
-} from "./model-catalog";
+	fromGossipsubTopic,
+	GossipsubModelBeaconTransport,
+	InMemoryModelBeaconTransport,
+	toGossipsubTopic,
+} from "./gossipsub-transport";
 export type {
 	ModelAnnouncementResult,
 	ModelBeaconOptions,
@@ -13,11 +17,7 @@ export type {
 	ModelCatalogOptions,
 } from "./model-catalog";
 export {
-	GossipsubModelBeaconTransport,
-	InMemoryModelBeaconTransport,
-	fromGossipsubTopic,
-	toGossipsubTopic,
-} from "./gossipsub-transport";
-export type { GossipsubLike, GossipsubTransportOptions } from "./gossipsub-transport";
-export { bridgeCatalogToNodeRegistry } from "./catalog-bridge";
-export type { CatalogBridge, CatalogBridgeOptions } from "./catalog-bridge";
+	ModelBeacon,
+	ModelCatalog,
+} from "./model-catalog";
+export type { BitterbotStatus, BitterbotWorkerConfig, RememberOptions } from "./types";

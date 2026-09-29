@@ -216,6 +216,9 @@ importers:
       '@agentmesh/llm-router':
         specifier: workspace:*
         version: link:../llm-router
+      '@agentmesh/opsmaxx-bridge':
+        specifier: workspace:*
+        version: link:../opsmaxx-bridge
       '@agentmesh/peer-mesh':
         specifier: workspace:*
         version: link:../peer-mesh
@@ -792,6 +795,22 @@ importers:
         specifier: ^5.7.2
         version: 5.9.3
 
+  packages/opsmaxx-bridge:
+    dependencies:
+      '@agentmesh/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.20.4
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.4)(lightningcss@1.32.0)(terser@5.51.2)
+
   packages/p2p:
     dependencies:
       '@agentmesh/core':
@@ -1056,6 +1075,9 @@ importers:
       '@agentmesh/noema':
         specifier: workspace:*
         version: link:../../packages/noema
+      '@agentmesh/opsmaxx-bridge':
+        specifier: workspace:*
+        version: link:../../packages/opsmaxx-bridge
       '@agentmesh/payment':
         specifier: workspace:*
         version: link:../../packages/payment

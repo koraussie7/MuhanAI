@@ -1,10 +1,5 @@
-export { XLangClient } from "./client";
 export type { XLangChatOptions, XLangClientOptions } from "./client";
-export { XLangEngine } from "./xlang-engine";
-export {
-	isXLangPeerResponse,
-	isXLangStreamEvent,
-} from "./protocol";
+export { XLangClient } from "./client";
 export type {
 	XLangCapability,
 	XLangPeerInfo,
@@ -13,3 +8,8 @@ export type {
 	XLangRequestMethod,
 	XLangStreamEvent,
 } from "./protocol";
+export {
+	isXLangPeerResponse,
+	isXLangStreamEvent,
+} from "./protocol";
+export { XLangEngine } from "./xlang-engine";

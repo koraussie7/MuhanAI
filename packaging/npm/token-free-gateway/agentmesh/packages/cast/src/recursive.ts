@@ -22,16 +22,15 @@
  *     `{ ok: false, reason: "budget_exceeded" }` rather than throwing.
  */
 
-import type { AgentExecutor } from "@agentmesh/agent";
-import type { AgentRegistry } from "@agentmesh/agent";
+import type { AgentExecutor, AgentRegistry } from "@agentmesh/agent";
 import type { AgentRequest, AgentResult } from "@agentmesh/core";
 import { fanOut } from "./fanout.js";
 import {
-canonicalReceiptBytes,
-canonicalReceiptId,
-type CallReceipt,
-type ReceiptSigner,
-ReceiptLedger,
+	type CallReceipt,
+	canonicalReceiptBytes,
+	canonicalReceiptId,
+	ReceiptLedger,
+	type ReceiptSigner,
 } from "./receipt.js";
 
 export interface RecursiveDelegateInput {
@@ -50,7 +49,11 @@ export interface RecursiveDelegateInput {
 
 export type RecursiveDelegateResult =
 	| { ok: true; result: AgentResult; depth: number }
-	| { ok: false; reason: "depth_exceeded" | "budget_exceeded" | "cycle_detected" | "no_agent_available"; agentIds: string[] };
+	| {
+			ok: false;
+			reason: "depth_exceeded" | "budget_exceeded" | "cycle_detected" | "no_agent_available";
+			agentIds: string[];
+	  };
 
 const DEFAULT_MAX_DEPTH = 3;
 
@@ -271,7 +274,8 @@ export class RecursiveCast {
 	): string[] {
 		const all = this.registry.all();
 		const excluded = new Set([...excludeAgentIds, ...ancestorIds, request.id]);
-		const required = request.requiredCapabilities ?? (requiredCapability ? [requiredCapability] : []);
+		const required =
+			request.requiredCapabilities ?? (requiredCapability ? [requiredCapability] : []);
 		return all
 			.filter((agent) => !excluded.has(agent.id))
 			.filter((agent) => {
