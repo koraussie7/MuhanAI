@@ -30,6 +30,12 @@ x-app: &app
     - .env.production
   environment:
     LAT_IMAGE_TAG: ${LAT_IMAGE_TAG:-latest}
+    # Node sizes its heap from the cgroup limit (~half of mem_limit), so a
+    # 512m cap yields a ~256 MB heap and the app dies with
+    # "FATAL ERROR: Reached heap limit" rather than being OOM-killed. Pin an
+    # explicit heap ceiling per service (see mem_limit below) so V8 collects
+    # garbage internally first and the cgroup limit stays a true last resort.
+    NODE_OPTIONS: --max-old-space-size=${NODE_HEAP_WEB:-512}
   extra_hosts:
     - "host.docker.internal:host-gateway"
   volumes:
@@ -46,7 +52,10 @@ services:
     image: latitudedata/web:${LAT_IMAGE_TAG:-latest}
     ports:
       - "127.0.0.1:4100:3000"
-    mem_limit: 768m
+    environment:
+      LAT_IMAGE_TAG: ${LAT_IMAGE_TAG:-latest}
+      NODE_OPTIONS: --max-old-space-size=${NODE_HEAP_WEB:-512}
+    mem_limit: 1024m
     healthcheck:
       test:
         [
@@ -63,7 +72,10 @@ services:
     image: latitudedata/api:${LAT_IMAGE_TAG:-latest}
     ports:
       - "127.0.0.1:4101:3001"
-    mem_limit: 512m
+    environment:
+      LAT_IMAGE_TAG: ${LAT_IMAGE_TAG:-latest}
+      NODE_OPTIONS: --max-old-space-size=${NODE_HEAP_API:-640}
+    mem_limit: 1024m
     healthcheck:
       test:
         [
@@ -80,7 +92,10 @@ services:
     image: latitudedata/ingest:${LAT_IMAGE_TAG:-latest}
     ports:
       - "127.0.0.1:4102:3002"
-    mem_limit: 512m
+    environment:
+      LAT_IMAGE_TAG: ${LAT_IMAGE_TAG:-latest}
+      NODE_OPTIONS: --max-old-space-size=${NODE_HEAP_INGEST:-512}
+    mem_limit: 768m
     healthcheck:
       test:
         [
@@ -95,7 +110,10 @@ services:
   workers:
     <<: *app
     image: latitudedata/workers:${LAT_IMAGE_TAG:-latest}
-    mem_limit: 768m
+    environment:
+      LAT_IMAGE_TAG: ${LAT_IMAGE_TAG:-latest}
+      NODE_OPTIONS: --max-old-space-size=${NODE_HEAP_WORKERS:-640}
+    mem_limit: 1024m
     healthcheck:
       test:
         [
@@ -110,7 +128,10 @@ services:
   workflows:
     <<: *app
     image: latitudedata/workflows:${LAT_IMAGE_TAG:-latest}
-    mem_limit: 512m
+    environment:
+      LAT_IMAGE_TAG: ${LAT_IMAGE_TAG:-latest}
+      NODE_OPTIONS: --max-old-space-size=${NODE_HEAP_WORKFLOWS:-512}
+    mem_limit: 768m
     healthcheck:
       test:
         [
@@ -127,9 +148,12 @@ services:
     image: latitudedata/migrations:${LAT_IMAGE_TAG:-latest}
     env_file:
       - .env.production
+    environment:
+      LAT_IMAGE_TAG: ${LAT_IMAGE_TAG:-latest}
+      NODE_OPTIONS: --max-old-space-size=${NODE_HEAP_MIGRATIONS:-192}
     logging: *logging
     restart: "no"
-    mem_limit: 256m
+    mem_limit: 384m
     depends_on:
       postgres:
         condition: service_healthy
