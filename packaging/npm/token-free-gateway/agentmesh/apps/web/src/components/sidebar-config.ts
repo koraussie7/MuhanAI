@@ -31,6 +31,7 @@ export interface NavGroup {
  */
 
 const GROUP_TITLES: Record<string, string> = {
+	intelligence: "Intelligence & Telemetry",
 	core: "Core & Chat",
 	network: "P2P Network",
 	resources: "Compute & Models",

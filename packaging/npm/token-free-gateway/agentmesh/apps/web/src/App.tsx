@@ -193,6 +193,7 @@ const LlmMeshPageLazy = React.lazy(() =>
  * Legacy paths are handled by redirects in sectionIdFromPath().
  */
 const GROUP_LABELS: Record<string, string> = {
+	intelligence: "Intelligence & Telemetry",
 	core: "Core",
 	network: "Network",
 	resources: "Resources",

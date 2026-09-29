@@ -26,6 +26,7 @@ export interface NavI18n {
 export const MENU_TRANSLATIONS: Record<SupportedLanguage, NavI18n> = {
 	ko: {
 		groups: {
+			intelligence: "인텔리전스 & 텔레메트리",
 			core: "코어 & 채팅",
 			network: "P2P 네트워크",
 			resources: "연산 & 모델",
@@ -152,6 +153,7 @@ export const MENU_TRANSLATIONS: Record<SupportedLanguage, NavI18n> = {
 	},
 	en: {
 		groups: {
+			intelligence: "Intelligence & Telemetry",
 			core: "Core & Chat",
 			network: "P2P Network",
 			resources: "Compute & Models",
@@ -270,6 +272,7 @@ export const MENU_TRANSLATIONS: Record<SupportedLanguage, NavI18n> = {
 	},
 	ja: {
 		groups: {
+			intelligence: "インテリジェンス＆テレメトリ",
 			core: "コア＆チャット",
 			network: "P2Pネットワーク",
 			resources: "コンピュート＆モデル",
@@ -362,6 +365,7 @@ export const MENU_TRANSLATIONS: Record<SupportedLanguage, NavI18n> = {
 	},
 	zh: {
 		groups: {
+			intelligence: "智能与遥测",
 			core: "核心与对话",
 			network: "P2P网络",
 			resources: "算力与模型",
@@ -454,6 +458,7 @@ export const MENU_TRANSLATIONS: Record<SupportedLanguage, NavI18n> = {
 	},
 	es: {
 		groups: {
+			intelligence: "Inteligencia y Telemetría",
 			core: "Núcleo y Chat",
 			network: "Red P2P",
 			resources: "Cómputo y Modelos",
@@ -546,6 +551,7 @@ export const MENU_TRANSLATIONS: Record<SupportedLanguage, NavI18n> = {
 	},
 	de: {
 		groups: {
+			intelligence: "Intelligenz & Telemetrie",
 			core: "Kern & Chat",
 			network: "P2P-Netzwerk",
 			resources: "Rechenleistung & Modelle",
@@ -637,6 +643,7 @@ export const MENU_TRANSLATIONS: Record<SupportedLanguage, NavI18n> = {
 	},
 	fr: {
 		groups: {
+			intelligence: "Intelligence & Télémétrie",
 			core: "Cœur & Chat",
 			network: "Réseau P2P",
 			resources: "Calcul & Modèles",
@@ -727,6 +734,7 @@ export const MENU_TRANSLATIONS: Record<SupportedLanguage, NavI18n> = {
 	},
 	pt: {
 		groups: {
+			intelligence: "Inteligência e Telemetria",
 			core: "Núcleo e Chat",
 			network: "Rede P2P",
 			resources: "Computação e Modelos",

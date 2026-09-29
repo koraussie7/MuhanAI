@@ -1,4 +1,5 @@
 export type RouteGroup =
+	| "intelligence"
 	| "core"
 	| "network"
 	| "resources"
@@ -21,6 +22,33 @@ export interface RouteDefinition {
 
 /** Single source of truth for navigation, routing, translations, and lazy pages. */
 export const ROUTES: readonly RouteDefinition[] = [
+	{
+		id: "ontology",
+		path: "/ontology",
+		group: "intelligence",
+		label: "Ontology",
+		iconKey: "layers",
+		badge: "NEW",
+		page: "ontology",
+	},
+	{
+		id: "pythia",
+		path: "/pythia",
+		group: "intelligence",
+		label: "Pythia Analysis",
+		iconKey: "python",
+		badge: "NEW",
+		page: "pythia",
+	},
+	{
+		id: "world",
+		path: "/world",
+		group: "intelligence",
+		label: "World Intelligence",
+		iconKey: "activity",
+		badge: "NEW",
+		page: "world",
+	},
 	{
 		id: "dashboard",
 		path: "/dashboard",
@@ -219,15 +247,7 @@ export const ROUTES: readonly RouteDefinition[] = [
 		badge: "Viz",
 		page: "knowledge-graph-viz",
 	},
-	{
-		id: "ontology",
-		path: "/ontology",
-		group: "knowledge",
-		label: "Ontology",
-		iconKey: "layers",
-		badge: "NEW",
-		page: "ontology",
-	},
+
 	{
 		id: "verification",
 		path: "/verification",
@@ -365,24 +385,7 @@ export const ROUTES: readonly RouteDefinition[] = [
 		badge: "NEW",
 		page: "happy",
 	},
-	{
-		id: "pythia",
-		path: "/pythia",
-		group: "system",
-		label: "Pythia",
-		iconKey: "python",
-		badge: "NEW",
-		page: "pythia",
-	},
-	{
-		id: "world",
-		path: "/world",
-		group: "system",
-		label: "World",
-		iconKey: "activity",
-		badge: "NEW",
-		page: "world",
-	},
+
 	{
 		id: "logs",
 		path: "/logs",
