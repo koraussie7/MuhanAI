@@ -161,6 +161,15 @@ export const ROUTES: readonly RouteDefinition[] = [
 		page: "models",
 	},
 	{
+		id: "llm-mesh",
+		path: "/llm-mesh",
+		group: "resources",
+		label: "SwarmLLM Mesh",
+		iconKey: "cpu",
+		badge: "LOCAL",
+		page: "llm-mesh",
+	},
+	{
 		id: "compute-mesh",
 		path: "/compute-mesh",
 		group: "resources",

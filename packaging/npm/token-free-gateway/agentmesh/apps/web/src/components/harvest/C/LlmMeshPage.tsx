@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createHttpAdapter, createResilientAdapter, type ResourceAdapter } from "./adapter.js";
 import type { GatewayProvider } from "./GatewayPanel.js";
 import { ApiVault, GatewayTable, PolicyChain } from "./GatewayPanel.js";
@@ -33,6 +33,9 @@ export interface LlmMeshSnapshot {
 	gateways: GatewayProvider[];
 	routes: LlmMeshRoute[];
 	vault: LlmMeshVaultEntry[];
+	timestamp?: number;
+	stale?: boolean;
+	error?: string;
 }
 
 export interface LlmMeshAdapter extends ResourceAdapter<LlmMeshSnapshot> {}
@@ -141,20 +144,35 @@ const POLICIES = [
 const MAX_LATENCY_MS = 1000;
 
 export function LlmMeshPage({ adapter }: LlmMeshPageProps = {}) {
-	const adp = adapter ?? defaultLlmMeshAdapter();
+	const adp = useMemo(() => adapter ?? defaultLlmMeshAdapter(), [adapter]);
 	const [policyId, setPolicyId] = useState<string>("balanced");
 	const [snapshot, setSnapshot] = useState<LlmMeshSnapshot | null>(null);
+	const [isRefreshing, setIsRefreshing] = useState(false);
+	const [refreshError, setRefreshError] = useState<string | null>(null);
 
-	const refresh = async () => {
-		const next = await adp.loadSnapshot();
-		setSnapshot(next);
-	};
+	const refresh = useCallback(async () => {
+		setIsRefreshing(true);
+		try {
+			const next = await adp.loadSnapshot();
+			setSnapshot(next);
+			setRefreshError(next.error ?? null);
+		} catch (error) {
+			setRefreshError(error instanceof Error ? error.message : "Unable to load LLM mesh status");
+		} finally {
+			setIsRefreshing(false);
+		}
+	}, [adp]);
 
 	useEffect(() => {
 		void refresh();
 		const timer = setInterval(() => void refresh(), 30_000);
 		return () => clearInterval(timer);
 	}, [refresh]);
+
+	const swarmGateway = snapshot?.gateways.find((gateway) => gateway.name === "SwarmLLM (local)");
+	const lastUpdated = snapshot?.timestamp
+		? new Date(snapshot.timestamp).toLocaleTimeString()
+		: null;
 
 	const activePolicy = POLICIES.find((p) => p.id === policyId) ?? POLICIES[6];
 
@@ -172,6 +190,64 @@ export function LlmMeshPage({ adapter }: LlmMeshPageProps = {}) {
 
 	return (
 		<div className="hc-llm-mesh">
+			{/* SwarmLLM control surface */}
+			<section className="hc-panel">
+				<div
+					style={{
+						display: "flex",
+						justifyContent: "space-between",
+						gap: 16,
+						alignItems: "flex-start",
+					}}
+				>
+					<div>
+						<h3 className="hc-panel-title">SwarmLLM Local Node</h3>
+						<p className="hc-panel-meta">
+							OpenAI-compatible local inference gateway · automatic health probe
+						</p>
+					</div>
+					<button
+						type="button"
+						className="hc-policy-chip"
+						onClick={() => void refresh()}
+						disabled={isRefreshing}
+					>
+						{isRefreshing ? "Checking…" : "Check now"}
+					</button>
+				</div>
+				<div className="hc-llm-stat">
+					<div className="hc-llm-stat-item">
+						<span className="hc-llm-stat-label">Status</span>
+						<span className="hc-llm-stat-value">
+							<span
+								className={`hc-status-dot ${swarmGateway?.status === "healthy" ? "idle" : swarmGateway?.status === "degraded" ? "warm" : "offline"}`}
+							/>{" "}
+							{swarmGateway?.status ?? "not configured"}
+						</span>
+					</div>
+					<div className="hc-llm-stat-item">
+						<span className="hc-llm-stat-label">Probe latency</span>
+						<span className="hc-llm-stat-value">
+							{swarmGateway ? `${swarmGateway.latencyMs} ms` : "—"}
+						</span>
+					</div>
+					<div className="hc-llm-stat-item">
+						<span className="hc-llm-stat-label">Last update</span>
+						<span className="hc-llm-stat-value">{lastUpdated ?? "waiting…"}</span>
+					</div>
+				</div>
+				{refreshError && (
+					<p className="hc-panel-meta" role="status">
+						{refreshError}
+					</p>
+				)}
+				{snapshot?.stale && (
+					<p className="hc-panel-meta" role="status">
+						Showing the last known snapshot while the gateway recovers.
+					</p>
+				)}
+			</section>
+
 			{/* Header summary */}
 			<section className="hc-panel">
 				<h3 className="hc-panel-title">LLM Mesh Overview</h3>
