@@ -234,6 +234,23 @@ type CollaborationProject = {
 	nextTask: string;
 };
 
+type CollaborationSkill = {
+	id: string;
+	area: "gateway" | "agent-engineering" | "web" | "operations";
+	status: "approved" | "unreviewed";
+	source: "local" | "upstream";
+	version: string | null;
+	verification: string[];
+};
+
+type CollaborationTask = {
+	id: string;
+	title: string;
+	status: "open";
+	createdAt: string;
+	requiredSkills: string[];
+};
+
 const INITIAL_COLLABORATION_PROJECTS: CollaborationProject[] = [
 	{
 	id: "gateway-hardening",
@@ -257,18 +274,26 @@ const INITIAL_COLLABORATION_PROJECTS: CollaborationProject[] = [
 
 type CollaborationResponse = {
 	projects: CollaborationProject[];
-	tasks: Array<{ id: string; title: string; status: "open"; createdAt: string }>;
+	tasks: CollaborationTask[];
+	skills: CollaborationSkill[];
 };
 
 export function ProjectsPage() {
 	const [projects, setProjects] = useState(INITIAL_COLLABORATION_PROJECTS);
 	const [joined, setJoined] = useState(false);
 	const [taskTitle, setTaskTitle] = useState("");
+	const [selectedSkills, setSelectedSkills] = useState<string[]>(["muhanai-public-contribution"]);
+	const [skills, setSkills] = useState<CollaborationSkill[]>([]);
+	const [tasks, setTasks] = useState<CollaborationTask[]>([]);
 	const [notice, setNotice] = useState("");
 
 	useEffect(() => {
 	void load<CollaborationResponse>("/api/collaboration/projects").then((response) => {
-	if (response) setProjects(response.projects);
+	if (response) {
+	setProjects(response.projects);
+	setSkills(response.skills);
+	setTasks(response.tasks);
+	}
 	});
 	}, []);
 
@@ -284,7 +309,11 @@ export function ProjectsPage() {
 	return;
 	}
 	try {
-	await postJson("/api/collaboration/tasks", { title });
+	const created = await postJson<CollaborationTask>("/api/collaboration/tasks", {
+	title,
+	requiredSkills: selectedSkills,
+	});
+	setTasks((current) => [created, ...current]);
 	setNotice(`공개 작업이 등록되었습니다: ${title}`);
 	setTaskTitle("");
 	} catch (error) {
@@ -368,7 +397,21 @@ export function ProjectsPage() {
 
 	<section className="peer-card">
 	<strong className="peer-name">Publish a task for the mesh</strong>
-	<p style={{ color: "#8f9188", fontSize: 13 }}>작은 작업부터 공개 등록하면 다른 에이전트가 맡아 PR을 제안합니다.</p>
+	<p style={{ color: "#8f9188", fontSize: 13 }}>작업에 필요한 검증된 스킬을 지정하면 적합한 에이전트가 매칭됩니다.</p>
+	<div className="peer-caps" style={{ margin: "10px 0" }}>
+	{skills.map((skill) => (
+	<button
+	key={skill.id}
+	type="button"
+	className="cap-chip sm"
+	aria-pressed={selectedSkills.includes(skill.id)}
+	onClick={() => setSelectedSkills((current) => current.includes(skill.id) ? current.filter((id) => id !== skill.id) : [...current, skill.id])}
+	style={{ cursor: "pointer", opacity: selectedSkills.includes(skill.id) ? 1 : 0.5 }}
+	>
+	{skill.id}
+	</button>
+	))}
+	</div>
 	<div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
 	<input
 	value={taskTitle}
@@ -381,6 +424,16 @@ export function ProjectsPage() {
 	<button type="button" className="btn-primary" onClick={publishTask}>작업 공개</button>
 	</div>
 	</section>
+	{tasks.length > 0 && (
+	<section className="peer-card">
+	<strong className="peer-name">Open tasks</strong>
+	{tasks.map((task) => (
+	<p key={task.id} style={{ color: "#c4c7bc", fontSize: 13, margin: "10px 0 0" }}>
+	{task.title} <span style={{ color: "#8f9188" }}>· {task.requiredSkills.join(", ") || "기본 검토"}</span>
+	</p>
+	))}
+	</section>
+	)}
 	</div>
 	</PageShell>
 	);

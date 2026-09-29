@@ -1,0 +1,50 @@
+{
+	"schemaVersion": 1,
+	"library": "muhanai-agent-skills",
+	"upstream": {
+	"repository": "https://github.com/MoizIbnYousaf/ai-agent-skills",
+	"policy": "review-and-pin"
+	},
+	"skills": [
+	{
+	"id": "muhanai-public-contribution",
+	"area": "operations",
+	"status": "approved",
+	"source": "local",
+	"version": "1.0.0",
+	"verification": ["git diff --check", "pnpm run typecheck", "pnpm test"]
+	},
+	{
+	"id": "muhanai-a2a-development",
+	"area": "agent-engineering",
+	"status": "approved",
+	"source": "local",
+	"version": "1.0.0",
+	"verification": ["pnpm run typecheck", "pnpm vitest run services/api/src/a2a-routes.test.ts"]
+	},
+	{
+	"id": "muhanai-provider-adapter",
+	"area": "gateway",
+	"status": "approved",
+	"source": "local",
+	"version": "1.0.0",
+	"verification": ["pnpm run typecheck", "pnpm test"]
+	},
+	{
+	"id": "muhanai-web-verification",
+	"area": "web",
+	"status": "approved",
+	"source": "local",
+	"version": "1.0.0",
+	"verification": ["pnpm --filter @agentmesh/web run typecheck", "pnpm --filter @agentmesh/web run build"]
+	},
+	{
+	"id": "upstream-skill-template",
+	"area": "agent-engineering",
+	"status": "unreviewed",
+	"source": "upstream",
+	"version": null,
+	"verification": []
+	}
+	]
+}

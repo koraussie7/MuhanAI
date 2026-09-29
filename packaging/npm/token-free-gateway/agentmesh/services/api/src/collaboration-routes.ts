@@ -18,7 +18,52 @@ type PublicTask = {
 	title: string;
 	status: "open";
 	createdAt: string;
+	requiredSkills: string[];
 };
+
+type SkillRecord = {
+	id: string;
+	area: "gateway" | "agent-engineering" | "web" | "operations";
+	status: "approved" | "unreviewed";
+	source: "local" | "upstream";
+	version: string | null;
+	verification: string[];
+};
+
+const skills: SkillRecord[] = [
+	{
+	id: "muhanai-public-contribution",
+	area: "operations",
+	status: "approved",
+		source: "local",
+	version: "1.0.0",
+	verification: ["git diff --check", "pnpm run typecheck", "pnpm test"],
+	},
+	{
+	id: "muhanai-a2a-development",
+	area: "agent-engineering",
+	status: "approved",
+		source: "local",
+	version: "1.0.0",
+	verification: ["pnpm run typecheck", "pnpm vitest run services/api/src/a2a-routes.test.ts"],
+	},
+	{
+	id: "muhanai-provider-adapter",
+	area: "gateway",
+	status: "approved",
+		source: "local",
+	version: "1.0.0",
+	verification: ["pnpm run typecheck", "pnpm test"],
+	},
+	{
+	id: "muhanai-web-verification",
+	area: "web",
+	status: "approved",
+		source: "local",
+	version: "1.0.0",
+	verification: ["pnpm --filter @agentmesh/web run typecheck", "pnpm --filter @agentmesh/web run build"],
+	},
+];
 
 const projects: CollaborationProject[] = [
 	{
@@ -44,6 +89,7 @@ const tasks: PublicTask[] = [];
 
 const TaskSchema = z.object({
 	title: z.string().trim().min(3).max(200),
+	requiredSkills: z.array(z.string().trim().min(1).max(80)).max(8).default([]),
 });
 
 export function resetCollaborationState() {
@@ -54,7 +100,9 @@ export function resetCollaborationState() {
 }
 
 export async function collaborationRoutes(app: FastifyInstance) {
-	app.get("/api/collaboration/projects", async () => ({ projects, tasks }));
+	app.get("/api/collaboration/projects", async () => ({ projects, tasks, skills }));
+
+	app.get("/api/collaboration/skills", async () => ({ skills }));
 
 	app.post(
 	"/api/collaboration/projects/:projectId/invitations",
@@ -75,6 +123,7 @@ export async function collaborationRoutes(app: FastifyInstance) {
 		title: parsed.data.title,
 	status: "open",
 	createdAt: new Date().toISOString(),
+		requiredSkills: parsed.data.requiredSkills,
 	};
 		tasks.unshift(task);
 	return reply.code(201).send(task);
