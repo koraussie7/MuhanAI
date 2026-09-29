@@ -1,4 +1,4 @@
-import type { ConnectionInfo, ConnectionState, PeerDescriptor, PeerId } from "./types.ts";
+import type { ConnectionInfo, ConnectionState, PeerDescriptor, PeerId } from "./types.js";
 
 /**
  * In-memory peer registry — single source of truth for known peers.

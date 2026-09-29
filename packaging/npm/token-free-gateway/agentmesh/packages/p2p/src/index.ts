@@ -19,11 +19,11 @@
  * ```
  */
 
-export { MessageRouter } from "./message-router.ts";
-export type { P2PNetworkEvent, P2PNetworkOptions } from "./network.ts";
-export { P2PNetwork } from "./network.ts";
-export { PeerRegistry } from "./peer-registry.ts";
-export { MemoryTransport } from "./transports/memory-transport.ts";
+export { MessageRouter } from "./message-router.js";
+export type { P2PNetworkEvent, P2PNetworkOptions } from "./network.js";
+export { P2PNetwork } from "./network.js";
+export { PeerRegistry } from "./peer-registry.js";
+export { MemoryTransport } from "./transports/memory-transport.js";
 
 export type {
 	ConnectionInfo,
@@ -43,5 +43,5 @@ export type {
 	PeerTransport,
 	TopologyNode,
 	TransportStats,
-} from "./types.ts";
-export { toMeshEvent } from "./types.ts";
+} from "./types.js";
+export { toMeshEvent } from "./types.js";

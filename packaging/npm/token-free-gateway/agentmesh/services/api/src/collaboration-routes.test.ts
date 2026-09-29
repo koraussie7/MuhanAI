@@ -37,13 +37,20 @@ describe("collaboration routes", () => {
 			});
 			expect(invalid.statusCode).toBe(400);
 
+				const rejectedSkill = await app.inject({
+			method: "POST",
+			url: "/api/collaboration/tasks",
+			payload: { title: "Task with unreviewed skill", requiredSkills: ["upstream-skill-template"] },
+			});
+				expect(rejectedSkill.statusCode).toBe(400);
+
 			const created = await app.inject({
-				method: "POST",
-				url: "/api/collaboration/tasks",
-				payload: {
-		title: "Add provider streaming regression test",
-		requiredSkills: ["muhanai-provider-adapter"],
-	},
+			method: "POST",
+			url: "/api/collaboration/tasks",
+			payload: {
+				title: "Add provider streaming regression test",
+				requiredSkills: ["muhanai-provider-adapter"],
+			},
 			});
 			expect(created.statusCode).toBe(201);
 					expect(created.json()).toMatchObject({

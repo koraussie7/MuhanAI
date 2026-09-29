@@ -1,6 +1,6 @@
-import { MessageRouter } from "./message-router.ts";
-import { PeerRegistry } from "./peer-registry.ts";
-import { MemoryTransport } from "./transports/memory-transport.ts";
+import { MessageRouter } from "./message-router.js";
+import { PeerRegistry } from "./peer-registry.js";
+import { MemoryTransport } from "./transports/memory-transport.js";
 import type {
 	NetworkTopology,
 	P2PMeshEvent,
@@ -9,7 +9,7 @@ import type {
 	PeerProtocol,
 	PeerTransport,
 	toMeshEvent,
-} from "./types.ts";
+} from "./types.js";
 
 export interface P2PNetworkOptions {
 	/** Local peer descriptor; generated automatically if omitted. */

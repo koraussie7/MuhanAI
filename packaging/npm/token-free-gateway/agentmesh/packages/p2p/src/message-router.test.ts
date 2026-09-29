@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { MessageRouter } from "./message-router.ts";
-import { PeerRegistry } from "./peer-registry.ts";
-import type { P2PMessage } from "./types.ts";
+import { MessageRouter } from "./message-router.js";
+import { PeerRegistry } from "./peer-registry.js";
+import type { P2PMessage } from "./types.js";
 
 function peer(id: string, capabilities: string[] = []) {
 	return {

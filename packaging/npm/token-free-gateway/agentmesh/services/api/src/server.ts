@@ -42,6 +42,7 @@ import { routerRoutes } from "./router-routes.js";
 import { securityRoutes } from "./security-routes.js";
 import { semanticRoutes } from "./semantic-routes.js";
 import { shoppingRoutes } from "./shopping-routes.js";
+import { initTelemetry, shutdownTelemetry, traceMiddleware } from "./telemetry.js";
 import { vietnamRoutes } from "./vietnam-routes.js";
 import { visitorRoutes } from "./visitor-routes.js";
 import { worldRoutes } from "./world-routes.js";
@@ -166,6 +167,22 @@ export async function buildApp(options: BuildAppOptions = {}) {
 		},
 		disableRequestLogging: false,
 	});
+
+	// Initialize OpenTelemetry tracing
+	const telemetryTracer = initTelemetry({
+		serviceName: "muhanai-agentmesh-api",
+		endpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+		headers: process.env.OTEL_EXPORTER_OTLP_HEADERS
+			? JSON.parse(process.env.OTEL_EXPORTER_OTLP_HEADERS)
+			: undefined,
+		enabled: process.env.OTEL_ENABLED !== "false",
+	});
+
+	// Add trace middleware if telemetry is enabled
+	const tracer = await telemetryTracer;
+	if (tracer) {
+		await app.register(traceMiddleware);
+	}
 
 	// Pulse bridge: singleton fan-out between the libp2p PulseSource (attached
 	// later, when the node starts) and any number of SSE sinks (per-client).
@@ -364,6 +381,9 @@ export async function buildApp(options: BuildAppOptions = {}) {
 			}
 		}
 		app.pulseBridge.stop();
+
+		// Shutdown telemetry
+		await shutdownTelemetry();
 	});
 
 	// Simple agent registry for A2A discovery

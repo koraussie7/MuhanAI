@@ -1,1 +1,1 @@
-export { MemoryTransport } from "./memory-transport.ts";
+export { MemoryTransport } from "./memory-transport.js";

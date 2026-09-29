@@ -5,45 +5,43 @@
  *   1. `panel` mode renders a header + the four capability cards.
  *   2. The component can mount and unmount without crashing even
  *      when no `iframeSrc` is provided.
- *   3. The component never throws if the bridge returns errors.
- *
- * Pure structural test (no @testing-library/react) so it works in the
- * current `apps/desktop` package that has no React testing setup.
+ *   3. The component never throws if the bridge returns an error.
  */
 
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
+
 import { createInMemoryBridge } from "@agentmesh/opsmaxx-bridge/mock";
-import { describe, expect, it } from "vitest";
 
 import { OpsMaxxApp } from "./OpsMaxxApp.js";
 
+afterEach(cleanup);
+
 describe("OpsMaxxApp (T5)", () => {
-	it("exports a callable component", () => {
-		expect(typeof OpsMaxxApp).toBe("function");
-	});
+  it("renders the panel mode by default", () => {
+    render(<OpsMaxxApp />);
+    expect(screen.getByTestId("opsmaxx-panel-mode")).toBeDefined();
+    expect(screen.getByText(/OpsMaxx Bridge Panel/)).toBeDefined();
+  });
 
-	it("default mode is 'panel'", () => {
-		// Component's default mode is verified at the type level:
-		// OpsMaxxEmbedMode is "iframe" | "panel" and the prop is
-		// optional. Reading the source for the default literal is
-		// easier than rendering in this jsdom-less test setup.
-		const el = OpsMaxxApp({});
-		expect(el).toBeDefined();
-	});
+  it("renders the four capability cards", () => {
+    render(<OpsMaxxApp />);
+    expect(screen.getByText("Vault")).toBeDefined();
+    expect(screen.getByText("SSH")).toBeDefined();
+    expect(screen.getByText("DB")).toBeDefined();
+  });
 
-	it("renders panel mode without crashing", () => {
-		const el = OpsMaxxApp({ mode: "panel" });
-		expect(el).toBeDefined();
-	});
+  it("renders the iframe mode when explicitly requested", () => {
+    render(<OpsMaxxApp mode="iframe" iframeSrc="about:blank" />);
+    expect(screen.getByTestId("opsmaxx-iframe-mode")).toBeDefined();
+  });
 
-	it("renders iframe mode without crashing", () => {
-		const el = OpsMaxxApp({ mode: "iframe", iframeSrc: "about:blank" });
-		expect(el).toBeDefined();
-	});
-
-	it("tolerates a closed bridge", () => {
-		const bridge = createInMemoryBridge();
-		void bridge.close();
-		const el = OpsMaxxApp({ bridge });
-		expect(el).toBeDefined();
-	});
+  it("tolerates a bridge that returns errors", () => {
+    const bridge = createInMemoryBridge();
+    // Force every list call to fail by closing the bridge first.
+    void bridge.close();
+    render(<OpsMaxxApp bridge={bridge} />);
+    // Component must not crash; the panel still renders.
+    expect(screen.getByTestId("opsmaxx-panel-mode")).toBeDefined();
+  });
 });

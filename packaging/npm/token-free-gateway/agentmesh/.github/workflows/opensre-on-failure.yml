@@ -1,0 +1,189 @@
+name: OpenSRE CI Failure Investigation
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  checks: read
+
+jobs:
+  investigate:
+    name: Investigate CI Failure
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Download CI failure logs
+        id: download-logs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runId = ${{ github.event.workflow_run.id }};
+            const jobs = await github.rest.actions.listJobsForWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: runId,
+            });
+            
+            const failedJobs = jobs.data.jobs.filter(j => j.conclusion === 'failure');
+            let logs = '';
+            
+            for (const job of failedJobs) {
+              const jobLogs = await github.rest.actions.downloadJobLogsForWorkflowRun({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: runId,
+                job_id: job.id,
+              });
+              logs += `=== Job: ${job.name} (${job.id}) ===\n`;
+              logs += jobLogs.data;
+              logs += '\n\n';
+            }
+            
+            return logs;
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run OpenSRE Investigation
+        id: opensre
+        if: steps.download-logs.outputs.result != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          # Save logs to file
+          cat > ci-failure.log << 'EOF'
+          ${{ steps.download-logs.outputs.result }}
+          EOF
+          
+          # Run OpenSRE investigation
+          # Note: Install OpenSRE first if not available
+          if ! command -v opensre &> /dev/null; then
+            echo "Installing OpenSRE..."
+            curl -fsSL https://install.opensre.com | bash
+            export PATH="$HOME/.opensre/bin:$PATH"
+          fi
+          
+          # Run investigation and create PR if fix found
+          opensre investigate \
+            --log-file ci-failure.log \
+            --repo ${{ github.repository }} \
+            --run-id ${{ github.event.workflow_run.id }} \
+            --open-pr \
+            --base-branch ${{ github.event.workflow_run.head_branch }} \
+            || echo "OpenSRE investigation completed (may have found no fix or already fixed)"
+
+      - name: Comment on PR with investigation link
+        if: github.event.workflow_run.pull_requests[0].number
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ github.event.workflow_run.pull_requests[0].number }};
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `## 🔍 OpenSRE Investigation Triggered
+              
+              CI workflow failed. OpenSRE has been triggered to investigate the failure and create a fix PR if possible.
+              
+              **Workflow Run:** #${{ github.event.workflow_run.id }}
+              **Failed Jobs:** Check the [workflow run](${{ github.event.workflow_run.html_url }}) for details.
+              
+              If OpenSRE finds a fix, it will create a new PR with the changes.`
+            });
+
+  # Alternative: Run OpenSRE locally with a custom script for more control
+  investigate-with-script:
+    name: Investigate with Custom Script
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Create investigation script
+        run: |
+          cat > investigate.mjs << 'SCRIPT'
+          import { execSync } from 'node:child_process';
+          import { writeFileSync, readFileSync } from 'node:fs';
+          
+          // Get the failed workflow run details
+          const runId = process.env.GITHUB_RUN_ID;
+          const repo = process.env.GITHUB_REPOSITORY;
+          const token = process.env.GITHUB_TOKEN;
+          
+          // Use gh CLI to get failure details
+          try {
+            const logs = execSync(`gh run view ${runId} --log-failed --repo ${repo}`, { 
+              encoding: 'utf-8',
+              env: { ...process.env, GH_TOKEN: token }
+            });
+            
+            writeFileSync('ci-failure.log', logs);
+            console.log('Saved CI failure logs to ci-failure.log');
+            
+            // Here you would call your LLM to analyze the logs
+            // For now, we just output the logs for manual review
+            console.log('--- FAILURE LOGS ---');
+            console.log(logs.slice(-10000)); // Last 10k chars
+          } catch (e) {
+            console.error('Failed to fetch logs:', e.message);
+          }
+          SCRIPT
+
+      - name: Run investigation script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_RUN_ID: ${{ github.event.workflow_run.id }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node investigate.mjs
+
+      - name: Upload failure logs as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-failure-logs
+          path: ci-failure.log
+          retention-days: 7

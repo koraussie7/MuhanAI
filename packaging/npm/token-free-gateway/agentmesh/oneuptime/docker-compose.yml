@@ -1,0 +1,188 @@
+version: '3.8'
+
+services:
+  # OneUptime Main Application
+  oneuptime:
+    image: oneuptime/oneuptime:latest
+    container_name: oneuptime-app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+      - PORT=8000
+      
+      # Database
+      - DATABASE_URL=postgresql://oneuptime:oneuptime@postgres:5432/oneuptime
+      - DATABASE_SSL=false
+      
+      # Redis
+      - REDIS_URL=redis://redis:6379
+      
+      # ClickHouse (for analytics)
+      - CLICKHOUSE_HOST=clickhouse
+      - CLICKHOUSE_PORT=9000
+      - CLICKHOUSE_DATABASE=oneuptime
+      - CLICKHOUSE_USERNAME=default
+      - CLICKHOUSE_PASSWORD=
+      
+      # S3/MinIO (for file storage)
+      - S3_ENDPOINT=http://minio:9000
+      - S3_ACCESS_KEY=minioadmin
+      - S3_SECRET_KEY=minioadmin
+      - S3_BUCKET=oneuptime
+      - S3_REGION=us-east-1
+      - S3_FORCE_PATH_STYLE=true
+      
+      # AI Configuration (for auto-fix)
+      - GLOBAL_LLM_PROVIDER=anthropic
+      - GLOBAL_ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      # Or use local Ollama:
+      # - GLOBAL_LLM_PROVIDER=ollama
+      # - GLOBAL_OLLAMA_HOST=http://host.docker.internal:11434
+      # - GLOBAL_OLLAMA_MODEL=llama3.1:8b
+      
+      # GitHub App Configuration
+      - GITHUB_APP_ID=${GITHUB_APP_ID}
+      - GITHUB_APP_PRIVATE_KEY=${GITHUB_APP_PRIVATE_KEY}
+      - GITHUB_APP_WEBHOOK_SECRET=${GITHUB_APP_WEBHOOK_SECRET}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      
+      # Encryption
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      
+      # Email (optional)
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - EMAIL_FROM=${EMAIL_FROM}
+      
+      # Frontend URL
+      - FRONTEND_URL=http://localhost:8000
+      
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: oneuptime-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=oneuptime
+      - POSTGRES_USER=oneuptime
+      - POSTGRES_PASSWORD=oneuptime
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U oneuptime -d oneuptime"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: oneuptime-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ClickHouse Analytics
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8-alpine
+    container_name: oneuptime-clickhouse
+    restart: unless-stopped
+    environment:
+      - CLICKHOUSE_DB=oneuptime
+      - CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT=1
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MinIO S3 Storage
+  minio:
+    image: minio/minio:latest
+    container_name: oneuptime-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # OneUptime Worker (for background jobs)
+  oneuptime-worker:
+    image: oneuptime/oneuptime:latest
+    container_name: oneuptime-worker
+    restart: unless-stopped
+    command: node dist/worker.js
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://oneuptime:oneuptime@postgres:5432/oneuptime
+      - REDIS_URL=redis://redis:6379
+      - CLICKHOUSE_HOST=clickhouse
+      - CLICKHOUSE_PORT=9000
+      - S3_ENDPOINT=http://minio:9000
+      - S3_ACCESS_KEY=minioadmin
+      - S3_SECRET_KEY=minioadmin
+      - S3_BUCKET=oneuptime
+      - GLOBAL_LLM_PROVIDER=anthropic
+      - GLOBAL_ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+  clickhouse_data:
+  minio_data:
+
+networks:
+  default:
+    name: oneuptime-network

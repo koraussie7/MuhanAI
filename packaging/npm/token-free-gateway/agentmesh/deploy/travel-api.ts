@@ -131,16 +131,44 @@ async function callTourMind({
 	return parsed;
 }
 
+function normalizeTourMindHotels(
+	data: Record<string, unknown>,
+	destination: string,
+	checkIn: string,
+	checkOut: string,
+): Array<Record<string, unknown>> {
+	const hotels = Array.isArray(data.hotels) ? data.hotels : [];
+	const nights = Math.max(1, Math.round((Date.parse(checkOut) - Date.parse(checkIn)) / 86_400_000));
+
+	return hotels.map((value, index) => {
+	const hotel = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+	const totalPrice = Number(hotel.min_price ?? hotel.total_price ?? 0);
+	return {
+		hotelId: String(hotel.hotel_id ?? hotel.id ?? `tourmind-${index}`),
+	name: String(hotel.hotel_name ?? hotel.name ?? `Hotel ${index + 1}`),
+	city: String(hotel.address ?? hotel.city ?? destination),
+	stars: Number(hotel.star_rating ?? hotel.stars ?? 0),
+	roomType: String(hotel.room_type ?? "View available rooms"),
+	pricePerNight: totalPrice > 0 ? Math.round((totalPrice / nights) * 100) / 100 : 0,
+		totalPrice,
+	currency: String(hotel.currency_code ?? hotel.currency ?? "CNY"),
+	refundable: Boolean(hotel.refundable ?? false),
+		highlights: [],
+		summary: "Live hotel result from TourMind",
+	imageUrl: typeof hotel.hotel_image === "string" ? hotel.hotel_image : undefined,
+	bookingUrl: typeof data.web_url === "string" ? data.web_url : "https://www.tourmind.com",
+	};
+	});
+}
+
 export async function handleTravelApi(
 	request: Request,
 	pathname: string,
-	env?: { TOURMIND_USER_KEY?: string },
 ): Promise<Response | null> {
 	const corsHeaders = {
-		"Access-Control-Allow-Origin": "https://travel.kbizhub.com",
+		"Access-Control-Allow-Origin": "*",
 		"Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-		"Access-Control-Allow-Headers": "Content-Type",
-		Vary: "Origin",
+		"Access-Control-Allow-Headers": "Content-Type, Authorization",
 	};
 
 	if (request.method === "OPTIONS" && pathname.startsWith("/api/travel/")) {
@@ -257,7 +285,7 @@ export async function handleTravelApi(
 				);
 			}
 
-			const userKey = env?.TOURMIND_USER_KEY ?? "";
+			const userKey = process.env.TOURMIND_USER_KEY || "";
 
 			// 1. Resolve the free-text destination to a TourMind region id.
 			const locRes = await callTourMind({
@@ -374,7 +402,7 @@ export async function handleTravelApi(
 					checkOut,
 					adults,
 					rooms,
-					hotels: searchRes.data?.hotels ?? [],
+							hotels: normalizeTourMindHotels(searchRes.data ?? {}, destination, checkIn, checkOut),
 					searchScope: searchRes.data?.search_scope ?? null,
 					webUrl: searchRes.data?.web_url ?? null,
 				},
@@ -410,7 +438,7 @@ export async function handleTravelApi(
 				);
 			}
 
-			const userKey = env?.TOURMIND_USER_KEY ?? "";
+			const userKey = process.env.TOURMIND_USER_KEY || "";
 
 			const ratesRes = await callTourMind({
 				path: "/skill/toc/query_room_rates",
@@ -486,7 +514,7 @@ export async function handleTravelApi(
 				);
 			}
 
-			const userKey = env?.TOURMIND_USER_KEY ?? "";
+			const userKey = process.env.TOURMIND_USER_KEY || "";
 
 			// Recheck the exact product; the checked values, not the earlier query
 			// values, are what create_booking must use.

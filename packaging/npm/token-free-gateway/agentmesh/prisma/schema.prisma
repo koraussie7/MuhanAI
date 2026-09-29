@@ -640,3 +640,44 @@ model TraceEvent {
   @@index([spanId])
   @@index([time])
 }
+
+
+// ---------------------------------------------------------------------------
+// Public collaboration + reviewed agent skills
+// ---------------------------------------------------------------------------
+
+model CollaborationSkill {
+  id             String   @id
+  area           String
+  status         String   @default("unreviewed")
+  source         String
+  version        String?
+  verification  String[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  tasks          CollaborationTaskSkill[]
+}
+
+model CollaborationTask {
+  id             String   @id @default(cuid())
+  title          String
+  status         String   @default("open")
+  requiredSkills String[]
+  githubPrUrl    String?
+  githubPrNumber Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  skills         CollaborationTaskSkill[]
+
+  @@index([status, createdAt])
+}
+
+model CollaborationTaskSkill {
+  taskId   String
+  skillId  String
+  task     CollaborationTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  skill    CollaborationSkill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, skillId])
+  @@index([skillId])
+}

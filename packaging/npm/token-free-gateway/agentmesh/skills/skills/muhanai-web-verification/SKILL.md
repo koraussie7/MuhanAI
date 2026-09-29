@@ -4,9 +4,11 @@ description: Change or review the MuhanAI web application and verify routes, int
 ---
 
 # MuhanAI Web Verification
+
 Prefer the existing React components, route registry, and visual language. Keep user-visible actions connected to a real API contract.
 
 ## Workflow
+
 1. Inspect the route, component, API helper, and existing page patterns.
 2. Implement the smallest accessible interaction with loading and error states.
 3. Run `pnpm --filter @agentmesh/web run typecheck`.

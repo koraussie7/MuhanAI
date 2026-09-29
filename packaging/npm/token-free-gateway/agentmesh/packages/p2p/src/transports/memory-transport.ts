@@ -1,5 +1,5 @@
-import type { MessageRouter } from "../message-router.ts";
-import type { PeerRegistry } from "../peer-registry.ts";
+import type { MessageRouter } from "../message-router.js";
+import type { PeerRegistry } from "../peer-registry.js";
 import type {
 	ConnectionInfo,
 	MessageReceipt,
@@ -7,7 +7,7 @@ import type {
 	PeerDescriptor,
 	PeerProtocol,
 	TransportStats,
-} from "../types.ts";
+} from "../types.js";
 
 /**
  * In-memory peer transport — peers communicate through an event bus local

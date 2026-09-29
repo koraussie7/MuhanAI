@@ -6,3 +6,4 @@ export * from "./types/contribution.js";
 export * from "./types/knowledge.js";
 export * from "./types/request.js";
 export * from "./types/result.js";
+export * from "./tracing.js";

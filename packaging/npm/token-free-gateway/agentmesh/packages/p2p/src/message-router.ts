@@ -1,6 +1,6 @@
 import { ed25519 } from "@noble/curves/ed25519";
-import type { PeerRegistry } from "./peer-registry.ts";
-import type { MessageReceipt, P2PMessage } from "./types.ts";
+import type { PeerRegistry } from "./peer-registry.js";
+import type { MessageReceipt, P2PMessage } from "./types.js";
 
 /** Default TTL for messages (seconds). */
 const DEFAULT_TTL = 60;
