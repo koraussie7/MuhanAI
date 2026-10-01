@@ -11,6 +11,7 @@ import { catalogRoutes } from "./catalog-routes.js";
 import { resonanceRoutes } from "./integrations/resonance/routes.js";
 import { computeRoutes } from "./compute-routes.js";
 import { computerUseRoutes } from "./computer-use-routes.js";
+import { clientRoutes } from "./client-routes.js";
 import { creditsRoutes } from "./credits-routes.js";
 import { feedRoutes } from "./feed-routes.js";
 import { PulseBridge } from "./gossip-bridge.js";
@@ -29,6 +30,7 @@ import { quorumRoutes } from "./quorum-routes.js";
 import { routerRoutes } from "./router-routes.js";
 import { securityRoutes } from "./security-routes.js";
 import { semanticRoutes } from "./semantic-routes.js";
+import { thinClientRoutes, resolveDevice as resolveThinClientDevice } from "./thin-client-routes.js";
 
 function timingSafeEqual(a: string | undefined, b: string | undefined): boolean {
 	if (typeof a !== "string" || typeof b !== "string") return false;
@@ -40,14 +42,16 @@ function timingSafeEqual(a: string | undefined, b: string | undefined): boolean 
 	return result === 0;
 }
 
-const PUBLIC_PATH_PREFIXES = [
-	"/api/pulse",
-	"/api/network",
-	"/api/agents",
-	"/api/auth",
-	"/api/health",
-	"/api/mcp",
-];
+	const PUBLIC_PATH_PREFIXES = [
+		"/api/pulse",
+		"/api/network",
+		"/api/agents",
+		"/api/auth",
+		"/api/health",
+		"/api/mcp",
+		"/api/client",
+		"/api/thin-client",
+	];
 const PUBLIC_PATH_EXACT = new Set(["/health", "/.well-known/mcp.json"]);
 
 function isPublicPath(rawUrl: string | undefined): boolean {
@@ -155,16 +159,34 @@ export async function buildApp(options: BuildAppOptions = {}) {
 		);
 	}
 
+	// Routes accessible by thin-client device tokens
+	const DEVICE_AUTH_PATHS = ["/api/llm/chat"];
+
 	app.addHook("onRequest", async (request, reply) => {
 		if (isPublicPath(request.url)) return;
 		if (!isProduction && process.env.DISABLE_AUTH === "true") return;
+
+		// Check if this route can be accessed with a thin-client device token
+		const isDeviceAuthPath = DEVICE_AUTH_PATHS.some(
+			(prefix) => request.url === prefix || request.url.startsWith(`${prefix}?`),
+		);
+
+		if (isDeviceAuthPath) {
+			// Try device token auth first, then fall back to API key
+			const device = resolveThinClientDevice(request);
+			if (device) {
+				// Valid device — proceed
+				return;
+			}
+			// Fall through to API key check
+		}
 
 		const validApiKey = process.env.API_KEY;
 		const rawApiKey = request.headers["x-api-key"];
 		const apiKey = Array.isArray(rawApiKey) ? rawApiKey[0] : rawApiKey;
 
 		if (!timingSafeEqual(apiKey, validApiKey)) {
-			return reply.code(401).send({ error: "Unauthorized: invalid or missing API key" });
+			return reply.code(401).send({ error: "Unauthorized: invalid or missing API key or device token" });
 		}
 	});
 
@@ -188,6 +210,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	await app.register(computerUseRoutes);
 	await app.register(happyRoutes);
 	await app.register(creditsRoutes);
+	await app.register(clientRoutes);
 	await app.register(securityRoutes);
 	await app.register(feedRoutes);
 	await app.register(authRoutes);
@@ -199,6 +222,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	await app.register(mcpRoutes);
 	await app.register(catalogRoutes);
 	await app.register(resonanceRoutes);
+	await app.register(thinClientRoutes);
 
 	// Wire the libp2p transport into the bridge. Best-effort: any failure here
 	// (mDNS unavailable on Docker bridge, identity write denied, etc.) keeps
@@ -247,7 +271,7 @@ const isMain = import.meta.url === `file://${process.argv[1]}`;
 if (isMain) {
 	const app = await buildApp();
 	try {
-		await app.listen({ port: 3001, host: "0.0.0.0" });
+		await app.listen({ port: 3999, host: "0.0.0.0" });
 		app.log.info("API server listening on http://0.0.0.0:3001");
 	} catch (err) {
 		app.log.error(err);

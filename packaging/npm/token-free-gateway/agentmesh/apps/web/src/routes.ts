@@ -282,6 +282,15 @@ export const ROUTES: readonly RouteDefinition[] = [
 		badge: "NEW",
 		page: "happy",
 	},
+	{
+		id: "thin-client",
+		path: "/thin-client",
+		group: "system",
+		label: "Thin Client",
+		iconKey: "monitor",
+		badge: "Beta",
+		page: "thin-client",
+	},
 ];
 
 export const ROUTE_COUNT = ROUTES.length;

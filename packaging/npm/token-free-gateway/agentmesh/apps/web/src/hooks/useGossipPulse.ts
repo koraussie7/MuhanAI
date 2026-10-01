@@ -81,6 +81,9 @@ export function useGossipPulse(opts: UseGossipPulseOptions = {}): UseGossipPulse
 	const [_nonce, setNonce] = useState(0);
 
 	const bufferRef = useRef<PulseMessage[]>([]);
+	// `kinds` is an array literal at most call sites, so its reference changes on
+	// every render. Depend on the joined key instead, or the effect below
+	// re-runs forever (setMessages([]) → re-render → new kinds → setMessages…).
 	const _kindsKey = kinds ? kinds.join(",") : "";
 
 	useEffect(() => {
@@ -113,7 +116,9 @@ export function useGossipPulse(opts: UseGossipPulseOptions = {}): UseGossipPulse
 		});
 
 		return handle.dispose;
-	}, [url, bufferSize, disabled, EventSource, kinds]);
+	// `_kindsKey` (not `kinds`) is intentional — see its declaration above.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: kinds is keyed by _kindsKey
+	}, [url, bufferSize, disabled, EventSource, _kindsKey]);
 
 	const close = useCallback(() => {
 		setStatus("closed");

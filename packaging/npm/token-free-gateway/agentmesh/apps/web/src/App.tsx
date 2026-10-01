@@ -147,6 +147,9 @@ const HiveBearPanelLazy = React.lazy(() =>
 const HappyPageLazy = React.lazy(() =>
 	import("./components/HappyPage").then((m) => ({ default: m.HappyPage })),
 );
+const ThinClientPageLazy = React.lazy(() =>
+	import("./components/ThinClientPage").then((m) => ({ default: m.ThinClientPage })),
+);
 const SearchPageLazy = React.lazy(() =>
 	import("./components/SpecPages").then((m) => ({ default: m.SearchPage })),
 );
@@ -613,6 +616,13 @@ export function App() {
 						{activeSection === "happy" && (
 							<Suspense fallback={<PageSkeleton />}>
 								<HappyPageLazy />
+							</Suspense>
+						)}
+
+						{/* Thin Client — companion apps (Electron desktop + Capacitor Android) */}
+						{activeSection === "thin-client" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<ThinClientPageLazy />
 							</Suspense>
 						)}
 
