@@ -1,0 +1,66 @@
+# Dockerfile for Colibri Fellowship Node
+# Uses Emscripten to build Colibri WASM at build time, then serves via Node.js
+
+# ---- Stage 1: Build Colibri WASM ----
+FROM node:22-alpine AS builder-wasm
+
+# Install Emscripten (via emsdk)
+RUN apk add --no-cache \
+    git python3 make cmake \
+    python3 py3-pip
+
+WORKDIR /opt
+RUN git clone https://github.com/emscripten-core/emsdk.git && \
+    cd emsdk && \
+    ./emsdk install latest && \
+    ./emsdk activate latest
+
+ENV PATH="/opt/emsdk:/opt/emsdk/upstream/emscripten:/opt/emsdk/node/20.16.2_64/bin:${PATH}"
+ENV EMSDK="/opt/emsdk"
+ENV EMSDK_NODE="/opt/emsdk/node/20.16.3_64/bin/node"
+
+# Copy Colibri source (expected at build context: colibri/)
+WORKDIR /colibri-build
+COPY colibri/ ./colibri/
+
+# Build Colibri to WASM
+RUN source /opt/emsdk/emsdk_env.sh && \
+    emcc colibri/colibri.c \
+    -o dist/colibri.js \
+    -s WASM=1 \
+    -s MODULARIZE=1 \
+    -s EXPORT_NAME="createColibriModule" \
+    -s EXPORTED_RUNTIME_METHODS="['ccall', 'cwrap', '_malloc', '_free', 'HEAPU8', 'HEAP8', 'UTF8ToString']" \
+    -s EXPORTED_FUNCTIONS="['_main', '_colibri_init', '_colibri_load_model', '_colibri_generate']" \
+    -s ALLOW_MEMORY_GROWTH=1 \
+    -s INITIAL_MEMORY=268435456 \
+    -s MAXIMUM_MEMORY=2147483648 \
+    -s ASSERTIONS=0 \
+    -O3 \
+    -lm
+
+# ---- Stage 2: Runtime + API ----
+FROM node:22-alpine AS runtime
+
+# Install tini + ca-certificates
+RUN apk add --no-cache tini ca-certificates
+
+WORKDIR /app
+
+# Install dependencies
+COPY deploy/fellowship/package.json ./package.json
+RUN npm ci --production
+
+# Copy WASM artifacts from builder
+COPY --from=builder-wasm /colibri-build/dist/ ./public/colibri/
+
+# Copy source
+COPY deploy/fellowship/src/ ./src/
+
+# Create data directories
+RUN mkdir -p /data/models /data/ipfs /data/gun /data/logs
+
+EXPOSE 3001 5001 8040
+
+ENTRYPOINT ["tini", "--"]
+CMD ["node", "src/index.js"]

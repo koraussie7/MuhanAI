@@ -1,0 +1,17 @@
+{
+  "name": "colibri-fellowship-node",
+  "version": "2.0.0",
+  "description": "Colibri WASM Fellowship Node — P2P inference + IPFS model serving",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "ipfs-http-server": "^65.0.0",
+    "ipfs-libp2p": "^65.0.0",
+    "gun": "^0.2020.1241"
+  }
+}

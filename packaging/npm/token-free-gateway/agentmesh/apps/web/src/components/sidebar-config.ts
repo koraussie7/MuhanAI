@@ -38,6 +38,7 @@ const GROUP_TITLES: Record<string, string> = {
 	economy: "Economy",
 	workspace: "Workspace",
 	system: "Settings",
+	p2pclaw: "P2PCLAW + Colibri",
 };
 
 /** Sidebar groups are derived from the route registry, not maintained separately. */

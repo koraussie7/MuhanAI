@@ -6,7 +6,8 @@ export type RouteGroup =
 	| "marketplace"
 	| "economy"
 	| "workspace"
-	| "system";
+	| "system"
+	| "p2pclaw"; // NEW
 
 export interface RouteDefinition {
 	id: string;
@@ -290,6 +291,42 @@ export const ROUTES: readonly RouteDefinition[] = [
 		iconKey: "monitor",
 		badge: "Beta",
 		page: "thin-client",
+	},
+	{
+		id: "p2pclaw-network",
+		path: "/network/p2pclaw",
+		group: "p2pclaw",
+		label: "P2PCLAW Network",
+		iconKey: "globe",
+		badge: "Colibri",
+		page: "p2pclaw-network",
+	},
+	{
+		id: "colibri-engine",
+		path: "/network/colibri",
+		group: "p2pclaw",
+		label: "Colibri Engine",
+		iconKey: "brain-circuit",
+		badge: "WASM",
+		page: "colibri-engine",
+	},
+	{
+		id: "agent-memory",
+		path: "/network/memory",
+		group: "p2pclaw",
+		label: "Agent Memory P2P",
+		iconKey: "database",
+		badge: "MemWal",
+		page: "agent-memory",
+	},
+	{
+		id: "model-streaming",
+		path: "/network/streaming",
+		group: "p2pclaw",
+		label: "Model Streaming",
+		iconKey: "activity",
+		badge: "Live",
+		page: "model-streaming",
 	},
 ];
 

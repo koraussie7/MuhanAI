@@ -1,5 +1,12 @@
 {
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": { "outDir": "dist" },
-	"include": ["src", "index.ts"]
+	"include": ["src", "index.ts"],
+	"exclude": ["src/**/*.test.ts", "src/**/*.tsx", "src/visuals/ColibriMetricsChart.tsx", "src/visuals/P2PChunksVisualization.tsx", "src/wasm-colibri/browser-runner.ts"],
+	"files": [
+		"src/types/ipfs-http-client.d.ts",
+		"src/types/gun.d.ts",
+		"src/types/multiformats.d.ts",
+		"src/types/p2p-media-loader.d.ts"
+	]
 }

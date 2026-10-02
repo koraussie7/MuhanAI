@@ -41,6 +41,14 @@
 		"unpdf": "^1.8.1",
 		"xlsx": "^0.18.5"
 	},
+	"peerDependencies": {
+		"gun": "^0.2020.1241",
+		"ipfs-http-client": "^60.0.0 || ^65.0.0"
+	},
+	"peerDependenciesMeta": {
+		"gun": { "optional": true },
+		"ipfs-http-client": { "optional": true }
+	},
 	"devDependencies": {
 		"@types/node": "^22.10.0",
 		"@types/xlsx": "^0.0.36",

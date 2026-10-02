@@ -4,7 +4,13 @@
 		"jsx": "react-jsx",
 		"allowImportingTsExtensions": true,
 		"noEmit": true,
-		"lib": ["ES2022", "DOM", "DOM.Iterable"]
+		"lib": ["ES2022", "DOM", "DOM.Iterable"],
+		"paths": {
+			"ipfs-http-client": ["../../packages/knowledge-base/src/types/ipfs-http-client.d.ts"],
+			"gun": ["../../packages/knowledge-base/src/types/gun.d.ts"],
+			"p2p-media-loader": ["../../packages/knowledge-base/src/types/p2p-media-loader.d.ts"],
+			"@knowledge-base/visuals/*": ["../../packages/knowledge-base/src/visuals/*"],
+		}
 	},
-	"include": ["src"]
+	"include": ["src", "../../packages/knowledge-base/src/types"]
 }

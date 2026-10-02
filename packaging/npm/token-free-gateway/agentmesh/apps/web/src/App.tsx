@@ -156,6 +156,18 @@ const SearchPageLazy = React.lazy(() =>
 const LlmMeshPageLazy = React.lazy(() =>
 	import("./components/DashPages").then((m) => ({ default: m.LlmMeshPage })),
 );
+const P2PCLAWNetworkLazy = React.lazy(() =>
+	import("./components/P2PCLAWNetwork").then((m) => ({ default: m.P2PCLAWNetwork })),
+);
+const ColibriEngineLazy = React.lazy(() =>
+	import("./components/ColibriEngine").then((m) => ({ default: m.ColibriEngine })),
+);
+const AgentMemoryP2PLazy = React.lazy(() =>
+	import("./components/AgentMemoryP2P").then((m) => ({ default: m.AgentMemoryP2P })),
+);
+const ModelStreamingLazy = React.lazy(() =>
+	import("./components/ModelStreaming").then((m) => ({ default: m.ModelStreaming })),
+);
 
 /**
  * Single Source of Truth for all routes.
@@ -171,6 +183,7 @@ const GROUP_LABELS: Record<string, string> = {
 	economy: "Economy",
 	workspace: "Workspace",
 	system: "System",
+	p2pclaw: "P2PCLAW + Colibri",
 };
 
 const SECTIONS = ROUTES.map((route) => ({
@@ -623,6 +636,28 @@ export function App() {
 						{activeSection === "thin-client" && (
 							<Suspense fallback={<PageSkeleton />}>
 								<ThinClientPageLazy />
+							</Suspense>
+						)}
+
+						{/* P2PCLAW + Colibri — Decentralized inference and memory P2P */}
+						{activeSection === "p2pclaw-network" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<P2PCLAWNetworkLazy />
+							</Suspense>
+						)}
+						{activeSection === "colibri-engine" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<ColibriEngineLazy />
+							</Suspense>
+						)}
+						{activeSection === "agent-memory" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<AgentMemoryP2PLazy />
+							</Suspense>
+						)}
+						{activeSection === "model-streaming" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<ModelStreamingLazy />
 							</Suspense>
 						)}
 

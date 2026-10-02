@@ -9,6 +9,8 @@ import {
 	Cpu,
 	Database,
 	FolderGit,
+	Globe,
+	BrainCircuit,
 	GitBranch,
 	GitMerge,
 	Layers,
@@ -111,6 +113,10 @@ function renderIcon(key: string): React.ReactNode {
 			return <Star size={18} />;
 		case "git-branch":
 			return <GitBranch size={18} />;
+		case "globe":
+			return <Globe size={18} />;
+		case "brain-circuit":
+			return <BrainCircuit size={18} />;
 		default:
 			return null;
 	}
