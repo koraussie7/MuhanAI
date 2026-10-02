@@ -1,5 +1,21 @@
 // packages/knowledge-base/src/p2p-memory/p2p-stream.ts
-import { P2PManager } from "p2p-media-loader";
+// NOTE: p2p-media-loader is an OPTIONAL dep — lazy-loaded so Node unit tests
+// (services/api) don't hard-fail when it isn't installed.
+type P2PLoaderModule = {
+  P2PManager: new (opts?: {
+    runtimeOptions?: { logging?: boolean };
+  }) => {
+    shareChunk(chunkId: string, data: Uint8Array): Promise<void>;
+    loadChunk(chunkId: string): Promise<Uint8Array>;
+    getStats(): { peersCount: number };
+    destroy(): void;
+  };
+};
+
+async function loadP2PManager(): Promise<P2PLoaderModule["P2PManager"]> {
+  const mod = (await import("p2p-media-loader")) as unknown as P2PLoaderModule;
+  return mod.P2PManager;
+}
 
 export interface P2PStreamConfig {
   announce: string[];
@@ -17,16 +33,32 @@ export interface MemoryChunk {
 }
 
 export class P2PMemoryStream {
-  private manager: P2PManager;
+  private manager: InstanceType<P2PLoaderModule["P2PManager"]> | null = null;
+  private managerPromise: Promise<
+    InstanceType<P2PLoaderModule["P2PManager"]>
+  > | null = null;
   private chunkSize: number;
 
   constructor(config: P2PStreamConfig) {
-    this.manager = new P2PManager({
-      runtimeOptions: {
-        logging: true,
-      },
-    });
     this.chunkSize = config.chunkSize || 1024 * 1024;
+  }
+
+  private async ensureManager(): Promise<
+    InstanceType<P2PLoaderModule["P2PManager"]>
+  > {
+    if (this.manager) return this.manager;
+    if (!this.managerPromise) {
+      this.managerPromise = (async () => {
+        const P2PManager = await loadP2PManager();
+        this.manager = new P2PManager({
+          runtimeOptions: {
+            logging: true,
+          },
+        });
+        return this.manager;
+      })();
+    }
+    return this.managerPromise;
   }
 
   async shareMemory(namespace: string, memory: Record<string, any>): Promise<void> {
@@ -51,23 +83,25 @@ export class P2PMemoryStream {
 
     for (const chunk of chunks) {
       const data = this.serializeChunk(chunk);
-      await this.manager.shareChunk(chunk.id, data);
+      const manager = await this.ensureManager();
+      await manager.shareChunk(chunk.id, data);
     }
   }
 
   async receiveChunks(chunkIds: string[]): Promise<MemoryChunk[]> {
     const results: MemoryChunk[] = [];
-    
+    const manager = await this.ensureManager();
+
     for (const chunkId of chunkIds) {
       try {
-        const data = await this.manager.loadChunk(chunkId);
+        const data = await manager.loadChunk(chunkId);
         const chunk = this.deserializeChunk(data);
         if (chunk) results.push(chunk);
       } catch (err) {
         console.warn(`Failed to load chunk ${chunkId}:`, err);
       }
     }
-    
+
     results.sort((a, b) => a.index - b.index);
     return results;
   }
@@ -97,11 +131,22 @@ export class P2PMemoryStream {
   }
 
   getPeerCount(): number {
-    return this.manager.getStats().peersCount;
+    try {
+      // Sync accessor — returns 0 until lazy manager is initialized.
+      return (this.manager?.getStats().peersCount ?? 0);
+    } catch {
+      return 0;
+    }
   }
 
   destroy(): void {
-    this.manager.destroy();
+    try {
+      this.manager?.destroy();
+    } catch {
+      // ignore — manager may never have initialized
+    }
+    this.manager = null;
+    this.managerPromise = null;
   }
 
   private serializeChunk(chunk: MemoryChunk): Uint8Array {
