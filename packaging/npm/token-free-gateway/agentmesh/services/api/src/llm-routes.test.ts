@@ -11,8 +11,8 @@
  */
 
 import { pino } from "pino";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { buildApp } from "./server.js";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { buildApp } from "./server.js";
 
 const originalFetch = globalThis.fetch;
 
@@ -20,9 +20,26 @@ describe("POST /api/llm/chat — user prompt wiring", () => {
 	let app: Awaited<ReturnType<typeof buildApp>> | undefined;
 
 	beforeEach(async () => {
-		process.env.DISABLE_AUTH = "true";
-		process.env.NODE_ENV = "development";
-		app = await buildApp({
+		// Stub env vars BEFORE resetModules so they survive module re-import.
+		// Order matters: resetModules() clears all cached modules, and if
+		// stubs are set before resetModules they get wiped. Set them after.
+		vi.resetModules();
+		vi.stubEnv("OMNIROUTE_PRIORITY", "false");
+		vi.stubEnv("OMNIROUTE_BASE_URL", "");
+		vi.stubEnv("OPENAI_BASE_URL", "");
+		vi.stubEnv("DISABLE_AUTH", "true");
+		vi.stubEnv("NODE_ENV", "test");
+
+		// Prevent .env / dotenv from re-loading cached env vars during import.
+		// We explicitly stub these AFTER resetModules to ensure they take precedence
+		// over any env vars that dotenv would set from agentmesh/.env
+		vi.stubEnv("OPENAI_BASE_URL", "");
+		vi.stubEnv("OPENAI_API_KEY", "");
+		vi.stubEnv("ANTHROPIC_API_KEY", "");
+		vi.stubEnv("OMNIROUTE_PRIORITY", "false");
+
+		const { buildApp: build } = await import("./server.js");
+		app = await build({
 			logger: pino({ level: "silent" }),
 			enableTransport: false,
 		});
@@ -34,7 +51,7 @@ describe("POST /api/llm/chat — user prompt wiring", () => {
 			app = undefined;
 		}
 		globalThis.fetch = originalFetch;
-		process.env.NODE_ENV = "test";
+		vi.unstubAllEnvs();
 	});
 
 	it("routes a question through the keyless free tier and returns the LLM text", async () => {
