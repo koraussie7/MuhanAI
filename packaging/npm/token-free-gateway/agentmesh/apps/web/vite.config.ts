@@ -1,5 +1,6 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import { fileURLToPath } from "node:url";
 import { defineConfig, type Plugin } from "vite";
 
 /**
@@ -334,6 +335,20 @@ function mcpRpcPlugin(): Plugin {
 export default defineConfig({
 	plugins: [react(), tailwindcss(), llmChatPlugin(), mcpRpcPlugin()],
 	server: { port: 5173, proxy: { "/api": "http://localhost:3001" } },
+	resolve: {
+		alias: {
+			// p2p-media-loader was unpublished from npm on 2023-06-28, so it can no
+			// longer be installed. knowledge-base lazy-imports it in p2p-stream.ts
+			// and treats it as optional (cc5d520), so resolve the specifier to a
+			// stub rather than failing the entire web build.
+			"p2p-media-loader": fileURLToPath(
+				new URL(
+					"../../packages/knowledge-base/src/p2p-memory/p2p-media-loader.stub.ts",
+					import.meta.url,
+				),
+			),
+		},
+	},
 	build: {
 		outDir: "dist",
 		rollupOptions: {
