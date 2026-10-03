@@ -153,6 +153,9 @@ const ThinClientPageLazy = React.lazy(() =>
 const SearchPageLazy = React.lazy(() =>
 	import("./components/SpecPages").then((m) => ({ default: m.SearchPage })),
 );
+const OntologyExplorerLazy = React.lazy(() =>
+	import("./components/OntologyExplorer").then((m) => ({ default: m.OntologyExplorer })),
+);
 const LlmMeshPageLazy = React.lazy(() =>
 	import("./components/DashPages").then((m) => ({ default: m.LlmMeshPage })),
 );
@@ -553,10 +556,15 @@ export function App() {
 								<VerificationPageLazy />
 							</Suspense>
 						)}
-						{activeSection === "search" && (
-							<Suspense fallback={<PageSkeleton />}>
-								<SearchPageLazy />
-							</Suspense>
+							{activeSection === "search" && (
+						<Suspense fallback={<PageSkeleton />}>
+						<SearchPageLazy />
+						</Suspense>
+						)}
+						{activeSection === "ontology" && (
+						<Suspense fallback={<PageSkeleton />}>
+						<OntologyExplorerLazy />
+						</Suspense>
 						)}
 
 						{/* Marketplace */}
@@ -680,10 +688,10 @@ export function App() {
 								<WorldCockpitLazy />
 							</Suspense>
 						)}
-						{activeSection === "live-events" && (
-							<Suspense fallback={<PageSkeleton />}>
-								<LiveEventsLazy />
-							</Suspense>
+							{(activeSection === "live-events" || activeSection === "pythia") && (
+						<Suspense fallback={<PageSkeleton />}>
+						<LiveEventsLazy />
+						</Suspense>
 						)}
 						{activeSection === "forecast-ledger" && (
 							<Suspense fallback={<PageSkeleton />}>

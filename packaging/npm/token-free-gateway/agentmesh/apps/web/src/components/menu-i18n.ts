@@ -33,9 +33,12 @@ export const MENU_TRANSLATIONS: Record<SupportedLanguage, NavI18n> = {
 			marketplace: "마켓플레이스",
 			economy: "경제 시스템",
 			system: "시스템 설정",
-			workspace: "워크스페이스",
-		},
-		items: {
+				workspace: "워크스페이스",
+			p2pclaw: "P2PCLAW + Colibri",
+			},
+			items: {
+			ontology: "온톨로지 탐색기",
+			pythia: "Pythia 인텔리전스",
 			// Core
 			dashboard: "대시보드",
 			"agent-cast": "에이전트 캐스트",
@@ -150,9 +153,12 @@ export const MENU_TRANSLATIONS: Record<SupportedLanguage, NavI18n> = {
 			marketplace: "Marketplace",
 			economy: "Economy",
 			system: "Settings",
-			workspace: "Workspace",
-		},
-		items: {
+				workspace: "Workspace",
+			p2pclaw: "P2PCLAW + Colibri",
+			},
+			items: {
+			ontology: "Ontology Explorer",
+			pythia: "Pythia Intelligence",
 			dashboard: "Dashboard",
 			"agent-cast": "Agent Cast",
 			"agent-mesh": "Agent Mesh",
