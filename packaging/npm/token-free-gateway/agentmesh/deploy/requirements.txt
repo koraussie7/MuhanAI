@@ -1,0 +1,9 @@
+# Pythia Connector + LocalCrab Adapter dependencies
+# Python 3.10+ required for modern type hints
+
+# Core
+pydantic>=2.5.0
+requests>=2.31.0
+
+# Testing (optional)
+pytest>=7.4.0  # or use stdlib unittest directly

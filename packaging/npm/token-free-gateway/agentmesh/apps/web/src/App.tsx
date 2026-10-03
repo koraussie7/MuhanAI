@@ -168,6 +168,21 @@ const AgentMemoryP2PLazy = React.lazy(() =>
 const ModelStreamingLazy = React.lazy(() =>
 	import("./components/ModelStreaming").then((m) => ({ default: m.ModelStreaming })),
 );
+const WorldCockpitLazy = React.lazy(() =>
+	import("./components/WorldCockpit").then((m) => ({ default: m.WorldCockpit })),
+);
+const LiveEventsLazy = React.lazy(() =>
+	import("./components/LiveEvents").then((m) => ({ default: m.LiveEvents })),
+);
+const ForecastLedgerLazy = React.lazy(() =>
+	import("./components/ForecastLedger").then((m) => ({ default: m.ForecastLedger })),
+);
+const EvidenceExplorerLazy = React.lazy(() =>
+	import("./components/EvidenceExplorer").then((m) => ({ default: m.EvidenceExplorer })),
+);
+const ImpactAnalysisLazy = React.lazy(() =>
+	import("./components/ImpactAnalysis").then((m) => ({ default: m.ImpactAnalysis })),
+);
 
 /**
  * Single Source of Truth for all routes.
@@ -658,6 +673,31 @@ export function App() {
 						{activeSection === "model-streaming" && (
 							<Suspense fallback={<PageSkeleton />}>
 								<ModelStreamingLazy />
+							</Suspense>
+						)}
+						{activeSection === "world-cockpit" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<WorldCockpitLazy />
+							</Suspense>
+						)}
+						{activeSection === "live-events" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<LiveEventsLazy />
+							</Suspense>
+						)}
+						{activeSection === "forecast-ledger" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<ForecastLedgerLazy />
+							</Suspense>
+						)}
+						{activeSection === "evidence-explorer" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<EvidenceExplorerLazy />
+							</Suspense>
+						)}
+						{activeSection === "impact-analysis" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<ImpactAnalysisLazy />
 							</Suspense>
 						)}
 
