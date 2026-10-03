@@ -1,5 +1,6 @@
 import {
 	Activity,
+	AlertTriangle,
 	BookOpen,
 	Bot,
 	CheckCircle2,
@@ -75,8 +76,10 @@ function renderIcon(key: string): React.ReactNode {
 			return <Bot size={18} />;
 		case "network":
 			return <Network size={18} />;
-		case "activity":
-			return <Activity size={18} />;
+			case "activity":
+		return <Activity size={18} />;
+		case "alert-triangle":
+		return <AlertTriangle size={18} />;
 		case "sparkles":
 			return <Sparkles size={18} />;
 		case "cpu":

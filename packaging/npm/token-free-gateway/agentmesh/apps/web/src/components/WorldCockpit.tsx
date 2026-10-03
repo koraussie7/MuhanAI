@@ -217,7 +217,7 @@ export function WorldCockpit() {
                       <td>{peer.downloadMbps.toFixed(1)} Mbps</td>
                       <td>{peer.uploadMbps.toFixed(1)} Mbps</td>
                       <td>{peer.sharedChunks}</td>
-                      <td>{(peer.cacheHitRate * 100).toFixed(0)}%</td>
+                      <td>{metrics.colibri.p2p.cacheHitRate.toFixed(0)}%</td>
                     </tr>
                   ))}
                 </tbody>

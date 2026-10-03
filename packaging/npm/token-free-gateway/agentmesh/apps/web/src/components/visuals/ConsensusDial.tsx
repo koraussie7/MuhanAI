@@ -9,8 +9,13 @@ export interface AgentVote {
 	reason: string;
 }
 
-export function ConsensusDial() {
-	const [agreement] = useState(94.2);
+export interface ConsensusDialProps {
+	value?: number;
+	label?: string;
+}
+
+export function ConsensusDial({ value, label }: ConsensusDialProps = {}) {
+	const [agreement] = useState(value === undefined ? 94.2 : value * 100);
 	const [votes] = useState<AgentVote[]>([
 		{
 			agent: "Claude 3.5 Sonnet",
@@ -93,7 +98,7 @@ export function ConsensusDial() {
 						/>
 					</svg>
 					<div className="consensus-gauge-content">
-						<span className="consensus-pct">{agreement}%</span>
+							<span className="consensus-pct">{label ?? `${agreement.toFixed(1)}%`}</span>
 						<span className="consensus-label">합의 일치율</span>
 					</div>
 				</div>

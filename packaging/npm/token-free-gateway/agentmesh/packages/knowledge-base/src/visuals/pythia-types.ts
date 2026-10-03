@@ -52,6 +52,8 @@ export interface ImpactAnalysis {
   colibriMetricsRef?: string;
 }
 
+import type { ColibriMetrics, ModelChunkMetrics, PeerMetrics } from "./colibri-metrics";
+
 export interface PythiaMetricsPacket {
   colibri: ColibriMetrics;
   timestamp: string;

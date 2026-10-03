@@ -87,11 +87,11 @@ export function ImpactAnalysis() {
             },
           ]);
           setForecasts([
-            { forecastId: "fc-demo-1", agentId: "claude-thin-client", hypothesis: "Q", outcome: "A", confidence: "high", confidenceNumeric: 0.85, supportingEvents: [] },
-            { forecastId: "fc-demo-2", agentId: "agent-gemini", hypothesis: "Q", outcome: "A", confidence: "medium", confidenceNumeric: 0.55, supportingEvents: [] },
+            { forecastId: "fc-demo-1", agentId: "claude-thin-client", createdAt: new Date().toISOString(), hypothesis: "Q", outcome: "A", confidence: "high", confidenceNumeric: 0.85, supportingEvents: [], citations: [] },
+            { forecastId: "fc-demo-2", agentId: "agent-gemini", createdAt: new Date().toISOString(), hypothesis: "Q", outcome: "A", confidence: "medium", confidenceNumeric: 0.55, supportingEvents: [], citations: [] },
           ]);
           setEvents([
-            { eventId: "evt-003", sourceAgent: "agent-local", kind: "verification", severity: "critical", title: "Memory pressure", body: "WASM heap limit", timestamp: new Date().toISOString(), metadata: {} },
+            { eventId: "evt-003", sourceAgent: "agent-local", kind: "verification", severity: "critical", title: "Memory pressure", body: "WASM heap limit", timestamp: new Date().toISOString(), metadata: {}, schemaVersion: "1.0.0" },
           ]);
           setLoading(false);
         }

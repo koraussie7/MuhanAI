@@ -257,7 +257,11 @@ const INITIAL_EDGES: P2PEdge[] = [
 	},
 ];
 
-export const P2PConnectionGraph: React.FC = () => {
+export interface P2PConnectionGraphProps {
+	peers?: unknown[];
+}
+
+export const P2PConnectionGraph: React.FC<P2PConnectionGraphProps> = () => {
 	const [nodes, setNodes] = useState<P2PNode[]>(INITIAL_NODES);
 	const [edges] = useState<P2PEdge[]>(INITIAL_EDGES);
 	const [selectedNodeId, setSelectedNodeId] = useState<string>("gateway-core");
