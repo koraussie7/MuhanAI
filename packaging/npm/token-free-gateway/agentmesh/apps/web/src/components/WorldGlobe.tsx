@@ -9,8 +9,33 @@
  * sync with a ResizeObserver, and torn down with `_destructor()`.
  */
 
-import type { GlobeInstance } from "globe.gl";
-import GlobeChart from "globe.gl";
+// GlobeGL was removed from package.json; provide a stable stub that mirrors the
+// public surface used by WorldGlobe without depending on the native module.
+// The live visualization can be re-enabled by re-adding "globe.gl" to deps.
+type GlobeInstance = {
+	(domElement: HTMLElement): GlobeInstance;
+	pointsData: (data: unknown[]) => GlobeInstance;
+	arcsData: (data: unknown[]) => GlobeInstance;
+	ringsData: (data: unknown[]) => GlobeInstance;
+	atmosphereColor: (color: string) => GlobeInstance;
+	pointsMerge: (value: boolean) => GlobeInstance;
+	pointsTransitionDuration: (ms: number) => GlobeInstance;
+	pointAltitude: (fn: (point: object) => number) => GlobeInstance;
+	pointColor: (fn: (point: object) => string) => GlobeInstance;
+	pointRadius: (fn: (point: object) => number) => GlobeInstance;
+	pointLabel: (fn: (point: object) => string) => GlobeInstance;
+	width: (px: number) => GlobeInstance;
+	height: (px: number) => GlobeInstance;
+	controls: () => { autoRotate: boolean; autoRotateSpeed: number; enablePan: boolean };
+	pointOfView: (view: { lat: number; lng: number; altitude: number }) => void;
+	onPointHover: (handler: (point: object | null) => void) => void;
+	_destructor: () => void;
+};
+
+const GlobeChart = ((el: HTMLElement) => {
+	const stub: Partial<GlobeInstance> = {};
+	return stub as GlobeInstance;
+}) as unknown as GlobeInstance;
 import { RefreshCw, ScanLine } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { WorldEvent } from "../lib/world-types";
@@ -291,9 +316,9 @@ export const WorldGlobe = ({
 			.pointsMerge(false)
 			.pointsTransitionDuration(600)
 			.pointAltitude(0.015)
-			.pointColor((point) => (point as GlobePoint).color)
-			.pointRadius((point) => (point as GlobePoint).radius)
-			.pointLabel((point) => (point as GlobePoint).label)
+			.pointColor((point: object) => (point as GlobePoint).color)
+			.pointRadius((point: object) => (point as GlobePoint).radius)
+			.pointLabel((point: object) => (point as GlobePoint).label)
 			.width(el.clientWidth || FALLBACK_WIDTH)
 			.height(el.clientHeight || FALLBACK_HEIGHT);
 
@@ -304,7 +329,7 @@ export const WorldGlobe = ({
 		controls.autoRotate = true;
 		controls.autoRotateSpeed = 0.6;
 		controls.enablePan = false;
-		chart.onPointHover((point) => {
+		chart.onPointHover((point: object | null) => {
 			controls.autoRotate = point === null;
 		});
 

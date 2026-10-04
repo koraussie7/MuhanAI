@@ -25,11 +25,15 @@ describe("action-dispatcher", () => {
 				timestamp: 123456789,
 			};
 
-			globalThis.fetch = vi.fn().mockResolvedValue({
+			const mockedFetch = Object.assign(vi.fn(), {
+				preconnect: () => undefined,
+			}) as unknown as { (...args: unknown[]): Promise<unknown>; preconnect?: (url?: string) => void; mockResolvedValue?: (value: unknown) => void };
+			(mockedFetch as { mockResolvedValue: (value: unknown) => void }).mockResolvedValue({
 				ok: true,
 				status: 202,
 				json: async () => mockEvent,
-			} as Response);
+			} as unknown as Response);
+			globalThis.fetch = mockedFetch as typeof fetch;
 
 			const request: A2UIActionRequest = {
 				surfaceId: "shop1-menu",
@@ -48,11 +52,15 @@ describe("action-dispatcher", () => {
 		});
 
 		it("throws an error when response is not ok", async () => {
-			globalThis.fetch = vi.fn().mockResolvedValue({
+			const mockedFetch = Object.assign(vi.fn(), {
+				preconnect: () => undefined,
+			}) as unknown as { (...args: unknown[]): Promise<unknown>; preconnect?: (url?: string) => void; mockResolvedValue?: (value: unknown) => void };
+			(mockedFetch as { mockResolvedValue: (value: unknown) => void }).mockResolvedValue({
 				ok: false,
 				status: 403,
 				json: async () => ({ error: "action_not_allowed" }),
-			} as Response);
+			} as unknown as Response);
+			globalThis.fetch = mockedFetch as typeof fetch;
 
 			await expect(
 				dispatchA2UIAction({ surfaceId: "shop1-menu", name: "forbidden_action" }),
@@ -60,13 +68,18 @@ describe("action-dispatcher", () => {
 		});
 
 		it("throws generic error when response is not ok and body is empty", async () => {
-			globalThis.fetch = vi.fn().mockResolvedValue({
+			const mockedFetch = Object.assign(vi.fn(), {
+				preconnect: () => undefined,
+			}) as unknown as { (...args: unknown[]): Promise<unknown>; preconnect?: (url?: string) => void; mockResolvedValue?: (value: unknown) => void };
+			(mockedFetch as { mockResolvedValue: (value: unknown) => void }).mockResolvedValue({
 				ok: false,
 				status: 500,
 				json: async () => {
 					throw new Error("fail");
 				},
 			} as unknown as Response);
+			globalThis.fetch = mockedFetch as typeof fetch;
+
 
 			await expect(
 				dispatchA2UIAction({ surfaceId: "shop1-menu", name: "request_reservation" }),
