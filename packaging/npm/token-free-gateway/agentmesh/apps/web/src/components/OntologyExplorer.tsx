@@ -1,6 +1,12 @@
 import { useMemo, useState } from "react";
 
 const RELATIONS = ["supports", "derived_from", "impacts", "predicts"] as const;
+const ENTITIES = [
+  { id: "event", label: "Pythia Event", description: "Atomic research evidence emitted by an agent." },
+  { id: "forecast", label: "Pythia Forecast", description: "A probabilistic claim linked to supporting events." },
+  { id: "evidence", label: "LocalCrab Evidence", description: "Persisted evidence record with content-hash provenance." },
+  { id: "impact", label: "Impact Analysis", description: "Impact tier and affected domain annotation." },
+];
 const FRAGMENTS = [
   { id: "event", label: "Pythia Event", region: "Asia Pacific", x: 276, y: 174, color: "#8df5d0" },
   { id: "forecast", label: "Pythia Forecast", region: "North America", x: 151, y: 142, color: "#8ab4ff" },
@@ -27,6 +33,14 @@ export function OntologyExplorer() {
         </p>
       </header>
       <div className="page-box-body">
+        <div className="peer-grid" style={{ marginBottom: 20 }}>
+          {ENTITIES.map((entity) => (
+            <article className="peer-card" key={entity.id}>
+              <strong className="peer-name">{entity.label}</strong>
+              <p className="dash-note">{entity.description}</p>
+            </article>
+          ))}
+        </div>
         <div style={{ display: "grid", gridTemplateColumns: "minmax(320px, 1.25fr) minmax(240px, .75fr)", gap: 20, alignItems: "stretch" }}>
           <div style={{ minHeight: 390, borderRadius: 18, background: "radial-gradient(circle at 48% 42%, rgba(63, 117, 145, .32), rgba(8, 17, 29, .96) 62%)", border: "1px solid rgba(141, 245, 208, .18)", overflow: "hidden", position: "relative" }}>
             <div style={{ position: "absolute", top: 16, left: 20, color: "#8df5d0", fontSize: 11, letterSpacing: ".14em" }}>OBSIDIAN / P2P KNOWLEDGE GLOBE</div>
