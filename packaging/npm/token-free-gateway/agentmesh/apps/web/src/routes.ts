@@ -178,6 +178,15 @@ export const ROUTES: readonly RouteDefinition[] = [
 		page: "federation",
 	},
 	{
+		id: "ontology",
+		path: "/ontology",
+		group: "knowledge",
+		label: "Ontology Explorer",
+		iconKey: "layers",
+		badge: "NEW",
+		page: "ontology",
+	},
+	{
 		id: "agents-market",
 		path: "/marketplace/agents",
 		group: "marketplace",

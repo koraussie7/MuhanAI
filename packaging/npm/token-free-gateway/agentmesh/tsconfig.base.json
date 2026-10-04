@@ -36,6 +36,18 @@
       ],
       "@agentmesh/llm-router": [
         "./packages/llm-router/src/index.ts"
+      ],
+      "@agentmesh/peer-mesh": [
+        "./packages/peer-mesh/src/index.ts"
+      ],
+      "@agentmesh/peer-mesh/*": [
+        "./packages/peer-mesh/src/*"
+      ],
+      "@agentmesh/cosmos-core": [
+        "./packages/cosmos-core/src/index.ts"
+      ],
+      "@agentmesh/cosmos-core/*": [
+        "./packages/cosmos-core/src/*"
       ]
     }
   }

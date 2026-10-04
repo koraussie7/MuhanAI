@@ -15,3 +15,6 @@ export * from "./pubsub.js";
 export * from "./transport.js";
 export * from "./trust-verifier.js";
 export * from "./device-capabilities.js";
+export * from "./model-seeding.js";
+export * from "./p2p-inference.js";
+export * from "./p3-visualization.js";

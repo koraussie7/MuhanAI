@@ -154,6 +154,9 @@ const HappyPageLazy = React.lazy(() =>
 const WorldPageLazy = React.lazy(() =>
 	import("./components/WorldPage").then((m) => ({ default: m.WorldPage })),
 );
+const OntologyExplorerLazy = React.lazy(() =>
+	import("./components/OntologyExplorer").then((m) => ({ default: m.OntologyExplorer })),
+);
 const SearchPageLazy = React.lazy(() =>
 	import("./components/SpecPages").then((m) => ({ default: m.SearchPage })),
 );
@@ -659,6 +662,13 @@ export function App() {
 						{activeSection === "pythia" && (
 							<Suspense fallback={<PageSkeleton />}>
 								<PythiaPageLazy />
+							</Suspense>
+						)}
+
+						{/* Ontology Explorer — Pythia·LocalCrab·Ontology·H3 Visualization */}
+						{activeSection === "ontology" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<OntologyExplorerLazy onNavigate={navigate} />
 							</Suspense>
 						)}
 
