@@ -40,10 +40,16 @@ import {
 	type ProvenanceRelation,
 	type ImpactTier,
 } from "@agentmesh/peer-mesh";
-import { conceptId, parseConceptId } from "@agentmesh/cosmos-core";
-import type { OntologyConcept, OntologyRelation } from "@agentmesh/cosmos-core";
 import { useI18n } from "../i18n.js";
 import { useMeshPulse } from "../hooks/useMeshPulse.js";
+
+type ConceptRef = { id: string; label: string };
+const conceptId = (category: string, key: string) => `${category}/${key}`;
+const parseConceptId = (id: string) => {
+	const [category = "", key = ""] = id.split("/", 2);
+	return { category, key };
+};
+const deriveConcept = (category: string, key: string, label: string): ConceptRef => ({ id: conceptId(category, key), label });
 
 const API = import.meta.env.VITE_API_BASE ?? "";
 const H3_RESOLUTION = 4;
@@ -718,7 +724,7 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 												{card.label}
 											</div>
 											<div style={{ fontSize: 10, color: "var(--cline-text-muted)" }}>
-												{card.domain}::{parsed.label}
+												{card.domain}::{parsed.key}
 											</div>
 										</div>
 									</div>

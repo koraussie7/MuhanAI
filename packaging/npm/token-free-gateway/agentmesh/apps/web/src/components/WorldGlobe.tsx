@@ -307,16 +307,13 @@ export const WorldGlobe = ({
 		const el = containerRef.current;
 		if (!el) return;
 
-		const chart = new GlobeChart(el, { animateIn: true, waitForGlobeReady: false });
+		const chart = GlobeChart(el);
 		chart
-			.globeImageUrl(GLOBE_TEXTURE)
-			.backgroundColor(GLOBE_BACKGROUND)
-			.showAtmosphere(true)
 			.atmosphereColor("#38bdf8")
 			.pointsMerge(false)
 			.pointsTransitionDuration(600)
-			.pointAltitude(0.015)
-			.pointColor((point: object) => (point as GlobePoint).color)
+			.pointAltitude((): number => 0.015)
+			.pointColor((point: object): string => (point as GlobePoint).color)
 			.pointRadius((point: object) => (point as GlobePoint).radius)
 			.pointLabel((point: object) => (point as GlobePoint).label)
 			.width(el.clientWidth || FALLBACK_WIDTH)

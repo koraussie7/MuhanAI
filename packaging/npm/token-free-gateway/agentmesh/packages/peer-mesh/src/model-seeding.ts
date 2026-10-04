@@ -384,8 +384,9 @@ export async function createIndexedDBSeedStore(dbName = "agentmesh-seeds", store
     markSeeded: async () => {},
     getStorageUsage: async () => storageUsage,
     getStorageQuota: async () => {
-      if (navigator.storage?.estimate) {
-        const est = await navigator.storage.estimate();
+      const estimate = (navigator as { storage?: { estimate?: () => Promise<{ quota?: number }> } }).storage?.estimate;
+      if (estimate) {
+        const est = await estimate();
         return est.quota ?? 1024 * 1024 * 1024;
       }
       return 1024 * 1024 * 1024;

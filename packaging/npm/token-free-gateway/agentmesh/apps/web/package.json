@@ -20,7 +20,6 @@
 		"@agentmesh/personal-mcp": "workspace:*",
 		"@agentmesh/shared-types": "workspace:*",
 		"@agentmesh/peer-mesh": "workspace:*",
-		"@agentmesh/cosmos-core": "workspace:*",
 		"@tailwindcss/vite": "^4.0.0",
 		"@types/react": "^19.0.0",
 		"@types/react-dom": "^19.0.0",

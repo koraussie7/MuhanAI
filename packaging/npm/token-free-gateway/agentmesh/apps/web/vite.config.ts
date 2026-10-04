@@ -334,10 +334,7 @@ function mcpRpcPlugin(): Plugin {
 export default defineConfig({
 	plugins: [react(), tailwindcss(), llmChatPlugin(), mcpRpcPlugin()],
 	resolve: {
-		alias: {
-			"@agentmesh/peer-mesh": "/packages/peer-mesh/src/index.ts",
-			"@agentmesh/cosmos-core": "/packages/cosmos-core/src/index.ts",
-		},
+		alias: [],
 	},
 	server: { port: 5173, proxy: { "/api": "http://localhost:3001" } },
 	build: {
