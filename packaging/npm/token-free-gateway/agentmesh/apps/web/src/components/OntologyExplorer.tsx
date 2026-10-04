@@ -32,8 +32,8 @@ export function OntologyExplorer() {
           Obsidian 지식 조각을 지구본 위에 배치하고 Pythia·LocalCrab 관계로 연결합니다.
         </p>
       </header>
-      <div className="page-box-body">
-        <div className="peer-grid" style={{ marginBottom: 20 }}>
+      <div className="page-box-body" style={{ display: "flex", flexDirection: "column" }}>
+        <div className="peer-grid" style={{ marginBottom: 20, order: 2 }}>
           {ENTITIES.map((entity) => (
             <article className="peer-card" key={entity.id}>
               <strong className="peer-name">{entity.label}</strong>
@@ -41,7 +41,7 @@ export function OntologyExplorer() {
             </article>
           ))}
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "minmax(320px, 1.25fr) minmax(240px, .75fr)", gap: 20, alignItems: "stretch" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "minmax(320px, 1.25fr) minmax(240px, .75fr)", gap: 20, alignItems: "stretch", order: 1 }}>
           <div style={{ minHeight: 390, borderRadius: 18, background: "radial-gradient(circle at 48% 42%, rgba(63, 117, 145, .32), rgba(8, 17, 29, .96) 62%)", border: "1px solid rgba(141, 245, 208, .18)", overflow: "hidden", position: "relative" }}>
             <div style={{ position: "absolute", top: 16, left: 20, color: "#8df5d0", fontSize: 11, letterSpacing: ".14em" }}>OBSIDIAN / P2P KNOWLEDGE GLOBE</div>
             <svg viewBox="0 0 420 360" role="img" aria-label="Pythia Obsidian knowledge globe" style={{ width: "100%", height: "100%", minHeight: 390 }}>
