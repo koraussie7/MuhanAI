@@ -388,8 +388,18 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 	// Build H3 aggregations from events if external data was provided without cells
 	const cells = useMemo(() => {
 		if (!data) return [];
-		if (data.cells.length > 0) return data.cells;
-		return buildAggregationsFromEvents(data.events, resolution);
+		if (data.cells.length === 0) {
+			return buildAggregationsFromEvents(data.events, resolution);
+		}
+		// If backend provided cells but their h3CellId is not a valid H3 cell ID
+		// (e.g. demo fallback uses synthetic labels), re-derive the H3 index from
+		// the cell's lat/lng center so the SVG render can use cellToBoundary().
+		return data.cells.map((cell) => {
+			if (isValidCell(cell.h3CellId)) return cell;
+			const [lng, lat] = cell.center ?? cell.bounds?.[0] ?? [0, 0];
+			const realId = latLngToCell(lat, lng, cell.resolution || resolution);
+			return { ...cell, h3CellId: realId, resolution: cell.resolution || resolution };
+		});
 	}, [data, resolution]);
 
 	// Demo concept cards
