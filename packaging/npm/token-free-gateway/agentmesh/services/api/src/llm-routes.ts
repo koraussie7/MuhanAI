@@ -8,6 +8,7 @@ import {
 	getOmniRouteEndpoint,
 	type KeylessRequest,
 } from "@agentmesh/llm-router/src/keyless-providers.js";
+import { randomUUID } from "node:crypto";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { clientError, formatZodError } from "./error-shapes.js";
@@ -26,6 +27,49 @@ const ChatSchema = z.object({
 const OMNIROUTE_PRIORITY = process.env.OMNIROUTE_PRIORITY !== "false";
 const OMNIROUTE_MODEL =
 	process.env.OMNIROUTE_MODEL ?? process.env.OPENAI_DEFAULT_MODEL ?? "openai/gpt-4o-mini";
+const HERMES_PUBLIC_API_URL = process.env.HERMES_PUBLIC_API_URL?.replace(/\/$/, "");
+const HERMES_PUBLIC_MODEL = process.env.HERMES_PUBLIC_MODEL ?? "hermes-public";
+
+async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number): Promise<Response> {
+	const controller = new AbortController();
+	const timer = setTimeout(() => controller.abort(), timeoutMs);
+	try {
+	return await fetch(url, { ...init, signal: controller.signal });
+	} finally {
+	clearTimeout(timer);
+	}
+}
+
+/** Optional, explicitly configured public-only Hermes adapter. */
+async function callHermesPublic(req: KeylessRequest) {
+	if (!HERMES_PUBLIC_API_URL) return null;
+	const headers: Record<string, string> = { "content-type": "application/json" };
+	if (process.env.HERMES_PUBLIC_API_KEY) headers.Authorization = `Bearer ${process.env.HERMES_PUBLIC_API_KEY}`;
+	// OpenCode-compatible upstreams require a per-request routing session.
+	headers["x-opencode-session"] = randomUUID();
+	const upstream = await fetchWithTimeout(
+	`${HERMES_PUBLIC_API_URL}/v1/chat/completions`,
+	{
+	method: "POST",
+		headers,
+	body: JSON.stringify({
+	model: req.model ?? HERMES_PUBLIC_MODEL,
+	messages: [
+	...(req.system ? [{ role: "system", content: req.system }] : []),
+	{ role: "user", content: req.prompt },
+	],
+		temperature: req.temperature ?? 0.7,
+	max_tokens: req.maxTokens ?? 1024,
+	}),
+	},
+	Number(process.env.HERMES_PUBLIC_TIMEOUT_MS ?? 15000),
+	);
+	if (!upstream.ok) throw new Error(`Hermes public HTTP ${upstream.status}`);
+	const data = (await upstream.json()) as { choices?: Array<{ message?: { content?: string } }> };
+	const text = data.choices?.[0]?.message?.content?.trim();
+	if (!text) throw new Error("Hermes public returned an invalid response");
+	return { text, provider: "hermes-public", model: req.model ?? HERMES_PUBLIC_MODEL, latencyMs: null };
+}
 
 /**
  * OmniRoute Free LLM 호출
@@ -92,6 +136,16 @@ export async function llmRoutes(app: FastifyInstance) {
 
 		const req: KeylessRequest = parse.data;
 
+			// === 0순위: explicitly configured, sandboxed public Hermes ===
+		if (HERMES_PUBLIC_API_URL) {
+		try {
+		const result = await callHermesPublic(req);
+		if (result) return { ...result, tier: "hermes-public" };
+		} catch (err) {
+		request.log.warn({ err }, "Hermes public call failed; continuing to fallback providers");
+		}
+		}
+
 		// === 1순위: OmniRoute Free LLM (OMNIROUTE_PRIORITY=true일 때) ===
 		if (OMNIROUTE_PRIORITY && getOmniRouteEndpoint()) {
 			try {
@@ -152,9 +206,9 @@ export async function llmRoutes(app: FastifyInstance) {
 	});
 
 	app.get("/api/llm/providers", async (_request, _reply) => {
-		return {
-			providers: getKeylessProviderNames(),
-			tier: "keyless",
-		};
+	return {
+	providers: [...(HERMES_PUBLIC_API_URL ? ["hermes-public"] : []), ...getKeylessProviderNames()],
+		tier: HERMES_PUBLIC_API_URL ? "hermes-public+keyless" : "keyless",
+	};
 	});
 }
