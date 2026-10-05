@@ -1,5 +1,6 @@
 import { handleFediverseRequest } from "./fediverse";
 import { handleFeedApi } from "./feed-api";
+import { handleGlassesApi } from "./glasses-api";
 import { handleMcpRequest } from "./mcp-server";
 import { handleTravelApi } from "./travel-api";
 
@@ -16,6 +17,10 @@ interface Env {
 	ASSETS: AssetBinding;
 	API_ORIGIN: string;
 	FEED_KV?: KVNamespace;
+	GLASSES_KV?: KVNamespace;
+	DEEPSEEK_API_KEY?: string;
+	GLM_API_KEY?: string;
+	GLASSES_DEVICE_SECRET?: string;
 }
 
 export default {
@@ -54,10 +59,13 @@ export default {
 				});
 				const orData = (await orRes.json()) as { key?: string };
 				if (!orRes.ok || !orData.key) {
-					return new Response(JSON.stringify({ error: "OpenRouter exchange failed", status: orRes.status }), {
-						status: 502,
-						headers: { "content-type": "application/json" },
-					});
+					return new Response(
+						JSON.stringify({ error: "OpenRouter exchange failed", status: orRes.status }),
+						{
+							status: 502,
+							headers: { "content-type": "application/json" },
+						},
+					);
 				}
 				return new Response(JSON.stringify({ key: orData.key }), {
 					headers: { "content-type": "application/json" },
@@ -73,6 +81,14 @@ export default {
 		if (url.pathname.startsWith("/api/")) {
 			const travelResponse = await handleTravelApi(request, url.pathname);
 			if (travelResponse) return travelResponse;
+
+			const glassesResponse = await handleGlassesApi(request, url.pathname, {
+				DEEPSEEK_API_KEY: env.DEEPSEEK_API_KEY,
+				GLM_API_KEY: env.GLM_API_KEY,
+				GLASSES_DEVICE_SECRET: env.GLASSES_DEVICE_SECRET,
+				GLASSES_KV: env.GLASSES_KV,
+			});
+			if (glassesResponse) return glassesResponse;
 
 			const feedResponse = await handleFeedApi(request, url.pathname, env.FEED_KV);
 			if (feedResponse) return feedResponse;
@@ -155,23 +171,21 @@ export default {
 		}
 
 		// Dashboard v2 — self-contained static page served directly from ASSETS.
-	// Must come BEFORE the SPA routing below: it has no file extension, so
-	// without this rule /dashboard2 would fall through to /index.html
-	// (the React SPA). Same path set as the Vite dev plugin
-	// (DASHBOARD_V2_ROUTES) and the Caddy/nginx deploy configs.
-	// `/dashboard` is intentionally NOT listed: it stays with the React SPA
-	// `<Dashboard>` component.
-	if (url.pathname === "/dashboard2" || url.pathname === "/dashboard2/") {
-		// ASSETS runs with the wrangler-default html_handling ("auto-trailing-slash"):
-		// fetching "/dashboard-v2.html" returns a 307 redirect to the
-		// extension-less pretty URL "/dashboard-v2", so request the pretty
-		// URL directly and serve the page body in one hop.
-		return env.ASSETS.fetch(
-			new Request(new URL("/dashboard-v2", request.url), request),
-		);
-	}
+		// Must come BEFORE the SPA routing below: it has no file extension, so
+		// without this rule /dashboard2 would fall through to /index.html
+		// (the React SPA). Same path set as the Vite dev plugin
+		// (DASHBOARD_V2_ROUTES) and the Caddy/nginx deploy configs.
+		// `/dashboard` is intentionally NOT listed: it stays with the React SPA
+		// `<Dashboard>` component.
+		if (url.pathname === "/dashboard2" || url.pathname === "/dashboard2/") {
+			// ASSETS runs with the wrangler-default html_handling ("auto-trailing-slash"):
+			// fetching "/dashboard-v2.html" returns a 307 redirect to the
+			// extension-less pretty URL "/dashboard-v2", so request the pretty
+			// URL directly and serve the page body in one hop.
+			return env.ASSETS.fetch(new Request(new URL("/dashboard-v2", request.url), request));
+		}
 
-	// SPA routing: for non-asset browser navigation, always serve /index.html
+		// SPA routing: for non-asset browser navigation, always serve /index.html
 		if (!url.pathname.includes(".") && !url.pathname.startsWith("/api/")) {
 			const indexReq = new Request(new URL("/index.html", request.url), {
 				method: "GET",

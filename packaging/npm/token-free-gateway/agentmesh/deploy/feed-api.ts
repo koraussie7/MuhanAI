@@ -2,6 +2,8 @@
 // Handles live API requests directly on Cloudflare edge when origin is down.
 import { createFeedStore, type FeedStore } from "./feed-store";
 
+const DEMO_PEER_COUNT = 12_482;
+
 export type VerifyVote = "correct" | "wrong" | "unsure";
 export type VersusVote = "ai" | "human";
 
@@ -97,13 +99,18 @@ function trendingScore(item: HelpNeededItem) {
 
 interface WantedItem {
 	id: string;
-	prompt: string;
+	question: string;
+	category: string;
+	aiConfidence: number;
+	humanAnswers: number;
+	reward: number;
+	tags: string[];
 	shares: number;
 }
 const SEED_WANTED: WantedItem[] = [
-	{ id: "hw-1", prompt: "베트남 사업자 등록을 실제로 해본 사람?", shares: 12 },
-	{ id: "hw-2", prompt: "다낭에서 6개월 이상 살아본 사람?", shares: 21 },
-	{ id: "hw-3", prompt: "USDT P2P 거래를 실제로 사용해본 사람?", shares: 7 },
+	{ id: "hw-1", question: "베트남 사업자 등록을 실제로 해본 사람?", category: "experience_gap", aiConfidence: 0.64, humanAnswers: 3, reward: 120, tags: ["사업자등록", "베트남", "초보창업"], shares: 12 },
+	{ id: "hw-2", question: "다낭에서 6개월 이상 살아본 사람?", category: "experience_gap", aiConfidence: 0.45, humanAnswers: 21, reward: 250, tags: ["다낭", "장기거주", "비자"], shares: 21 },
+	{ id: "hw-3", question: "USDT P2P 거래를 실제로 사용해본 사람?", category: "info_conflict", aiConfidence: 0.58, humanAnswers: 7, reward: 300, tags: ["USDT", "P2P", "암호화폐"], shares: 7 },
 ];
 
 interface VersusItem {
@@ -111,29 +118,37 @@ interface VersusItem {
 	question: string;
 	aiConsensus: number;
 	humanConsensus: number;
-	winner: "ai" | "human";
+	winner: "AI" | "HUMAN" | "undecided";
+	participants: { ai: number; human: number };
+	tags: string[];
 }
 const SEED_VERSUS: VersusItem[] = [
 	{
 		id: "vs-1",
 		question: "다낭에서 가장 좋은 장기 거주 지역은?",
-		aiConsensus: 0.68,
-		humanConsensus: 0.91,
-		winner: "human",
+		aiConsensus: 68,
+		humanConsensus: 91,
+		winner: "HUMAN",
+		participants: { ai: 142, human: 87 },
+		tags: ["다낭", "거주", "장기체류"],
 	},
 	{
 		id: "vs-2",
 		question: "2026년 국제 화물 운송 최적 경로는?",
-		aiConsensus: 0.94,
-		humanConsensus: 0.72,
-		winner: "ai",
+		aiConsensus: 94,
+		humanConsensus: 72,
+		winner: "AI",
+		participants: { ai: 203, human: 31 },
+		tags: ["화물운송", "물류", "AI"],
 	},
 	{
 		id: "vs-3",
 		question: "베트남 중소기업 세무 실무의 함정은?",
-		aiConsensus: 0.55,
-		humanConsensus: 0.88,
-		winner: "human",
+		aiConsensus: 55,
+		humanConsensus: 88,
+		winner: "HUMAN",
+		participants: { ai: 89, human: 156 },
+		tags: ["세무", "중소기업", "베트남"],
 	},
 ];
 
@@ -350,8 +365,11 @@ async function listTrending(
 		[...help]
 			.map((item) => ({
 				id: item.id,
-				question: item.question,
+				topic: item.question,
+				participants: item.participants,
 				score: trendingScore(item),
+				trend: item.aiConfidence < 0.5 ? "up" : "stable",
+				category: item.category,
 			}))
 			.sort((a, b) => b.score - a.score),
 	);
@@ -406,9 +424,9 @@ async function voteVersus(
 		store.update("feed:versus", SEED_VERSUS, (list) => {
 			const item = list.find((i) => i.id === id);
 			if (item) {
-				if (vote === "ai") item.aiConsensus = Math.min(1, item.aiConsensus + 0.01);
-				else item.humanConsensus = Math.min(1, item.humanConsensus + 0.01);
-				item.winner = item.aiConsensus >= item.humanConsensus ? "ai" : "human";
+				if (vote === "ai") item.aiConsensus = Math.min(100, item.aiConsensus + 1);
+				else item.humanConsensus = Math.min(100, item.humanConsensus + 1);
+				item.winner = item.aiConsensus >= item.humanConsensus ? "AI" : "HUMAN";
 			}
 			return list;
 		}),
@@ -455,12 +473,12 @@ async function getRewards(
 	match: RegExpExecArray | null,
 	store: FeedStore,
 ): Promise<Response> {
-	const actorId = match?.[1];
+	const actorId = match?.[1] ?? "anonymous";
 	const all = await store.read("feed:rewards", {} as Record<string, RewardEntry[]>);
-	const list = all[actorId] ?? [];
+	const list: RewardEntry[] = all[actorId] ?? [];
 	return json({
 		actorId,
-		balance: list.reduce((sum, e) => sum + e.credits, 0),
+		balance: list.reduce((sum: number, e: RewardEntry) => sum + e.credits, 0),
 		entries: list,
 	});
 }
@@ -471,26 +489,21 @@ async function listUnsolved(
 	store: FeedStore,
 ): Promise<Response> {
 	const help = await store.read("feed:help-needed", SEED.helpNeeded);
-	const categories = [
-		"ai_unsolved",
-		"info_conflict",
-		"experience_gap",
-		"source_gap",
-		"outdated",
-	] as const;
-	const labels: Record<(typeof categories)[number], string> = {
-		ai_unsolved: "AI가 해결하지 못함",
-		info_conflict: "정보가 서로 충돌함",
-		experience_gap: "실제 경험 부족",
-		source_gap: "검증된 자료 부족",
-		outdated: "최신 정보 부족",
-	};
 	return json(
-		categories.map((c) => ({
-			category: c,
-			label: labels[c],
-			count: help.filter((i) => i.category === c).length,
-		})),
+		help
+			.filter((i) => i.aiConfidence < 0.7)
+			.slice(0, 5)
+			.map((item) => ({
+				id: item.id,
+				title: item.question,
+				description: item.question,
+				category: item.category,
+				aiAgents: Math.round((1 - item.aiConfidence) * 10),
+				humanExperts: item.humanAnswers,
+				sources: item.participants,
+				consensus: Math.round(item.aiConfidence * 100),
+				tags: item.category ? [item.category] : [],
+			})),
 	);
 }
 
@@ -552,14 +565,93 @@ async function createKnowledgeNode(
 	return json({ node }, 201);
 }
 
+async function getCreditsBalance(request: Request, _match: RegExpExecArray | null): Promise<Response> {
+	const url = new URL(request.url);
+	const userId = url.searchParams.get("userId") ?? "demo";
+	const creditStore = createFeedStore(undefined as Parameters<typeof createFeedStore>[0]);
+	const rewards = await creditStore.read("feed:rewards", {} as Record<string, RewardEntry[]>);
+	const entries = rewards[userId] ?? [];
+	const balance = entries.reduce((sum: number, e: RewardEntry) => sum + e.credits, 0);
+	return json({ userId, balance });
+}
+
+async function getMeshPulse(_request: Request): Promise<Response> {
+	return json({
+		peers: DEMO_PEER_COUNT,
+		bytesUp: 12_500_000,
+		bytesDown: 8_200_000,
+		latencyMs: 28,
+		agentsOnline: DEMO_PEER_COUNT,
+		_demo: true,
+	});
+}
+
+async function listNodes(_request: Request): Promise<Response> {
+	return json([
+		{ id: "node-1", name: "MuhanAI Origin Hub", type: "origin", online: true, hostname: "muhanai.com", role: "coordinator", lastSeen: Date.now() },
+		{ id: "node-2", name: "Seoul P2P Relay", type: "relay", online: true, hostname: "seoul.agentmesh.com", role: "relay", lastSeen: Date.now() },
+		{ id: "node-3", name: "Bangkok Edge Gateway", type: "edge", online: true, hostname: "bangkok.muhanai.com", role: "gateway", lastSeen: Date.now() },
+	]);
+}
+
+async function getOmnirouteFreeTiers(_request: Request): Promise<Response> {
+	return json({
+		source: "fallback",
+		aggregate: {
+			monthlyTokens: 98_000_000,
+			monthlyTokensFormatted: "98M",
+			providersOnline: 3,
+		},
+		providers: [
+			{ provider: "Pollinations", limit: 50, used: 12, remaining: 38, resetAt: "2026-11-01T00:00:00Z", tier: "free" },
+			{ provider: "HuggingFace", limit: 30, used: 7, remaining: 23, resetAt: "2026-11-01T00:00:00Z", tier: "free" },
+			{ provider: "Groq", limit: 100, used: 0, remaining: 100, resetAt: "2026-11-01T00:00:00Z", tier: "free" },
+		],
+		fetchedAt: now(),
+	});
+}
+
+function handlePulseStream(): Response {
+	const headers = new Headers({
+		"Content-Type": "text/event-stream",
+		"Cache-Control": "no-store, no-cache, must-revalidate",
+		Connection: "keep-alive",
+		"Access-Control-Allow-Origin": "*",
+	});
+	const stream = new ReadableStream({
+		start(controller) {
+			const interval = setInterval(() => {
+				const pulse = JSON.stringify({
+					v: 1,
+					kind: "pulse",
+					fromPeerId: "muhanai-worker",
+					payload: { newQuestions: 1, _demo: true },
+					ts: Date.now(),
+				});
+				const credit = JSON.stringify({
+					v: 1,
+					kind: "credit",
+					fromPeerId: "muhanai-worker",
+					payload: { userId: "demo", balance: 120 },
+					ts: Date.now(),
+				});
+				controller.enqueue(`: heartbeat\n\ndata: ${pulse}\n\ndata: ${credit}\n\n`);
+			}, 15_000);
+			return () => clearInterval(interval);
+		},
+	});
+	return new Response(stream, { headers });
+}
+
 const ROUTES: Route[] = [
 	{ method: "GET", pattern: /^\/api\/pulse$/, handler: getPulse },
-	{
-		method: "GET",
-		pattern: /^\/api\/network$/,
-		handler: (_r) => getNetwork(_r),
-	},
+	{ method: "GET", pattern: /^\/api\/pulse\/stream$/, handler: async () => handlePulseStream() },
+	{ method: "GET", pattern: /^\/api\/mesh\/pulse$/, handler: getMeshPulse },
+	{ method: "GET", pattern: /^\/api\/network$/, handler: (_r) => getNetwork(_r) },
 	{ method: "GET", pattern: /^\/api\/agents$/, handler: (_r) => getAgents(_r) },
+	{ method: "GET", pattern: /^\/api\/nodes$/, handler: listNodes },
+	{ method: "GET", pattern: /^\/api\/omniroute\/free-tiers$/, handler: getOmnirouteFreeTiers },
+	{ method: "GET", pattern: /^\/api\/credits\/balance$/, handler: getCreditsBalance },
 	{ method: "POST", pattern: /^\/api\/cast$/, handler: (r) => handleCast(r) },
 	{ method: "GET", pattern: /^\/api\/help-needed$/, handler: listHelpNeeded },
 	{
@@ -609,8 +701,12 @@ const FEED_PREFIXES = [
 	"/api/unsolved",
 	"/api/network",
 	"/api/agents",
+	"/api/nodes",
 	"/api/cast",
 	"/api/knowledge",
+	"/api/credits",
+	"/api/mesh/pulse",
+	"/api/omniroute",
 ];
 
 /** Returns a Response for worker-handled /api paths, or null to fall through to proxy. */

@@ -48,6 +48,12 @@
       ],
       "@agentmesh/cosmos-core/*": [
         "./packages/cosmos-core/src/*"
+      ],
+      "@agentmesh/glasses-bridge": [
+        "./packages/glasses-bridge/src/index.ts"
+      ],
+      "@agentmesh/glasses-bridge/*": [
+        "./packages/glasses-bridge/src/*"
       ]
     }
   }

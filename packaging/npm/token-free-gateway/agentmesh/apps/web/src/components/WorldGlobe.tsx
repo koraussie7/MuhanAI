@@ -33,8 +33,26 @@ type GlobeInstance = {
 };
 
 const GlobeChart = ((el: HTMLElement) => {
-	const stub: Partial<GlobeInstance> = {};
-	return stub as GlobeInstance;
+	const noop = () => noop;
+	const chainable = {
+		pointsData: noop,
+		arcsData: noop,
+		ringsData: noop,
+		atmosphereColor: noop,
+		pointsMerge: noop,
+		pointsTransitionDuration: noop,
+		pointAltitude: noop,
+		pointColor: noop,
+		pointRadius: noop,
+		pointLabel: noop,
+		width: noop,
+		height: noop,
+		pointOfView: noop,
+		onPointHover: noop,
+		_destructor: noop,
+		controls: () => ({ autoRotate: false, autoRotateSpeed: 0, enablePan: true }),
+	};
+	return chainable as unknown as GlobeInstance;
 }) as unknown as GlobeInstance;
 import { RefreshCw, ScanLine } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";

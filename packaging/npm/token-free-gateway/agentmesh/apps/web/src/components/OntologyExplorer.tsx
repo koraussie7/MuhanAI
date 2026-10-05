@@ -49,7 +49,10 @@ const parseConceptId = (id: string) => {
 	const [category = "", key = ""] = id.split("/", 2);
 	return { category, key };
 };
-const deriveConcept = (category: string, key: string, label: string): ConceptRef => ({ id: conceptId(category, key), label });
+const deriveConcept = (category: string, key: string, label: string): ConceptRef => ({
+	id: conceptId(category, key),
+	label,
+});
 
 const API = import.meta.env.VITE_API_BASE ?? "";
 const H3_RESOLUTION = 4;
@@ -396,8 +399,8 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 		// the cell's lat/lng center so the SVG render can use cellToBoundary().
 		return data.cells.map((cell) => {
 			if (isValidCell(cell.h3CellId)) return cell;
-			const [lng, lat] = cell.center ?? cell.bounds?.[0] ?? [0, 0];
-			const realId = latLngToCell(lat, lng, cell.resolution || resolution);
+			const center = cell.center ?? cell.bounds?.[0] ?? { lat: 0, lng: 0 };
+			const realId = latLngToCell(center.lat, center.lng, cell.resolution || resolution);
 			return { ...cell, h3CellId: realId, resolution: cell.resolution || resolution };
 		});
 	}, [data, resolution]);
@@ -408,27 +411,29 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 	// Selected cell drawer
 	const handleCellClick = useCallback(
 		(cell: H3CellAggregation) => {
-			const cellEvents = data?.events.filter(
-				(e) =>
-					e.peerLocation &&
-					Math.abs(h3ToCenter(cell.h3CellId).lat - e.peerLocation.lat) < 0.001 &&
-					Math.abs(h3ToCenter(cell.h3CellId).lng - e.peerLocation.lng) < 0.001,
-			) ?? [];
+			const cellEvents =
+				data?.events.filter(
+					(e) =>
+						e.peerLocation &&
+						Math.abs(h3ToCenter(cell.h3CellId).lat - e.peerLocation.lat) < 0.001 &&
+						Math.abs(h3ToCenter(cell.h3CellId).lng - e.peerLocation.lng) < 0.001,
+				) ?? [];
 
-			const cellForecasts = data?.forecasts.filter((f) =>
-				cellEvents.some((e) => e.id === f.eventId),
-			) ?? [];
+			const cellForecasts =
+				data?.forecasts.filter((f) => cellEvents.some((e) => e.id === f.eventId)) ?? [];
 
-			const cellEvidence = data?.evidence.filter((e) =>
-				e.relatedEventIds.some((id) => cellEvents.some((ev) => ev.id === id)),
-			) ?? [];
+			const cellEvidence =
+				data?.evidence.filter((e) =>
+					e.relatedEventIds.some((id) => cellEvents.some((ev) => ev.id === id)),
+				) ?? [];
 
-			const cellProvenance = data?.provenance.filter(
-				(r) =>
-					r.sourceId === cell.h3CellId ||
-					r.targetId === cell.h3CellId ||
-					cellEvents.some((e) => e.id === r.sourceId || e.id === r.targetId),
-			) ?? [];
+			const cellProvenance =
+				data?.provenance.filter(
+					(r) =>
+						r.sourceId === cell.h3CellId ||
+						r.targetId === cell.h3CellId ||
+						cellEvents.some((e) => e.id === r.sourceId || e.id === r.targetId),
+				) ?? [];
 
 			const selection = createCellSelection(
 				cell.h3CellId,
@@ -464,10 +469,7 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 		const viewport = { width: 640, height: 360 };
 		return cells.map((cell) => {
 			const points = h3ToSvgPoints(cell.h3CellId, viewport);
-			const center = h3ToSvgPoints(
-				cell.h3CellId,
-				viewport,
-			).split(" ")[0]?.split(",") ?? ["0", "0"];
+			const center = h3ToSvgPoints(cell.h3CellId, viewport).split(" ")[0]?.split(",") ?? ["0", "0"];
 			return {
 				...cell,
 				points,
@@ -497,9 +499,7 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 				<div className="ontology-title-row">
 					<div style={{ display: "flex", alignItems: "center", gap: 10 }}>
 						<Layers size={22} style={{ color: "var(--cline-sky)" }} />
-						<h1 className="ontology-title">
-							Ontology Explorer — Pythia · LocalCrab · H3
-						</h1>
+						<h1 className="ontology-title">Ontology Explorer — Pythia · LocalCrab · H3</h1>
 					</div>
 					{isDemo && (
 						<span
@@ -557,7 +557,12 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 								cursor: "pointer",
 							}}
 						>
-							<span style={{ color: panel.id === selectedConceptId ? "var(--cline-sky)" : "var(--cline-text-muted)" }}>
+							<span
+								style={{
+									color:
+										panel.id === selectedConceptId ? "var(--cline-sky)" : "var(--cline-text-muted)",
+								}}
+							>
 								{panel.icon === "globe" && <Globe size={10} />}
 								{panel.icon === "activity" && <Zap size={10} />}
 								{panel.icon === "trending-up" && <TrendingUp size={10} />}
@@ -582,7 +587,10 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 						</span>
 					</div>
 
-					<div className="ontology-globe-canvas" style={{ position: "relative", width: 640, height: 360, margin: "0 auto" }}>
+					<div
+						className="ontology-globe-canvas"
+						style={{ position: "relative", width: 640, height: 360, margin: "0 auto" }}
+					>
 						<svg
 							viewBox="0 0 640 360"
 							className="ontology-globe-svg"
@@ -703,9 +711,7 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 										border: isSelected
 											? `2px solid ${card.color}`
 											: "1px solid var(--cline-border)",
-										background: isSelected
-											? `${card.color}10`
-											: "var(--cline-surface)",
+										background: isSelected ? `${card.color}10` : "var(--cline-surface)",
 										textAlign: "left",
 										cursor: "pointer",
 										transition: "all 0.2s ease",
@@ -757,7 +763,9 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 										</div>
 										<div>
 											<span style={{ color: "var(--cline-text-muted)" }}>Amplification</span>
-											<strong style={{ color: card.color }}>{Math.round(card.amplificationScore * 100)}%</strong>
+											<strong style={{ color: card.color }}>
+												{Math.round(card.amplificationScore * 100)}%
+											</strong>
 										</div>
 										<div>
 											<span style={{ color: "var(--cline-text-muted)" }}>Status</span>
@@ -817,25 +825,51 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 							marginBottom: 16,
 						}}
 					>
-						<div style={{ padding: 10, background: "var(--cline-bg-tertiary, rgba(255,255,255,0.03))", borderRadius: 6 }}>
+						<div
+							style={{
+								padding: 10,
+								background: "var(--cline-bg-tertiary, rgba(255,255,255,0.03))",
+								borderRadius: 6,
+							}}
+						>
 							<span style={{ fontSize: 10, color: "var(--cline-text-muted)" }}>Peers</span>
 							<div style={{ fontSize: 18, fontWeight: 700, color: "var(--cline-sky)" }}>
 								{selectedCell.aggregation.peerCount}
 							</div>
 						</div>
-						<div style={{ padding: 10, background: "var(--cline-bg-tertiary, rgba(255,255,255,0.03))", borderRadius: 6 }}>
-							<span style={{ fontSize: 10, color: "var(--cline-text-muted)" }}>Inferences (24h)</span>
+						<div
+							style={{
+								padding: 10,
+								background: "var(--cline-bg-tertiary, rgba(255,255,255,0.03))",
+								borderRadius: 6,
+							}}
+						>
+							<span style={{ fontSize: 10, color: "var(--cline-text-muted)" }}>
+								Inferences (24h)
+							</span>
 							<div style={{ fontSize: 18, fontWeight: 700, color: "var(--cline-green)" }}>
 								{selectedCell.aggregation.totalInferencesLast24h}
 							</div>
 						</div>
-						<div style={{ padding: 10, background: "var(--cline-bg-tertiary, rgba(255,255,255,0.03))", borderRadius: 6 }}>
+						<div
+							style={{
+								padding: 10,
+								background: "var(--cline-bg-tertiary, rgba(255,255,255,0.03))",
+								borderRadius: 6,
+							}}
+						>
 							<span style={{ fontSize: 10, color: "var(--cline-text-muted)" }}>Avg Latency</span>
 							<div style={{ fontSize: 18, fontWeight: 700, color: "var(--cline-amber)" }}>
 								{Math.round(selectedCell.aggregation.avgLatencyMs)}ms
 							</div>
 						</div>
-						<div style={{ padding: 10, background: "var(--cline-bg-tertiary, rgba(255,255,255,0.03))", borderRadius: 6 }}>
+						<div
+							style={{
+								padding: 10,
+								background: "var(--cline-bg-tertiary, rgba(255,255,255,0.03))",
+								borderRadius: 6,
+							}}
+						>
 							<span style={{ fontSize: 10, color: "var(--cline-text-muted)" }}>Impact Tier</span>
 							<div
 								style={{
@@ -847,13 +881,25 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 								{selectedCell.aggregation.impactTier.toUpperCase()}
 							</div>
 						</div>
-						<div style={{ padding: 10, background: "var(--cline-bg-tertiary, rgba(255,255,255,0.03))", borderRadius: 6 }}>
+						<div
+							style={{
+								padding: 10,
+								background: "var(--cline-bg-tertiary, rgba(255,255,255,0.03))",
+								borderRadius: 6,
+							}}
+						>
 							<span style={{ fontSize: 10, color: "var(--cline-text-muted)" }}>Evidence</span>
 							<div style={{ fontSize: 18, fontWeight: 700, color: "var(--cline-violet)" }}>
 								{selectedCell.aggregation.evidenceCount}
 							</div>
 						</div>
-						<div style={{ padding: 10, background: "var(--cline-bg-tertiary, rgba(255,255,255,0.03))", borderRadius: 6 }}>
+						<div
+							style={{
+								padding: 10,
+								background: "var(--cline-bg-tertiary, rgba(255,255,255,0.03))",
+								borderRadius: 6,
+							}}
+						>
 							<span style={{ fontSize: 10, color: "var(--cline-text-muted)" }}>Forecasts</span>
 							<div style={{ fontSize: 18, fontWeight: 700, color: "#a855f7" }}>
 								{selectedCell.aggregation.forecastCount}
@@ -864,10 +910,25 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 					{/* Events list */}
 					{selectedCell.relatedEvents.length > 0 && (
 						<div style={{ marginBottom: 16 }}>
-							<h4 style={{ margin: "0 0 8px 0", fontSize: 12, color: "var(--cline-text-muted)", textTransform: "uppercase" }}>
+							<h4
+								style={{
+									margin: "0 0 8px 0",
+									fontSize: 12,
+									color: "var(--cline-text-muted)",
+									textTransform: "uppercase",
+								}}
+							>
 								Pythia Events ({selectedCell.relatedEvents.length})
 							</h4>
-							<div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 180, overflow: "auto" }}>
+							<div
+								style={{
+									display: "flex",
+									flexDirection: "column",
+									gap: 6,
+									maxHeight: 180,
+									overflow: "auto",
+								}}
+							>
 								{selectedCell.relatedEvents.slice(0, 10).map((event) => (
 									<div
 										key={event.id}
@@ -882,11 +943,12 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 										<span style={{ color: "#38bdf8" }}>{event.modelId}</span> ·{" "}
 										<span style={{ color: event.cacheHit ? "#10b981" : "#f59e0b" }}>
 											{event.cacheHit ? "cache hit" : "miss"}
-										</span> ·{" "}
-										<span style={{ color: "var(--cline-text-muted)" }}>{Math.round(event.latencyMs)}ms</span> ·{" "}
+										</span>{" "}
+										·{" "}
 										<span style={{ color: "var(--cline-text-muted)" }}>
-											{event.peerId}
-										</span>
+											{Math.round(event.latencyMs)}ms
+										</span>{" "}
+										· <span style={{ color: "var(--cline-text-muted)" }}>{event.peerId}</span>
 									</div>
 								))}
 							</div>
@@ -896,10 +958,25 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 					{/* Forecasts list */}
 					{selectedCell.relatedForecasts.length > 0 && (
 						<div style={{ marginBottom: 16 }}>
-							<h4 style={{ margin: "0 0 8px 0", fontSize: 12, color: "var(--cline-text-muted)", textTransform: "uppercase" }}>
+							<h4
+								style={{
+									margin: "0 0 8px 0",
+									fontSize: 12,
+									color: "var(--cline-text-muted)",
+									textTransform: "uppercase",
+								}}
+							>
 								Pythia Forecasts ({selectedCell.relatedForecasts.length})
 							</h4>
-							<div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 150, overflow: "auto" }}>
+							<div
+								style={{
+									display: "flex",
+									flexDirection: "column",
+									gap: 6,
+									maxHeight: 150,
+									overflow: "auto",
+								}}
+							>
 								{selectedCell.relatedForecasts.slice(0, 5).map((forecast) => (
 									<div
 										key={forecast.id}
@@ -910,7 +987,9 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 											fontSize: 11,
 										}}
 									>
-										<div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
+										<div
+											style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}
+										>
 											<span style={{ color: "var(--cline-text)" }}>{forecast.domain}</span>
 											<span
 												style={{
@@ -922,7 +1001,8 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 											</span>
 										</div>
 										<div style={{ color: "var(--cline-text-muted)" }}>
-											{Math.round(forecast.probability * 100)}% · Conf: {Math.round(forecast.confidence * 100)}%
+											{Math.round(forecast.probability * 100)}% · Conf:{" "}
+											{Math.round(forecast.confidence * 100)}%
 										</div>
 										<div style={{ color: "#94a3b8", fontSize: 10, marginTop: 2 }}>
 											{forecast.rationale.slice(0, 80)}
@@ -936,10 +1016,25 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 					{/* Provenance */}
 					{selectedCell.relatedProvenance.length > 0 && (
 						<div style={{ marginBottom: 16 }}>
-							<h4 style={{ margin: "0 0 8px 0", fontSize: 12, color: "var(--cline-text-muted)", textTransform: "uppercase" }}>
+							<h4
+								style={{
+									margin: "0 0 8px 0",
+									fontSize: 12,
+									color: "var(--cline-text-muted)",
+									textTransform: "uppercase",
+								}}
+							>
 								Provenance Relations ({selectedCell.relatedProvenance.length})
 							</h4>
-							<div style={{ display: "flex", flexDirection: "column", gap: 4, maxHeight: 120, overflow: "auto" }}>
+							<div
+								style={{
+									display: "flex",
+									flexDirection: "column",
+									gap: 4,
+									maxHeight: 120,
+									overflow: "auto",
+								}}
+							>
 								{selectedCell.relatedProvenance.slice(0, 5).map((rel, idx) => (
 									<div
 										key={idx}
@@ -953,8 +1048,7 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 										{" → "}
 										<span style={{ color: "#a855f7" }}>{rel.predicate}</span>
 										{" → "}
-										<span style={{ color: "#10b981" }}>{rel.targetId.slice(0, 8)}…</span>
-										{" "}
+										<span style={{ color: "#10b981" }}>{rel.targetId.slice(0, 8)}…</span>{" "}
 										<span style={{ color: "#64748b" }}>
 											(Math.round(rel.strength * 100)%, conf: {Math.round(rel.confidence * 100)}%)
 										</span>

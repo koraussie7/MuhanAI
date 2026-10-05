@@ -1294,6 +1294,14 @@ html {
 	opacity: 0.9;
 }
 
+/* Dashboard Workstream Container */
+.dash-workstream-container {
+	background: var(--cline-surface);
+	border: 1px solid var(--cline-border);
+	border-radius: var(--cline-radius-lg);
+	padding: 20px;
+}
+
 /* Dashboard Tab Bar */
 .dash-workstream-tabs {
 	display: flex;

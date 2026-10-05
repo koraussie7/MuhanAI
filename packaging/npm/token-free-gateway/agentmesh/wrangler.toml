@@ -20,6 +20,10 @@ workers_dev = false
 binding = "FEED_KV"
 id = "d686b4fb62384fb8a13d0e27c3b52947"
 
+[[kv_namespaces]]
+binding = "GLASSES_KV"
+id = "9a1f3c5e7b2d4f6a8c0e2d4b6f8a0c2e"
+
 [assets]
 directory = "apps/web/dist"
 binding = "ASSETS"

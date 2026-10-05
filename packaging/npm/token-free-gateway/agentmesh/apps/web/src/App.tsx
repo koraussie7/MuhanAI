@@ -109,6 +109,12 @@ const McpSkillsPageLazy = React.lazy(() =>
 const NetworkMonitorPageLazy = React.lazy(() =>
 	import("./components/DashPages").then((m) => ({ default: m.NetworkMonitorPage })),
 );
+const HorizonGlassesPanelLazy = React.lazy(() =>
+	import("./components/HorizonGlassesPanel").then((m) => ({ default: m.HorizonGlassesPanel })),
+);
+const GlassesDevicesPanelLazy = React.lazy(() =>
+	import("./components/GlassesDevicesPanel").then((m) => ({ default: m.GlassesDevicesPanel })),
+);
 const VerificationPageLazy = React.lazy(() =>
 	import("./components/DashPages").then((m) => ({ default: m.VerificationPage })),
 );
@@ -153,6 +159,9 @@ const HappyPageLazy = React.lazy(() =>
 );
 const WorldPageLazy = React.lazy(() =>
 	import("./components/WorldPage").then((m) => ({ default: m.WorldPage })),
+);
+const GlassesAppLazy = React.lazy(() =>
+	import("./components/GlassesApp").then((m) => ({ default: m.GlassesApp })),
 );
 const OntologyExplorerLazy = React.lazy(() =>
 	import("./components/OntologyExplorer").then((m) => ({ default: m.OntologyExplorer })),
@@ -524,6 +533,16 @@ export function App() {
 								<NetworkMonitorPageLazy />
 							</Suspense>
 						)}
+						{activeSection === "horizon-glasses" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<HorizonGlassesPanelLazy />
+							</Suspense>
+						)}
+						{activeSection === "glasses-devices" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<GlassesDevicesPanelLazy />
+							</Suspense>
+						)}
 
 						{/* Resources */}
 						{activeSection === "models" && (
@@ -656,6 +675,13 @@ export function App() {
 						{activeSection === "world" && (
 							<Suspense fallback={<PageSkeleton />}>
 								<WorldPageLazy />
+							</Suspense>
+						)}
+
+						{/* Horizon Glasses Companion PWA */}
+						{activeSection === "glasses-app" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<GlassesAppLazy />
 							</Suspense>
 						)}
 						{/* Pythia */}

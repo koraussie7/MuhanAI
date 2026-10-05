@@ -1,12 +1,12 @@
-import { Flame, ListTodo, Network, Radio, ShieldCheck, Sparkles, Coins, FolderGit, LayoutDashboard, Bot, Monitor, Package, Network as NetworkIcon, Cpu, Layers, Database, CheckCircle, Search, Vote, GitMerge, Bot as BotIcon, Users, Coins as CoinsIcon, Activity, Star, FolderGit as FolderGitIcon, ListTodo as ListTodoIcon, GitBranch } from "lucide-react";
+import { Flame, ListTodo, Network, Radio, ShieldCheck, Sparkles, FolderGit, LayoutDashboard, Bot, Cpu, Database, ListTodo as ListTodoIcon, Network as NetworkIcon, Coins as CoinsIcon, FolderGit as FolderGitIcon } from "lucide-react";
 import type React from "react";
 import { lazy, Suspense, useState } from "react";
 import { useI18n } from "../i18n.js";
 import { formatPeerCountBare } from "../lib/mesh-stats.js";
+import { useMeshPulse } from "../hooks/useMeshPulse.js";
 import { AiVsHuman } from "./AiVsHuman";
 import { AskNetwork } from "./AskNetwork";
 import { CreditBalance } from "./CreditBalance";
-import { DocumentUploadPanel } from "./DocumentUploadPanel";
 import { FreeTierQuota } from "./FreeTierQuota";
 import { HelpNeeded } from "./HelpNeeded";
 import { HumanKnowledgeWanted } from "./HumanKnowledgeWanted";
@@ -43,6 +43,7 @@ interface WorkstreamTab {
 export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 	const [activeTab, setActiveTab] = useState<"tasks" | "verify" | "knowledge" | "economy" | "workspace">("tasks");
 	const { t } = useI18n();
+	const meshPulse = useMeshPulse();
 
 	const navigate = (path: string) => {
 		if (onNavigate) {
@@ -317,7 +318,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 					<div className="telemetry-stat-card">
 						<span className="telemetry-stat-lbl">{t.dashboard.activeP2PNodes}</span>
 						<span className="telemetry-stat-val" style={{ color: "var(--cline-sky)" }}>
-							{formatPeerCountBare(undefined)} Peers
+							{formatPeerCountBare(meshPulse.stats.peers)} Peers
 						</span>
 					</div>
 					<div className="telemetry-stat-card">
@@ -491,10 +492,3 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 		</main>
 	);
 };
-
-function navigate(path: string) {
-	if (typeof window !== "undefined") {
-		window.history.pushState(null, "", path);
-		window.dispatchEvent(new PopStateEvent("popstate"));
-	}
-}

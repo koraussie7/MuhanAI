@@ -13,6 +13,7 @@ import {
 	FolderGit,
 	GitBranch,
 	GitMerge,
+	Glasses,
 	Layers,
 	LayoutDashboard,
 	ListTodo,
@@ -116,6 +117,8 @@ function renderIcon(key: string): React.ReactNode {
 			return <GitBranch size={18} />;
 		case "python":
 			return <Code2 size={18} />;
+		case "glasses":
+			return <Glasses size={18} />;
 		case "ghost":
 			return <Ghost size={18} />;
 		case "robot":
@@ -243,7 +246,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 					{!isCollapsed ? (
 						<span>
 							{menuI18n.footer.peerMesh}: {formatPeerCountBare(stats.peers ?? stats.agentsOnline)}{" "}
-								{menuI18n.footer.nodes}
+							{menuI18n.footer.nodes}
 						</span>
 					) : (
 						<span>{menuI18n.footer.live}</span>

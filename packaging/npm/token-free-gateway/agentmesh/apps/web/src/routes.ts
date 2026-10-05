@@ -105,6 +105,23 @@ export const ROUTES: readonly RouteDefinition[] = [
 		page: "network-monitor",
 	},
 	{
+		id: "horizon-glasses",
+		path: "/horizon-glasses",
+		group: "network",
+		label: "Horizon Glasses",
+		iconKey: "glasses",
+		badge: "NEW",
+		page: "horizon-glasses",
+	},
+	{
+		id: "glasses-devices",
+		path: "/glasses-devices",
+		group: "network",
+		label: "Glasses Devices",
+		iconKey: "smartphone",
+		page: "glasses-devices",
+	},
+	{
 		id: "models",
 		path: "/models",
 		group: "resources",
@@ -308,6 +325,15 @@ export const ROUTES: readonly RouteDefinition[] = [
 		iconKey: "activity",
 		badge: "NEW",
 		page: "world",
+	},
+	{
+		id: "glasses-app",
+		path: "/glasses-app",
+		group: "system",
+		label: "Glasses App",
+		iconKey: "smartphone",
+		badge: "PWA",
+		page: "glasses-app",
 	},
 ];
 
