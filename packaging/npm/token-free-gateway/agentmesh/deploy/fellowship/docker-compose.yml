@@ -1,0 +1,100 @@
+version: "3.8"
+
+services:
+  # Colibri WASM Fellowship Node — runs in Docker with emscripten build
+  colibri-fellowship:
+    build:
+      context: ../../../../../../
+      dockerfile: packaging/npm/token-free-gateway/agentmesh/deploy/fellowship/Dockerfile.colibri
+    container_name: colibri-fellowship
+    restart: unless-stopped
+    ports:
+      - "3001:3001"   # Colibri WASM API (browser inference requests)
+      - "5001:5001"   # IPFS API (model chunk serving)
+      - "8040:8040"   # P2P WebRTC/WebTransport (browser P2P)
+      - "8081:8081"   # Gun.js relay
+    volumes:
+      - ./data/fellowship:/data
+      - ./data/fellowship/ipfs:/data/ipfs
+      - ./data/fellowship/gun:/data/gun
+      - ./public/colibri:/app/public/colibri  # WASM artifacts
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      # IPFS Configuration
+      - IPFS_PROFILE=fellowship
+      - IPFS_ANNOUNCE=/ip4/0.0.0.0/tcp/8040
+      - IPFS_BOOTNODES=/dns4/fellowship.muhanai.com/tcp/8040
+      # Gun.js P2P
+      - GUN_PORT=8081
+      - GUN_HOST=0.0.0.0
+      - GUN_PEERS=wss://fellowship.muhanai.com/gun
+      # Colibri WASM
+      - COLIBRI_MODEL_DIR=/data/models
+      - COLIBRI_MAX_MODELS=2
+      - COLIBRI_WORKERS=4
+      # Native binary path
+      - COLI_PATH=/app/coli
+      # Python server for heavy models
+      - PYTHON_SERVER=http://localhost:3002
+    networks:
+      - p2pclaw-net
+    depends_on:
+      - ipfs-node
+
+  # IPFS Companion Node
+  ipfs-node:
+    image: ipfs/kubo:latest
+    container_name: ipfs-fellowship
+    restart: unless-stopped
+    ports:
+      - "4001:4001"   # Libp2p
+      - "5001:5001"   # HTTP API
+      - "8080:8080"   # Gateway
+    volumes:
+      - ./data/ipfs:/data/ipfs
+    environment:
+      - IPFS_PROFILE=server
+      - IPFS_CLUSTER_PINNED_REPLICATION=3
+    command: daemon --migrate=true --enable-gc
+    networks:
+      - p2pclaw-net
+
+  # Gun.js Mesh Relay (browser P2P signaling + message relay)
+  gun-relay:
+    image: node:22-alpine
+    container_name: gun-fellowship
+    restart: unless-stopped
+    working_dir: /app
+    command: npx gun --port 8081 --host 0.0.0.0
+    environment:
+      - GUN_PORT=8081
+      - GUN_HOST=0.0.0.0
+    networks:
+      - p2pclaw-net
+
+  # Python server for heavy models (fallback when WASM can't handle)
+  colibri-python:
+    image: python:3.12-slim
+    container_name: colibri-python
+    restart: unless-stopped
+    working_dir: /app
+    command: python3 openai_server.py --host 0.0.0.0 --port 3002
+    volumes:
+      - ./data/fellowship:/data
+      - ./data/fellowship/models:/models
+    environment:
+      - COLI_PATH=/app/coli
+      - COLIBRI_MODEL_DIR=/models
+    networks:
+      - p2pclaw-net
+    depends_on:
+      - colibri-fellowship
+
+volumes:
+  fellowship-data:
+  ipfs-data:
+
+networks:
+  p2pclaw-net:
+    driver: bridge

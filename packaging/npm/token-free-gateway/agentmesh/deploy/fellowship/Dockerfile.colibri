@@ -1,0 +1,93 @@
+# Multi-stage build: Emscripten WASM → native → runtime
+# Build context is the project root (set in docker-compose.yml)
+# Stage 1: Emscripten build for browser WASM (minimal wrapper, CPU-only)
+FROM emscripten/emsdk:3.1.56 AS wasm-builder
+
+WORKDIR /colibri
+COPY vendor/colibri/c/colibri_wasm.c /colibri/colibri_wasm.c
+COPY vendor/colibri/c/compat.h /colibri/compat.h
+COPY vendor/colibri/c/abl.h /colibri/abl.h
+COPY vendor/colibri/c/edge_adapters.h /colibri/edge_adapters.h
+COPY vendor/colibri/c/edge_runtime.c /colibri/edge_runtime.c
+COPY vendor/colibri/c/segment_runtime.c /colibri/segment_runtime.c
+COPY vendor/colibri/c/segment_adapters.h /colibri/segment_adapters.h
+COPY vendor/colibri/c/segment_adapter_internal.h /colibri/segment_adapter_internal.h
+
+# Build minimal WASM module (CPU-only, no GPU backends)
+# Uses colibri_wasm.c wrapper — not the full engine (which has CUDA/Metal/Vulkan)
+RUN emcc -O3 -s WASM=1 \
+    -s EXPORTED_FUNCTIONS='["_malloc","_free","_colibri_init","_colibri_generate","_colibri_free","_colibri_tokenize","_colibri_forward","_colibri_sample","_colibri_model_load","_colibri_model_unload"]' \
+    -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap","getValue","setValue","UTF8ToString","stringToUTF8","HEAPU8","HEAPF32","HEAP32"]' \
+    -s MODULARIZE=1 \
+    -s EXPORT_NAME=createColibriModule \
+    -s ENVIRONMENT=web,worker \
+    -s ALLOW_MEMORY_GROWTH=1 \
+    -s INITIAL_MEMORY=256MB \
+    -s MAXIMUM_MEMORY=512MB \
+    -s PTHREAD_POOL_SIZE=4 \
+    -s USE_PTHREADS=0 \
+    -s PROXY_TO_PTHREAD=0 \
+    -I. \
+    -DNO_GPU_BACKENDS \
+    -DWASM_BUILD \
+    colibri_wasm.c \
+    -o colibri.js 2>&1 | tee build.log || (cat build.log && exit 1)
+
+# Stage 2: Native build for fellowship node
+FROM ubuntu:24.04 AS native-builder
+
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    clang \
+    libomp-dev \
+    git \
+    python3 \
+    python3-pip \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /colibri
+COPY vendor/colibri/c/ /colibri/
+
+# Build native binary (CPU-only for portability)
+RUN make colibri CC=clang EXTRA_CFLAGS="-DNO_GPU_BACKENDS -O3" 2>&1 | tee build.log || (cat build.log && exit 1)
+
+# Stage 3: Runtime image
+FROM node:22-alpine AS runtime
+
+WORKDIR /app
+
+# Install Python for openai_server.py
+RUN apk add --no-cache python3 py3-pip
+
+# Copy native binary (Makefile produces 'colibri', renamed to 'coli' for COLI_PATH)
+COPY --from=native-builder /colibri/colibri /app/coli
+
+# Copy Python server files from colibri vendor
+COPY vendor/colibri/c/openai_server.py /app/openai_server.py
+COPY vendor/colibri/c/family_registry.py /app/family_registry.py
+COPY vendor/colibri/c/v4_dsml.py /app/v4_dsml.py
+COPY vendor/colibri/c/v41_dsml.py /app/v41_dsml.py
+RUN cp vendor/colibri/c/quant.py /app/quant.py 2>/dev/null || true
+RUN cp vendor/colibri/c/fp8_format.py /app/fp8_format.py 2>/dev/null || true
+
+# Copy fellowship app source
+COPY packaging/npm/token-free-gateway/agentmesh/deploy/fellowship/package.json /app/package.json
+COPY packaging/npm/token-free-gateway/agentmesh/deploy/fellowship/src/ /app/src/
+
+# Copy WASM artifacts
+COPY --from=wasm-builder /colibri/colibri.js /app/public/colibri/colibri.js
+COPY --from=wasm-builder /colibri/colibri.wasm /app/public/colibri/colibri.wasm
+COPY --from=wasm-builder /colibri/colibri.data /app/public/colibri/colibri.data 2>/dev/null || true
+
+# Install Node dependencies
+RUN npm install --omit=dev
+
+EXPOSE 3001 8081
+
+ENV PYTHONUNBUFFERED=1
+ENV COLI_PATH=/app/coli
+ENV COLIBRI_MODEL_DIR=/models
+
+CMD ["node", "src/index.js"]

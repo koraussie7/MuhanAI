@@ -1,0 +1,25 @@
+{
+  "name": "colibri-fellowship-node",
+  "version": "3.0.0",
+  "description": "Colibri WASM Fellowship Node — P2P inference + IPFS model serving + Gun.js mesh",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "build:wasm": "bash ../build-wasm.sh",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "gun": "^0.2020.1241",
+    "ipfs-http-client": "^65.0.0",
+    "ws": "^8.18.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
