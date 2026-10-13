@@ -986,6 +986,8 @@
         <li><a href="#marketplace">마켓플레이스</a></li>
         <li><a href="#human-expert">인간 전문가</a></li>
         <li><a href="#economy">Agent Economy</a></li>
+        <li><a href="#message-center">메시지 센터</a></li>
+        <li><a href="#template-studio">템플릿 스튜디오</a></li>
       </ul>
       <div class="nav-actions">
         <a href="https://muhanai.com" target="_blank" class="btn-secondary"
@@ -3123,6 +3125,332 @@
         </button>
       </div>
     </section>
+    <!-- Section: Message Center (sendgo-mcp 연동 — 알림톡/SMS 발송) -->
+    <section id="message-center" style="padding-top: 50px">
+      <div class="section-head">
+        <div class="section-tag">Message Center</div>
+        <h2 class="section-title">예약 한 건이 알림톡 한 통이 됩니다</h2>
+        <p class="section-desc">
+          AI Agent가 접수한 예약·주문을 카카오 알림톡과 문자로 고객에게 즉시
+          안내합니다. <strong>Sendgo 공식 OpenAPI</strong> 기반이라 발송
+          이력·실패 통계·대체 발송까지 한 화면에서 관리합니다.
+        </p>
+      </div>
+
+      <div class="card-grid-4">
+        <div class="feat-card">
+          <div class="feat-icon">💬</div>
+          <h3 class="feat-title">카카오 알림톡</h3>
+          <p class="feat-desc">
+            승인된 템플릿으로 예약 확인·주문 접수·배송 안내를 발송합니다. 정보성
+            메시지라 광고 차단 정책의 영향을 받지 않습니다.
+          </p>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">📱</div>
+          <h3 class="feat-title">SMS / LMS / MMS</h3>
+          <p class="feat-desc">
+            단문·장문·이미지 문자를 함께 씁니다. 알림톡 전송이 실패하면
+            <code>replaceSms</code> 설정으로 문자에 자동 대체 발송됩니다.
+          </p>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">⏰</div>
+          <h3 class="feat-title">예약 발송</h3>
+          <p class="feat-desc">
+            <code>scheduleType: SCHEDULED</code> 으로 방문 하루 전 리마인드를
+            미리 예약해 둘 수 있습니다. Agent가 판단해 스스로 발송을 큐에
+            넣습니다.
+          </p>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">🔐</div>
+          <h3 class="feat-title">자격증명 자동 관리</h3>
+          <p class="feat-desc">
+            <code>accessKey</code>·<code>secretKey</code> 는 50분 캐시 토큰으로
+            자동 발급·갱신되며 401/403 시 재발송합니다. 키를 코드에 새기지
+            않습니다.
+          </p>
+        </div>
+      </div>
+
+      <!-- 발송 워크플로우 -->
+      <div class="pipeline-track" style="margin-top: 30px">
+        <div class="pipeline-step">
+          <div style="font-size: 1.6rem; margin-bottom: 4px">📥</div>
+          <div
+            style="
+              font-weight: 800;
+              font-size: 0.92rem;
+              color: var(--primary);
+            "
+          >
+            1. 예약 접수
+          </div>
+          <div
+            style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px"
+          >
+            Agent 또는 MCP 엔드포인트
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div style="font-size: 1.6rem; margin-bottom: 4px">🧠</div>
+          <div
+            style="
+              font-weight: 800;
+              font-size: 0.92rem;
+              color: var(--primary);
+            "
+          >
+            2. 템플릿 매칭
+          </div>
+          <div
+            style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px"
+          >
+            승인된(APR) 템플릿 선택
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div style="font-size: 1.6rem; margin-bottom: 4px">💬</div>
+          <div
+            style="
+              font-weight: 800;
+              font-size: 0.92rem;
+              color: var(--primary);
+            "
+          >
+            3. 알림톡 발송
+          </div>
+          <div
+            style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px"
+          >
+            Sendgo 공식 API
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div style="font-size: 1.6rem; margin-bottom: 4px">🛡️</div>
+          <div
+            style="
+              font-weight: 800;
+              font-size: 0.92rem;
+              color: var(--primary);
+            "
+          >
+            4. 실패 시 문자 대체
+          </div>
+          <div
+            style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px"
+          >
+            도달률 보장
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 26px">
+        <button
+          onclick="openStarterModal()"
+          class="btn-primary"
+          style="padding: 12px 26px; font-size: 0.9rem"
+        >
+          💬 메시지 센터 활성화하기
+        </button>
+      </div>
+    </section>
+    <!-- Section: Template Studio (sendgo-mcp 연동 — 알림톡 템플릿 라이프사이클) -->
+    <section id="template-studio" style="padding-top: 50px">
+      <div class="section-head">
+        <div class="section-tag">Template Studio</div>
+        <h2 class="section-title">반려당하기 전에 알아채는 템플릿 작업대</h2>
+        <p class="section-desc">
+          카카오 알림톡은 <strong>사전 승인</strong> 없인 발송 자체가
+          불가합니다. Sendgo 정책 필드를 저장 단계에서 먼저 검증하므로, 며칠
+          기다렸다 반려당하는 일을 막습니다. 반려 사유는 한국어로 그대로
+          전달됩니다.
+        </p>
+      </div>
+
+      <div class="card-grid-4">
+        <div class="feat-card">
+          <div class="feat-icon">✍️</div>
+          <h3 class="feat-title">템플릿 작성</h3>
+          <p class="feat-desc">
+            변수는 <code>#{name}</code> 형태로 본문에 넣습니다.
+            기본형(BA)·부가정보형(EX)·채널추가형(AD)·복합형(MI) 중 목적에 맞는
+            유형을 고릅니다.
+          </p>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">✅</div>
+          <h3 class="feat-title">정책 사전 검증</h3>
+          <p class="feat-desc">
+            <code>messagePurpose</code>·<code>legalBasis</code>·<code
+              >optInReviewConfirmed</code
+            >
+            등 정책 필드가 본문과 어긋나면 저장 단계에서
+            <code>POLICY_VALIDATION_FAILED</code> 로 즉시 차단됩니다.
+          </p>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">📋</div>
+          <h3 class="feat-title">검수 요청·추적</h3>
+          <p class="feat-desc">
+            검수는 <strong>비동기</strong>입니다.
+            <code>REG → REQ → APR / REJ</code> 상태를 폴링으로 추적하고, 승인된
+            템플릿만 발송에 쓸 수 있습니다.
+          </p>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">🗂️</div>
+          <h3 class="feat-title">폴더 관리</h3>
+          <p class="feat-desc">
+            최대 5단계 폴더로 주문 안내·배송 안내를 분류합니다. 알림톡과
+            브랜드메시지가 폴더를 공유하며, 미분류는
+            <code>folderUuid: none</code> 으로 조회합니다.
+          </p>
+        </div>
+      </div>
+
+      <!-- 검수 라이프사이클 -->
+      <div class="pipeline-track" style="margin-top: 30px">
+        <div class="pipeline-step">
+          <div style="font-size: 1.6rem; margin-bottom: 4px">✍️</div>
+          <div
+            style="
+              font-weight: 800;
+              font-size: 0.92rem;
+              color: var(--primary);
+            "
+          >
+            1. 작성
+          </div>
+          <div
+            style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px"
+          >
+            REG (등록)
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div style="font-size: 1.6rem; margin-bottom: 4px">🛡️</div>
+          <div
+            style="
+              font-weight: 800;
+              font-size: 0.92rem;
+              color: var(--primary);
+            "
+          >
+            2. 정책 검증
+          </div>
+          <div
+            style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px"
+          >
+            즉시 피드백
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div style="font-size: 1.6rem; margin-bottom: 4px">📤</div>
+          <div
+            style="
+              font-weight: 800;
+              font-size: 0.92rem;
+              color: var(--primary);
+            "
+          >
+            3. 검수 요청
+          </div>
+          <div
+            style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px"
+          >
+            REQ (심사 대기)
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div style="font-size: 1.6rem; margin-bottom: 4px">🎉</div>
+          <div
+            style="
+              font-weight: 800;
+              font-size: 0.92rem;
+              color: var(--primary);
+            "
+          >
+            4. 승인
+          </div>
+          <div
+            style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px"
+          >
+            APR — 발송 가능
+          </div>
+        </div>
+      </div>
+
+      <!-- 운영자 주의사항 -->
+      <div
+        style="
+          margin-top: 30px;
+          background: var(--bg-card);
+          border: 1px solid var(--border-accent);
+          border-radius: 16px;
+          padding: 22px 24px;
+        "
+      >
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+          "
+        >
+          <span style="font-size: 1.2rem">ℹ️</span>
+          <strong style="font-size: 1rem">알아두면 좋은 세 가지</strong>
+        </div>
+        <ul
+          style="
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.9;
+          "
+        >
+          <li>
+            • 카카오 채널이 카카오 측에서 차단되면 발송이
+            <strong style="color: var(--text)">조용히 실패</strong>합니다.
+            <code>sync()</code> 를 주기적으로 돌려 <code>block: true</code> 채널을
+            감시하세요.
+          </li>
+          <li>
+            • 본문을 수정하면 <strong style="color: var(--text)">재검수</strong>가
+            필요합니다. 승인받은 문안은 가급적 그대로 유지하고 변수만 바꾸세요.
+          </li>
+          <li>
+            • 심사가 붙는 작업은
+            <strong style="color: var(--text)">비동기</strong>입니다. 등록이
+            성공했다는 건 "접수됐다"는 뜻이지 "쓸 수 있다"는 뜻이 아닙니다.
+          </li>
+        </ul>
+      </div>
+
+      <div style="text-align: center; margin-top: 26px">
+        <button
+          onclick="openStarterModal()"
+          class="btn-primary"
+          style="padding: 12px 26px; font-size: 0.9rem"
+        >
+          ✍️ 템플릿 스튜디오 열기
+        </button>
+      </div>
+    </section>
+
+
+
+
 
     <!-- Section: Final CTA (Point 14: 29,000원으로 나의 AI Business 만들기) -->
     <div class="waitlist-section" id="waitlist">
