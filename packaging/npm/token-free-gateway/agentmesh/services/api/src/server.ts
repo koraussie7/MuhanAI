@@ -16,7 +16,11 @@ import { factoryRoutes } from "./factory-routes.js";
 import { elizaosRpcRoutes } from "./elizaos-rpc-routes.js";
 import { feedRoutes } from "./feed-routes.js";
 import { ghostRoutes } from "./ghost-routes.js";
-import { ghostDispatchRoutes } from "./ghost-dispatch-routes.js";
+// `ghost-dispatch-routes` is excluded from the TypeScript program for now: it was
+// written against `createTaskLedger` / `createCapabilityVerifier` /
+// `createApprovalStore` / `runGhostDispatch` primitives that do not exist in
+// `@agentmesh/ghost-adapter` yet, so it cannot compile. Re-enable the import and
+// the `app.register` call once those primitives land.
 import { PulseBridge } from "./gossip-bridge.js";
 import { happyRoutes } from "./happy-routes.js";
 import { hivebearRoutes } from "./hivebear-routes.js";
@@ -86,7 +90,7 @@ const PUBLIC_PATH_EXACT = new Set([
 	"/health",
 	"/.well-known/mcp.json",
 	"/.well-known/agent.json",
-	
+
 ]);
 
 function isPublicPath(rawUrl: string | undefined): boolean {
@@ -220,7 +224,6 @@ export async function buildApp(options: BuildAppOptions = {}) {
 
 	await app.register(a2uiRoutes);
 	await app.register(ghostRoutes);
-	await app.register(ghostDispatchRoutes);
 	await app.register(noemaRoutes);
 	await app.register(semanticRoutes);
 	await app.register(hivebearRoutes);
@@ -299,8 +302,10 @@ const isMain = import.meta.url === `file://${process.argv[1]}`;
 if (isMain) {
 	const app = await buildApp();
 	try {
-		await app.listen({ port: 3001, host: "0.0.0.0" });
-		app.log.info("API server listening on http://0.0.0.0:3001");
+		const port = Number(process.env.PORT ?? 3001);
+		const host = process.env.HOST ?? "0.0.0.0";
+		await app.listen({ port, host });
+		app.log.info(`API server listening on http://${host}:${port}`);
 	} catch (err) {
 		app.log.error(err);
 		process.exit(1);

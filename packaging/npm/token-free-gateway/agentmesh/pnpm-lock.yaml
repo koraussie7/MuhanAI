@@ -91,6 +91,9 @@ importers:
       '@agentmesh/knowledge-base':
         specifier: workspace:*
         version: link:../../packages/knowledge-base
+      '@agentmesh/peer-mesh':
+        specifier: workspace:*
+        version: link:../../packages/peer-mesh
       '@agentmesh/personal-mcp':
         specifier: workspace:*
         version: link:../../packages/personal-mcp
@@ -109,9 +112,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^4.3.4
         version: 4.7.0(vite@6.4.3(@types/node@22.20.4)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.15)(yaml@2.9.1))
-      globe.gl:
-        specifier: ^2.46.2
-        version: 2.46.2
+      h3-js:
+        specifier: ^4.5.0
+        version: 4.5.0
       lucide-react:
         specifier: ^0.460.0
         version: 0.460.0(react@19.3.0)
@@ -134,18 +137,6 @@ importers:
       '@types/node':
         specifier: ^22.0.0
         version: 22.20.4
-
-  packages/adapters:
-    dependencies:
-      '@agentmesh/core':
-        specifier: workspace:*
-        version: link:../core
-
-  packages/agent:
-    dependencies:
-      '@agentmesh/core':
-        specifier: workspace:*
-        version: link:../core
 
   packages/agent-cast:
     dependencies:
@@ -320,15 +311,6 @@ importers:
         specifier: ^1.40.0
         version: 1.63.0
 
-  packages/cast:
-    dependencies:
-      '@agentmesh/agent':
-        specifier: workspace:*
-        version: link:../agent
-      '@agentmesh/core':
-        specifier: workspace:*
-        version: link:../core
-
   packages/category-engine:
     dependencies:
       '@agentmesh/llm-router':
@@ -363,7 +345,14 @@ importers:
         specifier: ^1.0.0
         version: 1.13.2
 
-  packages/core: {}
+  packages/core:
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.4)(lightningcss@1.32.0)
 
   packages/cosmos-core:
     devDependencies:
@@ -504,6 +493,22 @@ importers:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.20.4)(lightningcss@1.32.0)
 
+  packages/glasses-bridge:
+    dependencies:
+      '@agentmesh/peer-mesh':
+        specifier: workspace:*
+        version: link:../peer-mesh
+      '@libp2p/interface':
+        specifier: ^3.2.0
+        version: 3.3.0
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.4)(lightningcss@1.32.0)
+
   packages/hivebear:
     dependencies:
       '@agentmesh/shared-types':
@@ -519,12 +524,6 @@ importers:
       vitest:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.20.4)(lightningcss@1.32.0)
-
-  packages/ipfs:
-    dependencies:
-      '@agentmesh/core':
-        specifier: workspace:*
-        version: link:../core
 
   packages/knowledge-base:
     dependencies:
