@@ -90,7 +90,10 @@ sudo systemctl reload caddy
 - **Static assets**: CSS/JS/SVG/images with 7-day immutable cache
 - **SPA fallback**: All paths → index.html
 - **Encoding**: zstd + gzip
-- **auto_https disable_redirect**: Prevents redirect loops behind Cloudflare proxy
+- **auto_https**: intentionally NOT set per-site — `auto_https` is a Caddy
+  global option, not a site-block directive (inside a site block
+  `caddy validate` fails with "unrecognized directive: auto_https").
+  Default auto-HTTPS (Let's Encrypt + HTTP→HTTPS redirect) applies
 - **Security headers**: HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy
 
 ## Revert

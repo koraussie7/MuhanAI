@@ -524,6 +524,118 @@ export interface KnowledgeNodeRecord {
 	createdAt: string;
 }
 
+/* ------------------------------ Ontology H3 Cells ------------------------------ */
+/* H3 hexagonal cell aggregations from glasses/device data synced to ontology.   */
+
+export interface H3CellAggregation {
+	h3CellId: string;
+	resolution: number;
+	bounds: { lat: number; lng: number }[];
+	center: { lat: number; lng: number };
+	peerCount: number;
+	activePeerIds: string[];
+	cachedChunkCount: number;
+	uniqueModelIds: string[];
+	uniqueChunkCids: string[];
+	activeInferenceCount: number;
+	totalInferencesLast24h: number;
+	avgLatencyMs: number;
+	avgTokensPerSecond: number;
+	quorumSuccessRate: number;
+	evidenceCount: number;
+	verifiedEvidenceCount: number;
+	unverifiedEvidenceCount: number;
+	forecastCount: number;
+	avgForecastConfidence: number;
+	highImpactForecastCount: number;
+	impactTier: "critical" | "high" | "medium" | "low";
+	impactScore: number;
+	windowStart: number;
+	windowEnd: number;
+	lastUpdated: number;
+}
+
+interface OntologySyncRequest {
+	cells: H3CellAggregation[];
+	source: string;
+}
+
+interface OntologySyncResult {
+	syncedCells: number;
+	newCells: number;
+	updatedCells: number;
+	creditsEarned: number;
+}
+
+const ONTOLOGY_CELLS_KEY = "ontology:h3cells";
+const ONTOLOGY_MAX_CELLS = 1000;
+
+async function syncOntologyCells(
+	request: Request,
+	_match: RegExpExecArray | null,
+	store: FeedStore,
+): Promise<Response> {
+	let body: OntologySyncRequest;
+	try {
+		body = (await request.json()) as OntologySyncRequest;
+	} catch {
+		return json({ error: "Invalid JSON body" }, 400);
+	}
+	if (!body.cells || !Array.isArray(body.cells)) {
+		return json({ error: "cells array required" }, 400);
+	}
+
+	const existing = await store.read(ONTOLOGY_CELLS_KEY, [] as H3CellAggregation[]);
+	const existingMap = new Map(existing.map((c) => [c.h3CellId, c]));
+
+	let newCells = 0;
+	let updatedCells = 0;
+
+	for (const cell of body.cells) {
+		if (!cell.h3CellId || cell.resolution === undefined) continue;
+		const existingCell = existingMap.get(cell.h3CellId);
+		if (existingCell) {
+			// Merge: update peer count, bounds, impact tier, lastUpdated
+			existingCell.peerCount += cell.peerCount;
+			existingCell.bounds.push(...cell.bounds);
+			existingCell.lastUpdated = Math.max(existingCell.lastUpdated, cell.lastUpdated);
+			if (cell.impactTier === "critical" || (cell.impactTier === "high" && existingCell.impactTier !== "critical")) {
+				existingCell.impactTier = cell.impactTier;
+				existingCell.impactScore = Math.max(existingCell.impactScore, cell.impactScore);
+			}
+			updatedCells++;
+		} else {
+			existingMap.set(cell.h3CellId, cell);
+			newCells++;
+		}
+	}
+
+	// Limit total cells
+	const allCells = Array.from(existingMap.values());
+	if (allCells.length > ONTOLOGY_MAX_CELLS) {
+		allCells.sort((a, b) => b.lastUpdated - a.lastUpdated);
+		allCells.splice(ONTOLOGY_MAX_CELLS);
+	}
+
+	await store.put(ONTOLOGY_CELLS_KEY, allCells);
+
+	// Calculate credits: base 50 per new cell, 20 per update, bonus for critical impact
+	const creditsEarned = newCells * 50 + updatedCells * 20 + body.cells.filter((c) => c.impactTier === "critical").length * 30;
+
+	const result: OntologySyncResult = {
+		syncedCells: body.cells.length,
+		newCells,
+		updatedCells,
+		creditsEarned,
+	};
+	return json(result);
+}
+
+async function listOntologyCells(store: FeedStore): Promise<Response> {
+	const cells = await store.read(ONTOLOGY_CELLS_KEY, [] as H3CellAggregation[]);
+	return json({ cells, count: cells.length });
+}
+
 const KNOWLEDGE_KEY = "knowledge:nodes";
 const KNOWLEDGE_MAX = 200;
 
@@ -611,6 +723,28 @@ async function getOmnirouteFreeTiers(_request: Request): Promise<Response> {
 	});
 }
 
+async function getWorldBrief(_request: Request): Promise<Response> {
+	return json({
+		source: "offline",
+		summary: "Pythia World Engine 오프라인 모드 — 무료 LLM API 기반 40+ 키리스 피드 통합. 24h/1w/1m/1y 예측 제공.",
+		domains: ["markets", "cyber", "disaster", "travel", "environment", "tech"],
+		events: [
+			{ id: "evt-1", title: "Seoul — 프리미엄 동향", domain: "markets", location: "Seoul", severity: "watch", source: "offline-demo", timestamp: now() },
+			{ id: "evt-2", title: "Bangkok — 항공 수요 급증", domain: "travel", location: "Bangkok", severity: "info", source: "offline-demo", timestamp: now() },
+			{ id: "evt-3", title: "Tokyo — 지진 경보 (소규모)", domain: "disaster", location: "Tokyo", severity: "alert", source: "offline-demo", timestamp: now() },
+			{ id: "evt-4", title: "New York — 시장 변동 감지", domain: "markets", location: "New York", severity: "watch", source: "offline-demo", timestamp: now() },
+			{ id: "evt-5", title: "London — 사이버 위협 활동", domain: "cyber", location: "London", severity: "watch", source: "offline-demo", timestamp: now() },
+			{ id: "evt-6", title: "Sydney — 산불 위험 상승", domain: "environment", location: "Sydney", severity: "alert", source: "offline-demo", timestamp: now() },
+		],
+		predictions: [
+			{ id: "pred-1", title: "비트코인 1주 내 $70K 돌파", horizon: "1w", probability: 0.72, confidence: 0.68, rationale: "거시 유동성 개선 + ETF 순유입 지속" },
+			{ id: "pred-2", title: "다낭 관광객 수 1개월 내 20% 증가", horizon: "1m", probability: 0.65, confidence: 0.6, rationale: "비자 면제 연장 + 직항편 증편" },
+			{ id: "pred-3", title: "한국 반도체 수출 1년 내 15% 성장", horizon: "1y", probability: 0.78, confidence: 0.7, rationale: "AI 서버 수요 폭증 + HBM 사이클" },
+		],
+		fetchedAt: now(),
+	});
+}
+
 function handlePulseStream(): Response {
 	const headers = new Headers({
 		"Content-Type": "text/event-stream",
@@ -686,8 +820,10 @@ const ROUTES: Route[] = [
 		handler: getRewards,
 	},
 	{ method: "GET", pattern: /^\/api\/unsolved$/, handler: listUnsolved },
-	{ method: "GET", pattern: /^\/api\/knowledge\/nodes$/, handler: (r, m, s) => listKnowledgeNodes(s) },
+{ method: "GET", pattern: /^\/api\/knowledge\/nodes$/, handler: (r, m, s) => listKnowledgeNodes(s) },
 	{ method: "POST", pattern: /^\/api\/knowledge\/nodes$/, handler: (r, m, s) => createKnowledgeNode(r, m, s) },
+	{ method: "POST", pattern: /^\/api\/ontology\/sync$/, handler: syncOntologyCells },
+	{ method: "GET", pattern: /^\/api\/ontology\/cells$/, handler: (r, m, s) => listOntologyCells(s) },
 ];
 
 const FEED_PREFIXES = [
@@ -707,6 +843,8 @@ const FEED_PREFIXES = [
 	"/api/credits",
 	"/api/mesh/pulse",
 	"/api/omniroute",
+	"/api/world",
+	"/api/ontology",
 ];
 
 /** Returns a Response for worker-handled /api paths, or null to fall through to proxy. */

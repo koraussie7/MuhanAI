@@ -8,7 +8,10 @@ set -euo pipefail
 
 CADDYFILE="/etc/caddy/Caddyfile"
 SITE_BLOCK='muhanai.com, www.muhanai.com, find.muhanai.com, travel.kbizhub.com {
-	auto_https disable_redirect
+	# NOTE: auto_https is a Caddy global option, NOT a site-block
+	# directive (inside a site block: "unrecognized directive").
+	# Default auto-HTTPS (ACME cert + HTTP->HTTPS redirect) is
+	# what direct / grey-DNS serving wants.
 	root * /var/www/muhanai.com/current
 	encode zstd gzip
 	header {
