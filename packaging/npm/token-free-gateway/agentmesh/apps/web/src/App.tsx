@@ -163,6 +163,11 @@ const WorldPageLazy = React.lazy(() =>
 const GlassesAppLazy = React.lazy(() =>
 	import("./components/GlassesApp").then((m) => ({ default: m.GlassesApp })),
 );
+const GhostDownloadPageLazy = React.lazy(() =>
+	import("./components/GhostDownloadPage").then((m) => ({
+		default: m.GhostDownloadPage,
+	})),
+);
 const OntologyExplorerLazy = React.lazy(() =>
 	import("./components/OntologyExplorer").then((m) => ({ default: m.OntologyExplorer })),
 );
@@ -682,6 +687,13 @@ export function App() {
 						{activeSection === "glasses-app" && (
 							<Suspense fallback={<PageSkeleton />}>
 								<GlassesAppLazy />
+							</Suspense>
+						)}
+
+						{/* Ghost desktop app download hub */}
+						{activeSection === "ghost" && (
+							<Suspense fallback={<PageSkeleton />}>
+								<GhostDownloadPageLazy />
 							</Suspense>
 						)}
 						{/* Pythia */}

@@ -82,6 +82,7 @@ export const MENU_TRANSLATIONS: Record<SupportedLanguage, NavI18n> = {
 			agents: "에이전트 목록",
 			"human-agents": "전문가 에이전트",
 			"glasses-app": "글래스 앱",
+			"ghost": "Ghost 데스크톱",
 		},
 		badges: {
 			LIVE: "라이브",
@@ -197,6 +198,7 @@ export const MENU_TRANSLATIONS: Record<SupportedLanguage, NavI18n> = {
 			agents: "Agents",
 			"human-agents": "Human Agents",
 			"glasses-app": "Glasses App",
+			"ghost": "Ghost Desktop",
 		},
 		badges: {
 			LIVE: "LIVE",
@@ -312,6 +314,7 @@ export const MENU_TRANSLATIONS: Record<SupportedLanguage, NavI18n> = {
 			agents: "エージェント",
 			"human-agents": "人間エージェント",
 			"glasses-app": "グラスアプリ",
+			"ghost": "Ghostデスクトップ",
 		},
 		badges: {
 			LIVE: "LIVE",
@@ -402,6 +405,7 @@ export const MENU_TRANSLATIONS: Record<SupportedLanguage, NavI18n> = {
 			agents: "智能体",
 			"human-agents": "专家智能体",
 			"glasses-app": "智能眼镜应用",
+			"ghost": "Ghost 桌面版",
 		},
 		badges: {
 			LIVE: "实时",
@@ -492,6 +496,7 @@ export const MENU_TRANSLATIONS: Record<SupportedLanguage, NavI18n> = {
 			agents: "Agentes",
 			"human-agents": "Agentes Humanos",
 			"glasses-app": "Aplicación de Gafas",
+			"ghost": "Escritorio Ghost",
 		},
 		badges: {
 			LIVE: "EN VIVO",
@@ -582,6 +587,7 @@ export const MENU_TRANSLATIONS: Record<SupportedLanguage, NavI18n> = {
 			agents: "Agenten",
 			"human-agents": "Menschliche Agenten",
 			"glasses-app": "Brillen-App",
+			"ghost": "Ghost Desktop",
 		},
 		badges: {
 			LIVE: "LIVE",
@@ -672,6 +678,7 @@ export const MENU_TRANSLATIONS: Record<SupportedLanguage, NavI18n> = {
 			agents: "Agents",
 			"human-agents": "Agents Humains",
 			"glasses-app": "Application Lunettes",
+			"ghost": "Bureau Ghost",
 		},
 		badges: {
 			LIVE: "EN DIRECT",
@@ -762,6 +769,7 @@ export const MENU_TRANSLATIONS: Record<SupportedLanguage, NavI18n> = {
 			agents: "Agentes",
 			"human-agents": "Agentes Humanos",
 			"glasses-app": "Aplicativo de Óculos",
+			"ghost": "Área de Trabalho Ghost",
 		},
 		badges: {
 			LIVE: "AO VIVO",

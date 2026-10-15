@@ -335,6 +335,15 @@ export const ROUTES: readonly RouteDefinition[] = [
 		badge: "PWA",
 		page: "glasses-app",
 	},
+	{
+		id: "ghost",
+		path: "/ghost",
+		group: "system",
+		label: "Ghost Desktop",
+		iconKey: "package",
+		badge: "NEW",
+		page: "ghost",
+	},
 ];
 
 export const ROUTE_COUNT = ROUTES.length;
