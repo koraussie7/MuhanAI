@@ -7,6 +7,7 @@ routes = [
   { pattern = "www.muhanai.com/*", zone_name = "muhanai.com" },
   { pattern = "find.muhanai.com/*", zone_name = "muhanai.com" },
   { pattern = "api.muhanai.com/*", zone_name = "muhanai.com" },
+  { pattern = "kbizhub.com/*", zone_name = "kbizhub.com" },
   { pattern = "shop1.kbizhub.com/*", zone_name = "kbizhub.com" },
   { pattern = "travel.kbizhub.com/*", zone_name = "kbizhub.com" },
 ]
