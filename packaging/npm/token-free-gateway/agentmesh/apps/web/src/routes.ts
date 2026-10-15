@@ -321,7 +321,7 @@ export const ROUTES: readonly RouteDefinition[] = [
 		id: "world",
 		path: "/world",
 		group: "system",
-		label: "World",
+		label: "World Intelligence",
 		iconKey: "activity",
 		badge: "NEW",
 		page: "world",

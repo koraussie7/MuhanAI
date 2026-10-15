@@ -4,12 +4,54 @@
  */
 export type SeedPlatform = "android" | "macos" | "windows" | "linux" | "raspberry-pi" | "unknown";
 
-interface StorageManagerWithEstimate extends StorageManager {
-  estimate(): Promise<StorageEstimate>;
+/**
+ * Minimal structural IndexedDB / OPFS shapes.
+ *
+ * `@agentmesh/peer-mesh` compiles without `lib.dom`, so the browser globals are
+ * described here instead of pulling DOM types into a Node-targeted package.
+ */
+interface IdbObjectStoreLike {
+	get(key: string): IdbRequestLike;
+	put(value: unknown): IdbRequestLike;
 }
 
-interface NavigatorWithStorage extends Navigator {
-  storage: StorageManagerWithEstimate;
+interface IdbTransactionLike {
+	objectStore(name: string): IdbObjectStoreLike;
+}
+
+interface IdbDatabaseLike {
+	transaction(name: string, mode: "readonly" | "readwrite"): IdbTransactionLike;
+	objectStoreNames: { contains(name: string): boolean };
+	createObjectStore(name: string, options: { keyPath: string }): IdbObjectStoreLike;
+	close(): void;
+}
+
+interface IdbRequestLike {
+	onsuccess: (() => void) | null;
+	onerror: (() => void) | null;
+	onupgradeneeded?: (() => void) | null;
+	result: IdbDatabaseLike & { data?: ArrayBuffer };
+	error: Error | null;
+}
+
+interface IdbFactoryLike {
+	open(name: string, version: number): IdbRequestLike;
+}
+
+interface FileSystemWritableLike {
+	write(data: Uint8Array): Promise<void>;
+	close(): Promise<void>;
+}
+
+interface FileHandleLike {
+	createWritable(): Promise<FileSystemWritableLike>;
+	getFile(): Promise<{ arrayBuffer(): Promise<ArrayBuffer> }>;
+}
+
+interface FileSystemDirectoryHandleLike {
+	getFileHandle(name: string, options?: { create?: boolean }): Promise<FileHandleLike>;
+	getDirectoryHandle(name: string, options?: { create?: boolean }): Promise<FileSystemDirectoryHandleLike>;
+	removeEntry(name: string): Promise<void>;
 }
 
 export interface ModelChunk {
@@ -336,13 +378,14 @@ export function createMemorySeedStore(): ModelSeedStore {
 }
 
 export async function createIndexedDBSeedStore(dbName = "agentmesh-seeds", storeName = "chunks"): Promise<ModelSeedStore> {
-  if (typeof indexedDB === "undefined") throw new Error("IndexedDB unavailable");
-  const db = await new Promise<IDBDatabase>((resolve, reject) => {
-    const request = indexedDB.open(dbName, 1);
+  const factory = (globalThis as unknown as { indexedDB?: IdbFactoryLike }).indexedDB;
+  if (!factory) throw new Error("IndexedDB unavailable");
+  const db = await new Promise<IdbDatabaseLike>((resolve, reject) => {
+    const request = factory.open(dbName, 1);
     request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains(storeName)) {
-        db.createObjectStore(storeName, { keyPath: "cid" });
+      const database = request.result;
+      if (!database.objectStoreNames.contains(storeName)) {
+        database.createObjectStore(storeName, { keyPath: "cid" });
       }
     };
     request.onsuccess = () => resolve(request.result);
@@ -375,8 +418,9 @@ export async function createIndexedDBSeedStore(dbName = "agentmesh-seeds", store
         const tx = db.transaction(storeName, "readonly");
         const req = tx.objectStore(storeName).get(cid);
         req.onsuccess = () => {
-          if (!req.result) reject(new Error(`Unknown chunk: ${cid}`));
-          else resolve(new Uint8Array(req.result.data));
+          const stored = req.result;
+          if (!stored) reject(new Error(`Unknown chunk: ${cid}`));
+          else resolve(new Uint8Array(stored.data as ArrayBuffer));
         };
         req.onerror = () => reject(req.error);
       });
@@ -384,9 +428,10 @@ export async function createIndexedDBSeedStore(dbName = "agentmesh-seeds", store
     markSeeded: async () => {},
     getStorageUsage: async () => storageUsage,
     getStorageQuota: async () => {
-      const estimate = (navigator as { storage?: { estimate?: () => Promise<{ quota?: number }> } }).storage?.estimate;
-      if (estimate) {
-        const est = await estimate();
+      const nav = (globalThis as { navigator?: { storage?: unknown } }).navigator;
+      const storage = nav?.storage as { estimate?: () => Promise<{ quota?: number }> } | undefined;
+      if (storage?.estimate) {
+        const est = await storage.estimate();
         return est.quota ?? 1024 * 1024 * 1024;
       }
       return 1024 * 1024 * 1024;
@@ -431,10 +476,12 @@ export async function createFileSystemSeedStore(rootDir: string): Promise<ModelS
 }
 
 export async function createOPFSSeedStore(rootName = "agentmesh-seeds"): Promise<ModelSeedStore> {
-  if (typeof navigator === "undefined" || !navigator.storage?.getDirectory) {
+  const nav = (globalThis as { navigator?: { storage?: unknown } }).navigator;
+  const storage = nav?.storage as { getDirectory?: () => Promise<FileSystemDirectoryHandleLike> } | undefined;
+  if (!storage?.getDirectory) {
     throw new Error("OPFS unavailable");
   }
-  const root = await navigator.storage.getDirectory();
+  const root = await storage.getDirectory();
   const dir = await root.getDirectoryHandle(rootName, { create: true });
   let storageUsage = 0;
 
@@ -460,9 +507,10 @@ export async function createOPFSSeedStore(rootName = "agentmesh-seeds"): Promise
     markSeeded: async () => {},
     getStorageUsage: async () => storageUsage,
     getStorageQuota: async () => {
-      const nav = navigator as NavigatorWithStorage;
-      if (nav.storage && typeof nav.storage.estimate === "function") {
-        const est = await nav.storage.estimate();
+      const nav = (globalThis as { navigator?: { storage?: unknown } }).navigator;
+      const storage = nav?.storage as { estimate?: () => Promise<{ quota?: number }> } | undefined;
+      if (storage?.estimate) {
+        const est = await storage.estimate();
         return est.quota ?? 1024 * 1024 * 1024;
       }
       return 1024 * 1024 * 1024;

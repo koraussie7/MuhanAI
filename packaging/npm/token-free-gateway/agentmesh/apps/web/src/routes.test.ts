@@ -9,6 +9,8 @@ test("route registry has unique ids and paths", () => {
 	assert.equal(new Set(ROUTES.map((route) => route.path)).size, ROUTE_COUNT);
 	assert.equal(new Set(ROUTES.map((route) => route.page)).size, ROUTE_COUNT);
 	assert.ok(ROUTES.every((route) => route.page === route.id));
+	assert.equal(ROUTES.find((route) => route.id === "ontology")?.path, "/ontology");
+	assert.equal(ROUTES.find((route) => route.id === "world")?.label, "World Intelligence");
 });
 
 test("sidebar is derived from every registered route", () => {

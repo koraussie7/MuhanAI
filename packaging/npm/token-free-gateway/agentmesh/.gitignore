@@ -23,3 +23,13 @@ dist-shop1/
 # danang directory bundle & crawl cache
 dist-danang/
 deploy/.ekoreatown/
+
+# tsc outputs written next to sources (peer-mesh, core)
+packages/*/src/**/*.js
+packages/*/src/**/*.js.map
+packages/*/src/**/*.d.ts
+packages/*/src/**/*.d.ts.map
+packages/*/node_modules/
+# python bytecode
+__pycache__/
+*.pyc

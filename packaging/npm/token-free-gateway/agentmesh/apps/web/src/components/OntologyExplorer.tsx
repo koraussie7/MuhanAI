@@ -415,8 +415,7 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 				data?.events.filter(
 					(e) =>
 						e.peerLocation &&
-						Math.abs(h3ToCenter(cell.h3CellId).lat - e.peerLocation.lat) < 0.001 &&
-						Math.abs(h3ToCenter(cell.h3CellId).lng - e.peerLocation.lng) < 0.001,
+						locationToH3(e.peerLocation.lat, e.peerLocation.lng, cell.resolution) === cell.h3CellId,
 				) ?? [];
 
 			const cellForecasts =
@@ -469,7 +468,7 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 		const viewport = { width: 640, height: 360 };
 		return cells.map((cell) => {
 			const points = h3ToSvgPoints(cell.h3CellId, viewport);
-			const center = h3ToSvgPoints(cell.h3CellId, viewport).split(" ")[0]?.split(",") ?? ["0", "0"];
+			const center = points.split(" ")[0]?.split(",") ?? ["0", "0"];
 			return {
 				...cell,
 				points,
@@ -574,6 +573,9 @@ export const OntologyExplorer: React.FC<OntologyExplorerProps> = ({
 						</button>
 					))}
 				</div>
+				{onNavigate && (
+					<button type="button" onClick={() => onNavigate("/world")} style={{ padding: "6px 10px", fontSize: 11, color: "#38bdf8", border: "1px solid rgba(56,189,248,0.35)", borderRadius: 6, background: "rgba(56,189,248,0.08)", cursor: "pointer" }}>World Intelligence</button>
+				)}
 			</div>
 
 			{/* Main Content: Hex Globe + Concept Cards */}

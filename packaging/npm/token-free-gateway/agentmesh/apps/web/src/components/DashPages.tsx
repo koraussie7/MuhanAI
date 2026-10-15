@@ -27,6 +27,7 @@ import {
 	McpMarket,
 } from "./harvest/C/MarketplaceGrid.js";
 import { PageBox } from "./PageBox.js";
+import { downloadAndSeedModel, type ModelManifest, type ModelChunk, type SeedProgress, createMemorySeedStore } from "@agentmesh/peer-mesh";
 
 const API = import.meta.env.VITE_API_BASE ?? "";
 
@@ -555,12 +556,12 @@ const CLUSTER_NODES: ClusterNode[] = [
 ];
 
 export function ComputeMeshPage() {
-	const [tab, setTab] = useState<"workers" | "gpu" | "cluster">("workers");
+	const [tab, setTab] = useState<"workers" | "gpu" | "cluster" | "model-seeding">("workers");
 	return (
 		<Page
 			iconKey="cpu"
 			title="Compute Mesh"
-			subtitle="AgentFM 분산 워커 · mycellm GPU 풀 · DAC 클러스터"
+			subtitle="AgentFM 분산 워커 · mycellm GPU 풀 · DAC 클러스터 · P2P 모델 시드"
 		>
 			<GpuRackVisualizer />
 			<StatGrid
@@ -590,12 +591,131 @@ export function ComputeMeshPage() {
 				>
 					🏢 DAC Cluster ({CLUSTER_NODES.length})
 				</button>
+				<button
+					className={`policy-chip ${tab === "model-seeding" ? "active" : ""}`}
+					onClick={() => setTab("model-seeding")}
+				>
+					🌱 Model Seeding
+				</button>
 			</div>
 
 			{tab === "workers" && <WorkerPool workers={COMPUTE_WORKERS} />}
 			{tab === "gpu" && <GpuPool nodes={GPU_NODES} />}
 			{tab === "cluster" && <ClusterOverview nodes={CLUSTER_NODES} />}
+			{tab === "model-seeding" && <ModelSeedingPanel />}
 		</Page>
+	);
+}
+
+// ---- Model Seeding (P2P Model Inference) ----
+function ModelSeedingPanel() {
+	const [progress, setProgress] = useState<SeedProgress | null>(null);
+	const [manifest, setManifest] = useState<ModelManifest | null>(null);
+	const [logs, setLogs] = useState<string[]>([]);
+	const [isRunning, setIsRunning] = useState(false);
+
+	const addLog = (msg: string) => {
+		setLogs((prev) => [...prev.slice(-50), `[${new Date().toLocaleTimeString()}] ${msg}`]);
+	};
+
+	const handleSeed = async () => {
+		if (!manifest) {
+			addLog("매니페스트를 먼저 입력하세요");
+			return;
+		}
+		setIsRunning(true);
+		setLogs([]);
+		addLog("시드 시작...");
+
+		const store = createMemorySeedStore();
+		try {
+			const status = await downloadAndSeedModel({
+				manifest,
+				store,
+				onProgress: (p) => {
+					setProgress(p);
+					addLog(`${p.phase}: ${p.downloadedChunks}/${p.totalChunks} chunks (${p.downloadSpeedBps ? (p.downloadSpeedBps / 1024 / 1024).toFixed(2) + " MB/s" : "계산 중..."})`);
+				},
+			});
+			addLog(`완료: ${status.modelId} v${status.version} (${status.seeded ? "시드됨" : "시드 안됨"})`);
+		} catch (e) {
+			addLog(`오류: ${e instanceof Error ? e.message : String(e)}`);
+		} finally {
+			setIsRunning(false);
+		}
+	};
+
+	const handleManifestInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+		try {
+			const parsed = JSON.parse(e.target.value);
+			setManifest(parsed);
+			addLog("매니페스트 파싱됨");
+		} catch {
+			addLog("잘못된 JSON 형식");
+		}
+	};
+
+	return (
+		<div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+			<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+				<div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+					<label style={{ fontSize: 12, color: "var(--cline-text-muted)" }}>Model Manifest (JSON)</label>
+					<textarea
+						value={manifest ? JSON.stringify(manifest, null, 2) : ""}
+						onChange={handleManifestInput}
+						placeholder='{"modelId":"my-model","version":"1.0","format":"gguf","sizeBytes":1000000,"chunks":[{"index":0,"cid":"bafy...","sizeBytes":1000000,"sha256":"...","url":"https://..."}],"license":"MIT"}'
+						style={{
+							minHeight: 120,
+							padding: 8,
+							borderRadius: 6,
+							border: "1px solid var(--cline-border)",
+							background: "var(--cline-bg)",
+							color: "var(--cline-text)",
+							fontFamily: "monospace",
+							fontSize: 11,
+						}}
+					/>
+				</div>
+				<div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+					<label style={{ fontSize: 12, color: "var(--cline-text-muted)" }}>진행 상태</label>
+					<div style={{ padding: 12, borderRadius: 6, border: "1px solid var(--cline-border)", background: "var(--cline-bg)" }}>
+						{progress ? (
+							<div style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 12 }}>
+								<div>Phase: <strong>{progress.phase}</strong></div>
+								<div>Chunks: <strong>{progress.downloadedChunks}/{progress.totalChunks}</strong></div>
+								<div>Downloaded: <strong>{((progress.downloadedChunks / progress.totalChunks) * 100).toFixed(1)}%</strong></div>
+								<div>Speed: <strong>{progress.downloadSpeedBps ? (progress.downloadSpeedBps / 1024 / 1024).toFixed(2) + " MB/s" : "—"}</strong></div>
+								<div>Cache Hit: <strong>{progress.cacheHitRate ? (progress.cacheHitRate * 100).toFixed(1) + "%" : "—"}</strong></div>
+							</div>
+						) : (
+							<div style={{ color: "var(--cline-text-muted)", fontSize: 12 }}>대기 중...</div>
+						)}
+					</div>
+					<button
+						onClick={handleSeed}
+						disabled={isRunning || !manifest}
+						style={{
+							padding: "8px 16px",
+							borderRadius: 6,
+							border: "1px solid var(--cline-border)",
+							background: isRunning || !manifest ? "var(--cline-bg)" : "var(--cline-primary-bg)",
+							color: isRunning || !manifest ? "var(--cline-text-muted)" : "var(--cline-primary)",
+							cursor: isRunning || !manifest ? "not-allowed" : "pointer",
+						}}
+					>
+						{isRunning ? "시드 중..." : "시드 시작"}
+					</button>
+				</div>
+			</div>
+			<div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+				<label style={{ fontSize: 12, color: "var(--cline-text-muted)" }}>로그</label>
+				<div style={{ maxHeight: 200, overflow: "auto", padding: 8, borderRadius: 6, border: "1px solid var(--cline-border)", background: "var(--cline-bg)", fontFamily: "monospace", fontSize: 10 }}>
+					{logs.map((log, i) => (
+						<div key={i} style={{ color: "var(--cline-text-muted)", borderBottom: "1px solid var(--cline-border)", padding: "2px 0" }}>{log}</div>
+					))}
+				</div>
+			</div>
+		</div>
 	);
 }
 

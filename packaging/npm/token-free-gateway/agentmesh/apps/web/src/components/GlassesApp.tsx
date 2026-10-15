@@ -19,10 +19,12 @@ import {
 	Bot,
 	Camera,
 	CreditCard,
+	Globe,
 	LogIn,
 	Mic,
 	Mic2,
 	MicOff,
+	RefreshCw,
 	Search,
 	Send,
 	ShieldCheck,
@@ -34,6 +36,8 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useGossipPulse } from "../hooks/useGossipPulse.js";
+import { latLngToCell, cellToLatLng } from "h3-js";
+import type { H3CellAggregation } from "@agentmesh/peer-mesh";
 
 interface KnowledgeEntry {
 	id: string;
@@ -44,6 +48,8 @@ interface KnowledgeEntry {
 	verified: boolean;
 	creditAwarded: number;
 	createdAt: string;
+	/** Location for H3 cell mapping */
+	location?: { lat: number; lng: number; name?: string };
 }
 
 interface GlassesStatus {
@@ -61,9 +67,17 @@ interface Message {
 	timestamp: number;
 }
 
-const API = "";
+interface OntologySyncResult {
+	syncedCells: number;
+	newCells: number;
+	updatedCells: number;
+	creditsEarned: number;
+}
 
-type Tab = "chat" | "knowledge" | "devices";
+const API = "";
+const H3_RESOLUTION = 4;
+
+type Tab = "chat" | "knowledge" | "devices" | "ontology";
 
 export function GlassesApp() {
 	const [activeTab, setActiveTab] = useState<Tab>("chat");
@@ -81,6 +95,12 @@ export function GlassesApp() {
 	const [creditBalance, setCreditBalance] = useState<number | null>(null);
 	const [showInstallBanner, setShowInstallBanner] = useState(false);
 	const [isCapturing, setIsCapturing] = useState(false);
+
+	// Ontology integration state
+	const [h3Cells, setH3Cells] = useState<H3CellAggregation[]>([]);
+	const [syncing, setSyncing] = useState(false);
+	const [lastSyncResult, setLastSyncResult] = useState<OntologySyncResult | null>(null);
+	const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number; name?: string } | null>(null);
 
 	const recognitionRef = useRef<any>(null);
 	const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -261,6 +281,108 @@ export function GlassesApp() {
 		alert("지식이 메쉬에 게시되었습니다!");
 	}, []);
 
+	// Capture current GPS location for H3 cell mapping
+	const captureLocation = useCallback(async () => {
+		if (!navigator.geolocation) {
+			alert("이 브라우저에서는 위치 정보를 지원하지 않습니다.");
+			return;
+		}
+		navigator.geolocation.getCurrentPosition(
+			(pos) => {
+				const loc = {
+					lat: pos.coords.latitude,
+					lng: pos.coords.longitude,
+					name: `위치 ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`,
+				};
+				setCurrentLocation(loc);
+				alert(`위치 캡처됨: ${loc.name}`);
+			},
+			(err) => {
+				alert(`위치 접근 거부됨: ${err.message}`);
+			},
+			{ enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+		);
+	}, []);
+
+	// Sync glasses knowledge to ontology graph (H3 cells)
+	const syncToOntology = useCallback(async () => {
+		if (syncing) return;
+		setSyncing(true);
+
+		try {
+			// Build H3 cell aggregations from knowledge entries with location
+			const cellMap = new Map<string, H3CellAggregation>();
+			const now = Date.now();
+
+			for (const entry of knowledge) {
+				if (!entry.location) continue;
+				const cellId = latLngToCell(entry.location.lat, entry.location.lng, H3_RESOLUTION);
+				const [centerLat, centerLng] = cellToLatLng(cellId) as [number, number];
+
+				if (!cellMap.has(cellId)) {
+					cellMap.set(cellId, {
+						h3CellId: cellId,
+						resolution: H3_RESOLUTION,
+						bounds: [{ lat: entry.location.lat, lng: entry.location.lng }],
+						center: { lat: centerLat, lng: centerLng },
+						peerCount: 0,
+						activePeerIds: [],
+						cachedChunkCount: 0,
+						uniqueModelIds: [],
+						uniqueChunkCids: [],
+						activeInferenceCount: 0,
+						totalInferencesLast24h: 0,
+						avgLatencyMs: 0,
+						avgTokensPerSecond: 0,
+						quorumSuccessRate: 1,
+						evidenceCount: 0,
+						verifiedEvidenceCount: 0,
+						unverifiedEvidenceCount: 0,
+						forecastCount: 0,
+						avgForecastConfidence: 0,
+						highImpactForecastCount: 0,
+						impactTier: entry.type === "obstacle_report" ? "critical" : "low",
+						impactScore: entry.type === "obstacle_report" ? 0.8 : 0.2,
+						windowStart: now,
+						windowEnd: now,
+						lastUpdated: now,
+					});
+				}
+				const cell = cellMap.get(cellId)!;
+				cell.peerCount += 1;
+				cell.bounds.push({ lat: entry.location.lat, lng: entry.location.lng });
+				cell.lastUpdated = now;
+				if (entry.type === "obstacle_report" && cell.impactTier !== "critical") {
+					cell.impactTier = "critical";
+					cell.impactScore = 0.9;
+				}
+			}
+
+			const cells = Array.from(cellMap.values());
+			setH3Cells(cells);
+
+			// Send to ontology sync endpoint
+			const res = await fetch(`${API}/api/ontology/sync`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ cells, source: "glasses" }),
+			});
+
+			if (res.ok) {
+				const result = (await res.json()) as OntologySyncResult;
+				setLastSyncResult(result);
+				setCreditBalance((prev) => (prev ?? 0) + result.creditsEarned);
+				alert(`온톨로지 동기화 완료! 새 셀 ${result.newCells}개, 업데이트 ${result.updatedCells}개, 크레딧 +${result.creditsEarned}`);
+			} else {
+				alert("동기화 실패: 서버 오류");
+			}
+		} catch (err) {
+			alert(`동기화 실패: ${err instanceof Error ? err.message : String(err)}`);
+		} finally {
+			setSyncing(false);
+		}
+	}, [knowledge, syncing]);
+
 	const handleInstall = useCallback(() => {
 		const deferred = (window as any).deferredInstallPrompt;
 		if (deferred) {
@@ -366,25 +488,43 @@ export function GlassesApp() {
 					<Search size={14} style={{ display: "inline", marginRight: 4 }} />
 					지식
 				</button>
-				<button
-					type="button"
-					onClick={() => setActiveTab("devices")}
-					style={{
-						flex: 1,
-						padding: "8px 12px",
-						borderRadius: 8,
-						border: "1px solid var(--cline-border)",
-						background: activeTab === "devices" ? "var(--cline-primary-bg)" : "transparent",
-						color: activeTab === "devices" ? "var(--cline-primary)" : "var(--cline-text-muted)",
-						fontSize: 13,
-						fontWeight: 600,
-						cursor: "pointer",
-					}}
-				>
-					<Users size={14} style={{ display: "inline", marginRight: 4 }} />
-					디바이스
-				</button>
-			</div>
+<button
+				type="button"
+				onClick={() => setActiveTab("devices")}
+				style={{
+					flex: 1,
+					padding: "8px 12px",
+					borderRadius: 8,
+					border: "1px solid var(--cline-border)",
+					background: activeTab === "devices" ? "var(--cline-primary-bg)" : "transparent",
+					color: activeTab === "devices" ? "var(--cline-primary)" : "var(--cline-text-muted)",
+					fontSize: 13,
+					fontWeight: 600,
+					cursor: "pointer",
+				}}
+			>
+				<Users size={14} style={{ display: "inline", marginRight: 4 }} />
+				디바이스
+			</button>
+			<button
+				type="button"
+				onClick={() => setActiveTab("ontology")}
+				style={{
+					flex: 1,
+					padding: "8px 12px",
+					borderRadius: 8,
+					border: "1px solid var(--cline-border)",
+					background: activeTab === "ontology" ? "var(--cline-primary-bg)" : "transparent",
+					color: activeTab === "ontology" ? "var(--cline-primary)" : "var(--cline-text-muted)",
+					fontSize: 13,
+					fontWeight: 600,
+					cursor: "pointer",
+				}}
+			>
+				<Globe size={14} style={{ display: "inline", marginRight: 4 }} />
+				온톨로지
+			</button>
+		</div>
 
 			{activeTab === "chat" && (
 				<div
@@ -702,6 +842,219 @@ export function GlassesApp() {
 							디바이스 연결
 						</button>
 					</div>
+				</div>
+			)}
+
+			{activeTab === "ontology" && (
+				<div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+					{/* Sync Status Card */}
+					<div
+						style={{
+							padding: "16px",
+							borderRadius: 10,
+							border: "1px solid var(--cline-border)",
+							background: "var(--cline-bg-tertiary, rgba(255,255,255,0.03))",
+						}}
+					>
+						<div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+							<Globe size={20} style={{ color: "#38bdf8" }} />
+							<span style={{ fontWeight: 700, fontSize: 14, color: "var(--cline-text)" }}>
+								온톨로지 그래프 동기화
+							</span>
+						</div>
+						<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 16 }}>
+							<div style={{ padding: "12px", borderRadius: 8, border: "1px solid var(--cline-border)", background: "var(--cline-bg)", textAlign: "center" }}>
+								<div style={{ fontSize: 24, fontWeight: 700, color: "#38bdf8" }}>{h3Cells.length}</div>
+								<div style={{ fontSize: 11, color: "var(--cline-text-muted)" }}>H3 셀 수</div>
+							</div>
+							<div style={{ padding: "12px", borderRadius: 8, border: "1px solid var(--cline-border)", background: "var(--cline-bg)", textAlign: "center" }}>
+								<div style={{ fontSize: 24, fontWeight: 700, color: "#fbbf24" }}>{lastSyncResult?.creditsEarned ?? 0}</div>
+								<div style={{ fontSize: 11, color: "var(--cline-text-muted)" }}>획득 크레딧</div>
+							</div>
+							<div style={{ padding: "12px", borderRadius: 8, border: "1px solid var(--cline-border)", background: "var(--cline-bg)", textAlign: "center" }}>
+								<div style={{ fontSize: 24, fontWeight: 700, color: "#34d399" }}>{lastSyncResult?.newCells ?? 0}</div>
+								<div style={{ fontSize: 11, color: "var(--cline-text-muted)" }}>새 셀</div>
+							</div>
+							<div style={{ padding: "12px", borderRadius: 8, border: "1px solid var(--cline-border)", background: "var(--cline-bg)", textAlign: "center" }}>
+								<div style={{ fontSize: 24, fontWeight: 700, color: "#f59e0b" }}>{lastSyncResult?.updatedCells ?? 0}</div>
+								<div style={{ fontSize: 11, color: "var(--cline-text-muted)" }}>업데이트됨</div>
+							</div>
+						</div>
+						<div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+							<button
+								type="button"
+								onClick={captureLocation}
+								disabled={syncing}
+								style={{
+									padding: "10px 16px",
+									borderRadius: 8,
+									border: "1px solid var(--cline-border)",
+									background: "var(--cline-bg-tertiary, rgba(255,255,255,0.03))",
+									color: "var(--cline-text)",
+									fontSize: 12,
+									fontWeight: 600,
+									cursor: "pointer",
+									display: "flex",
+									alignItems: "center",
+									gap: 6,
+								}}
+							>
+								<Globe size={14} />
+								현재 위치 캡처
+							</button>
+							<button
+								type="button"
+								onClick={syncToOntology}
+								disabled={syncing || h3Cells.length === 0}
+								style={{
+									padding: "10px 16px",
+									borderRadius: 8,
+									border: "1px solid rgba(56,189,248,0.3)",
+									background: syncing || h3Cells.length === 0 ? "var(--cline-bg)" : "rgba(56,189,248,0.15)",
+									color: syncing || h3Cells.length === 0 ? "var(--cline-text-muted)" : "#38bdf8",
+									fontSize: 12,
+									fontWeight: 600,
+									cursor: syncing || h3Cells.length === 0 ? "not-allowed" : "pointer",
+									display: "flex",
+									alignItems: "center",
+									gap: 6,
+								}}
+							>
+								<RefreshCw size={14} style={{ animation: syncing ? "spin 1s linear infinite" : "none" }} />
+								{syncing ? "동기화 중..." : "온톨로지에 동기화"}
+							</button>
+							<button
+								type="button"
+								onClick={publishKnowledge}
+								style={{
+									padding: "10px 16px",
+									borderRadius: 8,
+									border: "1px solid var(--cline-border)",
+									background: "var(--cline-bg-tertiary, rgba(255,255,255,0.03))",
+									color: "var(--cline-text)",
+									fontSize: 12,
+									fontWeight: 600,
+									cursor: "pointer",
+									display: "flex",
+									alignItems: "center",
+									gap: 6,
+								}}
+							>
+								<Bot size={14} />
+								지식 발행
+							</button>
+						</div>
+					</div>
+
+					{/* Current Location */}
+					{currentLocation && (
+						<div
+							style={{
+								padding: "12px 16px",
+								borderRadius: 8,
+								border: "1px solid rgba(56,189,248,0.3)",
+								background: "rgba(56,189,248,0.1)",
+							}}
+						>
+							<div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+								<Globe size={14} style={{ color: "#38bdf8" }} />
+								<span style={{ fontWeight: 600, fontSize: 12, color: "var(--cline-text)" }}>
+									현재 위치
+								</span>
+							</div>
+							<div style={{ fontSize: 11, color: "var(--cline-text-muted)", fontFamily: "monospace" }}>
+								{currentLocation.name}<br />
+								Lat: {currentLocation.lat.toFixed(6)}, Lng: {currentLocation.lng.toFixed(6)}<br />
+								H3 Cell (R{H3_RESOLUTION}): {latLngToCell(currentLocation.lat, currentLocation.lng, H3_RESOLUTION)}
+							</div>
+						</div>
+					)}
+
+					{/* H3 Cells List */}
+					<div
+						style={{
+							padding: "16px",
+							borderRadius: 10,
+							border: "1px solid var(--cline-border)",
+							background: "var(--cline-bg-tertiary, rgba(255,255,255,0.03))",
+						}}
+					>
+						<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+							<span style={{ fontWeight: 700, fontSize: 13, color: "var(--cline-text)" }}>
+								생성된 H3 셀 ({h3Cells.length}개)
+							</span>
+							{lastSyncResult && (
+								<span style={{ fontSize: 11, color: "var(--cline-green)", fontWeight: 600 }}>
+									최근 동기화: {new Date(lastSyncResult.creditsEarned > 0 ? Date.now() : 0).toLocaleTimeString()}
+								</span>
+							)}
+						</div>
+						{h3Cells.length === 0 ? (
+							<div style={{ padding: 16, textAlign: "center", color: "var(--cline-text-muted)", fontSize: 13 }}>
+								위치를 캡처하고 지식을 발행한 후 동기화하면 H3 셀이 생성됩니다.
+							</div>
+						) : (
+							<div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: "300px", overflowY: "auto" }}>
+								{h3Cells.map((cell) => (
+									<div
+										key={cell.h3CellId}
+										style={{
+											padding: "10px 12px",
+											borderRadius: 8,
+											border: "1px solid var(--cline-border)",
+											background: "var(--cline-bg)",
+											display: "flex",
+											alignItems: "center",
+											justifyContent: "space-between",
+										}}
+									>
+										<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+											<div
+												style={{
+													width: 10,
+													height: 10,
+													borderRadius: 2,
+													background: cell.impactTier === "critical" ? "#ef4444"
+														: cell.impactTier === "high" ? "#f59e0b"
+														: cell.impactTier === "medium" ? "#38bdf8"
+														: "#10b981",
+												}}
+											/>
+											<div style={{ fontSize: 11, fontFamily: "monospace", color: "var(--cline-text-muted)" }}>
+												{cell.h3CellId.slice(0, 16)}…
+											</div>
+										</div>
+										<div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 11, color: "var(--cline-text-muted)" }}>
+											<span>이벤트: {cell.peerCount}</span>
+											<span style={{ textTransform: "capitalize", color: cell.impactTier === "critical" ? "#ef4444" : cell.impactTier === "high" ? "#f59e0b" : "#10b981" }}>
+												{cell.impactTier}
+											</span>
+											<span>{cell.center.lat.toFixed(4)}, {cell.center.lng.toFixed(4)}</span>
+										</div>
+									</div>
+								))}
+							</div>
+						)}
+					</div>
+
+					{/* Last Sync Result */}
+					{lastSyncResult && (
+						<div
+							style={{
+								padding: "12px 16px",
+								borderRadius: 8,
+								border: "1px solid rgba(52,211,153,0.3)",
+								background: "rgba(52,211,153,0.1)",
+							}}
+						>
+							<div style={{ fontWeight: 600, fontSize: 12, color: "#34d399", marginBottom: 4 }}>
+								마지막 동기화 결과
+							</div>
+							<div style={{ fontSize: 11, color: "var(--cline-text-muted)", lineHeight: 1.8 }}>
+								새 셀: {lastSyncResult.newCells}개 · 업데이트: {lastSyncResult.updatedCells}개 · 크레딧: +{lastSyncResult.creditsEarned}
+							</div>
+						</div>
+					)}
 				</div>
 			)}
 		</div>
