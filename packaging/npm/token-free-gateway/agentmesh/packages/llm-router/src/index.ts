@@ -1,6 +1,6 @@
 import { p2pNodeRegistry } from "./p2p-node-registry.js";
 
-export type LLMProvider = "openai" | "anthropic" | "google" | "local" | "p2p";
+export type LLMProvider = "openai" | "anthropic" | "google" | "local" | "p2p" | "nexus";
 
 export interface LLMRequest {
 	system?: string;
@@ -24,6 +24,7 @@ export class LLMRouter {
 	private openai: any = null;
 	private anthropic: any = null;
 	private google: any = null;
+	private nexus: any = null;
 	private getOpenAI(): any {
 		if (this.openai) return this.openai;
 		if (!process.env.OPENAI_API_KEY) return null;
@@ -63,6 +64,21 @@ export class LLMRouter {
 		}
 	}
 
+	private getNexus(): any {
+		if (this.nexus) return this.nexus;
+		if (!process.env.NEXUS_API_KEY) return null;
+		try {
+			const OpenAI = require("openai").default;
+			const baseURL = process.env.NEXUS_BASE_URL ?? "https://api.nexus-ai.com/v1";
+			const config: Record<string, string> = { apiKey: process.env.NEXUS_API_KEY };
+			if (baseURL) config.baseURL = baseURL;
+			this.nexus = new OpenAI(config);
+			return this.nexus;
+		} catch {
+			return null;
+		}
+	}
+
 	getAvailableProviders(): LLMProvider[] {
 		const providers: LLMProvider[] = [];
 		if (process.env.OPENAI_API_KEY) providers.push("openai");
@@ -70,6 +86,7 @@ export class LLMRouter {
 		if (process.env.GOOGLE_API_KEY) providers.push("google");
 		if (process.env.LLM_LOCAL_ENDPOINT) providers.push("local");
 		if (p2pNodeRegistry.getHealthyNodes().length > 0) providers.push("p2p");
+		if (process.env.NEXUS_API_KEY) providers.push("nexus");
 		return providers.length > 0 ? providers : ["local"];
 	}
 
@@ -100,6 +117,8 @@ export class LLMRouter {
 				return this.generateGoogle(req);
 			case "local":
 				return this.generateLocal(req);
+		case "nexus":
+			return this.generateNexus(req);
 			case "p2p":
 				return this.generateP2P(req);
 			default:
@@ -276,6 +295,31 @@ export class LLMRouter {
 		}
 	}
 
+
+	private async generateNexus(req: LLMRequest): Promise<LLMResponse> {
+		const client = this.getNexus();
+		if (!client) return this.generateMock("nexus", req);
+		const messages: Array<{ role: string; content: string }> = [];
+		if (req.system) messages.push({ role: "system", content: req.system });
+		messages.push({ role: "user", content: req.prompt });
+		const defaultModel = process.env.NEXUS_DEFAULT_MODEL ?? "nexus-model-v1";
+		const response = await client.chat.completions.create({
+			model: req.model ?? defaultModel,
+			messages: messages as any,
+			temperature: req.temperature ?? 0.3,
+			max_tokens: req.maxTokens ?? 4096,
+		});
+		return {
+			text: response.choices[0]?.message?.content ?? "",
+			provider: "nexus",
+			model: response.model,
+			usage: {
+				inputTokens: response.usage?.prompt_tokens ?? 0,
+				outputTokens: response.usage?.completion_tokens ?? 0,
+			},
+			latencyMs: 0,
+		};
+	}
 	private generateMock(provider: LLMProvider, req: LLMRequest): LLMResponse {
 		const keyVar = `${provider.toUpperCase()}_API_KEY`;
 		const lines = [
