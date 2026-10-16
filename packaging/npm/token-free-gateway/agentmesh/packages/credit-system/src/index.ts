@@ -24,7 +24,8 @@ export type CreditReason =
 	| "referral"
 	| "spend"
 	| "refund"
-	| "admin_adjustment";
+	| "admin_adjustment"
+	| "compression_savings";
 
 export interface CreditLedgerEntry {
 	id: string;
@@ -164,5 +165,31 @@ export async function grantWelcomeBonus(
 		reason: "welcome_bonus",
 		idempotencyKey: `${WELCOME_BONUS_CODE}:${userId}`,
 		metadata: { ...metadata, campaign: WELCOME_BONUS_CODE },
+	});
+}
+
+export async function grantCompressionSavingsCredits(
+	prisma: PrismaClient,
+	input: {
+		userId: string;
+		savedTokens: number;
+		compressionRatio: number;
+		idempotencyKey: string;
+		metadata?: JsonMetadata;
+	},
+): Promise<{ balance: bigint; granted: boolean }> {
+	// 압축된 토큰 1개당 1 크레딧 지급 (최소 1 크레딧)
+	const amount = BigInt(Math.max(1, input.savedTokens));
+	return grantCredits(prisma, {
+		userId: input.userId,
+		amount,
+		reason: "compression_savings",
+		idempotencyKey: input.idempotencyKey,
+		metadata: {
+			...input.metadata,
+			savedTokens: input.savedTokens,
+			compressionRatio: input.compressionRatio,
+			program: "nexus-compression-rewards",
+		},
 	});
 }

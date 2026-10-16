@@ -65,14 +65,14 @@ muhanai.com + Nexus 통합 아키텍처
 | 1.6 | `.env.example` | `NEXUS_API_KEY`, `NEXUS_BASE_URL` 환경변수 문서화 |
 | 1.7 | `llm-router` | 단위 테스트 추가 (Nexus 제공자 모크) |
 
-### Phase 2: 토큰 압축 + 경제 연동 (우선순위: 높음)
+### Phase 2: 토큰 압축 + 경제 연동 (우선순위: 높음) ✅ 완료
 
-| 작업 | 대상 | 설명 |
-|------|------|------|
-| 2.1 | `llm-router` | Nexus 토큰 압축 API 연동 (요청/응답 토큰 절감량 추적) |
-| 2.2 | `credit-system` | 토큰 절감량을 명성 기반 원장에 기록 |
-| 2.3 | `llm-router` | 압축된 컨텍스트를 P2P CRDT 지식 호수에 저장 |
-| 2.4 | `.env` | `NEXUS_COMPRESSION_ENABLED`, `NEXUS_COMPRESSION_LEVEL` 설정 |
+| 작업 | 대상 | 설명 | 상태 |
+|------|------|------|------|
+| 2.1 | `llm-router` | Nexus 토큰 압축 API 연동 (요청/응답 토큰 절감량 추적) | ✅ 완료 |
+| 2.2 | `credit-system` | 토큰 절감량을 명성 기반 원장에 기록 | ✅ 완료 |
+| 2.3 | `llm-router` | 압축된 컨텍스트를 P2P CRDT 지식 호수에 저장 | ⏳ Phase 3에서 p2p-node-registry와 연동 |
+| 2.4 | `.env` | `NEXUS_COMPRESSION_ENABLED`, `NEXUS_COMPRESSION_LEVEL` 설정 | ✅ 완료 |
 
 ### Phase 3: 멀티 에이전트 오케스트레이션 (우선순위: 중간)
 
@@ -118,6 +118,10 @@ muhanai.com + Nexus 통합 아키텍처
 | 1.5 generateWithProvider switch 업데이트 | ✅ 완료 |
 | 1.6 .env.example 업데이트 | ✅ 완료 |
 | 1.7 단위 테스트 추가 | ⏳ 대기 |
+| 2.1 llm-router Nexus 압축 API 연동 | ✅ 완료 |
+| 2.2 credit-system compression_savings 크레딧 이유 추가 | ✅ 완료 |
+| 2.3 압축된 컨텍스트 P2P CRDT 저장 | ⏳ Phase 3 연동 대기 |
+| 2.4 .env 압축 환경변수 추가 | ✅ 완료 |
 
 ---
 

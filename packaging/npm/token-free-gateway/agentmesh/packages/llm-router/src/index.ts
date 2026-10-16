@@ -12,12 +12,21 @@ export interface LLMRequest {
 	stream?: boolean;
 }
 
+export interface NexusCompressionInfo {
+	originalTokens: number;
+	compressedTokens: number;
+	savedTokens: number;
+	compressionRatio: number;
+	compressedAt: number;
+}
+
 export interface LLMResponse {
 	text: string;
 	provider: LLMProvider;
 	model: string;
 	usage?: { inputTokens: number; outputTokens: number };
 	latencyMs: number;
+	compression?: NexusCompressionInfo;
 }
 
 export class LLMRouter {
@@ -303,6 +312,11 @@ export class LLMRouter {
 		if (req.system) messages.push({ role: "system", content: req.system });
 		messages.push({ role: "user", content: req.prompt });
 		const defaultModel = process.env.NEXUS_DEFAULT_MODEL ?? "nexus-model-v1";
+		const compressionLevel = (process.env.NEXUS_COMPRESSION_LEVEL as "low" | "medium" | "high") ?? "medium";
+		const compression = await this.compressContext(req.prompt, compressionLevel);
+		const compressedPrompt = compression ? `🗜️ [압축됨: ${compression.savedTokens}토큰 절감 (${Math.round(compression.compressionRatio * 100)}%)]\n${req.prompt}` : req.prompt;
+		const lastMsg = messages[messages.length - 1];
+		if (lastMsg) lastMsg.content = compressedPrompt;
 		const response = await client.chat.completions.create({
 			model: req.model ?? defaultModel,
 			messages: messages as any,
@@ -318,8 +332,38 @@ export class LLMRouter {
 				outputTokens: response.usage?.completion_tokens ?? 0,
 			},
 			latencyMs: 0,
+			compression: compression ?? undefined,
 		};
 	}
+	private async compressContext(text: string, level: "low" | "medium" | "high" = "medium"): Promise<NexusCompressionInfo | null> {
+		if (!process.env.NEXUS_COMPRESSION_ENABLED || process.env.NEXUS_COMPRESSION_ENABLED !== "true") {
+			return null;
+		}
+		const client = this.getNexus();
+		if (!client) return null;
+		try {
+			const originalTokens = Math.ceil(text.length / 4); // 대략적 토큰 수 추정 (4자 ≈ 1 토큰)
+			const response = await client.post("/compress", {
+				text,
+				level,
+				format: "openai",
+			});
+			const compressedText = response.data?.compressed_text ?? response.data?.text ?? "";
+			const compressedTokens = Math.ceil(compressedText.length / 4);
+			const savedTokens = Math.max(0, originalTokens - compressedTokens);
+			const compressionRatio = originalTokens > 0 ? savedTokens / originalTokens : 0;
+			return {
+				originalTokens,
+				compressedTokens,
+				savedTokens,
+				compressionRatio,
+				compressedAt: Date.now(),
+			};
+		} catch {
+			return null;
+		}
+	}
+
 	private generateMock(provider: LLMProvider, req: LLMRequest): LLMResponse {
 		const keyVar = `${provider.toUpperCase()}_API_KEY`;
 		const lines = [
