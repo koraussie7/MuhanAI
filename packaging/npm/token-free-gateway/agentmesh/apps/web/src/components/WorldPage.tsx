@@ -13,7 +13,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { WorldGlobe, eventPosition } from "./WorldGlobe";
 import { WorldMeshPanel } from "./WorldMeshPanel";
 import { GlobeVisualization } from "./GlobeVisualization";
-import { OntologyExplorer } from "./OntologyExplorer";
+import { OntologyGraph, type OntologyNode, type OntologyEdge } from "./OntologyGraph";
 import type { DemoCellData, H3CellAggregation } from "@agentmesh/peer-mesh";
 import { createDemoFallbackConfig, createDemoVisualizationData } from "@agentmesh/peer-mesh";
 import { latLngToCell, cellToLatLng } from "h3-js";
@@ -211,6 +211,33 @@ export const WorldPage: React.FC = () => {
 	provenance,
 	};
 	}, [brief, cells]);
+
+	// Convert brief data to OntologyGraph nodes/edges
+	const ontologyNodes: OntologyNode[] = useMemo(() => {
+		if (!brief) return []
+		const nodes: OntologyNode[] = []
+		brief.domains.forEach((domain) => {
+			nodes.push({ id: `domain-${domain}`, label: domain, type: "domain", color: "#38bdf8" })
+		})
+		brief.events.forEach((event) => {
+			nodes.push({ id: `event-${event.id}`, label: event.title, type: "event", color: severityColor(event.severity) })
+			nodes.push({ id: `domain-${event.domain}`, label: event.domain, type: "domain", color: "#38bdf8" })
+		})
+		return nodes
+	}, [brief])
+
+	const ontologyEdges: OntologyEdge[] = useMemo(() => {
+		if (!brief) return []
+		const edges: OntologyEdge[] = []
+		brief.events.forEach((event, idx) => {
+			edges.push({ id: `rel-${idx}-1`, source: `domain-${event.domain}`, target: `event-${event.id}`, label: "contains" })
+		})
+		for (let i = 0; i < brief.domains.length - 1; i++) {
+			edges.push({ id: `rel-domain-${i}`, source: `domain-${brief.domains[i]}`, target: `domain-${brief.domains[i + 1]}`, label: "related-to" })
+		}
+		return edges
+	}, [brief])
+
 	const handleCellClick = useCallback((cell: H3CellAggregation) => {
 		setSelectedCell(cell);
 	}, []);
@@ -271,8 +298,14 @@ export const WorldPage: React.FC = () => {
 				))}
 			</div>
 
-			{view === "ontology" ? (
-				<OntologyExplorer data={ontologyData} forceDemo={!brief || brief.source !== "pythia"} />
+{view === "ontology" ? (
+					<OntologyGraph
+						nodes={ontologyNodes}
+						edges={ontologyEdges}
+						onNodeClick={(node) => {
+							console.log("Ontology node clicked:", node);
+					}}
+/>
 			) : view === "mesh" ? (
 				<div style={{ height: "calc(100vh - 200px)", minHeight: 500 }}>
 					<GlobeVisualization
