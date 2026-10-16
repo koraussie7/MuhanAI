@@ -6,6 +6,60 @@ import type { AgentRunResult } from "@agentmesh/shared-types";
 export * from "./transports/index.js";
 
 /**
+ * Nexus 에이전트 발견 및 등록
+ * Nexus의 에이전트 바클링(Buckling) 목록을 MuhanAI P2P 메쉬에 등록합니다.
+ */
+export interface NexusAgentInfo {
+	id: string;
+	type: "claude-code" | "cursor" | "codex" | "opencode" | "nexus-native";
+	endpoint: string;
+	capabilities: string[];
+	healthScore: number;
+	lastSeen: number;
+}
+
+/**
+ * Nexus 에이전트 레지스트리
+ * Nexus 에이전트들을 MuhanAI 메쉬에 등록하고 발견합니다.
+ */
+export class NexusAgentRegistry {
+	private agents: Map<string, NexusAgentInfo> = new Map();
+
+	register(info: NexusAgentInfo): void {
+		this.agents.set(info.id, { ...info, lastSeen: Date.now() });
+	}
+
+	unregister(id: string): boolean {
+		return this.agents.delete(id);
+	}
+
+	get(id: string): NexusAgentInfo | undefined {
+		return this.agents.get(id);
+	}
+
+	listHealthy(minHealth: number = 0.5): NexusAgentInfo[] {
+		const now = Date.now();
+		return Array.from(this.agents.values()).filter(
+			(a) => a.healthScore >= minHealth && now - a.lastSeen < 300_000, // 5분 내 활동
+		);
+	}
+
+	listAll(): NexusAgentInfo[] {
+		return Array.from(this.agents.values());
+	}
+
+	updateHealth(id: string, score: number): void {
+		const agent = this.agents.get(id);
+		if (agent) {
+			agent.healthScore = score;
+			agent.lastSeen = Date.now();
+		}
+	}
+}
+
+export const nexusAgentRegistry = new NexusAgentRegistry();
+
+/**
  * Simple domain agent that uses the LLM router.
  */
 export class DomainAgent implements Agent {

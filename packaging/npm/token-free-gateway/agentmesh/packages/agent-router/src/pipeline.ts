@@ -1,7 +1,8 @@
 import { agentCast } from "../../agent-cast/src";
 import { agentRegistry } from "../../agent-core/src/registry";
 import { listAgentRuns } from "../../agent-core/src/run-store";
-import { agentMesh, DomainAgent } from "../../agent-mesh/src";
+import { agentMesh, DomainAgent, nexusAgentRegistry } from "../../agent-mesh/src";
+import { nexusOrchestrator } from "../../agent-cast/src";
 import { categoryRouter } from "../../category-engine/src/router";
 import { hybridSearch } from "../../knowledge-base/src/hybrid-search";
 import { personalMcpRegistry } from "../../personal-mcp/src/server";
@@ -12,6 +13,30 @@ export interface RouteResult {
 	cast: CastResult;
 	knowledgeUsed: number;
 	runIds?: string[];
+	nexusOrchestration?: {
+		orchestrationId: string;
+		bucklingUsed: boolean;
+		hedgeStreaming: boolean;
+		ttftMs: number;
+		tokenSavings: number;
+	};
+}
+
+/**
+ * Nexus Agent Buckling 라우팅 전략
+ * 질문의 복잡도에 따라 Nexus 멀티 에이전트 바클링을 적용합니다.
+ */
+function shouldUseNexusBuckling(
+	question: string,
+	category: CategoryContext & { confidence?: number },
+): boolean {
+	// 복잡한 질문 (긴 질문, 다중 도메인, 높은 리스크)는 Nexus 바클링 사용
+	const isComplex =
+		question.length > 200 ||
+		category.riskLevel === "high" ||
+		category.confidence != null && category.confidence < 0.5;
+	const hasNexusAgents = nexusAgentRegistry.listHealthy().length > 0;
+	return isComplex && hasNexusAgents;
 }
 
 /**
@@ -67,10 +92,33 @@ export async function routeQuestion(question: string, userId: string): Promise<R
 	// Optional: surface recent run ids for this user
 	const recent = await listAgentRuns({ userId, limit: agentResults.length });
 
+	// Nexus Agent Buckling 오케스트레이션 (복잡한 질문일 때)
+	let nexusOrchestration;
+	if (shouldUseNexusBuckling(question, classification)) {
+		const nexusAgentIds = nexusAgentRegistry
+			.listHealthy()
+			.map((a) => a.id);
+		if (nexusAgentIds.length > 0) {
+			const orchResult = await nexusOrchestrator.orchestrate(
+				question,
+				nexusAgentIds,
+				{ strategy: "buckling", ttftThresholdMs: 800 },
+			);
+			nexusOrchestration = {
+				orchestrationId: orchResult.orchestrationId,
+				bucklingUsed: orchResult.bucklingUsed,
+				hedgeStreaming: orchResult.hedgeStreaming,
+				ttftMs: orchResult.ttftMs,
+				tokenSavings: orchResult.tokenSavings,
+			};
+		}
+	}
+
 	return {
 		category: classification,
 		cast,
 		knowledgeUsed: knowledge.length,
 		runIds: recent.map((r) => r.id),
+		nexusOrchestration,
 	};
 }

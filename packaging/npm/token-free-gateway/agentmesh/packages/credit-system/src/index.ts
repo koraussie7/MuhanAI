@@ -168,6 +168,22 @@ export async function grantWelcomeBonus(
 	});
 }
 
+export {
+	encryptSecret,
+	decryptSecret,
+	SecretVault,
+	secretVault,
+	generateDID,
+	createDIDDocument,
+	verifyDIDSignature,
+	authenticateDID,
+	storeApiKey,
+	loadApiKey,
+	type EncryptedVaultEntry,
+	type DIDDocument,
+	type DIDAuthResult,
+} from "./security.js";
+
 export async function grantCompressionSavingsCredits(
 	prisma: PrismaClient,
 	input: {

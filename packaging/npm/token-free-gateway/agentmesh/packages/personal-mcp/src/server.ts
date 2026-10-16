@@ -4,6 +4,94 @@ import { personalMemoryService } from "./memory";
 import { getKnowledgeStore } from "./store-factory";
 import { executePersonalTool, PERSONAL_MCP_TOOLS } from "./tools";
 
+/**
+ * Nexus 풀 네이티브 MCP 서버 연동
+ * Nexus의 MCP 서버를 MuhanAI Personal MCP에 연동하여
+ * 외부 툴/리소스에 안전하게 접근합니다.
+ */
+export interface NexusMCPServerConfig {
+	serverId: string;
+	endpoint: string;
+	apiKey?: string;
+	capabilities: string[];
+	healthScore: number;
+}
+
+export interface NexusMCPConnection {
+	config: NexusMCPServerConfig;
+	connected: boolean;
+	lastConnected: number;
+	callTool: (name: string, args: Record<string, unknown>) => Promise<unknown>;
+	listTools: () => Promise<Array<{ name: string; description: string }>>;
+}
+
+/**
+ * Nexus MCP 서버 연결 관리자
+ */
+export class NexusMCPConnectionManager {
+	private connections: Map<string, NexusMCPConnection> = new Map();
+
+	async connect(config: NexusMCPServerConfig): Promise<NexusMCPConnection> {
+		const existing = this.connections.get(config.serverId);
+		if (existing && existing.connected) {
+			return existing;
+		}
+
+		// Nexus MCP 서버에 연결 시도 (실제 구현에서는 HTTP/WebSocket 사용)
+		const connection: NexusMCPConnection = {
+			config,
+			connected: true,
+			lastConnected: Date.now(),
+			callTool: async (name, args) => {
+				// Nexus MCP 서버로 툴 호출 위임
+				const response = await fetch(`${config.endpoint}/mcp/call`, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						...(config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : {}),
+					},
+					body: JSON.stringify({ name, arguments: args }),
+				});
+				if (!response.ok) {
+					throw new Error(`Nexus MCP tool call failed: ${response.status}`);
+				}
+				return response.json();
+			},
+			listTools: async () => {
+				const response = await fetch(`${config.endpoint}/mcp/tools`, {
+					headers: config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : {},
+				});
+				if (!response.ok) {
+					return [];
+				}
+				const data = await response.json();
+				return Array.isArray(data) ? data : [];
+			},
+		};
+
+		this.connections.set(config.serverId, connection);
+		return connection;
+	}
+
+	disconnect(serverId: string): boolean {
+		const conn = this.connections.get(serverId);
+		if (conn) {
+			conn.connected = false;
+		}
+		return this.connections.delete(serverId);
+	}
+
+	get(serverId: string): NexusMCPConnection | undefined {
+		return this.connections.get(serverId);
+	}
+
+	list(): NexusMCPConnection[] {
+		return Array.from(this.connections.values());
+	}
+}
+
+export const nexusMCPConnectionManager = new NexusMCPConnectionManager();
+
 // ---------------------------------------------------------------------------
 // MCP-style resource & prompt types (logical, in-process)
 // ---------------------------------------------------------------------------
