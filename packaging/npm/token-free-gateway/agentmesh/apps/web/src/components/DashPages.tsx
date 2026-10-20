@@ -381,82 +381,10 @@ export function P2pNetworkPage() {
 export { LlmMeshPage } from "./harvest/C/LlmMeshPage.js";
 
 // ---- Token Bank (Harvested from p2ptokens + PinkyBrain: Ledger + Trust Ring) ----
-export function TokenBankPage() {
-	const [table, setTable] = useState<LedgerRow[]>([]);
-	const [balance, setBalance] = useState<{
-		balance: number;
-		entries: LedgerEntry[];
-	} | null>(null);
-
-	useEffect(() => {
-		fetch(`${API}/api/rewards/table`)
-			.then((r) => r.json())
-			.then(setTable)
-			.catch(() => {
-				setTable([
-					{ reason: "Local Model Hosting", credits: 120 },
-					{ reason: "Peer Routing / P2P Relay", credits: 45 },
-					{ reason: "Knowledge Lake Verification", credits: 250 },
-					{ reason: "Agent Cast Consensus Node", credits: 90 },
-				]);
-			});
-		fetch(`${API}/api/rewards/anonymous`)
-			.then((r) => r.json())
-			.then(setBalance)
-			.catch(() => {
-				setBalance({
-					balance: 12480,
-					entries: [
-						{ reason: "WebRTC DataChannel Relay", credits: 80, at: "10분 전" },
-						{ reason: "Society CRDT Proof Sign", credits: 140, at: "25분 전" },
-					],
-				});
-			});
-	}, []);
-
-	const balanceValue = balance?.balance ?? 12480;
-	const trustScore = 0.94;
-
-	return (
-		<Page
-			iconKey="coins"
-			title="Token Bank & Accounting"
-			subtitle="p2ptokens 기여 회계 원장 · PinkyBrain Web of Trust 평판 링"
-		>
-			<LiveBlockStream />
-			<StatGrid
-				stats={[
-					["Balance", balanceValue],
-					["Entries", balance?.entries.length ?? 2],
-				]}
-			/>
-			<div
-				className="hc-tokenbank-top"
-				style={{
-					display: "flex",
-					gap: 20,
-					alignItems: "center",
-					margin: "16px 0",
-				}}
-			>
-				<TrustRing score={trustScore} trust={trustScore} />
-				<div className="hc-tokenbank-side" style={{ flex: 1 }}>
-					<WebOfTrustBadge peers={312} verified={240} />
-					<div className="reward-grid" style={{ marginTop: 12 }}>
-						{table.slice(0, 4).map((row) => (
-							<RewardChip key={row.reason} reason={row.reason} credits={row.credits} />
-						))}
-					</div>
-				</div>
-			</div>
-			<div className="hc-panel">
-				<h3 className="hc-panel-title">Ledger Accounting</h3>
-				<p className="hc-panel-meta">활동별 보상 정책과 크레딧 적립 내역</p>
-				<LedgerTable table={table} entries={balance?.entries ?? []} />
-			</div>
-		</Page>
-	);
-}
+// TokenBankPage was relocated to ./TokenBankPage (501 lines, Minima chain
+// integration Phase 1-3) so the legacy inline stub above is removed to
+// avoid duplicate identifier TS2300.
+export { TokenBankPage } from "./TokenBankPage.js";
 
 // ---- Compute Mesh (Harvested from AgentFM + mycellm + DAC) ----
 const COMPUTE_WORKERS: ComputeWorker[] = [
