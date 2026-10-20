@@ -268,18 +268,9 @@ export function ProjectsPage() {
 	);
 }
 
-export function TasksPage() {
-	return (
-		<PageShell
-			iconKey="list-todo"
-			title="Task Dispatch Board"
-			subtitle="AgentFM 에이전트 간 작업 실시간 디스패치 및 큐"
-			badge="Dispatch Engine"
-		>
-			<TaskDispatchBoard />
-		</PageShell>
-	);
-}
+// TasksPage was relocated to ./TasksPage (416 lines, Minima chain
+// integration Phase 2 -- task lifecycle with escrow auto-release).
+export { TasksPage } from "./TasksPage.js";
 
 export function WorkflowsPage() {
 	return (
