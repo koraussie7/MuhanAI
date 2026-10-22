@@ -1,0 +1,1103 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<script>
+  // FOUC prevention: detect browser language synchronously, BEFORE the
+  // defer-loaded i18n.js runs. This eliminates a flash of Korean text on
+  // English browsers (and vice versa). Safe — never throws.
+  (function () {
+    try {
+      var saved = null;
+      try { saved = localStorage.getItem("golive_lang"); } catch (_) {}
+      var urlLang = null;
+      try { urlLang = new URL(location.href).searchParams.get("lang"); } catch (_) {}
+      var nav = (navigator.languages && navigator.languages[0]) || navigator.language || "";
+      var short = (nav || "").toLowerCase().split("-")[0];
+      var pick = urlLang || saved || short || "ko";
+      var supported = ["ko","en","vi","ja","zh","hi","es"];
+      if (supported.indexOf(pick) === -1) pick = "ko";
+      document.documentElement.setAttribute("lang", pick);
+      document.documentElement.setAttribute("data-lang", pick);
+    } catch (_) { /* never block paint */ }
+  })();
+</script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>golive.wiki — 실시간 태스크 대시보드 (Airtasker Interactive Map)</title>
+<link rel="stylesheet" href="./styles/tokens.css"/>
+<script src="./styles/i18n.js" defer type="module"></script>
+<!-- Integration (Phase 2): mode switcher + drawer + unified dashboard controller -->
+<script type="module" src="./js/dashboard-app.js"></script>
+<script type="module" src="./js/request-drawer.js"></script>
+<script type="module" src="./js/services-app.js"></script>
+<!-- Leaflet Map CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --at-primary: #14EBC0;
+    --at-blue: #0A65FC;
+    --at-dark: #09090B;
+    --at-surface: #141418;
+    --at-border: #27272A;
+    --at-text: #FAFAFA;
+    --at-muted: #A1A1AA;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--at-dark);
+    color: var(--at-text);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .app-layout {
+    display: grid;
+    grid-template-rows: 64px 1fr;
+    height: 100vh;
+  }
+  /* Topbar */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    padding-top: env(safe-area-inset-top, 0);
+    padding-left: max(24px, env(safe-area-inset-left, 0));
+    padding-right: max(24px, env(safe-area-inset-right, 0));
+    background: rgba(9,9,11,0.95);
+    border-bottom: 1px solid var(--at-border);
+    gap: 16px;
+    z-index: 1000;
+  }
+  .logo {
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.03em;
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .logo span { color: var(--at-primary); }
+  .search-bar {
+    flex: 1;
+    max-width: 500px;
+    display: flex;
+    align-items: center;
+    background: #141418;
+    border: 1px solid var(--at-border);
+    border-radius: 999px;
+    padding: 8px 16px;
+    gap: 10px;
+  }
+  .search-bar input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #fff;
+    outline: none;
+    font-size: 14px;
+  }
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .btn-post {
+    background: var(--at-primary);
+    color: #09090B;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+
+  /* === Phase 2: Mode Switcher (topbar segmented control) === */
+  .mode-switcher {
+    display: inline-flex;
+    background: #141418;
+    border: 1px solid var(--at-border);
+    border-radius: 999px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .mode-btn {
+    background: transparent;
+    border: none;
+    color: var(--at-muted);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .mode-btn:hover { color: var(--at-text); }
+  .mode-btn.active {
+    background: var(--at-primary);
+    color: #09090B;
+  }
+  /* === Phase 2: Request Drawer (right-side slide-in panel) === */
+  .drawer {
+    position: fixed;
+    top: 64px; /* below topbar */
+    right: 0;
+    bottom: 0;
+    width: 480px;
+    max-width: 100vw;
+    background: #0e0e11;
+    border-left: 1px solid var(--at-border);
+    box-shadow: -8px 0 32px rgba(0,0,0,0.5);
+    z-index: 1000;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+  }
+  .drawer[hidden] { display: none; }
+  .drawer.open { transform: translateX(0); }
+  @media (max-width: 768px) {
+    .drawer { width: 100vw; }
+  }
+  .drawer-head {
+    position: sticky;
+    top: 0;
+    background: #0e0e11;
+    border-bottom: 1px solid var(--at-border);
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 2;
+  }
+  .drawer-close {
+    align-self: flex-end;
+    background: transparent;
+    border: 1px solid var(--at-border);
+    color: var(--at-text);
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .drawer-close:hover { border-color: var(--at-primary); color: var(--at-primary); }
+  .drawer-head .step-bar {
+    display: flex;
+    gap: 6px;
+  }
+  .drawer-head .step-pill {
+    flex: 1;
+    padding: 8px 10px;
+    background: #141418;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--at-muted);
+    text-align: center;
+  }
+  .drawer-head .step-pill.done { color: #14ebc0; }
+  .drawer-head .step-pill.active {
+    background: rgba(20, 235, 192, 0.12);
+    color: #14ebc0;
+  }
+  .drawer-body { padding: 20px; }
+  .drawer-step { display: block; }
+  .drawer-step[hidden] { display: none; }
+  .drawer-h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .drawer-sub { color: var(--at-muted); font-size: 13px; margin-bottom: 16px; }
+  .form-card {
+    background: #141418;
+    border: 1px solid var(--at-border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .form-card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--at-primary);
+  }
+  .form-row { margin-bottom: 12px; }
+  .form-row label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--at-muted);
+    margin-bottom: 4px;
+  }
+  .form-row input, .form-row textarea, .form-row select {
+    width: 100%;
+    background: #0a0a0c;
+    border: 1px solid var(--at-border);
+    color: var(--at-text);
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+  }
+  .form-row textarea { min-height: 64px; resize: vertical; }
+  .offer-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 13px;
+  }
+  .offer-row .label-sm { color: var(--at-muted); }
+  .offer-row .price { font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .offer-row .price.suggested { color: var(--at-primary); }
+  #offer-slider {
+    width: 100%;
+    accent-color: var(--at-primary);
+    margin-top: 8px;
+  }
+  .slider-value {
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--at-primary);
+    margin-top: 4px;
+  }
+  .btn-primary {
+    background: var(--at-primary);
+    color: #09090B;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 999px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 8px;
+  }
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--at-border);
+    color: var(--at-text);
+    padding: 10px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  /* === Phase 2: Category grid (inside drawer step 1) === */
+  #cat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .cat-card {
+    background: #141418;
+    border: 1px solid var(--at-border);
+    border-radius: 10px;
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+  }
+  .cat-card:hover {
+    border-color: var(--at-primary);
+    transform: translateY(-2px);
+  }
+  .badge-top {
+    position: absolute;
+    top: -8px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--at-primary);
+    color: #09090B;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+  .cat-card .emoji { font-size: 28px; margin-bottom: 4px; }
+  .cat-card .name { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+  .cat-card .desc { font-size: 11px; color: var(--at-muted); margin-bottom: 4px; }
+  .cat-card .avg { font-size: 11px; color: var(--at-primary); font-weight: 600; }
+  /* === Phase 2: Offers list (inside drawer step 3) === */
+  .negotiation-header { margin-bottom: 16px; }
+  #offer-count-badge {
+    display: inline-block;
+    background: rgba(20, 235, 192, 0.15);
+    color: var(--at-primary);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+  }
+  .offer-card {
+    background: #141418;
+    border: 1px solid var(--at-border);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .offer-head {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .worker-av {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--at-primary);
+    color: #09090B;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+  .worker-info { flex: 1; }
+  .worker-name { font-weight: 700; font-size: 14px; }
+  .worker-rating { font-size: 12px; color: var(--at-primary); }
+  .worker-meta { font-size: 11px; color: var(--at-muted); }
+  .price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-top: 1px solid var(--at-border);
+    border-bottom: 1px solid var(--at-border);
+    margin-bottom: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+  }
+  .price-row .yours { color: var(--at-muted); }
+  .price-row .arrow { color: var(--at-muted); }
+  .price-row .theirs { color: var(--at-primary); font-weight: 700; }
+  .offer-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .btn-accept, .btn-decline {
+    flex: 1;
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .btn-accept { background: var(--at-primary); color: #09090B; }
+  .btn-decline { background: #27272a; color: var(--at-text); }
+  .counter-form {
+    display: flex;
+    gap: 6px;
+  }
+  .counter-form input {
+    flex: 1;
+    background: #0a0a0c;
+    border: 1px solid var(--at-border);
+    color: var(--at-text);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-family: inherit;
+  }
+
+  /* Main Split View: Left List, Center Interactive Map, Right Activity Feed */
+  .split-body {
+    display: grid;
+    grid-template-columns: 440px 1fr 320px;
+    height: calc(100vh - 64px);
+    overflow: hidden;
+  }
+
+  /* Left Panel: Tasks Browse */
+  .task-list-panel {
+    border-right: 1px solid var(--at-border);
+    display: flex;
+    flex-direction: column;
+    background: #0E0E11;
+    z-index: 10;
+  }
+  .filter-bar {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--at-border);
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .filter-pill {
+    white-space: nowrap;
+    background: var(--at-surface);
+    border: 1px solid var(--at-border);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--at-muted);
+    cursor: pointer;
+  }
+  .filter-pill.active {
+    background: var(--at-primary);
+    color: #09090B;
+    border-color: var(--at-primary);
+  }
+  .task-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Airtasker Split Card */
+  .browse-card {
+    background: var(--at-surface);
+    border: 1px solid var(--at-border);
+    border-radius: 14px;
+    padding: 16px;
+    text-decoration: none;
+    color: inherit;
+    transition: all .15s;
+    cursor: pointer;
+    display: block;
+  }
+  .browse-card:hover, .browse-card.active {
+    border-color: var(--at-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .browse-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .browse-card-title {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #fff;
+  }
+  .browse-card-price {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--at-primary);
+    white-space: nowrap;
+  }
+  .browse-card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--at-muted);
+    margin-bottom: 12px;
+  }
+  .browse-card-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    font-size: 12px;
+  }
+  .status-badge {
+    background: rgba(20,235,192,0.12);
+    color: var(--at-primary);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+
+  /* Center: Real Leaflet Interactive Map */
+  .map-panel {
+    background: #09090B;
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  #real-map {
+    width: 100%;
+    height: 100%;
+    background: #09090B;
+  }
+
+  /* inDriver-style minimal map --------------------------------------- */
+  /* OSM standard tiles are inverted + hue-rotated into a dark theme.
+     100% invert + 180deg hue-rotate is the well-known trick that turns OSM
+     light tiles into a near-black map; we then nudge brightness/contrast
+     to keep road lines readable. */
+  .leaflet-tile-pane {
+    filter: invert(1) hue-rotate(180deg) brightness(0.96) contrast(0.92) saturate(0.6);
+  }
+  .leaflet-tile-pane .leaflet-tile {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+  /* Drop the container slightly so any sub-pixel halo around tiles is absorbed. */
+  .leaflet-tile-container { opacity: 0.96; }
+
+  /* Single, subtle attribution chip bottom-left — not Leaflet's default. */
+  .map-panel::after {
+    content: "© OpenStreetMap · CARTO";
+    position: absolute;
+    bottom: 8px;
+    left: 12px;
+    z-index: 999;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.04em;
+    color: rgba(250,250,250,0.32);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .map-overlay-badge {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 999;
+    background: rgba(14,14,17,0.92);
+    border: 1px solid var(--at-border);
+    backdrop-filter: blur(10px);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--at-primary);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* inDriver-style pin: small price chip floating above a thin colored stem. */
+  .custom-div-icon.minimal-pin {
+    background: transparent !important;
+    border: 0 !important;
+    width: 76px !important;
+    height: 38px !important;
+    margin-left: -38px !important;
+    margin-top: -36px !important;
+    pointer-events: auto;
+  }
+  .custom-div-icon.minimal-pin .price-chip {
+    background: #14ebc0;
+    color: #09090B;
+    font-weight: 700;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.65);
+    white-space: nowrap;
+    text-align: center;
+    transform: translateY(0);
+    transition: transform .15s ease, background .15s ease;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+  .custom-div-icon.minimal-pin:hover .price-chip {
+    transform: scale(1.08);
+    background: #ffffff;
+  }
+  .custom-div-icon.minimal-pin .pin-stem {
+    width: 2px;
+    height: 10px;
+    margin: 0 auto;
+    background: #14ebc0;
+    box-shadow: 0 0 0 1.5px rgba(20,235,192,0.25);
+    border-radius: 1px;
+  }
+  /* keep the old class alive for any cached markup references */
+  .airtasker-price-marker {
+    background: var(--at-primary);
+    color: #09090B;
+    font-weight: 800;
+    font-size: 12px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.7);
+    white-space: nowrap;
+    cursor: pointer;
+    border: 2px solid #09090B;
+    transition: transform .15s, background .15s;
+    text-align: center;
+  }
+  .airtasker-price-marker:hover {
+    transform: scale(1.15);
+    background: #ffffff;
+  }
+
+  /* golive.wiki own design — toggleable map layers
+     ----------------------------------------------------------------
+     Four buttons stacked vertically at the top-right of the map.
+     Each one is bound to state-store.toggleLayer(name) by dashboard-app.js. */
+  .layer-toggles {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    pointer-events: auto;
+  }
+  .layer-btn {
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 10px;
+    background: rgba(14,14,17,0.92);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    font-size: 16px;
+    line-height: 36px;
+    cursor: pointer;
+    transition: background .15s ease, transform .15s ease, opacity .15s ease;
+    opacity: 0.78;
+    color: #fff;
+  }
+  .layer-btn:hover { opacity: 1; transform: translateY(-1px); }
+  .layer-btn.is-on  { opacity: 1; background: rgba(20,235,192,0.25); }
+  /* Layer-specific on-state accents */
+  .layer-btn[data-layer="demand"].is-on    { background: rgba(255, 90, 90, 0.30); }
+  .layer-btn[data-layer="risk"].is-on      { background: rgba(240, 180, 0, 0.30); }
+  .layer-btn[data-layer="signals"].is-on   { background: rgba(124, 92, 255, 0.30); }
+  .layer-btn[data-layer="valuation"].is-on { background: rgba(20,235,192, 0.30); }
+
+  /* Real-time signal pulse — pure CSS, no JS animation loop. */
+  @keyframes signal-pulse {
+    0%   { box-shadow: 0 0 0 0   rgba(124, 92, 255, 0.55); }
+    70%  { box-shadow: 0 0 0 12px rgba(124, 92, 255, 0.00); }
+    100% { box-shadow: 0 0 0 0   rgba(124, 92, 255, 0.00); }
+  }
+    /* Valuation popup (rendered by buildValuationLayer when Supabase data exists) */
+  .valuation-pop {
+    background: rgba(14,14,17,0.92);
+    border: 1px solid var(--at-border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: #fafafa;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.55);
+    font-family: 'JetBrains Mono', monospace;
+    min-width: 140px;
+  }
+  .leaflet-popup-content-wrapper.valuation-wrap {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+  .leaflet-popup-tip.valuation-tip { display: none; }
+
+  .leaflet-interactive.signal-pulse {
+    animation: signal-pulse 1.8s ease-out infinite;
+  }
+
+  /* Minimal zoom controls — round, glassy, no border noise. */
+  .leaflet-control-zoom {
+    border: 0 !important;
+    border-radius: 10px !important;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.55);
+  }
+  .leaflet-control-zoom a {
+    background: rgba(14,14,17,0.92) !important;
+    color: #14ebc0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+    width: 32px !important;
+    height: 32px !important;
+    line-height: 32px !important;
+    font-size: 16px !important;
+    backdrop-filter: blur(8px);
+    transition: background .15s;
+  }
+  .leaflet-control-zoom a:last-child { border-bottom: 0 !important; }
+  .leaflet-control-zoom a:hover {
+    background: rgba(20,235,192,0.18) !important;
+    color: #ffffff !important;
+  }
+
+  /* Custom Dark Popup */
+  .leaflet-popup-content-wrapper {
+    background: #141418 !important;
+    color: #fff !important;
+    border: 1px solid var(--at-border) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.8) !important;
+  }
+  .leaflet-popup-tip {
+    background: #141418 !important;
+  }
+  .popup-card h4 { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .popup-card p { font-size: 12px; color: var(--at-muted); margin-bottom: 8px; }
+  .popup-card .price { font-size: 16px; font-weight: 800; color: var(--at-primary); margin-bottom: 8px; }
+  .popup-card a {
+    display: block;
+    background: var(--at-primary);
+    color: #09090B;
+    text-align: center;
+    padding: 6px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  /* Right Panel: Realtime Event Stream */
+  .activity-panel {
+    border-left: 1px solid var(--at-border);
+    background: #0E0E11;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    z-index: 10;
+  }
+  .activity-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--at-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .activity-item {
+    background: var(--at-surface);
+    border: 1px solid var(--at-border);
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 13px;
+  }
+  .activity-item .time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--at-muted);
+    margin-bottom: 4px;
+  }
+  .activity-item .msg { font-weight: 600; line-height: 1.4; }
+  .activity-item .price { color: var(--at-primary); font-weight: bold; margin-top: 4px; }
+
+  /* ============== Responsive: tablet ============== */
+  @media (max-width: 1200px) {
+    .split-body { grid-template-columns: 360px 1fr; }
+    .activity-panel { display: none; }
+    .topbar { padding: 0 16px; gap: 12px; }
+    .search-bar { max-width: 320px; }
+  }
+
+  /* ============== Responsive: mobile landscape / small tablet ============== */
+  @media (max-width: 900px) {
+    .topbar .logo { font-size: 16px; }
+    .topbar-actions .btn-primary-desktop { display: none; }
+    .split-body { grid-template-columns: 1fr; }
+    .task-list-panel {
+      border-right: 0;
+      border-bottom: 1px solid var(--at-border);
+      max-height: 280px;
+    }
+    .map-panel { height: 50vh; min-height: 360px; order: -1; }
+    .layer-toggles {
+      top: 12px !important;
+      right: 12px !important;
+      flex-direction: row !important;       /* horizontal stack on mobile */
+      gap: 6px !important;
+    }
+    .layer-btn { width: 32px; height: 32px; line-height: 32px; font-size: 14px; }
+  }
+
+  /* ============== Responsive: phone portrait ============== */
+  @media (max-width: 600px) {
+    .topbar {
+      padding: 0 10px;
+      gap: 8px;
+      height: 56px;
+    }
+    .app-layout { grid-template-rows: 56px 1fr; }
+    .search-bar {
+      max-width: none;
+      padding: 6px 12px;
+    }
+    .search-bar input { font-size: 13px; }
+    .map-overlay-badge { display: none; }      /* room for layer toggles */
+    .map-panel { height: 55vh; min-height: 320px; }
+    .task-list-panel { padding: 12px; max-height: 220px; }
+    .drawer { width: 100vw; }
+    .layer-toggles { gap: 4px !important; }
+    .layer-btn { width: 30px; height: 30px; line-height: 30px; font-size: 13px; }
+  }
+
+  /* ============== Responsive: very small phones ============== */
+  @media (max-width: 380px) {
+    .topbar .logo { font-size: 14px; }
+    .topbar .search-bar { padding: 4px 10px; }
+    .layer-btn { width: 28px; height: 28px; line-height: 28px; font-size: 12px; }
+  }
+
+  /* ============== Touch: bigger tap targets, disable hover effects ============== */
+  @media (hover: none) and (pointer: coarse) {
+    .layer-btn { opacity: 1; }
+    .airtasker-price-marker:hover,
+    .custom-div-icon.minimal-pin:hover .price-chip { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-layout">
+  <!-- Topbar -->
+  <header class="topbar">
+    <div style="display:flex; align-items:center; gap:20px;">
+      <a href="./index.html" class="logo">go<span>live</span>.wiki</a>
+      <div class="search-bar">
+        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <input type="text" data-i18n-ph="search_ph" placeholder="작업명, 지역(예: 강남구, 역삼동), 키워드 검색"/>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <!-- Universal Language Switcher Component -->
+      <div class="lang-switcher-wrap">
+        <button class="lang-btn" onclick="toggleLangDropdown()">
+          <span id="current-lang-label">🇰🇷 KO</span>
+          <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+        <div class="lang-dropdown" id="lang-dropdown">
+          <div style="font-size:11px; font-weight:700; color:var(--at-muted); padding:4px 8px; text-transform:uppercase;">Direct Native (완전번역)</div>
+          <div class="lang-opt" onclick="switchLanguage('ko')"><span>🇰🇷 한국어</span><span class="badge">KO</span></div>
+          <div class="lang-opt" onclick="switchLanguage('en')"><span>🇺🇸 English</span><span class="badge">EN</span></div>
+          <div class="lang-opt" onclick="switchLanguage('vi')"><span>🇻🇳 Tiếng Việt</span><span class="badge">VI</span></div>
+          <div class="lang-opt" onclick="switchLanguage('ja')"><span>🇯🇵 日本語</span><span class="badge">JA</span></div>
+          <div class="lang-opt" onclick="switchLanguage('zh')"><span>🇨🇳 中文</span><span class="badge">ZH</span></div>
+          <div class="lang-opt" onclick="switchLanguage('hi')"><span>🇮🇳 हिन्दी</span><span class="badge">HI</span></div>
+          <div class="lang-opt" onclick="switchLanguage('es')"><span>🇪🇸 Español</span><span class="badge">ES</span></div>
+          <div class="lang-divider"></div>
+          <div style="font-size:11px; font-weight:700; color:var(--at-muted); padding:4px 8px; text-transform:uppercase;">기타 언어 (Google 번역)</div>
+          <div class="lang-opt" onclick="switchLanguage('google_more')"><span>🌐 More Languages...</span></div>
+        </div>
+      </div>
+      <a href="https://golive.wiki/07-my-gigs.html" style="color:var(--at-muted); text-decoration:none; font-size:14px; font-weight:600;" data-i18n="nav_my_tasks">내 의뢰 목록</a>
+      <div id="mode-switcher" class="mode-switcher">
+        <button class="mode-btn active" data-mode="worker">워커 모드</button>
+        <button class="mode-btn" data-mode="requester">의뢰 모드</button>
+      </div>
+      <a href="https://golive.wiki/screens-05-create-gig.html" class="btn-post" data-i18n="nav_post_task">+ 일 올리기</a>
+      <a href="./index.html" style="color:var(--at-muted); text-decoration:none; font-size:14px; margin-left:8px;" data-i18n="nav_home">홈으로</a>
+    </div>
+  </header>
+
+  <!-- Split View -->
+  <div class="split-body">
+    <!-- 1. Left List -->
+    <div class="task-list-panel">
+      <div class="filter-bar">
+        <div class="filter-pill active" data-i18n="filter_all">전체 (4)</div>
+        <div class="filter-pill" data-i18n="filter_radius">반경 3km</div>
+        <div class="filter-pill" data-i18n="filter_cleaning">청소</div>
+        <div class="filter-pill" data-i18n="filter_moving">이사/용달</div>
+        <div class="filter-pill" data-i18n="filter_assembly">조립</div>
+      </div>
+
+      <div class="task-scroll">
+        <!-- Task Item 1 -->
+        <div class="browse-card active" onclick="focusTask(37.5088, 127.0398, '논현동 원룸 입주 청소')">
+          <div class="browse-card-top">
+            <div class="browse-card-title" data-i18n="task_1_title">강남구 논현동 원룸 입주 청소 (10평형)</div>
+            <div class="browse-card-price">₩85,000</div>
+          </div>
+          <div class="browse-card-meta">
+            <div data-i18n="task_1_loc">📍 서울 강남구 논현동 · 1.4km</div>
+            <div data-i18n="task_1_time">⏰ 오늘 14:00 희망 · 2시간 예상</div>
+          </div>
+          <div class="browse-card-foot">
+            <span class="status-badge" data-i18n="status_open">OPEN FOR OFFERS</span>
+            <span style="color:var(--at-muted)" data-i18n="offers_3">제안 3건</span>
+          </div>
+        </div>
+
+        <!-- Task Item 2 -->
+        <div class="browse-card" onclick="focusTask(37.5028, 127.0125, '이케아 3단 서랍장 조립')">
+          <div class="browse-card-top">
+            <div class="browse-card-title" data-i18n="task_2_title">이케아 3단 서랍장 & 책장 방문 조립</div>
+            <div class="browse-card-price">₩50,000</div>
+          </div>
+          <div class="browse-card-meta">
+            <div data-i18n="task_2_loc">📍 서울 서초구 반포동 · 2.1km</div>
+            <div data-i18n="task_2_time">⏰ 내일 오전 조율 가능</div>
+          </div>
+          <div class="browse-card-foot">
+            <span class="status-badge" data-i18n="status_open">OPEN FOR OFFERS</span>
+            <span style="color:var(--at-muted)" data-i18n="offers_1">제안 1건</span>
+          </div>
+        </div>
+
+        <!-- Task Item 3 -->
+        <div class="browse-card" onclick="focusTask(37.5006, 127.0364, '소형 1톤 트럭 용달')">
+          <div class="browse-card-top">
+            <div class="browse-card-title" data-i18n="task_3_title">소형 1톤 트럭 용달 (매트리스 운반)</div>
+            <div class="browse-card-price">₩90,000</div>
+          </div>
+          <div class="browse-card-meta">
+            <div data-i18n="task_3_loc">📍 역삼동 &rarr; 잠실동 · 3.5km</div>
+            <div data-i18n="task_3_time">⏰ 이번 주 토요일 오전</div>
+          </div>
+          <div class="browse-card-foot">
+            <span class="status-badge" data-i18n="status_open">OPEN FOR OFFERS</span>
+            <span style="color:var(--at-muted)" data-i18n="offers_5">제안 5건</span>
+          </div>
+        </div>
+
+        <!-- Task Item 4 -->
+        <div class="browse-card" onclick="focusTask(37.5185, 127.0515, '삼성동 오피스 조명 교체')">
+          <div class="browse-card-top">
+            <div class="browse-card-title" data-i18n="task_4_title">삼성동 소형 사무실 LED 레일 조명 교체</div>
+            <div class="browse-card-price">₩65,000</div>
+          </div>
+          <div class="browse-card-meta">
+            <div data-i18n="task_4_loc">📍 서울 강남구 삼성동 · 2.8km</div>
+            <div data-i18n="task_4_time">⏰ 금요일 저녁 6시 이후</div>
+          </div>
+          <div class="browse-card-foot">
+            <span class="status-badge" data-i18n="status_open">OPEN FOR OFFERS</span>
+            <span style="color:var(--at-muted)" data-i18n="offers_2">제안 2건</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Center: Real Interactive Leaflet Map (Free OSM Tiles) -->
+    <div class="map-panel">
+      <div class="map-overlay-badge">
+        <span style="width:8px; height:8px; background:var(--at-primary); border-radius:50%; display:inline-block;"></span>
+        <span data-i18n="map_overlay_label">SEOUL GANGNAM-GU · OPENSTREETMAP LIVE TILES</span>
+      </div>
+      <!-- golive.wiki own design: four-layer toggle stack -->
+      <div class="layer-toggles" role="toolbar" aria-label="Map layers">
+        <button class="layer-btn" data-layer="demand"    type="button" data-i18n-title="layer_demand"    title="🔥 수요">🔥</button>
+        <button class="layer-btn" data-layer="risk"      type="button" data-i18n-title="layer_risk"      title="⚠️ 안전">⚠️</button>
+        <button class="layer-btn" data-layer="signals"   type="button" data-i18n-title="layer_signals"   title="📡 신호">📡</button>
+        <button class="layer-btn" data-layer="valuation" type="button" data-i18n-title="layer_valuation" title="💎 시세">💎</button>
+      </div>
+      <div id="real-map"></div>
+    </div>
+
+    <!-- 3. Right Realtime Activity Stream -->
+    <div class="activity-panel">
+      <div class="activity-title">
+        <span data-i18n="activity_feed_title">실시간 플랫폼 피드</span>
+        <span style="color:var(--at-primary)" data-i18n="live_badge">● LIVE</span>
+      </div>
+    <div id="activity-feed"></div>
+  
+  </div>
+</div>
+
+<!-- Language Switcher Inline Init (matches index.html) -->
+<script>
+  function toggleLangDropdown() {
+    const d = document.getElementById("lang-dropdown");
+    if (d) d.classList.toggle("show");
+  }
+  function switchLanguage(lang) {
+    applyLanguage(lang);
+    const d = document.getElementById("lang-dropdown");
+    if (d) d.classList.remove("show");
+  }
+  window.addEventListener("click", function(e) {
+    if (!e.target.closest(".lang-switcher-wrap")) {
+      const d = document.getElementById("lang-dropdown");
+      if (d) d.classList.remove("show");
+    }
+  });
+</script>
+
+
+<!-- Request Drawer (Phase 2) -->
+<aside id="request-drawer" class="drawer" hidden>
+  <header class="drawer-head">
+    <button class="drawer-close" aria-label="닫기">×</button>
+    <div class="step-bar">
+      <div class="step-pill active" data-step="1">1. 카테고리</div>
+      <div class="step-pill" data-step="2">2. 의뢰서 + 제안가</div>
+      <div class="step-pill" data-step="3">3. 카운터오퍼</div>
+    </div>
+  </header>
+  <div class="drawer-body">
+    <section class="drawer-step" data-step="1">
+      <h2 class="drawer-h2" data-i18n="reqflow_step1_title">어떤 서비스가 필요하신가요?</h2>
+      <p class="drawer-sub" data-i18n="reqflow_step1_sub">가장 인기 있는 카테고리 18개에서 선택하세요.</p>
+      <div id="cat-grid"></div>
+    </section>
+    <section class="drawer-step" data-step="2" hidden>
+      <h2 class="drawer-h2"><span id="form-cat-emoji"></span> <span id="form-cat-name"></span></h2>
+      <p class="drawer-sub" data-i18n="reqflow_step2_sub">작업 내용과 희망 가격을 입력하세요.</p>
+      <div class="form-card">
+        <h3 data-i18n="reqflow_form_task">작업 정보</h3>
+        <div class="form-row">
+          <label data-i18n="reqflow_label_title">작업 제목</label>
+          <input type="text" id="task-title" placeholder="예: 논현동 1톤 트럭 이사" />
+        </div>
+        <div class="form-row">
+          <label data-i18n="reqflow_label_desc">상세 설명</label>
+          <textarea id="task-desc" placeholder="작업 범위, 필요한 도구, 주의사항 등"></textarea>
+        </div>
+        <div class="form-row">
+          <label data-i18n="reqflow_label_location">작업 위치</label>
+          <input type="text" id="task-location" placeholder="예: 서울 강남구 테헤란로 152" />
+        </div>
+        <div class="form-row">
+          <label data-i18n="reqflow_label_when">희망 일시</label>
+          <select id="task-when">
+            <option data-i18n="reqflow_when_today" value="today">오늘 즉시</option>
+            <option data-i18n="reqflow_when_tomorrow" value="tomorrow">내일</option>
+            <option data-i18n="reqflow_when_this_week" value="this-week">이번 주 내</option>
+            <option data-i18n="reqflow_when_negotiable" value="negotiable">워커와 조율</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-card">
+        <h3 data-i18n="reqflow_form_offer">내 제안 가격 (inDrive식)</h3>
+        <p class="drawer-sub" data-i18n="reqflow_form_offer_sub">시스템 추천가보다 낮게 제시하면 더 많은 기사 매칭을 받습니다.</p>
+        <div class="offer-row">
+          <span class="label-sm" data-i18n="reqflow_label_my_offer">내 제안가</span>
+          <span class="price" id="my-offer-display">₩50,000</span>
+        </div>
+        <div class="offer-row">
+          <span class="label-sm" data-i18n="reqflow_label_suggested">시스템 추천가</span>
+          <span class="price suggested" id="suggested-display">₩85,000</span>
+        </div>
+        <input type="range" id="offer-slider" min="10000" max="300000" step="1000" value="50000" oninput="updateOffer(this.value)" />
+        <div class="slider-value" id="slider-value">₩50,000</div>
+      </div>
+      <button class="btn-primary" id="btn-submit-request" onclick="submitRequest()" data-i18n="reqflow_btn_request_quote">호출하기 (워커 매칭)</button>
+      <button class="btn-secondary" onclick="goStep(1)" data-i18n="reqflow_btn_back_categories">← 카테고리로 돌아가기</button>
+    </section>
+    <section class="drawer-step" data-step="3" hidden>
+      <div class="negotiation-header">
+        <h2 class="drawer-h2" data-i18n="reqflow_step3_title">워커 카운터오퍼 수신 중</h2>
+        <p class="drawer-sub" data-i18n="reqflow_step3_sub">반경 3km 내 워커들에게 실시간 매칭 요청을 보냈습니다</p>
+      </div>
+      <span class="badge" id="offer-count-badge" data-i18n="reqflow_offers_count_0">받은 제안 0건</span>
+      <div id="offers-list"></div>
+      <div id="empty-state" data-i18n="ride_searching" style="display:none; padding:40px 20px; text-align:center; color:#a1a1aa;">
+        근처 워커들이 내 의뢰를 보고 있어요. 보통 30초 안에 첫 번째 제안이 도착합니다.
+      </div>
+      <button class="btn-secondary" onclick="goStep(2)" data-i18n="reqflow_btn_edit_request">← 의뢰 수정하기</button>
+    </section>
+  </div>
+</aside>
+
+<script type="module" src="./js/search-typeahead-boot.js"></script>
+</body>
+</html>

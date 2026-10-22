@@ -1,0 +1,18 @@
+/* golive.wiki Design Tokens — Airtasker/InDrive dark theme */
+:root {
+  --at-primary: #14ebc0;
+  --at-primary-hover: #0fd2ab;
+  --at-blue: #0a65fc;
+  --at-dark: #09090b;
+  --at-card-bg: #141418;
+  --at-surface: #141418;
+  --at-border: #27272a;
+  --at-border-hover: #3f3f46;
+  --at-text-main: #fafafa;
+  --at-text-muted: #a1a1aa;
+  --at-pill-bg: #1f1f24;
+  --at-gold: #f59e0b;
+  --at-danger: #ef4444;
+  --at-success: #10b981;
+  --at-ride-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}

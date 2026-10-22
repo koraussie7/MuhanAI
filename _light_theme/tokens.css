@@ -1,0 +1,72 @@
+/* golive.wiki Design Tokens — Airtasker/InDrive theme with light/dark switching */
+:root,
+:root[data-theme="dark"] {
+  --at-primary: #14ebc0;
+  --at-primary-hover: #0fd2ab;
+  --at-blue: #0a65fc;
+  --at-dark: #09090b;
+  --at-card-bg: #141418;
+  --at-surface: #141418;
+  --at-border: #27272a;
+  --at-border-hover: #3f3f46;
+  --at-text-main: #fafafa;
+  --at-text-muted: #a1a1aa;
+  --at-pill-bg: #1f1f24;
+  --at-gold: #f59e0b;
+  --at-danger: #ef4444;
+  --at-success: #10b981;
+  --at-ride-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  /* Map tile URLs — dark default, light override via [data-theme="light"] */
+  --map-tile-url: "https://tile.openstreetmap.de/{z}/{x}/{y}.png";
+  --map-tile-fallback: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+  --map-label-filter: brightness(0.85) invert(1) contrast(2.2)
+    hue-rotate(180deg) saturate(0.4) brightness(0.95);
+  --map-tile-opacity: 1;
+}
+
+:root[data-theme="light"] {
+  --at-primary: #0fa980;
+  --at-primary-hover: #0c8c6a;
+  --at-blue: #0a65fc;
+  --at-dark: #ffffff;
+  --at-card-bg: #ffffff;
+  --at-surface: #f7f8fa;
+  --at-border: #e4e6eb;
+  --at-border-hover: #c8ccd2;
+  --at-text-main: #0f1419;
+  --at-text-muted: #5b6470;
+  --at-pill-bg: #eef0f3;
+  --at-gold: #b45309;
+  --at-danger: #b91c1c;
+  --at-success: #047857;
+  --at-ride-shadow: 0 12px 28px rgba(15, 20, 25, 0.08);
+  /* Light map: CartoDB Voyager (no API key) — clean, readable, Airtasker-like */
+  --map-tile-url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png";
+  --map-tile-fallback: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png";
+  --map-label-filter: none;
+  --map-tile-opacity: 1;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    --at-primary: #0fa980;
+    --at-primary-hover: #0c8c6a;
+    --at-blue: #0a65fc;
+    --at-dark: #ffffff;
+    --at-card-bg: #ffffff;
+    --at-surface: #f7f8fa;
+    --at-border: #e4e6eb;
+    --at-border-hover: #c8ccd2;
+    --at-text-main: #0f1419;
+    --at-text-muted: #5b6470;
+    --at-pill-bg: #eef0f3;
+    --at-gold: #b45309;
+    --at-danger: #b91c1c;
+    --at-success: #047857;
+    --at-ride-shadow: 0 12px 28px rgba(15, 20, 25, 0.08);
+    --map-tile-url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png";
+    --map-tile-fallback: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png";
+    --map-label-filter: none;
+    --map-tile-opacity: 1;
+  }
+}
