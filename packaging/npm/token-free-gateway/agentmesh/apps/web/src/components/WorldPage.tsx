@@ -46,7 +46,7 @@ interface WorldPrediction {
 }
 
 interface WorldBrief {
-	source: "pythia" | "offline";
+	source: "pythia" | "shadowbroker" | "merged" | "offline";
 	summary: string;
 	domains: string[];
 	events: WorldEvent[];
@@ -96,7 +96,10 @@ function isWorldPrediction(value: unknown): value is WorldPrediction {
 export function normalizeBrief(payload: unknown): WorldBrief {
 	const p = (payload ?? {}) as Partial<WorldBrief>;
 	return {
-		source: p.source === "pythia" ? "pythia" : "offline",
+		source:
+			p.source === "pythia" || p.source === "shadowbroker" || p.source === "merged"
+				? p.source
+				: "offline",
 		summary: typeof p.summary === "string" ? p.summary : "World brief is unavailable.",
 		domains: Array.isArray(p.domains)
 			? p.domains.filter((d): d is string => typeof d === "string")
@@ -205,13 +208,28 @@ export const WorldPage: React.FC = () => {
 		load();
 	}, [load]);
 
+
 	// Stable references: WorldGlobe re-runs its marker effect on new arrays.
 	const events = useMemo(() => brief?.events ?? [], [brief]);
 	const predictions = useMemo(
 		() => (brief?.predictions ?? []).filter((p) => p.horizon === horizon),
 		[brief, horizon],
 	);
-	const live = brief?.source === "pythia";
+	// GEV sensor stream (ShadowBroker) merges into the brief server-side; any
+	// live source keeps the globe streaming. `merged` = pythia + shadowbroker.
+	const live =
+		brief?.source === "pythia" || brief?.source === "shadowbroker" || brief?.source === "merged";
+	const gevStreaming = live && (brief?.source === "merged" || (brief?.events ?? []).some((e) => e.source === "shadowbroker"));
+	// GEV live stream polling — while a live source is streaming, re-fetch the
+	// brief every 30s so globe markers and the sidebar track new sensor events.
+	// Pauses when offline (manual refresh still works) and cleans up on unmount.
+	useEffect(() => {
+		if (!gevStreaming) return;
+		const id = window.setInterval(() => {
+			void load();
+		}, 30_000);
+		return () => window.clearInterval(id);
+	}, [gevStreaming, load]);
 	const focusEntity = useMemo(
 		() =>
 			selectedEntity
@@ -256,6 +274,23 @@ export const WorldPage: React.FC = () => {
 					>
 						{live ? "LIVE" : "OFFLINE"}
 					</span>
+					{gevStreaming && (
+						<span
+							data-testid="world-gev-stream-badge"
+							style={{
+								fontSize: 10,
+								fontWeight: 700,
+								letterSpacing: 0.5,
+								padding: "2px 8px",
+								borderRadius: 999,
+								border: "1px solid #38bdf8",
+								color: "#38bdf8",
+								background: "rgba(56,189,248,0.12)",
+							}}
+						>
+							GEV STREAM
+						</span>
+					)}
 				</div>
 				<button
 					type="button"
