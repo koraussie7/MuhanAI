@@ -50,7 +50,10 @@ describe("geo metadata pipeline", () => {
 				(e.payload as { metadata?: unknown }).metadata !== undefined,
 		);
 		expect(geoEvents.length).toBeGreaterThan(0);
-		const meta = (geoEvents[0].payload as { metadata: Record<string, number> }).metadata;
+		const firstGeo = geoEvents[0];
+		if (!firstGeo) throw new Error("geo event missing");
+		const meta = (firstGeo.payload as { metadata: Record<string, number> }).metadata;
+		if (!meta) throw new Error("geo metadata missing");
 		expect(meta.latitude).toBe(37.5665);
 		expect(meta.longitude).toBe(126.978);
 	});
