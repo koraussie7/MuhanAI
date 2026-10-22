@@ -13,11 +13,14 @@ import { Network, RefreshCw } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  fetchOntologySnapshot,
-  relationsFor,
-  type OntologyEntity,
-  type OntologySnapshot,
-  type OntologyTypeFilter,
+	explainRequestFor,
+	fetchOntologySnapshot,
+	relationsFor,
+	pythiaExplainGraph,
+	type ExplainGraphResult,
+	type OntologyEntity,
+	type OntologySnapshot,
+	type OntologyTypeFilter,
 } from "../lib/ontograph-integration";
 export interface SelectedEntity {
   id: string;
@@ -51,6 +54,9 @@ export const OntologyGraphPanel: React.FC<OntologyGraphPanelProps> = ({
   const [loading, setLoading] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<OntologyTypeFilter>("all");
+  const [explaining, setExplaining] = useState(false);
+  const [explanation, setExplanation] = useState<ExplainGraphResult | null>(null);
+  const [explainError, setExplainError] = useState<string | null>(null);
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -93,7 +99,25 @@ export const OntologyGraphPanel: React.FC<OntologyGraphPanelProps> = ({
     );
   };
   const entityLabel = (id: string): string =>
-    snapshot?.entities.find((e) => e.id === id)?.label ?? id;
+  	snapshot?.entities.find((e) => e.id === id)?.label ?? id;
+  /**
+   * Ask Pythia to explain the selected entity's neighborhood. Runs against
+   * the Token-Free Gateway — zero cost, degrades to an error message when
+   * no keyless provider is reachable.
+   */
+  const handleExplain = async () => {
+  	if (!snapshot || !selected) return;
+  	setExplaining(true);
+  	setExplainError(null);
+  	try {
+  		setExplanation(await pythiaExplainGraph(explainRequestFor(snapshot, selected)));
+  	} catch (err) {
+  		setExplanation(null);
+  		setExplainError(err instanceof Error ? err.message : "Unknown error");
+  	} finally {
+  		setExplaining(false);
+  	}
+  };
   return (
     <div
       data-testid="ontology-graph-panel"
@@ -322,6 +346,50 @@ export const OntologyGraphPanel: React.FC<OntologyGraphPanelProps> = ({
               <span style={{ color: "#38bdf8" }}>({r.label})</span>
             </div>
           ))}
+          <button
+            type="button"
+            data-testid="ontology-explain-button"
+            onClick={handleExplain}
+            disabled={explaining}
+            style={{
+              marginTop: 8,
+              fontSize: 11,
+              padding: "4px 10px",
+              borderRadius: 6,
+              border: "1px solid rgba(56,189,248,0.4)",
+              background: "rgba(56,189,248,0.1)",
+              color: "#38bdf8",
+              cursor: explaining ? "default" : "pointer",
+              opacity: explaining ? 0.6 : 1,
+              width: "100%",
+            }}
+          >
+            {explaining ? "Pythia 분석중…" : "Pythia 그래프 설명"}
+          </button>
+          {explanation && (
+            <div
+              data-testid="ontology-explanation"
+              style={{
+                marginTop: 6,
+                fontSize: 10,
+                lineHeight: 1.5,
+                color: "var(--cline-text)",
+                whiteSpace: "pre-wrap",
+                borderTop: "1px solid var(--cline-border, rgba(255,255,255,0.08))",
+                paddingTop: 6,
+              }}
+            >
+              {explanation.explanation}
+              <div style={{ fontSize: 9, color: "var(--cline-text-muted)", marginTop: 4 }}>
+                {explanation.provider} · {explanation.cost}
+              </div>
+            </div>
+          )}
+          {explainError && (
+            <div style={{ fontSize: 10, color: "var(--cline-rose, #f43f5e)", marginTop: 4 }}>
+              {explainError}
+            </div>
+          )}
         </div>
       )}
     </div>

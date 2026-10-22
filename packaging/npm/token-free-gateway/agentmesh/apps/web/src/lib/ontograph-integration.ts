@@ -117,3 +117,57 @@ export function relationsFor(
 	}
 	return { inbound, outbound };
 }
+// ---------------------------------------------------------------------------
+// Pythia graph explanation (Token-Free Gateway)
+// ---------------------------------------------------------------------------
+export interface ExplainGraphRequest {
+	query: string;
+	results: { id: string; label: string; type?: string; relations?: string }[];
+}
+export interface ExplainGraphResult {
+	query: string;
+	explanation: string;
+	provider: string;
+	latencyMs: number;
+	cost: string;
+}
+/**
+ * POST /api/pythia/explain-graph — ask the keyless LLM mesh to explain the
+ * selected entity's neighborhood in plain language. Never throws for network
+ * issues alone: the panel surfaces the error message instead.
+ */
+export async function pythiaExplainGraph(req: ExplainGraphRequest): Promise<ExplainGraphResult> {
+	const res = await fetch("/api/pythia/explain-graph", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		credentials: "include",
+		body: JSON.stringify(req),
+	});
+	if (!res.ok) throw new Error(`Explain graph failed: HTTP ${res.status}`);
+	return (await res.json()) as ExplainGraphResult;
+}
+/**
+ * Convenience: builds the explain request for one entity and its relations,
+ * mirroring what the OntologyGraphPanel shows for a selection.
+ */
+export function explainRequestFor(
+	snapshot: OntologySnapshot,
+	entity: OntologyEntity,
+): ExplainGraphRequest {
+	const { inbound, outbound } = relationsFor(snapshot, entity.id);
+	const relStrings = [
+		...outbound.map((r) => `→ ${r.label} ${r.target}`),
+		...inbound.map((r) => `← ${r.label} ${r.source}`),
+	];
+	return {
+		query: `Explain the entity "${entity.label}" (${entity.type}) in the ontology graph.`,
+		results: [
+			{
+				id: entity.id,
+				label: entity.label,
+				type: entity.type,
+				...(relStrings.length > 0 ? { relations: relStrings.join("; ") } : {}),
+			},
+		],
+	};
+}
