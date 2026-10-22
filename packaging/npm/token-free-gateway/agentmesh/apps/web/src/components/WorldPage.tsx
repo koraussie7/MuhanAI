@@ -2,7 +2,7 @@ import { Activity, RefreshCw, Sparkles } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { t, useI18n } from "../i18n";
-import { factCheckWorldEvent } from "../lib/pythia-integration";
+import { factCheckWorldEvent, pythiaSummarizeBrief } from "../lib/pythia-integration";
 import { OntologyGraphPanel } from "./OntologyGraphPanel";
 import { WorldGlobe } from "./WorldGlobe";
 
@@ -147,6 +147,9 @@ export const WorldPage: React.FC = () => {
 		result: { summary?: string; verdict?: string; confidence?: number } | null;
 	} | null>(null);
 	const [factCheckError, setFactCheckError] = useState<string | null>(null);
+	const [summarizing, setSummarizing] = useState(false);
+	const [briefSummary, setBriefSummary] = useState<string | null>(null);
+	const [summaryError, setSummaryError] = useState<string | null>(null);
 
 	const handleFactCheck = useCallback(async (event: WorldEvent) => {
 		setFactChecking(event.id);
@@ -161,6 +164,27 @@ export const WorldPage: React.FC = () => {
 			setFactChecking(null);
 		}
 	}, []);
+	/**
+	 * Ask Pythia (via the keyless mesh) for a plain-language Korean summary of
+	 * the current world brief. Result is shown under the raw summary.
+	 */
+	const handleSummarizeBrief = useCallback(async () => {
+		if (!brief) return;
+		setSummarizing(true);
+		setSummaryError(null);
+		try {
+			const result = await pythiaSummarizeBrief(
+				brief.summary,
+				brief.events.map((e) => ({ title: e.title, domain: e.domain, severity: e.severity })),
+			);
+			setBriefSummary(result.explanation);
+		} catch (err) {
+			setBriefSummary(null);
+			setSummaryError(err instanceof Error ? err.message : "Unknown error");
+		} finally {
+			setSummarizing(false);
+		}
+	}, [brief]);
 	const load = useCallback(async () => {
 		setLoading(true);
 		setError(null);
@@ -297,6 +321,46 @@ export const WorldPage: React.FC = () => {
 					<p style={{ fontSize: 13, color: "var(--cline-text-muted)", lineHeight: 1.6, margin: 0 }}>
 						{brief.summary}
 					</p>
+					<button
+						type="button"
+						data-testid="world-brief-summarize"
+						onClick={handleSummarizeBrief}
+						disabled={summarizing}
+						style={{
+							marginTop: 10,
+							fontSize: 11,
+							padding: "4px 12px",
+							borderRadius: 6,
+							border: "1px solid rgba(56,189,248,0.4)",
+							background: "rgba(56,189,248,0.1)",
+							color: "#38bdf8",
+							cursor: summarizing ? "default" : "pointer",
+							opacity: summarizing ? 0.6 : 1,
+						}}
+					>
+						{summarizing ? t.world.summarizing : t.world.summarizeBrief}
+					</button>
+					{briefSummary && (
+						<div
+							data-testid="world-brief-summary"
+							style={{
+								marginTop: 10,
+								fontSize: 12,
+								lineHeight: 1.6,
+								color: "var(--cline-text)",
+								whiteSpace: "pre-wrap",
+								borderTop: "1px solid var(--cline-border, rgba(255,255,255,0.08))",
+								paddingTop: 10,
+							}}
+						>
+							{briefSummary}
+						</div>
+					)}
+					{summaryError && (
+						<div style={{ fontSize: 10, color: "var(--cline-rose, #f43f5e)", marginTop: 6 }}>
+							{t.world.briefError}: {summaryError}
+						</div>
+					)}
 					<div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
 						{brief.domains.map((d) => (
 							<span
