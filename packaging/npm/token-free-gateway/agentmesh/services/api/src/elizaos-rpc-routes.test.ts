@@ -3,6 +3,7 @@
  * that the elizaOS adapter client (`packages/elizaos-adapter/src/rpc.ts`)
  * depends on.
  */
+import { connect } from "node:net";
 import { pino } from "pino";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildApp } from "./server.js";
@@ -10,6 +11,40 @@ import { buildApp } from "./server.js";
 async function makeApp() {
 	return buildApp({ enableTransport: false, logger: pino({ level: "silent" }) });
 }
+
+/**
+ * `credits.record` is the only RPC in this file that persists through Prisma
+ * (`./db.js` → `grantCredits`), so it needs a reachable Postgres — start one
+ * with `docker compose -f deploy/docker-compose.db.yml up -d`. Every other
+ * test here is hermetic, so the DB-bound one is skipped (with a visible
+ * reason) instead of failing the suite on machines and CI runners that have
+ * no database.
+ */
+async function databaseReachable(candidate = process.env.DATABASE_URL, timeoutMs = 750) {
+	if (!candidate) return false;
+	try {
+		const url = new URL(candidate);
+		const port = Number(url.port || 5432);
+		return await new Promise<boolean>((resolve) => {
+			const socket = connect({ host: url.hostname, port });
+			let settled = false;
+			const finish = (ok: boolean) => {
+				if (settled) return;
+				settled = true;
+				socket.destroy();
+				resolve(ok);
+			};
+			socket.setTimeout(timeoutMs);
+			socket.once("connect", () => finish(true));
+			socket.once("timeout", () => finish(false));
+			socket.once("error", () => finish(false));
+		});
+	} catch {
+		return false;
+	}
+}
+
+const databaseReady = await databaseReachable();
 
 describe("elizaOS RPC bridge", () => {
 	beforeEach(() => {
@@ -139,7 +174,7 @@ describe("elizaOS RPC bridge", () => {
 		}
 	});
 
-	it("credits.record records a credit grant", async () => {
+	it.skipIf(!databaseReady)("credits.record records a credit grant", async () => {
 		const app = await makeApp();
 		try {
 			const res = await app.inject({
