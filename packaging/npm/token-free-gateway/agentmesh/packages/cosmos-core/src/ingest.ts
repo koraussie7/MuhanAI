@@ -27,14 +27,17 @@ import type {
 
 /** Matches `WorldEvent` in `services/api/src/world-routes.ts`. */
 export interface WorldFeedEvent {
-	id: string;
-	title: string;
-	domain: string;
-	location?: string;
-	severity: WorldSeverity;
-	source: string;
-	timestamp: string;
-}
+	 id: string;
+		title: string;
+		domain: string;
+		location?: string;
+		/** Optional coordinates for the location — powers the /world globe focus. */
+		latitude?: number;
+		longitude?: number;
+		severity: WorldSeverity;
+		source: string;
+		timestamp: string;
+	}
 
 /** Matches `WorldPrediction` in `services/api/src/world-routes.ts`. */
 export interface WorldFeedPrediction {
@@ -67,6 +70,60 @@ export interface IngestOptions {
 function parseTimestamp(value: string, now: number): number {
 	const parsed = Date.parse(value);
 	return Number.isFinite(parsed) ? parsed : now;
+}
+
+/**
+ * Geo metadata for location concepts — carried on `ontology_node` payloads so
+ * the projection persists coordinates on the concept (OntologyConcept.metadata),
+ * which the /api/ontograph sidebar reads to fly the globe to a selection.
+ */
+export interface GeoCoordinates {
+	latitude: number;
+	longitude: number;
+}
+/**
+ * City-name → coordinates. The world feed only carries a free-form location
+ * string, so a small known-cities table is the pragmatic resolver; unknown
+ * locations degrade to no coordinates (the sidebar still lists the entity,
+ * just without globe focus).
+ */
+const GEO_KNOWN_LOCATIONS: Record<string, GeoCoordinates> = {
+	seoul: { latitude: 37.5665, longitude: 126.978 },
+	tokyo: { latitude: 35.6762, longitude: 139.6503 },
+	paris: { latitude: 48.8566, longitude: 2.3522 },
+	london: { latitude: 51.5074, longitude: -0.1278 },
+	"new york": { latitude: 40.7128, longitude: -74.006 },
+	sydney: { latitude: -33.8688, longitude: 151.2093 },
+	dubai: { latitude: 25.2048, longitude: 55.2708 },
+	moscow: { latitude: 55.7558, longitude: 37.6173 },
+	beijing: { latitude: 39.9042, longitude: 116.4074 },
+	"new delhi": { latitude: 28.6139, longitude: 77.209 },
+	delhi: { latitude: 28.6139, longitude: 77.209 },
+	berlin: { latitude: 52.52, longitude: 13.405 },
+	"los angeles": { latitude: 34.0522, longitude: -118.2437 },
+	"san francisco": { latitude: 37.7749, longitude: -122.4194 },
+	singapore: { latitude: 1.3521, longitude: 103.8198 },
+	hongkong: { latitude: 22.3193, longitude: 114.1694 },
+	"hong kong": { latitude: 22.3193, longitude: 114.1694 },
+	cairo: { latitude: 30.0444, longitude: 31.2357 },
+	istanbul: { latitude: 41.0082, longitude: 28.9784 },
+	mumbai: { latitude: 19.076, longitude: 72.8777 },
+	shanghai: { latitude: 31.2304, longitude: 121.4737 },
+	jakarta: { latitude: -6.2088, longitude: 106.8456 },
+	nairobi: { latitude: -1.2921, longitude: 36.8219 },
+};
+/**
+ * Resolve a feed location string to coordinates. Case-insensitive substring
+ * match: "Seoul, KR" and "near Tokyo" both resolve. Returns null when no
+ * known city matches.
+ */
+export function geoForLocation(location: string | undefined): GeoCoordinates | null {
+	if (!location) return null;
+	const needle = location.toLowerCase();
+	for (const [city, coords] of Object.entries(GEO_KNOWN_LOCATIONS)) {
+		if (needle.includes(city)) return coords;
+	}
+	return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -154,7 +211,14 @@ export function normalizePrediction(
  */
 export function conceptObservationEvents(
 	conceptIds: string[],
-	meta: { domain: string; label: string; upstreamId?: string; timestamp: number },
+	meta: {
+		domain: string;
+		label: string;
+		upstreamId?: string;
+		timestamp: number;
+		/** Optional coordinates, attached as concept metadata (geo concepts). */
+		geo?: GeoCoordinates;
+	},
 	source: CosmosEventSource = "pythia",
 ): CosmosEventInput[] {
 	const seen = new Set<string>();
@@ -172,6 +236,7 @@ export function conceptObservationEvents(
 			status: "raw",
 		};
 		if (meta.upstreamId) payload.upstreamId = meta.upstreamId;
+		if (meta.geo) payload.metadata = { latitude: meta.geo.latitude, longitude: meta.geo.longitude };
 
 		events.push({
 			kind: "ontology_node",
@@ -244,6 +309,7 @@ export async function ingestWorldBrief(
 		}
 		const { event, conceptIds } = normalizeWorldEvent(raw, { source, now });
 		for (const id of conceptIds) touchedConcepts.add(id);
+		const geo = geoForLocation(raw.location);
 		batch.push(
 			event,
 			...conceptObservationEvents(conceptIds, {
@@ -251,6 +317,7 @@ export async function ingestWorldBrief(
 				label: raw.title,
 				upstreamId: raw.id,
 				timestamp: parseTimestamp(raw.timestamp, now),
+				...(geo ? { geo } : {}),
 			}, source),
 		);
 	}

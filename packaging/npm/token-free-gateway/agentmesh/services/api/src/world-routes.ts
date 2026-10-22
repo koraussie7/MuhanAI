@@ -33,6 +33,9 @@ export interface WorldEvent {
 	title: string;
 	domain: string;
 	location?: string;
+	/** Optional coordinates for the location — feeds the ontology geo metadata. */
+	latitude?: number;
+	longitude?: number;
 	severity: "info" | "watch" | "alert";
 	source: string;
 	timestamp: string;
@@ -145,6 +148,10 @@ async function tryLiveBrief(): Promise<WorldBrief | null> {
 				timestamp: typeof e.timestamp === "string" ? e.timestamp : new Date().toISOString(),
 			};
 			if (typeof e.location === "string") evt.location = e.location;
+			if (typeof e.latitude === "number" && typeof e.longitude === "number") {
+				evt.latitude = e.latitude;
+				evt.longitude = e.longitude;
+			}
 			return evt;
 		});
 		return {
