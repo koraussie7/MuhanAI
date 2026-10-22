@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="DadaBot" />
+    <meta name="description" content="Dadabot 설치 가이드 — P2P mesh의 로컬-퍼스트 AI 에이전트 OS. macOS/Linux/Windows에서 1분 안에 설치." />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="/icons/icon-192.svg" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
+    <title>DadaBot · 설치 가이드 — muhanai</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --fg: #e2e8f0;
+        --accent: #06b6d4;
+        --accent-2: #0891b2;
+        --card: #1e293b;
+        --border: #334155;
+        --muted: #94a3b8;
+        --code-bg: #020617;
+        --success: #10b981;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body {
+        background: var(--bg);
+        color: var(--fg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard", "Noto Sans KR", sans-serif;
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+
+      .container {
+        max-width: 880px;
+        margin: 0 auto;
+        padding: 48px 24px 96px;
+      }
+
+      /* Header */
+      .hero {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        margin-bottom: 48px;
+      }
+      .hero img {
+        width: 96px;
+        height: 96px;
+        border-radius: 22px;
+        flex-shrink: 0;
+      }
+      .hero-text h1 {
+        font-size: 36px;
+        font-weight: 700;
+        color: var(--accent);
+        margin-bottom: 8px;
+      }
+      .hero-text p {
+        color: var(--muted);
+        font-size: 16px;
+      }
+
+      /* Status badge */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        background: rgba(16, 185, 129, 0.15);
+        color: var(--success);
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        margin-bottom: 32px;
+      }
+      .badge::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--success);
+        animation: pulse 2s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+      }
+
+      /* Section */
+      section {
+        margin-bottom: 40px;
+      }
+      h2 {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--accent);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      h2::before {
+        content: "";
+        width: 4px;
+        height: 22px;
+        background: var(--accent);
+        border-radius: 2px;
+      }
+
+      p { margin-bottom: 12px; color: var(--fg); }
+      .muted { color: var(--muted); font-size: 14px; }
+
+      /* Code block */
+      pre {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin: 12px 0;
+        overflow-x: auto;
+        position: relative;
+      }
+      code {
+        font-family: "SF Mono", "JetBrains Mono", "Fira Code", Consolas, monospace;
+        font-size: 14px;
+        color: #cbd5e1;
+      }
+      pre code { white-space: pre; }
+
+      .copy-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        color: var(--muted);
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .copy-btn:hover {
+        color: var(--accent);
+        border-color: var(--accent);
+      }
+      .copy-btn.copied { color: var(--success); border-color: var(--success); }
+
+      /* Card */
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 16px 0;
+      }
+      .card h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--accent);
+        margin-bottom: 8px;
+      }
+      .card p { font-size: 14px; color: var(--muted); margin-bottom: 12px; }
+
+      /* Grid for OS cards */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin: 16px 0;
+      }
+
+      /* Steps */
+      ol.steps {
+        counter-reset: step;
+        list-style: none;
+        padding-left: 0;
+      }
+      ol.steps > li {
+        counter-increment: step;
+        padding: 12px 0 12px 40px;
+        position: relative;
+      }
+      ol.steps > li::before {
+        content: counter(step);
+        position: absolute;
+        left: 0;
+        top: 12px;
+        width: 28px;
+        height: 28px;
+        background: var(--accent);
+        color: var(--bg);
+        border-radius: 50%;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+      }
+
+      /* Features */
+      ul.features {
+        list-style: none;
+        padding-left: 0;
+      }
+      ul.features > li {
+        padding: 8px 0 8px 28px;
+        position: relative;
+      }
+      ul.features > li::before {
+        content: "▸";
+        position: absolute;
+        left: 8px;
+        color: var(--accent);
+        font-weight: 700;
+      }
+
+      /* Footer */
+      footer {
+        margin-top: 64px;
+        padding-top: 24px;
+        border-top: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 13px;
+      }
+      footer .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        align-items: center;
+      }
+
+      /* Responsive */
+      @media (max-width: 600px) {
+        .container { padding: 24px 16px 64px; }
+        .hero { flex-direction: column; align-items: flex-start; }
+        .hero img { width: 72px; height: 72px; }
+        .hero-text h1 { font-size: 28px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Hero -->
+      <header class="hero">
+        <img src="/icons/icon-192.svg" alt="DadaBot" />
+        <div class="hero-text">
+          <h1>DadaBot</h1>
+          <p>P2P mesh의 로컬-퍼스트 AI 에이전트 OS · 무료 모델 44개 · 인간 승인 · 블록 캔버스</p>
+        </div>
+      </header>
+
+      <span class="badge">v0.1.0 · Stable · Self-hosted</span>
+
+      <!-- Quick Install -->
+      <section>
+        <h2>설치</h2>
+        <p class="muted">아래 명령을 복사해 터미널에 붙여넣으세요. 1분 안에 설치됩니다.</p>
+
+        <h3 style="font-size: 16px; margin: 16px 0 8px; color: var(--accent);">macOS · Linux</h3>
+        <pre><code id="cmd-bash">curl -fsSL https://dadabot.muhanai.com/install.sh | sh</code><button class="copy-btn" data-target="cmd-bash">Copy</button></pre>
+
+        <h3 style="font-size: 16px; margin: 16px 0 8px; color: var(--accent);">Windows (PowerShell)</h3>
+        <pre><code id="cmd-ps">iwr -useb https://dadabot.muhanai.com/install.ps1 | iex</code><button class="copy-btn" data-target="cmd-ps">Copy</button></pre>
+
+        <p class="muted">설치 후엔 <code>dadabot doctor</code>로 시스템 상태를 확인하고, <code>dadabot run proposal.json</code>으로 첫 자동화 파이프라인을 시작하세요.</p>
+      </section>
+
+      <!-- What it does -->
+      <section>
+        <h2>주요 기능</h2>
+        <ul class="features">
+          <li><strong>5단계 안전 파이프라인</strong> — propose → review → execute → approve → audit</li>
+          <li><strong>인간 승인 (HITL)</strong> — 모든 destructive 작업은 사람 승인 필수</li>
+          <li><strong>무료 모델 44개</strong> — Groq · Cerebras · OpenRouter 등 API 키 한 줄 등록</li>
+          <li><strong>블록 캔버스</strong> — 드래그-앤-드롭으로 워크플로 조립</li>
+          <li><strong>P2P mesh</strong> — 97·93·110 bootstrap 노드를 통한 agent-to-agent (a2a) / agent-to-user (a2u)</li>
+          <li><strong>다중 백엔드</strong> — Minima chain · Matrix federation · IPFS gateway 통합</li>
+          <li><strong>크로스 플랫폼</strong> — macOS (x64+arm64) · Linux (x64) · Windows (x64)</li>
+        </ul>
+      </section>
+
+      <!-- 5-step pipeline -->
+      <section>
+        <h2>안전 파이프라인 (5단계)</h2>
+        <ol class="steps">
+          <li><strong>Propose</strong> — 제안서 작성 (proposal.json)</li>
+          <li><strong>Review</strong> — 자동 정적 분석 + 영향 분석</li>
+          <li><strong>Execute</strong> — sandbox에서 실행, 출력 캡처</li>
+          <li><strong>Approve</strong> — 사람이 <code>dadabot approve <crId></code>로 최종 승인</li>
+          <li><strong>Audit</strong> — 모든 step이 audit log에 영구 기록</li>
+        </ol>
+      </section>
+
+      <!-- Architecture -->
+      <section>
+        <h2>P2P mesh 구조</h2>
+        <div class="card">
+          <h3>110 · 97 · 93 노드 (redundant bootstrap)</h3>
+          <p>dadabot CLI는 Tailscale mesh 안에서 <strong>3개 bootstrap 노드</strong>(110·97·93)에 동시 연결. 어느 한 노드가 죽어도 mesh 유지.</p>
+        </div>
+        <div class="card">
+          <h3>a2a · a2u 프로토콜</h3>
+          <p>에이전트 간(a2a)은 <strong>proposal / change-request JSON</strong>을 libp2p stream으로 직접 교환. 에이전트↔사용자(a2u)는 <strong>Telegram / WebSocket / Webhook</strong> 어댑터.</p>
+        </div>
+      </section>
+
+      <!-- Verify installation -->
+      <section>
+        <h2>설치 검증</h2>
+        <p class="muted">설치 후 다음 명령으로 정상 설치 확인:</p>
+        <pre><code>dadabot doctor</code></pre>
+        <p class="muted">API 키 등록:</p>
+        <pre><code>bash ~/.dadabot/scripts/setup/setup-free-providers.sh</code></pre>
+        <p class="muted">첫 파이프라인 실행:</p>
+        <pre><code>dadabot run proposal.json
+dadabot approve <crId></code></pre>
+      </section>
+
+      <!-- Source -->
+      <section>
+        <h2>소스 · 라이센스</h2>
+        <ul class="features">
+          <li>소스 코드: <a href="https://github.com/koraussie7/dadabot" target="_blank" rel="noopener">github.com/koraussie7/dadabot</a></li>
+          <li>릴리즈 manifest: <a href="https://dadabot.muhanai.com/latest-stable.json" target="_blank" rel="noopener">latest-stable.json</a></li>
+          <li>대시보드: <a href="https://muhanai.com/dadabot">muhanai.com/dadabot</a> (메인 페이지)</li>
+          <li>설치 파일: <a href="https://dadabot.muhanai.com/install.sh">install.sh</a> · <a href="https://dadabot.muhanai.com/install.ps1">install.ps1</a></li>
+        </ul>
+      </section>
+
+      <footer>
+        <div class="row">
+          <span>muhanai.com © 2026</span>
+          <span>·</span>
+          <span>P2P mesh · a2a · a2u</span>
+          <span>·</span>
+          <span>Self-hosted on dadabot.muhanai.com (192.255.201.97)</span>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Copy-to-clipboard -->
+    <script>
+      document.querySelectorAll(".copy-btn").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const id = btn.dataset.target;
+          const code = document.getElementById(id)?.innerText || "";
+          try {
+            await navigator.clipboard.writeText(code);
+            btn.classList.add("copied");
+            btn.textContent = "Copied!";
+            setTimeout(() => {
+              btn.classList.remove("copied");
+              btn.textContent = "Copy";
+            }, 1600);
+          } catch (e) {
+            // fallback: select text
+            const range = document.createRange();
+            range.selectNode(document.getElementById(id));
+            window.getSelection()?.removeAllRanges();
+            window.getSelection()?.addRange(range);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

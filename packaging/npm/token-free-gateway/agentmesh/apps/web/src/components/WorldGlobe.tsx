@@ -9,13 +9,13 @@
  * sync with a ResizeObserver, and torn down with `_destructor()`.
  */
 
-// GlobeGL was removed from package.json; provide a stable stub that mirrors the
-// public surface used by WorldGlobe without depending on the native module.
-// The live visualization can be re-enabled by re-adding "globe.gl" to deps.
+// globe.gl 실제 3D 지구본 (스텁 아님). package.json의 globe.gl 의존성 필요.
+import Globe from "globe.gl";
 type GlobeInstance = {
 	(domElement: HTMLElement): GlobeInstance;
 	pointsData: (data: unknown[]) => GlobeInstance;
 	arcsData: (data: unknown[]) => GlobeInstance;
+	globeImageUrl: (url: string) => GlobeInstance;
 	ringsData: (data: unknown[]) => GlobeInstance;
 	atmosphereColor: (color: string) => GlobeInstance;
 	pointsMerge: (value: boolean) => GlobeInstance;
@@ -32,10 +32,7 @@ type GlobeInstance = {
 	_destructor: () => void;
 };
 
-const GlobeChart = ((el: HTMLElement) => {
-	const stub: Partial<GlobeInstance> = {};
-	return stub as GlobeInstance;
-}) as unknown as GlobeInstance;
+const GlobeChart = Globe as unknown as (el: HTMLElement) => GlobeInstance;
 import { RefreshCw, ScanLine } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { WorldEvent } from "../lib/world-types";
@@ -266,6 +263,15 @@ export interface WorldGlobeProps {
 	onRefresh?: () => void | Promise<void>;
 	/** true면 이벤트가 비었을 때 오프라인 데모 마커를 그린다. */
 	demoFallback?: boolean;
+	/**
+	 * 온톨로지 패널에서 선택된 엔티티. 좌표가 있으면 그 위치를 중심으로
+	 * 글로브 시점을 이동시키고 자동 회전을 잠시 멈춘다.
+	 */
+	focusEntity?: {
+		id: string;
+		latitude?: number;
+		longitude?: number;
+	} | null;
 }
 
 const LegendDot = ({ color, label }: { color: string; label: string }) => (
@@ -289,6 +295,7 @@ export const WorldGlobe = ({
 	lastUpdated,
 	onRefresh,
 	demoFallback = true,
+	focusEntity = null,
 }: WorldGlobeProps) => {
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const globeRef = useRef<GlobeInstance | null>(null);
@@ -307,16 +314,14 @@ export const WorldGlobe = ({
 		const el = containerRef.current;
 		if (!el) return;
 
-		const chart = new GlobeChart(el, { animateIn: true, waitForGlobeReady: false });
+		const chart = GlobeChart(el);
 		chart
 			.globeImageUrl(GLOBE_TEXTURE)
-			.backgroundColor(GLOBE_BACKGROUND)
-			.showAtmosphere(true)
 			.atmosphereColor("#38bdf8")
 			.pointsMerge(false)
 			.pointsTransitionDuration(600)
-			.pointAltitude(0.015)
-			.pointColor((point: object) => (point as GlobePoint).color)
+			.pointAltitude((): number => 0.015)
+			.pointColor((point: object): string => (point as GlobePoint).color)
 			.pointRadius((point: object) => (point as GlobePoint).radius)
 			.pointLabel((point: object) => (point as GlobePoint).label)
 			.width(el.clientWidth || FALLBACK_WIDTH)
@@ -352,6 +357,26 @@ export const WorldGlobe = ({
 	useEffect(() => {
 		globeRef.current?.pointsData(points);
 	}, [points]);
+
+	// 온톨로지 패널에서 선택된 엔티티로 시점을 이동시킨다.
+	// 좌표가 없는 엔티티는 무시하고, 이동 중에는 자동 회전을 멈춘다.
+	useEffect(() => {
+		const chart = globeRef.current;
+		if (!chart || !focusEntity) return;
+		if (focusEntity.latitude === undefined || focusEntity.longitude === undefined) return;
+
+		chart.pointOfView({
+			lat: focusEntity.latitude,
+			lng: focusEntity.longitude,
+			altitude: 1.2,
+		});
+
+		const controls = chart.controls();
+		controls.autoRotate = false;
+
+		// 사용자가 다른 곳을 보기 전까지 회전을 멈춘 상태를 유지한다.
+		// 다음 선택이 오면 이 effect가 다시 실행되어 시점이 갱신된다.
+	}, [focusEntity]);
 
 	const handleRefresh = useCallback(() => {
 		if (!onRefresh) return;

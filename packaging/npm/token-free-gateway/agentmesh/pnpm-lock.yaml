@@ -91,6 +91,12 @@ importers:
       '@agentmesh/knowledge-base':
         specifier: workspace:*
         version: link:../../packages/knowledge-base
+      '@agentmesh/minima-client':
+        specifier: workspace:^
+        version: link:../../packages/minima-client
+      '@agentmesh/peer-mesh':
+        specifier: workspace:*
+        version: link:../../packages/peer-mesh
       '@agentmesh/personal-mcp':
         specifier: workspace:*
         version: link:../../packages/personal-mcp
@@ -109,9 +115,15 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^4.3.4
         version: 4.7.0(vite@6.4.3(@types/node@22.20.4)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.15)(yaml@2.9.1))
+      cytoscape:
+        specifier: ^3.34.4
+        version: 3.34.4
       globe.gl:
         specifier: ^2.46.2
         version: 2.46.2
+      h3-js:
+        specifier: ^4.5.0
+        version: 4.5.0
       lucide-react:
         specifier: ^0.460.0
         version: 0.460.0(react@19.3.0)
@@ -121,6 +133,9 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.3.0(react@19.3.0)
+      react-router-dom:
+        specifier: ^7.18.4
+        version: 7.18.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       tailwindcss:
         specifier: ^4.0.0
         version: 4.3.3
@@ -131,21 +146,12 @@ importers:
         specifier: ^6.0.5
         version: 6.4.3(@types/node@22.20.4)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.15)(yaml@2.9.1)
     devDependencies:
+      '@types/cytoscape':
+        specifier: ^3.31.0
+        version: 3.31.0
       '@types/node':
         specifier: ^22.0.0
         version: 22.20.4
-
-  packages/adapters:
-    dependencies:
-      '@agentmesh/core':
-        specifier: workspace:*
-        version: link:../core
-
-  packages/agent:
-    dependencies:
-      '@agentmesh/core':
-        specifier: workspace:*
-        version: link:../core
 
   packages/agent-cast:
     dependencies:
@@ -320,15 +326,6 @@ importers:
         specifier: ^1.40.0
         version: 1.63.0
 
-  packages/cast:
-    dependencies:
-      '@agentmesh/agent':
-        specifier: workspace:*
-        version: link:../agent
-      '@agentmesh/core':
-        specifier: workspace:*
-        version: link:../core
-
   packages/category-engine:
     dependencies:
       '@agentmesh/llm-router':
@@ -363,9 +360,20 @@ importers:
         specifier: ^1.0.0
         version: 1.13.2
 
-  packages/core: {}
+  packages/core:
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.4)(lightningcss@1.32.0)
 
   packages/cosmos-core:
+    dependencies:
+      '@muhanai/ontology':
+        specifier: workspace:*
+        version: link:../muhanai-ontology
     devDependencies:
       '@types/node':
         specifier: ^22.10.0
@@ -519,12 +527,6 @@ importers:
       vitest:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.20.4)(lightningcss@1.32.0)
-
-  packages/ipfs:
-    dependencies:
-      '@agentmesh/core':
-        specifier: workspace:*
-        version: link:../core
 
   packages/knowledge-base:
     dependencies:
@@ -713,6 +715,24 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.0.0
         version: 1.30.0(@cfworker/json-schema@4.1.1)(zod@4.6.5)
+
+  packages/minima-client:
+    devDependencies:
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
+
+  packages/muhanai-ontology:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.20.4
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.4)(lightningcss@1.32.0)
 
   packages/noema:
     dependencies:
@@ -2997,6 +3017,10 @@ packages:
   '@types/babel__traverse@7.28.0':
     resolution: {integrity: sha512-8PvcXf70gTDZBgt9ptxJ8elBeBjcLOAcOtoO/mPJjtji1+CdGbHgm77om1GrsPxsiE+uXIpNSK64UYaIwQXd4Q==}
 
+  '@types/cytoscape@3.31.0':
+    resolution: {integrity: sha512-EXHOHxqQjGxLDEh5cP4te6J0bi7LbCzmZkzsR6f703igUac8UGMdEohMyU3GHAayCTZrLQOMnaE/lqB2Ekh8Ww==}
+    deprecated: This is a stub types definition. cytoscape provides its own type definitions, so you do not need this installed.
+
   '@types/dns-packet@5.6.5':
     resolution: {integrity: sha512-qXOC7XLOEe43ehtWJCMnQXvgcIpv6rPmQ1jXT98Ad8A3TB1Ue50jsCbSSSyuazScEuZ/Q026vHbrOTVkmwA+7Q==}
 
@@ -3591,6 +3615,10 @@ packages:
 
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
+
+  cytoscape@3.34.4:
+    resolution: {integrity: sha512-msY99tMY8iWTg+sIPGfSqDcPNOt4xcj+v/K/7qUFaCUxxlqnMkUYLBjRUzn9W5CU/R2hrmtJa5+UtovrEM2ctg==}
+    engines: {node: '>=0.10'}
 
   d3-array@3.2.4:
     resolution: {integrity: sha512-tdQAmyA18i4J7wprpYq8ClcxZy3SC31QMeByyCFyRt7BVHdREQZ5lpzoe5mFEYZUWe+oq8HBvk9JjpibyEV4Jg==}
@@ -5280,6 +5308,23 @@ packages:
   react-refresh@0.17.0:
     resolution: {integrity: sha512-z6F7K9bV85EfseRCp2bzrpyQ0Gkw1uLoCel9XBVWPg/TjRj94SkJzUTGfOa4bs7iJvBWtQG0Wq7wnI0syw3EBQ==}
     engines: {node: '>=0.10.0'}
+
+  react-router-dom@7.18.4:
+    resolution: {integrity: sha512-yrfmJHIpDG7taCpqKjT1G5B6q3O2K+RN8/fgNf0lTjCwiPbQ0ei6vXX9ZjQR+7ld8Tr7Z5xmyMnZ8YJrphWQUw==}
+    engines: {node: '>=20.0.0'}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+
+  react-router@7.18.4:
+    resolution: {integrity: sha512-PUPQcMhMGRAslLcvtlPz/kmzBEWPhLdgLFrL7pLNepBL6dX0lWj4WD2cUYVgYCuT3jxvghYFg81cDTj44DhetQ==}
+    engines: {node: '>=20.0.0'}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
 
   react@19.3.0:
     resolution: {integrity: sha512-E8LUcbtBWt20bbl2YoHfx4ZDBdxVTfOKtCZn9cDSJ4l6/nuoApcpIBcj47t2wZoVX8g2ZHuMHbiShgCR1T5Sog==}
@@ -8421,6 +8466,10 @@ snapshots:
     dependencies:
       '@babel/types': 7.29.8
 
+  '@types/cytoscape@3.31.0':
+    dependencies:
+      cytoscape: 3.34.4
+
   '@types/dns-packet@5.6.5':
     dependencies:
       '@types/node': 22.20.4
@@ -9125,6 +9174,8 @@ snapshots:
   cssom@0.5.0: {}
 
   csstype@3.2.3: {}
+
+  cytoscape@3.34.4: {}
 
   d3-array@3.2.4:
     dependencies:
@@ -10969,6 +11020,20 @@ snapshots:
   react-is@18.3.1: {}
 
   react-refresh@0.17.0: {}
+
+  react-router-dom@7.18.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
+    dependencies:
+      react: 19.3.0
+      react-dom: 19.3.0(react@19.3.0)
+      react-router: 7.18.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+
+  react-router@7.18.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
+    dependencies:
+      cookie: 1.1.1
+      react: 19.3.0
+      set-cookie-parser: 2.7.2
+    optionalDependencies:
+      react-dom: 19.3.0(react@19.3.0)
 
   react@19.3.0: {}
 

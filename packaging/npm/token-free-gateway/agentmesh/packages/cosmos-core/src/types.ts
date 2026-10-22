@@ -114,6 +114,8 @@ export interface OntologyNodeObserved extends CosmosEventBase {
 		domain: string;
 		status: ConceptStatus;
 		upstreamId?: string;
+		/** Optional concept metadata (e.g. geo coordinates for location concepts). */
+		metadata?: Record<string, unknown>;
 	};
 }
 

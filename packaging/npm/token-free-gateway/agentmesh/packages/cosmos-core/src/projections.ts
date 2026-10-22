@@ -57,18 +57,18 @@ export function applyEvent(projection: ConceptProjection, event: CosmosEvent): v
 
 	switch (event.kind) {
 		case "ontology_node": {
-			const { conceptId, label, domain, status } = event.payload;
+			const { conceptId, label, domain, status, metadata } = event.payload;
 			const existing = projection.concepts.get(conceptId);
 			if (existing) {
-				projection.concepts.set(
-					conceptId,
-					observeConcept(existing, {
-						...(event.payload.upstreamId !== undefined
-							? { upstreamId: event.payload.upstreamId }
-							: {}),
-						seenAt: event.timestamp,
-					}),
-				);
+				let updated = observeConcept(existing, {
+					...(event.payload.upstreamId !== undefined
+						? { upstreamId: event.payload.upstreamId }
+						: {}),
+					seenAt: event.timestamp,
+				});
+				// Later observations may carry coordinates the first one lacked.
+				if (metadata) updated = { ...updated, metadata };
+				projection.concepts.set(conceptId, updated);
 				break;
 			}
 			projection.concepts.set(
@@ -80,6 +80,9 @@ export function applyEvent(projection: ConceptProjection, event: CosmosEvent): v
 					status,
 					...(event.payload.upstreamId !== undefined
 						? { upstreamId: event.payload.upstreamId }
+						: {}),
+					...(event.payload.metadata !== undefined
+						? { metadata: event.payload.metadata }
 						: {}),
 					firstSeen: event.timestamp,
 				}),

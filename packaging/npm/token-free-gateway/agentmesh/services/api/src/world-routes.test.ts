@@ -1,7 +1,7 @@
 import { pino } from "pino";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildApp } from "./server.js";
-import { buildOfflineBrief, getPythiaWorldUrl } from "./world-routes.js";
+import { buildOfflineBrief, getPythiaWorldUrl, getShadowBrokerConfig } from "./world-routes.js";
 
 const originalFetch = globalThis.fetch;
 
@@ -17,6 +17,19 @@ describe("world-routes helpers", () => {
 		expect(getPythiaWorldUrl()).toBe("http://localhost:8088");
 	});
 
+	it("getShadowBrokerConfig reads env at call time", () => {
+		delete process.env.SHADOWBROKER_URL;
+		delete process.env.SHADOWBROKER_TOKEN;
+		expect(getShadowBrokerConfig()).toBeNull();
+		process.env.SHADOWBROKER_URL = "http://gev.example:9000";
+		process.env.SHADOWBROKER_LAYERS = "flights, earthquakes";
+		const config = getShadowBrokerConfig();
+		expect(config?.base).toBe("http://gev.example:9000");
+		expect(config?.layers).toEqual(["flights", "earthquakes"]);
+		expect(config?.token).toBeUndefined();
+		process.env.SHADOWBROKER_TOKEN = "tok-1";
+		expect(getShadowBrokerConfig()?.token).toBe("tok-1");
+	});
 	it("buildOfflineBrief is deterministic within the same UTC hour", () => {
 		const a = buildOfflineBrief();
 		const b = buildOfflineBrief();

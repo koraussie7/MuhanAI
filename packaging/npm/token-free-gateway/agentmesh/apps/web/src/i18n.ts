@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 
-export type SupportedLanguage = "ko" | "en" | "ja" | "zh" | "es" | "de" | "fr" | "pt";
+export type SupportedLanguage = "ko" | "en" | "vi" | "ja" | "zh" | "hi" | "es" | "de" | "fr" | "pt";
 
 export interface LanguageMeta {
 	code: SupportedLanguage;
@@ -15,8 +15,10 @@ export interface LanguageMeta {
 export const SUPPORTED_LANGUAGES: LanguageMeta[] = [
 	{ code: "ko", label: "Korean", native: "한국어", flag: "🇰🇷" },
 	{ code: "en", label: "English", native: "English", flag: "🇺🇸" },
+	{ code: "vi", label: "Vietnamese", native: "Tiếng Việt", flag: "🇻🇳" },
 	{ code: "ja", label: "Japanese", native: "日本語", flag: "🇯🇵" },
 	{ code: "zh", label: "Chinese", native: "简体中文", flag: "🇨🇳" },
+	{ code: "hi", label: "Hindi", native: "हिन्दी", flag: "🇮🇳" },
 	{ code: "es", label: "Spanish", native: "Español", flag: "🇪🇸" },
 	{ code: "de", label: "German", native: "Deutsch", flag: "🇩🇪" },
 	{ code: "fr", label: "French", native: "Français", flag: "🇫🇷" },
@@ -35,6 +37,29 @@ export interface I18nContent {
 		empower: string;
 	};
 	ghostPrompts: string[];
+
+	world: {
+		horizon24h: string;
+		horizon1w: string;
+		horizon1m: string;
+		horizon1y: string;
+		offlineSummary: string;
+		refreshing: string;
+		refresh: string;
+		realtimeEvents: (count: number) => string;
+		noEvents: string;
+		predictions: string;
+		noPredictions: string;
+		probability: (pct: number) => string;
+		confidence: (pct: number) => string;
+		summarizeBrief: string;
+		summarizing: string;
+		briefSummary: string;
+		briefError: string;
+	};
+	placeholder: {
+		underConstruction: string;
+	};
 	ui: {
 		searchPlaceholder: string;
 		gatewayActive: string;
@@ -381,6 +406,28 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			close: "닫기",
 		},
 
+		world: {
+			horizon24h: "24시간",
+			horizon1w: "1주",
+			horizon1m: "1개월",
+			horizon1y: "1년",
+			offlineSummary: "오프라인 스냅샷. 실시간 엔진 연결 시 세계 상태와 예측이 표시됩니다.",
+			refreshing: "새로고침 중…",
+			refresh: "새로고침",
+			realtimeEvents: (count: number) => `실시간 이벤트 (${count})`,
+			noEvents: "이벤트가 없습니다.",
+			predictions: "예측 (Prediction)",
+			noPredictions: "해당 기간 예측이 없습니다.",
+			probability: (pct: number) => `확률 ${pct}%`,
+			confidence: (pct: number) => `신뢰도 ${pct}%`,
+		summarizeBrief: "Pythia 요약",
+		summarizing: "요약 중…",
+		briefSummary: "Pythia 브리핑 요약",
+		briefError: "요약 실패",
+		},
+		placeholder: {
+			underConstruction: "이 섹션은 준비 중입니다.",
+		},
 	},
 	en: {
 		slogans: {
@@ -567,6 +614,28 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			close: "Close",
 		},
 
+		world: {
+			horizon24h: "24 hours",
+			horizon1w: "1 week",
+			horizon1m: "1 month",
+			horizon1y: "1 year",
+			offlineSummary: "Offline snapshot. Connect to the real-time engine to view world state and predictions.",
+			refreshing: "Refreshing…",
+			refresh: "Refresh",
+			realtimeEvents: (count: number) => `Real-time Events (${count})`,
+			noEvents: "No events.",
+			predictions: "Predictions",
+			noPredictions: "No predictions for this horizon.",
+			probability: (pct: number) => `Probability ${pct}%`,
+			confidence: (pct: number) => `Confidence ${pct}%`,
+		summarizeBrief: "Pythia summary",
+		summarizing: "Summarizing…",
+		briefSummary: "Pythia briefing summary",
+		briefError: "Summary failed",
+		},
+		placeholder: {
+			underConstruction: "This section is under construction.",
+		},
 	},
 	ja: {
 		slogans: {
@@ -752,6 +821,28 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			close: "閉じる",
 		},
 
+		world: {
+			horizon24h: "24時間",
+			horizon1w: "1週間",
+			horizon1m: "1か月",
+			horizon1y: "1年",
+			offlineSummary: "オフラインスナップショット。リアルタイムエンジンに接続すると、世界の状態と予測が表示されます。",
+			refreshing: "更新中…",
+			refresh: "更新",
+			realtimeEvents: (count: number) => `リアルタイムイベント (${count})`,
+			noEvents: "イベントがありません。",
+			predictions: "予測",
+			noPredictions: "この期間の予測はありません。",
+			probability: (pct: number) => `確率 ${pct}%`,
+			confidence: (pct: number) => `信頼度 ${pct}%`,
+		summarizeBrief: "Pythia要約",
+		summarizing: "要約中…",
+		briefSummary: "Pythiaブリーフ要約",
+		briefError: "要約失敗",
+		},
+		placeholder: {
+			underConstruction: "このセクションは準備中です。",
+		},
 	},
 	zh: {
 		slogans: {
@@ -936,6 +1027,28 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			close: "关闭",
 		},
 
+		world: {
+			horizon24h: "24 小时",
+			horizon1w: "1 周",
+			horizon1m: "1 个月",
+			horizon1y: "1 年",
+			offlineSummary: "离线快照。连接实时引擎即可查看世界状态和预测。",
+			refreshing: "刷新中…",
+			refresh: "刷新",
+			realtimeEvents: (count: number) => `实时事件 (${count})`,
+			noEvents: "暂无事件。",
+			predictions: "预测",
+			noPredictions: "此时间段暂无预测。",
+			probability: (pct: number) => `概率 ${pct}%`,
+			confidence: (pct: number) => `置信度 ${pct}%`,
+		summarizeBrief: "Pythia摘要",
+		summarizing: "摘要中…",
+		briefSummary: "Pythia简报摘要",
+		briefError: "摘要失败",
+		},
+		placeholder: {
+			underConstruction: "此部分正在建设中。",
+		},
 	},
 	es: {
 		slogans: {
@@ -1122,6 +1235,28 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			close: "Cerrar",
 		},
 
+		world: {
+			horizon24h: "24 horas",
+			horizon1w: "1 semana",
+			horizon1m: "1 mes",
+			horizon1y: "1 año",
+			offlineSummary: "Instantánea sin conexión. Conecta el motor en tiempo real para ver el estado del mundo y predicciones.",
+			refreshing: "Actualizando…",
+			refresh: "Actualizar",
+			realtimeEvents: (count: number) => `Eventos en tiempo real (${count})`,
+			noEvents: "Sin eventos.",
+			predictions: "Predicciones",
+			noPredictions: "Sin predicciones para este horizonte.",
+			probability: (pct: number) => `Probabilidad ${pct}%`,
+			confidence: (pct: number) => `Confianza ${pct}%`,
+		summarizeBrief: "Resumen Pythia",
+		summarizing: "Resumiendo…",
+		briefSummary: "Resumen del informe Pythia",
+		briefError: "Error al resumir",
+		},
+		placeholder: {
+			underConstruction: "Esta sección está en construcción.",
+		},
 	},
 	de: {
 		slogans: {
@@ -1308,6 +1443,28 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			close: "Schließen",
 		},
 
+		world: {
+			horizon24h: "24 Stunden",
+			horizon1w: "1 Woche",
+			horizon1m: "1 Monat",
+			horizon1y: "1 Jahr",
+			offlineSummary: "Offline-Snapshot. Verbinden Sie sich mit der Echtzeit-Engine, um Weltzustand und Vorhersagen anzuzeigen.",
+			refreshing: "Wird aktualisiert…",
+			refresh: "Aktualisieren",
+			realtimeEvents: (count: number) => `Echtzeit-Ereignisse (${count})`,
+			noEvents: "Keine Ereignisse.",
+			predictions: "Vorhersagen",
+			noPredictions: "Keine Vorhersagen für diesen Horizont.",
+			probability: (pct: number) => `Wahrscheinlichkeit ${pct}%`,
+			confidence: (pct: number) => `Konfidenz ${pct}%`,
+		summarizeBrief: "Pythia-Zusammenfassung",
+		summarizing: "Zusammenfassen…",
+		briefSummary: "Pythia-Briefing-Zusammenfassung",
+		briefError: "Zusammenfassung fehlgeschlagen",
+		},
+		placeholder: {
+			underConstruction: "Dieser Abschnitt befindet sich im Aufbau.",
+		},
 	},
 	fr: {
 		slogans: {
@@ -1495,6 +1652,28 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			close: "Fermer",
 		},
 
+		world: {
+			horizon24h: "24 heures",
+			horizon1w: "1 semaine",
+			horizon1m: "1 mois",
+			horizon1y: "1 an",
+			offlineSummary: "Capture hors ligne. Connectez-vous au moteur temps réel pour voir l'état du monde et les prédictions.",
+			refreshing: "Actualisation…",
+			refresh: "Actualiser",
+			realtimeEvents: (count: number) => `Événements en temps réel (${count})`,
+			noEvents: "Aucun événement.",
+			predictions: "Prédictions",
+			noPredictions: "Aucune prédiction pour cet horizon.",
+			probability: (pct: number) => `Probabilité ${pct}%`,
+			confidence: (pct: number) => `Confiance ${pct}%`,
+		summarizeBrief: "Résumé Pythia",
+		summarizing: "Résumé en cours…",
+		briefSummary: "Résumé du briefing Pythia",
+		briefError: "Échec du résumé",
+		},
+		placeholder: {
+			underConstruction: "Cette section est en construction.",
+		},
 	},
 	pt: {
 		slogans: {
@@ -1680,6 +1859,440 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 			close: "Fechar",
 		},
 
+		world: {
+			horizon24h: "24 horas",
+			horizon1w: "1 semana",
+			horizon1m: "1 mês",
+			horizon1y: "1 ano",
+			offlineSummary: "Captura offline. Conecte-se ao motor em tempo real para ver o estado do mundo e previsões.",
+			refreshing: "Atualizando…",
+			refresh: "Atualizar",
+			realtimeEvents: (count: number) => `Eventos em tempo real (${count})`,
+			noEvents: "Sem eventos.",
+			predictions: "Previsões",
+			noPredictions: "Sem previsões para este horizonte.",
+			probability: (pct: number) => `Probabilidade ${pct}%`,
+			confidence: (pct: number) => `Confiança ${pct}%`,
+		summarizeBrief: "Resumo Pythia",
+		summarizing: "Resumindo…",
+		briefSummary: "Resumo do briefing Pythia",
+		briefError: "Falha ao resumir",
+		},
+		placeholder: {
+			underConstruction: "Esta seção está em construção.",
+		},
+	},
+	vi: {
+		slogans: {
+			origin: "사람과 AI의 공존, 그 무한한 시작점",
+			paradigm: "새로운 공존의 패러다임: 사람과 AI, 무한으로 잇다",
+			forEveryone: "모두를 위한 AI, 사람과 함께 호흡하는 지능",
+			convergence: "공존에서 무한으로: Human & AI Convergence",
+			collective: "비용의 한계를 넘어, 사람과 자율 에이전트가 완성하는 집단 지성",
+			empower: "당신의 아이디어에 자율 지능의 힘을 더해, 함께 더 큰 가치를 만듭니다",
+		},
+		ghostPrompts: [
+			"사람과 AI의 공존, 그 무한한 시작점",
+			"새로운 공존의 패러다임: 사람과 AI, 무한으로 잇다",
+			"모두를 위한 AI, 사람과 함께 호흡하는 지능",
+			"공존에서 무한으로: Human & AI Convergence",
+			"비용의 한계를 넘어, 사람과 자율 에이전트가 완성하는 집단 지성",
+			"당신의 아이디어에 자율 지능의 힘을 더해, 함께 더 큰 가치를 만듭니다",
+			"[[Zero-Token Gateway]] 동작 원리 탐색하기...",
+			"신규 지식 노드 발행: #WebRTC 분산 CRDT 캐시",
+			"피어 에이전트에게 묻기: Claude 3.7 vs DeepSeek R1 합의 알고리즘",
+			"내 옵시디언 볼트 시냅스 발행: [[AI 메모리 레이크.md]]",
+		],
+		ui: {
+			searchPlaceholder: "네트워크 질문 또는 지식 검색...",
+			gatewayActive: "토큰 프리 게이트웨이 활성",
+			publishToCosmic: "우주에 발행",
+			connectPeer: "피어 연결",
+			connectDevice: "내 디바이스 연결",
+			deviceConnected: "내 피어 연결됨",
+			dashboard: "대시보드",
+			cosmicMesh: "코스믹 메쉬",
+			agentCast: "에이전트 캐스트",
+			agentMesh: "에이전트 메쉬",
+			models: "LLM 모델",
+			mcpTools: "MCP 도구",
+			knowledgeGraph: "지식 그래프",
+			verification: "상호 검증",
+			settings: "설정",
+			language: "언어",
+			peerModalTitle: "P2P 메쉬 노드 연결",
+			peerModalDesc: "옵시디언 지식 메쉬에 연결할 사용자 이름이나 닉네임을 입력하세요.",
+			peerNicknamePlaceholder: "닉네임 입력 (예: Brian, Satoshi, Neo)",
+			peerConnectBtn: "⚡ 메쉬에 연결",
+			peerCancelBtn: "취소",
+			changeNickname: "닉네임 변경",
+			userGuide: "사용설명서",
+			aiThinking:
+				"다중 AI 쿼럼(Claude 3.7 + DeepSeek R1 + Gemini 2.5)이 제로 토큰 지능망에서 합의 추론 중...",
+			aiQuorumTitle: "MuhanAI 멀티 에이전트 쿼럼 합의",
+			saveAsNode: "지식 노드로 발행",
+			copyAnswer: "답변 복사",
+			copied: "복사됨!",
+		},
+		cosmicHud: {
+			developerConsole: "개발자 콘솔",
+			userGuideTitle: "MuhanAI 사용설명서 열기",
+			connectPeerTitle: "새로운 P2P 피어 노드 이름을 지정하고 연결합니다",
+			connectPeer: "피어 연결",
+			devicePeerManage: "내 디바이스 피어 이름 변경 또는 관리",
+			devicePeerConnect: "내 디바이스 피어 이름을 지정하고 P2P 메쉬에 마운트합니다",
+			userFallback: "사용자",
+			connectedSuffix: "(연결됨)",
+			connectPrefix: "연결",
+			connectMyDevice: "내 디바이스 연결",
+			physicsTitle: "그래프 물리 파라미터",
+			fullscreenTitle: "전체화면 전환",
+			graphForces: "옵시디언 그래프 힘",
+			repelForce: "반발력",
+			linkDistance: "연결 거리",
+			centerGravity: "중심 중력",
+			visibleFilters: "표시 필터",
+			eventFeed: "P2P 메쉬 이벤트 피드 & WEBRTC CRDT 로그",
+			peersLabel: "피어:",
+			notesLabel: "노트:",
+			synapsesLabel: "시냅스:",
+			latencyLabel: "지연:",
+			subtitle: "옵시디언 그래프 토폴로지 & P2P 실루엣",
+		},
+		promptBar: {
+			computerUseTitle: "Computer Use (e2b Desktop) — BYOK 비전 모델로 데스크톱 자동 조종",
+			byokEnabledTitle: "BYOK 활성화됨 — 클릭하여 설정 변경",
+			byokSetupTitle: "BYOK 설정 — 자신의 API 키 사용",
+			byokSettingsOpenAria: "BYOK 설정 열기",
+			byokSettingsAria: "BYOK 설정",
+			byokActive: "활성",
+			panelCloseTitle: "패널 닫기",
+			byokPanelCloseAria: "BYOK 패널 닫기",
+			keyHideTitle: "키 숨기기",
+			keyShowTitle: "키 표시",
+			keyHideAria: "API 키 숨기기",
+			keyShowAria: "API 키 표시",
+			keySaveRefresh: "키 저장 / 갱신",
+			keySaveActivate: "키 저장하고 활성화",
+			keyDeleteTitle: "localStorage에서 키 삭제",
+			keyDelete: "키 삭제 (Forget)",
+			currentlyUsing: "현재 사용 중:",
+			publishTitle: "Canvas에 Obsidian 노드로 영구 발행",
+			published: "발행 완료",
+			copyAnswerTitle: "답변 복사",
+			apiKeyRequired: "API 키를 입력해 주세요",
+			rateLimitedHint: "⚠ Rate-Limited · BYOK 권장",
+			noLlmHint: "No LLM · BYOK 추가 필요",
+		},
+	
+		freeLlm: {
+			settingsTitle: "무료 LLM 폴백 설정",
+			settingsDesc: "폴백으로 사용할 무료 LLM 공급자를 선택하세요",
+			pollinations: "Pollinations (POST)",
+			pollinationsGet: "Pollinations (GET)",
+			apiLlmChat: "/api/llm/chat (키리스 풀)",
+			localOauth: "로컬 OAuth 게이트웨이",
+			omniroute: "OmniRoute 메쉬",
+			geminiProxy: "Gemini 프록시 (무료)",
+			geminiCli: "Gemini CLI (무료 · 1,000건/일)",
+			meshLlm: "Mesh-LLM (로컬 메시, 9337)",
+			noneSelected: "선택된 공급자 없음",
+			expand: "열기",
+			collapse: "닫기",
+		},
+	dashboard: {
+			meshOperational: "● P2P 메쉬 가동 중",
+			gatewayActive: "토큰 프리 게이트웨이 활성",
+			heroTitle: "MuhanAI 자율 에이전트 메쉬",
+			heroDesc: "Cline 스타일의 탈중앙화 AI 메쉬 네트워크입니다. 로컬 및 분산 모델이 WebRTC & libp2p P2P 연결을 통해 자율적으로 합의하고 협력합니다.",
+			cosmicMesh: "코스믹 메쉬",
+			launchAgentCast: "에이전트 캐스트 실행",
+			peerNodes: "피어 노드",
+			activeP2PNodes: "활성 P2P 노드",
+			consensusQuorum: "합의 쿼럼",
+			distributedCompute: "분산 컴퓨트",
+			tokenCost: "토큰 비용",
+			tabTasks: "작업 & 도움 요청",
+			tabVerify: "검증 & 쿼럼",
+			tabKnowledge: "인기 인텔리전스 & 가르치기",
+			tabKb: "지식 베이스",
+			tokenBank: {
+				title: "토큰 뱅크",
+				subtitle: "p2ptokens 기여 회계 원장 · PinkyBrain Web of Trust 평판 링",
+				balance: "잔액",
+				entries: "항목 수",
+				trustScore: "신뢰 점수",
+				viewDetails: "상세 보기",
+			},
+		},
+		rightPanel: {
+			agents: "에이전트",
+			compute: "연산",
+			cpuNodes: "CPU 노드",
+			gpuNodes: "GPU 노드",
+			webgpu: "WebGPU",
+			totalCompute: "총 연산",
+			llm: "LLM",
+			providers: "공급자",
+			models: "모델",
+			free: "무료",
+			mcp: "MCP",
+			servers: "서버",
+			tools: "도구",
+			categories: "카테고리",
+			human: "인간",
+			online: "온라인",
+			available: "가용",
+			specialties: "전문분야",
+			reputation: "평판",
+			success: "성공률",
+		},
+		findPage: {
+			peerModalUserTitle: "내 디바이스 피어 이름 지정",
+			peerModalPeerTitle: "P2P 피어 노드 연결 및 이름 지정",
+			peerModalUserLabel: "디바이스 피어 닉네임",
+			peerModalPeerLabel: "원격 피어 노드 이름",
+			peerModalUserPlaceholder: "예: Brian-MacBook, CosmicCoder...",
+			peerModalPeerPlaceholder: "예: Peer-Tokyo-Node...",
+			peerModalRandomTitle: "랜덤 코스믹 이름 생성",
+			peerModalRandom: "🎲 랜덤",
+			peerModalUserHelp: "P2P 분산 지식 메쉬 및 WebRTC 볼트에 표시될 디바이스 이름입니다.",
+			peerModalPeerHelp: "새로운 피어 노드로 지식 그래프에 마운트할 고유 이름입니다.",
+			peerModalDisconnect: "연결 해제",
+			peerModalCancel: "취소",
+			peerModalApply: "이름 변경 적용",
+			peerModalConnect: "이름 지정 및 연결",
+			close: "닫기",
+		},
+
+			world: {
+			horizon24h: "24 giờ",
+			horizon1w: "1 tuần",
+			horizon1m: "1 tháng",
+			horizon1y: "1 năm",
+			offlineSummary: "Ảnh chụp ngoại tuyến. Kết nối công cụ thời gian thực để xem trạng thái thế giới và dự đoán.",
+			refreshing: "Đang làm mới…",
+			refresh: "Làm mới",
+			realtimeEvents: (count: number) => `Sự kiện thời gian thực (${count})`,
+			noEvents: "Không có sự kiện.",
+			predictions: "Dự đoán",
+			noPredictions: "Không có dự đoán cho khung thời gian này.",
+			probability: (pct: number) => `Xác suất ${pct}%`,
+			confidence: (pct: number) => `Độ tin cậy ${pct}%`,
+		summarizeBrief: "Tóm tắt Pythia",
+		summarizing: "Đang tóm tắt…",
+		briefSummary: "Tóm tắt briefing Pythia",
+		briefError: "Lỗi tóm tắt",
+		},
+			placeholder: {
+			underConstruction: "Phần này đang được xây dựng.",
+		},
+	},
+	hi: {
+		slogans: {
+			origin: "사람과 AI의 공존, 그 무한한 시작점",
+			paradigm: "새로운 공존의 패러다임: 사람과 AI, 무한으로 잇다",
+			forEveryone: "모두를 위한 AI, 사람과 함께 호흡하는 지능",
+			convergence: "공존에서 무한으로: Human & AI Convergence",
+			collective: "비용의 한계를 넘어, 사람과 자율 에이전트가 완성하는 집단 지성",
+			empower: "당신의 아이디어에 자율 지능의 힘을 더해, 함께 더 큰 가치를 만듭니다",
+		},
+		ghostPrompts: [
+			"사람과 AI의 공존, 그 무한한 시작점",
+			"새로운 공존의 패러다임: 사람과 AI, 무한으로 잇다",
+			"모두를 위한 AI, 사람과 함께 호흡하는 지능",
+			"공존에서 무한으로: Human & AI Convergence",
+			"비용의 한계를 넘어, 사람과 자율 에이전트가 완성하는 집단 지성",
+			"당신의 아이디어에 자율 지능의 힘을 더해, 함께 더 큰 가치를 만듭니다",
+			"[[Zero-Token Gateway]] 동작 원리 탐색하기...",
+			"신규 지식 노드 발행: #WebRTC 분산 CRDT 캐시",
+			"피어 에이전트에게 묻기: Claude 3.7 vs DeepSeek R1 합의 알고리즘",
+			"내 옵시디언 볼트 시냅스 발행: [[AI 메모리 레이크.md]]",
+		],
+		ui: {
+			searchPlaceholder: "네트워크 질문 또는 지식 검색...",
+			gatewayActive: "토큰 프리 게이트웨이 활성",
+			publishToCosmic: "우주에 발행",
+			connectPeer: "피어 연결",
+			connectDevice: "내 디바이스 연결",
+			deviceConnected: "내 피어 연결됨",
+			dashboard: "대시보드",
+			cosmicMesh: "코스믹 메쉬",
+			agentCast: "에이전트 캐스트",
+			agentMesh: "에이전트 메쉬",
+			models: "LLM 모델",
+			mcpTools: "MCP 도구",
+			knowledgeGraph: "지식 그래프",
+			verification: "상호 검증",
+			settings: "설정",
+			language: "언어",
+			peerModalTitle: "P2P 메쉬 노드 연결",
+			peerModalDesc: "옵시디언 지식 메쉬에 연결할 사용자 이름이나 닉네임을 입력하세요.",
+			peerNicknamePlaceholder: "닉네임 입력 (예: Brian, Satoshi, Neo)",
+			peerConnectBtn: "⚡ 메쉬에 연결",
+			peerCancelBtn: "취소",
+			changeNickname: "닉네임 변경",
+			userGuide: "사용설명서",
+			aiThinking:
+				"다중 AI 쿼럼(Claude 3.7 + DeepSeek R1 + Gemini 2.5)이 제로 토큰 지능망에서 합의 추론 중...",
+			aiQuorumTitle: "MuhanAI 멀티 에이전트 쿼럼 합의",
+			saveAsNode: "지식 노드로 발행",
+			copyAnswer: "답변 복사",
+			copied: "복사됨!",
+		},
+		cosmicHud: {
+			developerConsole: "개발자 콘솔",
+			userGuideTitle: "MuhanAI 사용설명서 열기",
+			connectPeerTitle: "새로운 P2P 피어 노드 이름을 지정하고 연결합니다",
+			connectPeer: "피어 연결",
+			devicePeerManage: "내 디바이스 피어 이름 변경 또는 관리",
+			devicePeerConnect: "내 디바이스 피어 이름을 지정하고 P2P 메쉬에 마운트합니다",
+			userFallback: "사용자",
+			connectedSuffix: "(연결됨)",
+			connectPrefix: "연결",
+			connectMyDevice: "내 디바이스 연결",
+			physicsTitle: "그래프 물리 파라미터",
+			fullscreenTitle: "전체화면 전환",
+			graphForces: "옵시디언 그래프 힘",
+			repelForce: "반발력",
+			linkDistance: "연결 거리",
+			centerGravity: "중심 중력",
+			visibleFilters: "표시 필터",
+			eventFeed: "P2P 메쉬 이벤트 피드 & WEBRTC CRDT 로그",
+			peersLabel: "피어:",
+			notesLabel: "노트:",
+			synapsesLabel: "시냅스:",
+			latencyLabel: "지연:",
+			subtitle: "옵시디언 그래프 토폴로지 & P2P 실루엣",
+		},
+		promptBar: {
+			computerUseTitle: "Computer Use (e2b Desktop) — BYOK 비전 모델로 데스크톱 자동 조종",
+			byokEnabledTitle: "BYOK 활성화됨 — 클릭하여 설정 변경",
+			byokSetupTitle: "BYOK 설정 — 자신의 API 키 사용",
+			byokSettingsOpenAria: "BYOK 설정 열기",
+			byokSettingsAria: "BYOK 설정",
+			byokActive: "활성",
+			panelCloseTitle: "패널 닫기",
+			byokPanelCloseAria: "BYOK 패널 닫기",
+			keyHideTitle: "키 숨기기",
+			keyShowTitle: "키 표시",
+			keyHideAria: "API 키 숨기기",
+			keyShowAria: "API 키 표시",
+			keySaveRefresh: "키 저장 / 갱신",
+			keySaveActivate: "키 저장하고 활성화",
+			keyDeleteTitle: "localStorage에서 키 삭제",
+			keyDelete: "키 삭제 (Forget)",
+			currentlyUsing: "현재 사용 중:",
+			publishTitle: "Canvas에 Obsidian 노드로 영구 발행",
+			published: "발행 완료",
+			copyAnswerTitle: "답변 복사",
+			apiKeyRequired: "API 키를 입력해 주세요",
+			rateLimitedHint: "⚠ Rate-Limited · BYOK 권장",
+			noLlmHint: "No LLM · BYOK 추가 필요",
+		},
+	
+		freeLlm: {
+			settingsTitle: "무료 LLM 폴백 설정",
+			settingsDesc: "폴백으로 사용할 무료 LLM 공급자를 선택하세요",
+			pollinations: "Pollinations (POST)",
+			pollinationsGet: "Pollinations (GET)",
+			apiLlmChat: "/api/llm/chat (키리스 풀)",
+			localOauth: "로컬 OAuth 게이트웨이",
+			omniroute: "OmniRoute 메쉬",
+			geminiProxy: "Gemini 프록시 (무료)",
+			geminiCli: "Gemini CLI (무료 · 1,000건/일)",
+			meshLlm: "Mesh-LLM (로컬 메시, 9337)",
+			noneSelected: "선택된 공급자 없음",
+			expand: "열기",
+			collapse: "닫기",
+		},
+	dashboard: {
+			meshOperational: "● P2P 메쉬 가동 중",
+			gatewayActive: "토큰 프리 게이트웨이 활성",
+			heroTitle: "MuhanAI 자율 에이전트 메쉬",
+			heroDesc: "Cline 스타일의 탈중앙화 AI 메쉬 네트워크입니다. 로컬 및 분산 모델이 WebRTC & libp2p P2P 연결을 통해 자율적으로 합의하고 협력합니다.",
+			cosmicMesh: "코스믹 메쉬",
+			launchAgentCast: "에이전트 캐스트 실행",
+			peerNodes: "피어 노드",
+			activeP2PNodes: "활성 P2P 노드",
+			consensusQuorum: "합의 쿼럼",
+			distributedCompute: "분산 컴퓨트",
+			tokenCost: "토큰 비용",
+			tabTasks: "작업 & 도움 요청",
+			tabVerify: "검증 & 쿼럼",
+			tabKnowledge: "인기 인텔리전스 & 가르치기",
+			tabKb: "지식 베이스",
+			tokenBank: {
+				title: "토큰 뱅크",
+				subtitle: "p2ptokens 기여 회계 원장 · PinkyBrain Web of Trust 평판 링",
+				balance: "잔액",
+				entries: "항목 수",
+				trustScore: "신뢰 점수",
+				viewDetails: "상세 보기",
+			},
+		},
+		rightPanel: {
+			agents: "에이전트",
+			compute: "연산",
+			cpuNodes: "CPU 노드",
+			gpuNodes: "GPU 노드",
+			webgpu: "WebGPU",
+			totalCompute: "총 연산",
+			llm: "LLM",
+			providers: "공급자",
+			models: "모델",
+			free: "무료",
+			mcp: "MCP",
+			servers: "서버",
+			tools: "도구",
+			categories: "카테고리",
+			human: "인간",
+			online: "온라인",
+			available: "가용",
+			specialties: "전문분야",
+			reputation: "평판",
+			success: "성공률",
+		},
+		findPage: {
+			peerModalUserTitle: "내 디바이스 피어 이름 지정",
+			peerModalPeerTitle: "P2P 피어 노드 연결 및 이름 지정",
+			peerModalUserLabel: "디바이스 피어 닉네임",
+			peerModalPeerLabel: "원격 피어 노드 이름",
+			peerModalUserPlaceholder: "예: Brian-MacBook, CosmicCoder...",
+			peerModalPeerPlaceholder: "예: Peer-Tokyo-Node...",
+			peerModalRandomTitle: "랜덤 코스믹 이름 생성",
+			peerModalRandom: "🎲 랜덤",
+			peerModalUserHelp: "P2P 분산 지식 메쉬 및 WebRTC 볼트에 표시될 디바이스 이름입니다.",
+			peerModalPeerHelp: "새로운 피어 노드로 지식 그래프에 마운트할 고유 이름입니다.",
+			peerModalDisconnect: "연결 해제",
+			peerModalCancel: "취소",
+			peerModalApply: "이름 변경 적용",
+			peerModalConnect: "이름 지정 및 연결",
+			close: "닫기",
+		},
+
+			world: {
+			horizon24h: "24 घंटे",
+			horizon1w: "1 सप्ताह",
+			horizon1m: "1 माह",
+			horizon1y: "1 वर्ष",
+			offlineSummary: "ऑफ़लाइन स्नैपशॉट। रियल-टाइम इंजन से कनेक्ट करके विश्व स्थिति और पूर्वानुमान देखें।",
+			refreshing: "रीफ़्रेश हो रहा है…",
+			refresh: "रीफ़्रेश",
+			realtimeEvents: (count: number) => `रीयलटाइम ईवेंट (${count})`,
+			noEvents: "कोई ईवेंट नहीं।",
+			predictions: "पूर्वानुमान",
+			noPredictions: "इस क्षितिज के लिए कोई पूर्वानुमान नहीं।",
+			probability: (pct: number) => `संभावना ${pct}%`,
+			confidence: (pct: number) => `विश्वास ${pct}%`,
+		summarizeBrief: "Pythia सारांश",
+		summarizing: "सारांश बन रहा है…",
+		briefSummary: "Pythia ब्रीफिंग सारांश",
+		briefError: "सारांश विफल",
+		},
+			placeholder: {
+			underConstruction: "यह अनुभाग निर्माणाधीन है।",
+		},
 	},
 };
 
@@ -1726,6 +2339,18 @@ export function getCurrentLanguage(): SupportedLanguage {
 	return currentLanguage;
 }
 
+/**
+ * Static accessor: returns the current language's content.
+ * Use inside/outside React. Re-reads current language on each access.
+ */
+export const t: I18nContent = new Proxy({} as I18nContent, {
+	get(_target, prop: string) {
+		const lang = getCurrentLanguage();
+		const content = TRANSLATIONS[lang] || TRANSLATIONS.en;
+		return (content as any)[prop];
+	},
+});
+
 export function useI18n() {
 	const [lang, setLangState] = useState<SupportedLanguage>(currentLanguage);
 
@@ -1754,3 +2379,11 @@ export function useI18n() {
 		supportedLanguages: SUPPORTED_LANGUAGES,
 	};
 }
+
+
+
+
+
+
+
+

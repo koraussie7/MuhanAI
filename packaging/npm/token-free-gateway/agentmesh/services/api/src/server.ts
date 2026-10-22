@@ -39,6 +39,7 @@ import { securityRoutes } from "./security-routes.js";
 import { semanticRoutes } from "./semantic-routes.js";
 import { shoppingRoutes } from "./shopping-routes.js";
 import { worldRoutes } from "./world-routes.js";
+import { ontographRoutes } from "./ontograph-routes.js";
 
 function timingSafeEqual(a: string | undefined, b: string | undefined): boolean {
 	if (typeof a !== "string" || typeof b !== "string") return false;
@@ -86,7 +87,7 @@ const PUBLIC_PATH_EXACT = new Set([
 	"/health",
 	"/.well-known/mcp.json",
 	"/.well-known/agent.json",
-	
+
 ]);
 
 function isPublicPath(rawUrl: string | undefined): boolean {
@@ -246,6 +247,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	await app.register(omniRouteRoutes);
 	await app.register(openaiCompatRoutes);
 	await app.register(worldRoutes);
+	await app.register(ontographRoutes);
 	await app.register(paymentRoutes);
 	await app.register(routerRoutes);
 	await app.register(mcpRoutes);

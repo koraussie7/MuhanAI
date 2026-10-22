@@ -42,6 +42,20 @@ const CreateSessionSchema = z.object({
 const SendSchema = z.object({
 	message: z.string().min(1).max(8192),
 });
+const ExplainGraphSchema = z.object({
+	query: z.string().min(1).max(1024),
+	results: z
+		.array(
+			z.object({
+				id: z.string().min(1).max(256),
+				label: z.string().min(1).max(256),
+				type: z.string().max(64).optional(),
+				relations: z.string().max(512).optional(),
+			}),
+		)
+		.max(50),
+	model: z.string().max(128).optional(),
+});
 
 interface PythiaSession {
 	id: string;
@@ -159,6 +173,11 @@ const PYTHIA_SYSTEM =
 	"You are Pythia, an expert Python coding agent. You specialize in code repair, " +
 	"refactoring, bug detection, and best practices. You work through the Token-Free " +
 	"Gateway with zero API cost. Always provide working, tested Python code with explanations.";
+const EXPLAIN_GRAPH_SYSTEM =
+	"You are a knowledge graph analyst. Given a graph query and its results — entities " +
+	"with types and their relations — explain what the graph shows: key entities, how " +
+	"they connect, and notable patterns. Be concise and concrete; never invent " +
+	"entities that are not in the results.";
 
 export async function pythiaRoutes(app: FastifyInstance) {
 	/**
@@ -322,5 +341,46 @@ export async function pythiaRoutes(app: FastifyInstance) {
 			tier: "keyless",
 			cost: "0 MHT (Token-Free)",
 		};
+	});
+	/**
+	 * POST /api/pythia/explain-graph
+	 *
+	 * Knowledge-graph explanation: takes a graph query plus the results
+	 * (entities + relations) from the /api/ontograph projection and asks the
+	 * keyless LLM mesh for a plain-language explanation. Powers the "Explain"
+	 * button on the /world ontology sidebar.
+	 */
+	app.post("/api/pythia/explain-graph", async (request, reply) => {
+		const parse = ExplainGraphSchema.safeParse(request.body);
+		if (!parse.success) {
+			return clientError(reply, 400, formatZodError(parse.error), request.id);
+		}
+		const { query, results, model } = parse.data;
+		const summary = results
+			.slice(0, 20)
+			.map((r, i) => `${i + 1}. [${r.type ?? "entity"}] ${r.id} — ${r.label}${r.relations ? ` (${r.relations})` : ""}`)
+			.join("\n");
+		const prompt =
+			`Graph query: ${query}\n\nGraph results:\n${summary || "(no results)"}\n\n` +
+			"Explain what this knowledge graph shows: the key entities, how they relate, " +
+			"and any notable patterns. Answer in Korean with a short explanation followed " +
+			"by 2-3 key insights as bullet points.";
+		try {
+			const result = await callKeylessProviders({
+				prompt,
+				system: EXPLAIN_GRAPH_SYSTEM,
+				...(model !== undefined ? { model } : {}),
+			});
+			return {
+				query,
+				explanation: result.text,
+				provider: result.provider,
+				latencyMs: result.latencyMs,
+				cost: "0 MHT (Token-Free)",
+			};
+		} catch (err) {
+			request.log.error({ err }, "pythia explain-graph failed");
+			return clientError(reply, 502, "All keyless providers failed", request.id);
+		}
 	});
 }
