@@ -59,6 +59,34 @@ export interface WorldBrief {
 	fetchedAt: string;
 }
 
+/**
+ * PYTHIA's own horizon vocabulary. The panel speaks in `1w/1m/1y`, the engine in
+ * `week/month/year`; without this map every forecast fell through to the
+ * default bucket and the horizon tabs showed nothing.
+ */
+const PYTHIA_HORIZONS: Record<string, WorldPrediction["horizon"]> = {
+	"24h": "24h",
+	week: "1w",
+	month: "1m",
+	year: "1y",
+	// Tolerate the panel vocabulary too, in case an older engine echoes it back.
+	"1w": "1w",
+	"1m": "1m",
+	"1y": "1y",
+};
+
+/**
+ * PYTHIA rates salience 0..1 rather than emitting a severity word. Anything it
+ * considers worth surfacing gets at least `watch`, so a live feed never renders
+ * entirely as background noise.
+ */
+function severityFromSalience(salience: unknown): WorldEvent["severity"] {
+	if (typeof salience !== "number") return "info";
+	if (salience >= 0.75) return "alert";
+	if (salience >= 0.4) return "watch";
+	return "info";
+}
+
 /** Resolve the upstream base URL at request time (tests flip env freely). */
 export function getPythiaWorldUrl(): string | null {
 	const raw = process.env.PYTHIA_WORLD_URL;
@@ -160,29 +188,63 @@ async function tryLiveBrief(): Promise<WorldBrief | null> {
 			summary?: unknown;
 			domains?: unknown;
 			events?: unknown;
+			events_by_domain?: unknown;
 			predictions?: unknown;
 		};
-		const events = Array.isArray(data.events) ? (data.events as Record<string, unknown>[]) : [];
+
+		// PYTHIA groups live events by domain (`events_by_domain: { conflict: [...],
+		// weather: [...] }`). The flat `events` key is our own older shape, kept as
+		// a fallback so an older engine still works — reading only `events` meant
+		// every live payload arrived as zero events.
+		const grouped = data.events_by_domain;
+		const rawEvents: Record<string, unknown>[] = [];
+		if (grouped && typeof grouped === "object" && !Array.isArray(grouped)) {
+			for (const [domain, list] of Object.entries(grouped as Record<string, unknown>)) {
+				if (!Array.isArray(list)) continue;
+				for (const item of list) {
+					if (item && typeof item === "object") {
+						rawEvents.push({ ...(item as Record<string, unknown>), domain });
+					}
+				}
+			}
+		} else if (Array.isArray(data.events)) {
+			rawEvents.push(...(data.events as Record<string, unknown>[]));
+		}
+
+		const events = rawEvents;
 		const predictions = Array.isArray(data.predictions)
 			? (data.predictions as Record<string, unknown>[])
 			: [];
 		const domains = Array.isArray(data.domains) ? (data.domains as unknown[]) : [];
 		const eventList = events.slice(0, 50).map((e, i) => {
+			const lat = typeof e.lat === "number" ? e.lat : e.latitude;
+			const lng = typeof e.lng === "number" ? e.lng : e.longitude;
+			const ts = e.ts;
 			const evt: WorldEvent = {
 				id: typeof e.id === "string" ? e.id : `evt-${i}`,
-				title: typeof e.title === "string" ? e.title : "untitled",
+				title:
+					typeof e.title === "string"
+						? e.title
+						: typeof e.summary === "string"
+							? e.summary
+							: "untitled",
 				domain: typeof e.domain === "string" ? e.domain : "general",
 				severity:
 					e.severity === "alert" || e.severity === "watch" || e.severity === "info"
 						? e.severity
-						: "info",
+						: severityFromSalience(e.salience),
 				source: typeof e.source === "string" ? e.source : "pythia",
-				timestamp: typeof e.timestamp === "string" ? e.timestamp : new Date().toISOString(),
+				timestamp:
+					typeof e.timestamp === "string"
+						? e.timestamp
+						: typeof ts === "number"
+							? new Date(ts).toISOString()
+							: new Date().toISOString(),
 			};
 			if (typeof e.location === "string") evt.location = e.location;
-			if (typeof e.latitude === "number" && typeof e.longitude === "number") {
-				evt.latitude = e.latitude;
-				evt.longitude = e.longitude;
+			if (typeof lat === "number" && typeof lng === "number") {
+				evt.latitude = lat;
+				evt.longitude = lng;
 			}
 			return evt;
 		});
@@ -193,14 +255,30 @@ async function tryLiveBrief(): Promise<WorldBrief | null> {
 			events: eventList,
 			predictions: predictions.slice(0, 50).map((p, i) => ({
 				id: typeof p.id === "string" ? p.id : `pred-${i}`,
-				title: typeof p.title === "string" ? p.title : "untitled",
+				title:
+					typeof p.title === "string"
+						? p.title
+						: typeof p.statement === "string"
+							? p.statement
+							: "untitled",
 				horizon:
-					p.horizon === "24h" || p.horizon === "1w" || p.horizon === "1m" || p.horizon === "1y"
-						? p.horizon
-						: ("1w" as const),
+					(typeof p.horizon === "string" ? PYTHIA_HORIZONS[p.horizon] : undefined) ?? "1w",
 				probability: typeof p.probability === "number" ? p.probability : 0.5,
-				confidence: typeof p.confidence === "number" ? p.confidence : 0.5,
-				rationale: typeof p.rationale === "string" ? p.rationale : "",
+				// PYTHIA publishes base_rate; the panel's confidence is how far the
+				// swarm moved off that baseline, floored so an unmoved forecast still
+				// shows a non-zero confidence.
+				confidence:
+					typeof p.confidence === "number"
+						? p.confidence
+						: typeof p.base_probability === "number" && typeof p.probability === "number"
+							? Math.min(1, Math.abs(p.probability - p.base_probability) + 0.5)
+							: 0.5,
+				rationale:
+					typeof p.rationale === "string"
+						? p.rationale
+						: typeof p.reasoning === "string"
+							? p.reasoning
+							: "",
 			})),
 			fetchedAt: new Date().toISOString(),
 		};

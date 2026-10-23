@@ -164,3 +164,84 @@ describe("World API routes", () => {
 		}
 	});
 });
+
+describe("World API — PYTHIA /agent/view contract", () => {
+	beforeEach(() => {
+		process.env.DISABLE_AUTH = "true";
+		process.env.PYTHIA_WORLD_URL = "http://localhost:8088";
+	});
+	afterEach(() => {
+		delete process.env.DISABLE_AUTH;
+		delete process.env.PYTHIA_WORLD_URL;
+		globalThis.fetch = originalFetch;
+	});
+
+	// PYTHIA groups events by domain and uses week/month/year horizons. Reading
+	// only a flat `events` array made every live payload arrive as zero events,
+	// and the panel's unused-horizon tabs stayed empty.
+	it("normalises events_by_domain and the week/month/year horizons", async () => {
+		globalThis.fetch = (async () =>
+			new Response(
+				JSON.stringify({
+					summary: "Two conflicts active, one flood watch.",
+					domains: ["conflict", "disaster"],
+					events_by_domain: {
+						conflict: [
+							{
+								id: "evt-a",
+								title: "Border skirmish",
+								lat: 33.3,
+								lng: 44.4,
+								salience: 0.8,
+								source: "gdelt",
+								ts: 1_700_000_000_000,
+							},
+						],
+						disaster: [{ id: "evt-b", title: "Flood watch", lat: 10, lng: 20, salience: 0.45 }],
+					},
+					event_count: 2,
+					predictions: [
+						{
+							id: "pred-a",
+							statement: "Escalation likely",
+							horizon: "week",
+							probability: 0.71,
+							base_probability: 0.4,
+							reasoning: "Two independent feeds agree.",
+						},
+						{ id: "pred-b", title: "Famine risk", horizon: "month", probability: 0.3 },
+					],
+				}),
+				{ status: 200, headers: { "content-type": "application/json" } },
+			)) as typeof fetch;
+
+		const app = await buildApp({ enableTransport: false, logger: pino({ level: "silent" }) });
+		try {
+			const res = await app.inject({ method: "GET", url: "/api/world/brief" });
+			expect(res.statusCode).toBe(200);
+			const body = res.json();
+
+			expect(body.source).toBe("pythia");
+			// Both domains survive, each stamped with its group key.
+			expect(body.events).toHaveLength(2);
+			const conflict = body.events.find((e: { id: string }) => e.id === "evt-a");
+			expect(conflict.domain).toBe("conflict");
+			expect(conflict.latitude).toBe(33.3);
+			expect(conflict.longitude).toBe(44.4);
+			expect(conflict.severity).toBe("alert"); // salience 0.8
+			expect(conflict.timestamp).toBe(new Date(1_700_000_000_000).toISOString());
+
+			const flood = body.events.find((e: { id: string }) => e.id === "evt-b");
+			expect(flood.severity).toBe("watch"); // salience 0.45
+
+			// week -> 1w, month -> 1m
+			expect(body.predictions.map((p: { horizon: string }) => p.horizon)).toEqual(["1w", "1m"]);
+			expect(body.predictions[0].title).toBe("Escalation likely");
+			expect(body.predictions[0].rationale).toBe("Two independent feeds agree.");
+			// confidence derived from the distance off base rate
+			expect(body.predictions[0].confidence).toBeCloseTo(0.81, 5);
+		} finally {
+			await app.close();
+		}
+	});
+});
