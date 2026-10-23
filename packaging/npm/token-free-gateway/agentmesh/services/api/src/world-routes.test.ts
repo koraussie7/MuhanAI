@@ -307,3 +307,60 @@ describe("World API — live events reach the ontology graph", () => {
 		}
 	});
 });
+
+describe("World API — misplaced coordinates from upstream", () => {
+	beforeEach(() => {
+		process.env.DISABLE_AUTH = "true";
+		process.env.PYTHIA_WORLD_URL = "http://localhost:8088";
+	});
+	afterEach(() => {
+		delete process.env.DISABLE_AUTH;
+		delete process.env.PYTHIA_WORLD_URL;
+		globalThis.fetch = originalFetch;
+	});
+
+	// Osiris sends transposed pairs. A latitude beyond ±90 settles it — the row
+	// must be (lng, lat) — so those are corrected. Pairs where both readings are
+	// legal (31.272,49.487) are deliberately left alone: guessing would move
+	// markers to the wrong continent and hide the real upstream bug.
+	it("swaps only the pairs whose latitude cannot be a latitude", async () => {
+		globalThis.fetch = (async () =>
+			new Response(
+				JSON.stringify({
+					summary: "s",
+					domains: ["conflict"],
+					events_by_domain: {
+						conflict: [
+							{ id: "bad", title: "Impossible latitude", lat: 120.5, lng: 31.046 },
+							{ id: "ok", title: "Good event", lat: -33.86, lng: 151.2 },
+							{ id: "amb", title: "Ambiguous", lat: 34.851, lng: 31.046 },
+						],
+					},
+					predictions: [],
+				}),
+				{ status: 200, headers: { "content-type": "application/json" } },
+			)) as typeof fetch;
+
+		const app = await buildApp({ enableTransport: false, logger: pino({ level: "silent" }) });
+		try {
+			const body = (await app.inject({ method: "GET", url: "/api/world/brief" })).json();
+			const byId = Object.fromEntries(
+				body.events.map((e: { id: string }) => [e.id, e]),
+			) as Record<string, { latitude?: number; longitude?: number }>;
+
+			// 120.5 cannot be a latitude -> read as (lng, lat).
+			expect(byId.bad?.latitude).toBeCloseTo(31.046);
+			expect(byId.bad?.longitude).toBeCloseTo(120.5);
+
+			// A legal pair is untouched.
+			expect(byId.ok?.latitude).toBeCloseTo(-33.86);
+			expect(byId.ok?.longitude).toBeCloseTo(151.2);
+
+			// Both readings legal -> no guess either way.
+			expect(byId.amb?.latitude).toBeCloseTo(34.851);
+			expect(byId.amb?.longitude).toBeCloseTo(31.046);
+		} finally {
+			await app.close();
+		}
+	});
+});

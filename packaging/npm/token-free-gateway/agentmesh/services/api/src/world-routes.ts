@@ -88,6 +88,30 @@ function severityFromSalience(salience: unknown): WorldEvent["severity"] {
 	return "info";
 }
 
+/**
+ * Reject coordinates that cannot be a (lat, lng) pair; swap when only the
+ * reversed reading is legal.
+ *
+ * Much upstream data arrives transposed (Israel as 34.851,31.046). Sometimes
+ * that is detectable — a latitude beyond ±90 is not a latitude — and then the
+ * pair is read reversed. But plenty of transposed rows have two in-range
+ * values (31.272,49.487) where both readings are legal coordinates; there is no
+ * local way to tell which is right, and guessing would silently move markers.
+ * Those are passed through unchanged rather than "corrected" on a hunch.
+ */
+function normaliseCoords(lat: unknown, lng: unknown): { lat: number; lng: number } | null {
+	if (typeof lat !== "number" || typeof lng !== "number") return null;
+	if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
+	const latLegal = Math.abs(lat) <= 90;
+	const lngLegal = Math.abs(lng) <= 180;
+	if (latLegal && lngLegal) return { lat, lng };
+
+	// Only the reversed reading is legal — that one we can trust.
+	if (!latLegal && Math.abs(lng) <= 90) return { lat: lng, lng: lat };
+	return null;
+}
+
 /** Resolve the upstream base URL at request time (tests flip env freely). */
 export function getPythiaWorldUrl(): string | null {
 	const raw = process.env.PYTHIA_WORLD_URL;
@@ -218,8 +242,10 @@ async function tryLiveBrief(): Promise<WorldBrief | null> {
 			: [];
 		const domains = Array.isArray(data.domains) ? (data.domains as unknown[]) : [];
 		const eventList = events.slice(0, 50).map((e, i) => {
-			const lat = typeof e.lat === "number" ? e.lat : e.latitude;
-			const lng = typeof e.lng === "number" ? e.lng : e.longitude;
+			const coords = normaliseCoords(
+				typeof e.lat === "number" ? e.lat : e.latitude,
+				typeof e.lng === "number" ? e.lng : e.longitude,
+			);
 			const ts = e.ts;
 			const evt: WorldEvent = {
 				id: typeof e.id === "string" ? e.id : `evt-${i}`,
@@ -243,9 +269,9 @@ async function tryLiveBrief(): Promise<WorldBrief | null> {
 							: new Date().toISOString(),
 			};
 			if (typeof e.location === "string") evt.location = e.location;
-			if (typeof lat === "number" && typeof lng === "number") {
-				evt.latitude = lat;
-				evt.longitude = lng;
+			if (coords) {
+				evt.latitude = coords.lat;
+				evt.longitude = coords.lng;
 			}
 			return evt;
 		});

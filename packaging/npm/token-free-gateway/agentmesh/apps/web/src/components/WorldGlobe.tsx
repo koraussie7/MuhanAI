@@ -480,8 +480,10 @@ export const WorldGlobe = ({
 				<span className="text-white/50">{points.length} markers</span>
 			</div>
 
-			{/* 로딩 인디케이터 */}
-			{!ready && (
+			{/* 로딩 인디케이터 — 오류 폴백이 떠 있으면 사라져야 한다.
+			    예전에는 !ready 만 봤기 때문에 초기화가 실패하면 스피너가
+			    영원히 돌았고, 폴백 위에 겹쳐 "무한 로딩"으로 보었다. */}
+			{!ready && !globeError && (
 				<div className="absolute inset-0 flex items-center justify-center">
 					<div className="flex items-center gap-2 rounded-lg bg-white/5 px-4 py-2 text-sm text-white/60 backdrop-blur-sm">
 						<RefreshCw size={14} className="animate-spin" />
