@@ -6,7 +6,7 @@
  * a prop. Markup, classes and colours carried over unchanged.
  */
 
-import type { CSSProperties } from "react";
+import { Fragment, type CSSProperties } from "react";
 
 const STEPS = [
   {
@@ -120,15 +120,10 @@ export function Economy({ onCreateNode }: Props) {
       {/* Business Node Generation Pipeline */}
       <div className="pipeline-track" style={{ marginBottom: 30 }}>
         {STEPS.map((s, i) => (
-          <>
-            {i > 0 && (
-              <div className="pipeline-arrow" key={`arrow-${s.title}`}>
-                →
-              </div>
-            )}
+          <Fragment key={s.title}>
+            {i > 0 && <div className="pipeline-arrow">→</div>}
             <div
               className="pipeline-step"
-              key={s.title}
               style={
                 "highlight" in s && s.highlight ? highlightedStep : undefined
               }
@@ -139,7 +134,7 @@ export function Economy({ onCreateNode }: Props) {
               <div style={stepTitle(s.accent)}>{s.title}</div>
               <div style={stepSub}>{s.sub}</div>
             </div>
-          </>
+          </Fragment>
         ))}
       </div>
 
