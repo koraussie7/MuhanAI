@@ -32,7 +32,13 @@ type GlobeInstance = {
 	_destructor: () => void;
 };
 
-const GlobeChart = Globe as unknown as (el: HTMLElement) => GlobeInstance;
+/**
+ * globe.gl is an ES class (Kapsule factory). Calling it without `new` returns
+ * an empty object and attaches nothing — no canvas, no exception, which is how
+ * this page silently rendered a blank card. The old `as unknown as` cast hid
+ * exactly that from the compiler.
+ */
+const GlobeChart = Globe as unknown as new (el: HTMLElement) => GlobeInstance;
 import { RefreshCw, ScanLine } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { WorldEvent } from "../lib/world-types";
@@ -334,7 +340,7 @@ export const WorldGlobe = ({
 
 		let chart: GlobeInstance | null = null;
 		try {
-			chart = GlobeChart(el);
+			chart = new GlobeChart(el);
 			chart
 				.globeImageUrl(GLOBE_TEXTURE)
 				.atmosphereColor("#38bdf8")
