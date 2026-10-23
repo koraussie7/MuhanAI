@@ -80,6 +80,8 @@ const PUBLIC_PATH_PREFIXES = [
 	"/api/agents",
 	"/api/nodes",
 	"/api/mesh",
+	// The glasses PWA reads the shared knowledge lake without a device token.
+	"/api/knowledge",
 	"/api/auth",
 	"/api/health",
 	"/rpc",

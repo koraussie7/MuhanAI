@@ -25,6 +25,7 @@ import {
 	Smartphone,
 	Sparkles,
 	Star,
+	Glasses,
 	Users,
 	Vote,
 	X,
@@ -116,6 +117,10 @@ function renderIcon(key: string): React.ReactNode {
 			return <GitBranch size={18} />;
 		case "python":
 			return <Code2 size={18} />;
+		case "glasses":
+			return <Glasses size={18} />;
+		case "smartphone":
+			return <Smartphone size={18} />;
 		case "ghost":
 			return <Ghost size={18} />;
 		case "robot":

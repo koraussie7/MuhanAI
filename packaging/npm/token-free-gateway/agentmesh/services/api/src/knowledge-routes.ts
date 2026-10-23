@@ -107,6 +107,12 @@ function getFederation(app: FastifyInstance): {
 	return { federation, transport };
 }
 
+const PublishSchema = z.object({
+	title: z.string().min(1).max(256),
+	markdown: z.string().min(1).max(64_000),
+	tags: z.array(z.string().max(64)).max(16).optional(),
+});
+
 export async function knowledgeRoutes(app: FastifyInstance) {
 	const { federation, transport } = getFederation(app);
 
@@ -295,10 +301,43 @@ export async function knowledgeRoutes(app: FastifyInstance) {
 				return { started: true, kind: "libp2p" };
 			} catch (e) {
 				request.log.error({ err: e, route: "folklore/transport/start" }, "transport start failed");
-				return clientError(reply, 500, "Transport start failed", request.id);
-			}
-		}
+								return clientError(reply, 500, "Transport start failed", request.id);
+							}
+						}
+						return { started: true, kind };
+					});
 
-		return { started: true, kind };
-	});
-}
+					// The Horizon Glasses PWA (apps/web/src/components/GlassesApp.tsx) has always
+					// read and written `/api/knowledge/nodes`; the server never implemented it, so
+					// its knowledge panel stayed empty. Reuse the wheel protocol as the store
+					// rather than adding a second one — it already owns registration and listing.
+					app.get("/api/knowledge/nodes", async (_request, _reply) => {
+						return {
+							nodes: wheelProtocol.listShared().map((entry) => ({
+								id: entry.id,
+								type: entry.type,
+								content: entry.content,
+								ownerId: entry.ownerId,
+							})),
+						};
+					});
+
+					app.post("/api/knowledge/nodes", async (request, reply) => {
+						const parse = PublishSchema.safeParse(request.body);
+						if (!parse.success) {
+							return clientError(reply, 400, formatZodError(parse.error), request.id);
+						}
+
+						const { title, markdown, tags } = parse.data;
+						const id = `glasses-${Date.now().toString(36)}`;
+						wheelProtocol.register({
+							id,
+							type: "knowledge",
+							content: JSON.stringify({ title, markdown, tags: tags ?? [] }),
+							ownerId: "glasses-app",
+							shared: true,
+							timestamp: Date.now(),
+						});
+						return { ok: true, id };
+					});
+				}

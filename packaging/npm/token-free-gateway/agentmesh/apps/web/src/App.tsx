@@ -155,6 +155,17 @@ const HappyPageLazy = React.lazy(() =>
 const WorldPageLazy = React.lazy(() =>
 	import("./components/WorldPage").then((m) => ({ default: m.WorldPage })),
 );
+// Horizon Glasses — Rokid AR glasses companion surfaces. Restored from 73309f0
+// after the branch never merged; see docs/horizon-glasses/CLAUDE.md.
+const HorizonGlassesPanelLazy = React.lazy(() =>
+	import("./components/HorizonGlassesPanel").then((m) => ({ default: m.HorizonGlassesPanel })),
+);
+const GlassesDevicesPanelLazy = React.lazy(() =>
+	import("./components/GlassesDevicesPanel").then((m) => ({ default: m.GlassesDevicesPanel })),
+);
+const GlassesAppLazy = React.lazy(() =>
+	import("./components/GlassesApp").then((m) => ({ default: m.GlassesApp })),
+);
 const SearchPageLazy = React.lazy(() =>
 	import("./components/SpecPages").then((m) => ({ default: m.SearchPage })),
 );
@@ -655,6 +666,28 @@ export function App() {
 							<ErrorBoundary label="World">
 								<Suspense fallback={<PageSkeleton />}>
 									<WorldPageLazy />
+								</Suspense>
+							</ErrorBoundary>
+						)}
+						{/* Horizon Glasses — device + PWA surfaces */}
+						{activeSection === "horizon-glasses" && (
+							<ErrorBoundary label="Horizon Glasses">
+								<Suspense fallback={<PageSkeleton />}>
+									<HorizonGlassesPanelLazy />
+								</Suspense>
+							</ErrorBoundary>
+						)}
+						{activeSection === "glasses-devices" && (
+							<ErrorBoundary label="Glasses Devices">
+								<Suspense fallback={<PageSkeleton />}>
+									<GlassesDevicesPanelLazy />
+								</Suspense>
+							</ErrorBoundary>
+						)}
+						{activeSection === "glasses-app" && (
+							<ErrorBoundary label="Glasses App">
+								<Suspense fallback={<PageSkeleton />}>
+									<GlassesAppLazy />
 								</Suspense>
 							</ErrorBoundary>
 						)}
