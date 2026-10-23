@@ -350,13 +350,19 @@ export const WorldGlobe = ({
 			chart.pointOfView({ lat: 25, lng: 20, altitude: 2.4 });
 
 			// Osiris 느낌의 자동 회전 — 마커에 hover하면 잠시 멈춘다.
+			// globe.gl's controls() can return undefined before three.js has finished
+			// attaching OrbitControls; assigning to it threw "Cannot set properties
+			// of undefined", which the catch below turned into a fallback card even
+			// though WebGL was fine. Rotation is cosmetic — skip it, keep the globe.
 			const controls = chart.controls();
-			controls.autoRotate = true;
-			controls.autoRotateSpeed = 0.6;
-			controls.enablePan = false;
-			chart.onPointHover((point: object | null) => {
-				controls.autoRotate = point === null;
-			});
+			if (controls) {
+				controls.autoRotate = true;
+				controls.autoRotateSpeed = 0.6;
+				controls.enablePan = false;
+				chart.onPointHover((point: object | null) => {
+					if (controls) controls.autoRotate = point === null;
+				});
+			}
 
 			globeRef.current = chart;
 			setReady(true);
