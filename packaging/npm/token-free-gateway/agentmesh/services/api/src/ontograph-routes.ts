@@ -17,7 +17,7 @@
  */
 import type { FastifyInstance } from "fastify";
 import { clientError, formatZodError } from "./error-shapes.js";
-import { cosmosProjection, conceptViews, relationViews } from "./cosmos-routes.js";
+import { type GraphConceptView, cosmosProjection, conceptViews, relationViews } from "./cosmos-routes.js";
 import { z } from "zod";
 const QuerySchema = z.object({
 	limit: z.coerce.number().int().min(1).max(200).optional(),
@@ -96,33 +96,49 @@ export function buildOfflineOntograph(): OntographSnapshot {
  * Concepts become entities; projected relations become edges. Entity types
  * are derived from the concept domain so the sidebar filters stay honest.
  */
+/**
+ * Project cosmos concepts onto sidebar entities, lifting geo metadata onto
+ * `latitude`/`longitude` so the globe can focus on a selection.
+ *
+ * Ingestion writes the GeoJSON shape `{ geo: { lat, lng } }`; events written
+ * before the ShadowBroker pipeline used flat `{ latitude, longitude }`. Both
+ * are accepted so replaying an older log still places concepts correctly.
+ */
+export function toEntities(
+	concepts: ReadonlyArray<
+		Pick<GraphConceptView, "id" | "label" | "domain" | "status" | "signalScore" | "metadata">
+	>,
+): OntographEntity[] {
+	return concepts.map((c) => {
+		const out: OntographEntity = {
+			id: c.id,
+			label: c.label,
+			type: entityTypeFor(c.domain, c.status),
+			status: c.status,
+			signalScore: c.signalScore,
+			domain: c.domain,
+		};
+		const meta = c.metadata;
+		if (meta && typeof meta === "object") {
+			const record = meta as Record<string, unknown>;
+			const nested = record.geo as Record<string, unknown> | undefined;
+			const lat = nested?.lat ?? record.latitude;
+			const lng = nested?.lng ?? record.longitude;
+			if (typeof lat === "number" && typeof lng === "number") {
+				out.latitude = lat;
+				out.longitude = lng;
+			}
+		}
+		return out;
+	});
+}
+
 export async function buildLiveOntograph(): Promise<OntographSnapshot | null> {
 	try {
 		const live = await cosmosProjection();
 		const concepts = conceptViews(live);
 		if (concepts.length === 0) return null;
-		const entities: OntographEntity[] = concepts.map((c) => {
-			const out: OntographEntity = {
-				id: c.id,
-				label: c.label,
-				type: entityTypeFor(c.domain, c.status),
-				status: c.status,
-				signalScore: c.signalScore,
-				domain: c.domain,
-			};
-			// Geo concepts carry coordinates in metadata (world feed ingestion
-			// writes location lat/lng when the upstream provides it).
-			const meta = c.metadata;
-			if (meta && typeof meta === "object") {
-				const lat = (meta as Record<string, unknown>).latitude;
-				const lng = (meta as Record<string, unknown>).longitude;
-				if (typeof lat === "number" && typeof lng === "number") {
-					out.latitude = lat;
-					out.longitude = lng;
-				}
-			}
-			return out;
-		});
+		const entities = toEntities(concepts);
 		const known = new Set(entities.map((e) => e.id));
 		const relations: OntographRelation[] = relationViews(live)
 			.filter((r) => known.has(r.sourceId) && known.has(r.targetId))
