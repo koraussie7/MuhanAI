@@ -7,7 +7,7 @@
  * "what is true now" and "what was true at sequence N".
  */
 
-import { amplify, statusForScore, type ReactionSample } from "./amplification.js";
+import { amplify, type ReactionSample, statusForScore } from "./amplification.js";
 import { conceptIdsOf } from "./log.js";
 import { createConcept, observeConcept, projectRelation, relationId } from "./ontology.js";
 import type {
@@ -66,7 +66,8 @@ export function applyEvent(projection: ConceptProjection, event: CosmosEvent): v
 						: {}),
 					seenAt: event.timestamp,
 				});
-				// Later observations may carry coordinates the first one lacked.
+				// Later observations may carry metadata the first one lacked
+				// (e.g. geo coordinates resolved on a subsequent sighting).
 				if (metadata) updated = { ...updated, metadata };
 				projection.concepts.set(conceptId, updated);
 				break;
@@ -81,9 +82,7 @@ export function applyEvent(projection: ConceptProjection, event: CosmosEvent): v
 					...(event.payload.upstreamId !== undefined
 						? { upstreamId: event.payload.upstreamId }
 						: {}),
-					...(event.payload.metadata !== undefined
-						? { metadata: event.payload.metadata }
-						: {}),
+					...(metadata !== undefined ? { metadata } : {}),
 					firstSeen: event.timestamp,
 				}),
 			);

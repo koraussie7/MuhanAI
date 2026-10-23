@@ -11,7 +11,7 @@
  */
 
 import { randomUUID } from "node:crypto";
-import { conceptId, clamp01 } from "./ontology.js";
+import { clamp01, conceptId } from "./ontology.js";
 import type {
 	AppendOnlyLog,
 	CosmosEvent,
@@ -27,17 +27,16 @@ import type {
 
 /** Matches `WorldEvent` in `services/api/src/world-routes.ts`. */
 export interface WorldFeedEvent {
-	 id: string;
-		title: string;
-		domain: string;
-		location?: string;
-		/** Optional coordinates for the location — powers the /world globe focus. */
-		latitude?: number;
-		longitude?: number;
-		severity: WorldSeverity;
-		source: string;
-		timestamp: string;
-	}
+	id: string;
+	title: string;
+	domain: string;
+	location?: string;
+	severity: WorldSeverity;
+	source: string;
+	timestamp: string;
+	/** GeoJSON-style point from geospatial sources (ShadowBroker). */
+	geo?: { lat: number; lng: number; altitudeM?: number };
+}
 
 /** Matches `WorldPrediction` in `services/api/src/world-routes.ts`. */
 export interface WorldFeedPrediction {
@@ -51,7 +50,12 @@ export interface WorldFeedPrediction {
 
 /** Matches `WorldBrief` in `services/api/src/world-routes.ts`. */
 export interface WorldFeedBrief {
-	source: "pythia" | "offline";
+	/**
+	 * `merged` is what the live routes emit once more than one engine is wired
+	 * in: a single brief carrying Pythia forecasts *and* ShadowBroker
+	 * observations. Offline snapshots are still skipped at ingest.
+	 */
+	source: "pythia" | "shadowbroker" | "merged" | "offline";
 	summary: string;
 	domains: string[];
 	events: WorldFeedEvent[];
@@ -64,66 +68,18 @@ export interface IngestOptions {
 	source?: CosmosEventSource;
 	/** Epoch millis override (tests). */
 	now?: number;
+	/**
+	 * Subject domains for a prediction (e.g. `["conflict"]`). Without at least
+	 * one, the forecast can only be correlated with an observation by proximity,
+	 * never by domain — see `normalizePrediction`.
+	 */
+	subjectDomains?: string[];
 }
 
 /** Parse an ISO timestamp, falling back to `now` when unparseable. */
 function parseTimestamp(value: string, now: number): number {
 	const parsed = Date.parse(value);
 	return Number.isFinite(parsed) ? parsed : now;
-}
-
-/**
- * Geo metadata for location concepts — carried on `ontology_node` payloads so
- * the projection persists coordinates on the concept (OntologyConcept.metadata),
- * which the /api/ontograph sidebar reads to fly the globe to a selection.
- */
-export interface GeoCoordinates {
-	latitude: number;
-	longitude: number;
-}
-/**
- * City-name → coordinates. The world feed only carries a free-form location
- * string, so a small known-cities table is the pragmatic resolver; unknown
- * locations degrade to no coordinates (the sidebar still lists the entity,
- * just without globe focus).
- */
-const GEO_KNOWN_LOCATIONS: Record<string, GeoCoordinates> = {
-	seoul: { latitude: 37.5665, longitude: 126.978 },
-	tokyo: { latitude: 35.6762, longitude: 139.6503 },
-	paris: { latitude: 48.8566, longitude: 2.3522 },
-	london: { latitude: 51.5074, longitude: -0.1278 },
-	"new york": { latitude: 40.7128, longitude: -74.006 },
-	sydney: { latitude: -33.8688, longitude: 151.2093 },
-	dubai: { latitude: 25.2048, longitude: 55.2708 },
-	moscow: { latitude: 55.7558, longitude: 37.6173 },
-	beijing: { latitude: 39.9042, longitude: 116.4074 },
-	"new delhi": { latitude: 28.6139, longitude: 77.209 },
-	delhi: { latitude: 28.6139, longitude: 77.209 },
-	berlin: { latitude: 52.52, longitude: 13.405 },
-	"los angeles": { latitude: 34.0522, longitude: -118.2437 },
-	"san francisco": { latitude: 37.7749, longitude: -122.4194 },
-	singapore: { latitude: 1.3521, longitude: 103.8198 },
-	hongkong: { latitude: 22.3193, longitude: 114.1694 },
-	"hong kong": { latitude: 22.3193, longitude: 114.1694 },
-	cairo: { latitude: 30.0444, longitude: 31.2357 },
-	istanbul: { latitude: 41.0082, longitude: 28.9784 },
-	mumbai: { latitude: 19.076, longitude: 72.8777 },
-	shanghai: { latitude: 31.2304, longitude: 121.4737 },
-	jakarta: { latitude: -6.2088, longitude: 106.8456 },
-	nairobi: { latitude: -1.2921, longitude: 36.8219 },
-};
-/**
- * Resolve a feed location string to coordinates. Case-insensitive substring
- * match: "Seoul, KR" and "near Tokyo" both resolve. Returns null when no
- * known city matches.
- */
-export function geoForLocation(location: string | undefined): GeoCoordinates | null {
-	if (!location) return null;
-	const needle = location.toLowerCase();
-	for (const [city, coords] of Object.entries(GEO_KNOWN_LOCATIONS)) {
-		if (needle.includes(city)) return coords;
-	}
-	return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -158,6 +114,7 @@ export function normalizeWorldEvent(
 		raw: { source: event.source, timestamp: event.timestamp },
 	};
 	if (event.location) payload.location = event.location;
+	if (event.geo) payload.geo = event.geo;
 
 	return {
 		event: {
@@ -174,6 +131,12 @@ export function normalizeWorldEvent(
  * Prediction → `prediction` event. Predictions are the raw material for the
  * `prediction_accuracy` signal: once reality catches up, a matching world event
  * makes the originating concepts measurably more trustworthy.
+ *
+ * `domain` is fixed to `"prediction"` (the event kind), so the forecast's
+ * *subject* domains are carried in `conceptIds` instead — a forecast with no
+ * subject domain can never be correlated with an observation, because there is
+ * nothing to match on. Callers that know the subject domain (the world routes
+ * do, from the upstream brief) pass it via `subjectDomains`.
  */
 export function normalizePrediction(
 	prediction: WorldFeedPrediction,
@@ -181,6 +144,11 @@ export function normalizePrediction(
 ): { event: CosmosEventInput; conceptIds: string[] } {
 	const now = options.now ?? Date.now();
 	const conceptIds = [conceptId("prediction", prediction.title)];
+	for (const domain of options.subjectDomains ?? []) {
+		if (domain && domain !== "prediction" && domain !== "general") {
+			conceptIds.push(conceptId("domain", domain));
+		}
+	}
 
 	return {
 		event: {
@@ -216,8 +184,8 @@ export function conceptObservationEvents(
 		label: string;
 		upstreamId?: string;
 		timestamp: number;
-		/** Optional coordinates, attached as concept metadata (geo concepts). */
-		geo?: GeoCoordinates;
+		/** Optional GeoJSON point - persisted as concept metadata for the /world globe focus. */
+		geo?: { lat: number; lng: number; altitudeM?: number };
 	},
 	source: CosmosEventSource = "pythia",
 ): CosmosEventInput[] {
@@ -236,7 +204,7 @@ export function conceptObservationEvents(
 			status: "raw",
 		};
 		if (meta.upstreamId) payload.upstreamId = meta.upstreamId;
-		if (meta.geo) payload.metadata = { latitude: meta.geo.latitude, longitude: meta.geo.longitude };
+		if (meta.geo) payload.metadata = { geo: meta.geo };
 
 		events.push({
 			kind: "ontology_node",
@@ -309,16 +277,19 @@ export async function ingestWorldBrief(
 		}
 		const { event, conceptIds } = normalizeWorldEvent(raw, { source, now });
 		for (const id of conceptIds) touchedConcepts.add(id);
-		const geo = geoForLocation(raw.location);
 		batch.push(
 			event,
-			...conceptObservationEvents(conceptIds, {
-				domain: raw.domain,
-				label: raw.title,
-				upstreamId: raw.id,
-				timestamp: parseTimestamp(raw.timestamp, now),
-				...(geo ? { geo } : {}),
-			}, source),
+			...conceptObservationEvents(
+				conceptIds,
+				{
+					domain: raw.domain,
+					label: raw.title,
+					upstreamId: raw.id,
+					timestamp: parseTimestamp(raw.timestamp, now),
+					...(raw.geo ? { geo: raw.geo } : {}),
+				},
+				source,
+			),
 		);
 	}
 
@@ -327,16 +298,26 @@ export async function ingestWorldBrief(
 			skippedUpstreamIds.push(raw.id);
 			continue;
 		}
-		const { event, conceptIds } = normalizePrediction(raw, { source, now });
+		// A forecast inherits the domains its author reported, so correlation has
+		// something to match an observation against.
+		const { event, conceptIds } = normalizePrediction(raw, {
+			source,
+			now,
+			subjectDomains: brief.domains,
+		});
 		for (const id of conceptIds) touchedConcepts.add(id);
 		batch.push(
 			event,
-			...conceptObservationEvents(conceptIds, {
-				domain: "prediction",
-				label: raw.title,
-				upstreamId: raw.id,
-				timestamp: now,
-			}, source),
+			...conceptObservationEvents(
+				conceptIds,
+				{
+					domain: "prediction",
+					label: raw.title,
+					upstreamId: raw.id,
+					timestamp: now,
+				},
+				source,
+			),
 		);
 	}
 
