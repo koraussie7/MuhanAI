@@ -66,6 +66,38 @@ export function getPythiaWorldUrl(): string | null {
 	return raw.replace(/\/+$/, "");
 }
 
+export interface ShadowBrokerConfig {
+	base: string;
+	/** Sensor layers to request; empty means "whatever the server defaults to". */
+	layers: string[];
+	token?: string;
+}
+
+/**
+ * Resolve the ShadowBroker (GEV sensor feed) config at request time.
+ *
+ * Read on every call rather than cached at module load so tests and operators
+ * can set env without restarting the process, matching getPythiaWorldUrl.
+ * Returns null when no base URL is configured — that is the normal state, and
+ * the world panel falls back to the offline snapshot.
+ */
+export function getShadowBrokerConfig(): ShadowBrokerConfig | null {
+	const raw = process.env.SHADOWBROKER_URL;
+	if (!raw) return null;
+
+	const layers = (process.env.SHADOWBROKER_LAYERS ?? "")
+		.split(",")
+		.map((layer) => layer.trim())
+		.filter((layer) => layer.length > 0);
+
+	const token = process.env.SHADOWBROKER_TOKEN;
+	return {
+		base: raw.replace(/\/+$/, ""),
+		layers,
+		...(token ? { token } : {}),
+	};
+}
+
 // ---------------------------------------------------------------------------
 // Deterministic offline snapshot — same hour → same payload, so the UI keeps
 // a stable frame when the upstream engine is absent (mirrors the
