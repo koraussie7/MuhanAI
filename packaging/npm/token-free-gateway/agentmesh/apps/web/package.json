@@ -31,6 +31,7 @@
 		"lucide-react": "^0.460.0",
 		"react": "^19.0.0",
 		"react-dom": "^19.0.0",
+		"react-globe.gl": "^2.38.0",
 		"react-router-dom": "^7.18.4",
 		"tailwindcss": "^4.0.0",
 		"typescript": "^5.7.2",

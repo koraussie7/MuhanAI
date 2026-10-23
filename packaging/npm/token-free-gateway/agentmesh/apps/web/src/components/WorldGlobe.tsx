@@ -9,36 +9,13 @@
  * sync with a ResizeObserver, and torn down with `_destructor()`.
  */
 
-// globe.gl 실제 3D 지구본 (스텁 아님). package.json의 globe.gl 의존성 필요.
-import Globe from "globe.gl";
-type GlobeInstance = {
-	(domElement: HTMLElement): GlobeInstance;
-	pointsData: (data: unknown[]) => GlobeInstance;
-	arcsData: (data: unknown[]) => GlobeInstance;
-	globeImageUrl: (url: string) => GlobeInstance;
-	ringsData: (data: unknown[]) => GlobeInstance;
-	atmosphereColor: (color: string) => GlobeInstance;
-	pointsMerge: (value: boolean) => GlobeInstance;
-	pointsTransitionDuration: (ms: number) => GlobeInstance;
-	pointAltitude: (fn: (point: object) => number) => GlobeInstance;
-	pointColor: (fn: (point: object) => string) => GlobeInstance;
-	pointRadius: (fn: (point: object) => number) => GlobeInstance;
-	pointLabel: (fn: (point: object) => string) => GlobeInstance;
-	width: (px: number) => GlobeInstance;
-	height: (px: number) => GlobeInstance;
-	controls: () => { autoRotate: boolean; autoRotateSpeed: number; enablePan: boolean };
-	pointOfView: (view: { lat: number; lng: number; altitude: number }) => void;
-	onPointHover: (handler: (point: object | null) => void) => void;
-	_destructor: () => void;
-};
-
-/**
- * globe.gl is an ES class (Kapsule factory). Calling it without `new` returns
- * an empty object and attaches nothing — no canvas, no exception, which is how
- * this page silently rendered a blank card. The old `as unknown as` cast hid
- * exactly that from the compiler.
- */
-const GlobeChart = Globe as unknown as new (el: HTMLElement) => GlobeInstance;
+// react-globe.gl — the official React wrapper. It owns the globe.gl instance,
+// so unmount teardown, resize handling and StrictMode's double mount are the
+// library's problem instead of ours. The hand-rolled version here is what made
+// /world render an empty card twice: a missing `new`, and a controls() that
+// could be undefined.
+import Globe, { type GlobeMethods } from "react-globe.gl";
+type GlobeInstance = GlobeMethods;
 import { RefreshCw, ScanLine } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { WorldEvent } from "../lib/world-types";
@@ -304,7 +281,9 @@ export const WorldGlobe = ({
 	focusEntity = null,
 }: WorldGlobeProps) => {
 	const containerRef = useRef<HTMLDivElement | null>(null);
-	const globeRef = useRef<GlobeInstance | null>(null);
+	const globeRef = useRef<GlobeInstance | undefined>(undefined);
+	// 선택된 엔티티로 이동한 뒤에는 자동 회전을 유지하지 않는다.
+	const [autoRotate, setAutoRotate] = useState(true);
 	const [ready, setReady] = useState(false);
 	const [globeError, setGlobeError] = useState<string | null>(null);
 	const [refreshing, setRefreshing] = useState(false);
@@ -326,8 +305,15 @@ export const WorldGlobe = ({
 		[events, usingDemo],
 	);
 
-	// 글로브 초기화 — 마운트 시 1회. 컨테이너 크기는 ResizeObserver로 동기화.
-	// WebGL이 없거나 globe.gl 초기화가 실패해도 페이지를 죽이지 않고 폴백 UI를 보여준다.
+	// 글로브 초기화 — <Globe>가 인스턴스 생성/해체를 직접 관리한다.
+	//
+	// 예전에는 globe.gl을 직접 `new`했기 때문에 마운트/정리/리사이즈를 모두
+	// 손으로 다뤘고, 그 과정에서 (1) `new` 누락으로 조용히 빈 카드가 되고
+	// (2) StrictMode 이중 마운트에서 캔버스가 사라지는 버그가 있었다.
+	// 래퍼로 옮기면서 그 두 부류가 구조적으로 불가능해졌다.
+	const [size, setSize] = useState({ w: FALLBACK_WIDTH, h: FALLBACK_HEIGHT });
+	const [hovering, setHovering] = useState(false);
+
 	useEffect(() => {
 		const el = containerRef.current;
 		if (!el) return;
@@ -338,93 +324,57 @@ export const WorldGlobe = ({
 			return;
 		}
 
-		let chart: GlobeInstance | null = null;
-		try {
-			chart = new GlobeChart(el);
-			chart
-				.globeImageUrl(GLOBE_TEXTURE)
-				.atmosphereColor("#38bdf8")
-				.pointsMerge(false)
-				.pointsTransitionDuration(600)
-				.pointAltitude((): number => 0.015)
-				.pointColor((point: object): string => (point as GlobePoint).color)
-				.pointRadius((point: object) => (point as GlobePoint).radius)
-				.pointLabel((point: object) => (point as GlobePoint).label)
-				.width(el.clientWidth || FALLBACK_WIDTH)
-				.height(el.clientHeight || FALLBACK_HEIGHT);
-
-			chart.pointOfView({ lat: 25, lng: 20, altitude: 2.4 });
-
-			// Osiris 느낌의 자동 회전 — 마커에 hover하면 잠시 멈춘다.
-			// globe.gl's controls() can return undefined before three.js has finished
-			// attaching OrbitControls; assigning to it threw "Cannot set properties
-			// of undefined", which the catch below turned into a fallback card even
-			// though WebGL was fine. Rotation is cosmetic — skip it, keep the globe.
-			const controls = chart.controls();
-			if (controls) {
-				controls.autoRotate = true;
-				controls.autoRotateSpeed = 0.6;
-				controls.enablePan = false;
-				chart.onPointHover((point: object | null) => {
-					if (controls) controls.autoRotate = point === null;
-				});
-			}
-
-			globeRef.current = chart;
-			setReady(true);
-			setGlobeError(null);
-		} catch (err) {
-			// WebGL 없음 / three.js 초기화 실패 — 페이지를 죽이지 않는다.
-			setGlobeError(err instanceof Error ? err.message : "지구본을 표시할 수 없습니다.");
-			setReady(false);
-			return;
-		}
-
-		const observer = new ResizeObserver(() => {
-			chart?.width(el.clientWidth || FALLBACK_WIDTH).height(el.clientHeight || FALLBACK_HEIGHT);
-		});
-		observer.observe(el);
-
-		return () => {
-			observer.disconnect();
-			globeRef.current = null;
-			try {
-				chart?._destructor();
-			} catch {
-				/* teardown 실패는 무시 */
-			}
-			// globe.gl은 canvas를 컨테이너에 직접 붙이고 _destructor()는 그것을
-			// 치운다. React StrictMode는 effect를 mount→cleanup→mount로 두 번
-			// 돌리는데, 같은 DOM 노드를 재사용하므로 두 번째 mount가 이미 파괴된
-			// 컨테이너에 붙으려다 아무것도 그리지 않는다(예외도 없음). 노드를
-			// 비워 두 번째 mount가 새로 만들 수 있게 한다.
-			//
-			// 이 정리 코드는 재실행 전에 돌기 때문에, 여기서 비우지 않으면
-			// 캔버스가 남아 있는지 여부에 따라 두 번째 결과가 달라진다.
-			el.replaceChildren();
+		// 라이브러리에 크기를 prop으로 넘기므로 컨테이너 크기만 따라간다.
+		const sync = () => {
+			const w = el.clientWidth || FALLBACK_WIDTH;
+			const h = el.clientHeight || FALLBACK_HEIGHT;
+			setSize((prev) => (prev.w === w && prev.h === h ? prev : { w, h }));
 		};
+		sync();
+
+		const observer = new ResizeObserver(sync);
+		observer.observe(el);
+		return () => observer.disconnect();
+	}, [hasWebGL]);
+
+	// globe 준비 완료. onGlobeReady는 라이브러리가 넘겨주는 시점이라
+	// 예전처럼 내부 상태를 추측할 필요가 없다.
+	const handleGlobeReady = useCallback(() => {
+		setReady(true);
+		setGlobeError(null);
 	}, []);
 
-	// 이벤트/데모 변경 시 마커만 갱신 (globe 재생성 없음)
+	// 마커 hover 중에는 자동 회전을 멈춘다. 래퍼에는 "hover 상태" 개념이
+	// 없어서, 포인터 이벤트로 상태를 만들고 그 값을 회전 제어에 반영한다.
+	const handlePointHover = useCallback((point: object | null) => {
+		setHovering(point !== null);
+	}, []);
+
+	// 라이브러리는 초기 시점만 prop으로 받고, 이후 회전 제어는 인스턴스
+	// 메서드로만 노출한다(autoRotate는 controls()에만 있다).
 	useEffect(() => {
-		globeRef.current?.pointsData(points);
-	}, [points]);
+		const chart = globeRef.current;
+		if (!chart || !ready) return;
+		const controls = chart.controls();
+		if (!controls) return;
+		controls.autoRotate = autoRotate && !hovering;
+		controls.autoRotateSpeed = 0.6;
+		controls.enablePan = false;
+	}, [autoRotate, hovering, ready]);
 
 	// 온톨로지 패널에서 선택된 엔티티로 시점을 이동시킨다.
-	// 좌표가 없는 엔티티는 무시하고, 이동 중에는 자동 회전을 멈춘다.
+	// 좌표가 없는 엔티티는 무시한다. 래퍼에는 회전을 직접 끄는 API가 없어서,
+	// 엔티티를 선택한 뒤에는 자동 회전을 꺼진 상태로 유지한다.
 	useEffect(() => {
 		const chart = globeRef.current;
 		if (!chart || !focusEntity) return;
 		if (focusEntity.latitude === undefined || focusEntity.longitude === undefined) return;
 
-		chart.pointOfView({
-			lat: focusEntity.latitude,
-			lng: focusEntity.longitude,
-			altitude: 1.2,
-		});
-
-		const controls = chart.controls();
-		controls.autoRotate = false;
+		chart.pointOfView(
+			{ lat: focusEntity.latitude, lng: focusEntity.longitude, altitude: 1.2 },
+			700,
+		);
+		setAutoRotate(false);
 
 		// 사용자가 다른 곳을 보기 전까지 회전을 멈춘 상태를 유지한다.
 		// 다음 선택이 오면 이 effect가 다시 실행되어 시점이 갱신된다.
@@ -445,8 +395,28 @@ export const WorldGlobe = ({
 			style={{ aspectRatio: "16 / 9" }}
 			data-testid="world-globe"
 		>
-			{/* globe.gl이 이 컨테이너를 캔버스로 채운다 */}
-			<div ref={containerRef} className="absolute inset-0" />
+			{/* react-globe.gl이 이 컨테이너에 캔버스를 만들고 알아서 정리한다 */}
+			<div ref={containerRef} className="absolute inset-0">
+				{hasWebGL && !globeError && (
+					<Globe
+						ref={globeRef}
+						width={size.w}
+						height={size.h}
+						globeImageUrl={GLOBE_TEXTURE}
+						atmosphereColor="#38bdf8"
+						pointsData={points}
+						pointsMerge={false}
+						pointsTransitionDuration={600}
+						pointAltitude={0.015}
+						pointColor={(p: object) => (p as GlobePoint).color}
+						pointRadius={(p: object) => (p as GlobePoint).radius}
+						pointLabel={(p: object) => (p as GlobePoint).label}
+						onPointHover={handlePointHover}
+						onGlobeReady={handleGlobeReady}
+						enablePointerInteraction
+					/>
+				)}
+			</div>
 
 		{/* globe.gl 초기화 실패 시 폴백 UI */}
 		{globeError && (

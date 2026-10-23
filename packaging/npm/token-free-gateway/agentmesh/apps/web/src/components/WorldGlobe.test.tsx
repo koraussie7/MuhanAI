@@ -16,13 +16,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import type { WorldEvent } from "../lib/world-types";
 
-vi.mock("globe.gl", () => ({
+vi.mock("react-globe.gl", () => ({
 	default: () => {
 		throw new Error("no webgl");
-	},
-}));
-
-import { WorldGlobe } from "./WorldGlobe.js";
+		},
+	}));
+	import { WorldGlobe } from "./WorldGlobe.js";
 import { eventPosition, toGlobePoints } from "./WorldGlobe.js";
 
 describe("WorldGlobe — globe.gl 초기화 실패 방어", () => {
