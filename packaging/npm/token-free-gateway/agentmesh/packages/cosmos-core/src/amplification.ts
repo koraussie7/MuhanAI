@@ -62,7 +62,6 @@ export interface AmplificationInput {
 	predictionAccuracy?: number;
 }
 
-
 /** Largest share of reactions attributable to one actor, tempered by actor count. */
 function crossAgentFactor(reactions: ReactionSample[]): number {
 	if (reactions.length === 0) return 0;
@@ -89,10 +88,7 @@ function temporalClusterFactor(reactions: ReactionSample[]): number {
 	let start = 0;
 
 	for (let end = 0; end < sorted.length; end += 1) {
-		while (
-			start < end &&
-			sorted[end]!.timestamp - sorted[start]!.timestamp > CLUSTER_WINDOW_MS
-		) {
+		while (start < end && sorted[end]!.timestamp - sorted[start]!.timestamp > CLUSTER_WINDOW_MS) {
 			start += 1;
 		}
 		best = Math.max(best, end - start + 1);
@@ -138,14 +134,12 @@ export function amplify(input: AmplificationInput): AmplificationBreakdown {
 	if (citations > 0) contributions.citations = citations * SIGNAL_WEIGHTS.citations;
 
 	const accuracy = clamp01(input.predictionAccuracy ?? 0);
-	if (accuracy > 0) contributions.prediction_accuracy = accuracy * SIGNAL_WEIGHTS.prediction_accuracy;
+	if (accuracy > 0)
+		contributions.prediction_accuracy = accuracy * SIGNAL_WEIGHTS.prediction_accuracy;
 
 	const signals = (Object.keys(contributions) as SignalType[])
 		.filter((signal) => (contributions[signal] ?? 0) > 0)
-		.sort(
-			(a, b) =>
-				(contributions[b] ?? 0) - (contributions[a] ?? 0) || a.localeCompare(b),
-		);
+		.sort((a, b) => (contributions[b] ?? 0) - (contributions[a] ?? 0) || a.localeCompare(b));
 
 	const total = signals.reduce((sum, signal) => sum + (contributions[signal] ?? 0), 0);
 

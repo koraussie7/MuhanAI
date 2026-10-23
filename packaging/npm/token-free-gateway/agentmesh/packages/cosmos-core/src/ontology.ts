@@ -13,12 +13,7 @@
  * derivation that users and agents can confirm — never in the identity function.
  */
 
-import type {
-	ConceptStatus,
-	OntologyConcept,
-	OntologyRelation,
-	RelationType,
-} from "./types.js";
+import type { ConceptStatus, OntologyConcept, OntologyRelation, RelationType } from "./types.js";
 
 /** Clamp any number into the 0..1 range (NaN → 0). */
 export function clamp01(value: number): number {
@@ -65,11 +60,7 @@ export function parseConceptId(id: string): { domain: string; label: string } {
 }
 
 /** Deterministic relation id so repeated proposals land on one edge. */
-export function relationId(
-	sourceId: string,
-	predicate: RelationType,
-	targetId: string,
-): string {
+export function relationId(sourceId: string, predicate: RelationType, targetId: string): string {
 	return `${sourceId}|${predicate}|${targetId}`;
 }
 
