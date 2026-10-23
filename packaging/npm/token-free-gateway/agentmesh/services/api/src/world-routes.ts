@@ -21,6 +21,7 @@
 
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
+import { recordObservations } from "./cosmos-routes.js";
 import { clientError, formatZodError } from "./error-shapes.js";
 
 const QuerySchema = z.object({
@@ -287,6 +288,66 @@ async function tryLiveBrief(): Promise<WorldBrief | null> {
 	}
 }
 
+// ---------------------------------------------------------------------------
+// World feed -> cosmic graph
+// ---------------------------------------------------------------------------
+
+/**
+ * Events already written to the graph, keyed by event id.
+ *
+ * The panel polls every 30s while streaming, and PYTHIA re-sends most of the
+ * same events each time. Without this the log grows without bound and the
+ * projection folds the same observation over and over.
+ */
+const ingestedEventIds = new Set<string>();
+const MAX_INGESTED_IDS = 5000;
+
+/**
+ * Record live world events as concept observations.
+ *
+ * Each event id becomes a concept, grouped under its domain, carrying the
+ * upstream coordinates so /api/ontograph/snapshot can place it on the globe
+ * and the sidebar can filter by type. Observations only — no relations are
+ * invented here; those come from Pythia's own predictions.
+ *
+ * Best-effort by construction: the caller is a user-facing GET.
+ */
+async function ingestBrief(brief: WorldBrief): Promise<void> {
+	if (brief.source !== "pythia") return;
+
+	const fresh = brief.events.filter((event) => {
+		if (ingestedEventIds.has(event.id)) return false;
+		ingestedEventIds.add(event.id);
+		return true;
+	});
+	if (fresh.length === 0) return;
+
+	// Bound the dedup set so a long-running process does not leak.
+	if (ingestedEventIds.size > MAX_INGESTED_IDS) {
+		const excess = ingestedEventIds.size - MAX_INGESTED_IDS;
+		let dropped = 0;
+		for (const id of ingestedEventIds) {
+			if (dropped >= excess) break;
+			ingestedEventIds.delete(id);
+			dropped += 1;
+		}
+	}
+
+	for (const event of fresh) {
+		// The concept id is `<domain>::<label>`; passing `world::<id>` would make
+		// the raw upstream id the display label.
+		const conceptKey = `${event.domain}::${event.title.slice(0, 120)}`;
+		await recordObservations([conceptKey], {
+			domain: event.domain,
+			label: event.title.slice(0, 120),
+			timestamp: Date.parse(event.timestamp) || Date.now(),
+			...(typeof event.latitude === "number" && typeof event.longitude === "number"
+				? { geo: { latitude: event.latitude, longitude: event.longitude } }
+				: {}),
+		});
+	}
+}
+
 export async function worldRoutes(app: FastifyInstance) {
 	app.get("/api/world/brief", async (request, reply) => {
 		const parse = QuerySchema.safeParse(request.query);
@@ -295,6 +356,10 @@ export async function worldRoutes(app: FastifyInstance) {
 		}
 		const live = await tryLiveBrief();
 		const brief = live ?? buildOfflineBrief();
+		// Feed live observations into the cosmic graph so the ontology sidebar
+		// reflects the same world the globe is showing. Offline snapshots are
+		// synthetic and must never become concepts.
+		if (live) await ingestBrief(live);
 		const { domain } = parse.data;
 		return domain
 			? {

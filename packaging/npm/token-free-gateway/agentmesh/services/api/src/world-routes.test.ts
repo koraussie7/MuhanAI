@@ -1,6 +1,7 @@
 import { pino } from "pino";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildApp } from "./server.js";
+import { resetCosmosGraph } from "./cosmos-routes.js";
 import { buildOfflineBrief, getPythiaWorldUrl, getShadowBrokerConfig } from "./world-routes.js";
 
 const originalFetch = globalThis.fetch;
@@ -240,6 +241,67 @@ describe("World API — PYTHIA /agent/view contract", () => {
 			expect(body.predictions[0].rationale).toBe("Two independent feeds agree.");
 			// confidence derived from the distance off base rate
 			expect(body.predictions[0].confidence).toBeCloseTo(0.81, 5);
+		} finally {
+			await app.close();
+		}
+	});
+});
+
+describe("World API — live events reach the ontology graph", () => {
+	beforeEach(async () => {
+		process.env.DISABLE_AUTH = "true";
+		process.env.PYTHIA_WORLD_URL = "http://localhost:8088";
+		await resetCosmosGraph();
+	});
+	afterEach(async () => {
+		delete process.env.DISABLE_AUTH;
+		delete process.env.PYTHIA_WORLD_URL;
+		globalThis.fetch = originalFetch;
+		await resetCosmosGraph();
+	});
+
+	// The panel polls /api/world/brief while streaming. Before this, live events
+	// showed on the globe but never became concepts, so the ontology sidebar sat
+	// on its offline fixture with zero entities.
+	it("records live events as concepts and exposes them via the ontograph snapshot", async () => {
+		globalThis.fetch = (async () =>
+			new Response(
+				JSON.stringify({
+					summary: "Quake and conflict active.",
+					domains: ["seismic", "conflict"],
+					events_by_domain: {
+						seismic: [
+							{ id: "q1", title: "M5.2 near Anchorage", lat: 61.2, lng: -149.9, salience: 0.5 },
+						],
+						conflict: [{ id: "c1", title: "Border incident", lat: 33.3, lng: 44.4, salience: 0.8 }],
+					},
+					predictions: [],
+				}),
+				{ status: 200, headers: { "content-type": "application/json" } },
+			)) as typeof fetch;
+
+		const app = await buildApp({ enableTransport: false, logger: pino({ level: "silent" }) });
+		try {
+			// Poll twice — the second call must not duplicate concepts.
+			await app.inject({ method: "GET", url: "/api/world/brief" });
+			await app.inject({ method: "GET", url: "/api/world/brief" });
+
+			const res = await app.inject({ method: "GET", url: "/api/ontograph/snapshot" });
+			expect(res.statusCode).toBe(200);
+			const body = res.json();
+
+			// Live concepts exist, so the panel leaves its offline fixture.
+			expect(body.source).toBe("ontograph");
+			const labels = body.entities.map((e: { label: string }) => e.label);
+			expect(labels).toContain("M5.2 near Anchorage");
+			expect(labels).toContain("Border incident");
+			// Deduped: two polls, two distinct concepts.
+			expect(labels.filter((l: string) => l === "Border incident")).toHaveLength(1);
+
+			// Coordinates survive so the globe can fly to the entity.
+			const quake = body.entities.find((e: { label: string }) => e.label === "M5.2 near Anchorage");
+			expect(quake.latitude).toBeCloseTo(61.2);
+			expect(quake.longitude).toBeCloseTo(-149.9);
 		} finally {
 			await app.close();
 		}
