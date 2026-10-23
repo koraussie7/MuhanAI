@@ -1,7 +1,7 @@
 import { pino } from "pino";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildApp } from "./server.js";
-import { buildOfflineOntograph, entityTypeFor } from "./ontograph-routes.js";
+import { buildOfflineOntograph, entityTypeFor, toEntities } from "./ontograph-routes.js";
 import { resetCosmosGraph } from "./cosmos-routes.js";
 describe("ontograph-routes helpers", () => {
 	afterEach(async () => {
@@ -26,6 +26,35 @@ describe("ontograph-routes helpers", () => {
 		expect(entityTypeFor("cyber")).toBe("concept");
 	});
 });
+describe("ontograph geo metadata", () => {
+	it("maps concept metadata.geo onto entity lat/lng", () => {
+		const entities = toEntities([
+			{
+				id: "geo::seoul",
+				label: "Seoul",
+				domain: "geo",
+				status: "raw",
+				signalScore: 0,
+				metadata: { geo: { lat: 37.5665, lng: 126.978 } },
+			},
+			{
+				id: "geo::legacy",
+				label: "Legacy",
+				domain: "geo",
+				status: "raw",
+				signalScore: 0,
+				metadata: { latitude: 51.5074, longitude: -0.1278 },
+			},
+		]);
+		const seoul = entities.find((e) => e.label === "Seoul");
+		expect(seoul?.latitude).toBeCloseTo(37.5665);
+		expect(seoul?.longitude).toBeCloseTo(126.978);
+		// Older events wrote flat lat/lng — replaying an old log must still place it.
+		const legacy = entities.find((e) => e.label === "Legacy");
+		expect(legacy?.latitude).toBeCloseTo(51.5074);
+	});
+});
+
 describe("Ontograph API routes", () => {
 	beforeEach(() => {
 		process.env.DISABLE_AUTH = "true";
