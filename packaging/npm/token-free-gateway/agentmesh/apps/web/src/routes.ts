@@ -29,6 +29,15 @@ export const ROUTES: readonly RouteDefinition[] = [
 		page: "dashboard",
 	},
 	{
+		id: "world",
+		path: "/world",
+		group: "core",
+		label: "World",
+		iconKey: "activity",
+		badge: "NEW",
+		page: "world",
+	},
+	{
 		id: "find",
 		path: "/",
 		group: "core",
@@ -290,15 +299,6 @@ export const ROUTES: readonly RouteDefinition[] = [
 		iconKey: "python",
 		badge: "NEW",
 		page: "pythia",
-	},
-	{
-		id: "world",
-		path: "/world",
-		group: "system",
-		label: "World",
-		iconKey: "activity",
-		badge: "NEW",
-		page: "world",
 	},
 ];
 
