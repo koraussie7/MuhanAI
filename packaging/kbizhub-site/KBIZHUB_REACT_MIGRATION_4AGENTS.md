@@ -330,10 +330,15 @@ src/sections/Economy.tsx       ← #economy (194줄)
 
 ### C.2 TeamBuilder.tsx — `toggleTeamAgent` 이전
 
-원본 함수:
+**원본 (index.html `<script>`에서 확인):**
 
 ```js
-function toggleTeamAgent(el) { ... }   // DOM 클래스 토글
+function toggleTeamAgent(el, role) {
+  el.classList.toggle("selected");
+  const count = document.querySelectorAll(".team-agent-card.selected").length;
+  const counterEl = document.getElementById("selectedTeamCount");
+  if (counterEl) counterEl.textContent = count;
+}
 ```
 
 React로:
@@ -344,16 +349,23 @@ const [selected, setSelected] = useState<Set<string>>(new Set());
 const toggle = (id: string) =>
   setSelected((prev) => {
     const next = new Set(prev);
-    next.has(id) ? next.delete(id) : next.add(id);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
     return next;
   });
 ```
 
-**DOM 조작(`classList.toggle`)을 상태로 바꾸는 것이 이 파트의 핵심.**
-선택 상태에 따라 클래스가 붙도록 렌더 시 계산한다:
+DOM 조작(`classList.toggle`)을 상태로 바꾸는 것이 이 파트의 핵심이다.
+선택 상태에 따라 클래스를 렌더 시 계산한다:
 
 ```tsx
-className={`agent-card ${selected.has(agent.id) ? "is-selected" : ""}`}
+className={`team-agent-card ${selected.has(agent.id) ? "selected" : ""}`}
+```
+
+카운터(`#selectedTeamCount`)는 직접 DOM을 쓰지 않고 **파생값**으로 렌더한다:
+
+```tsx
+<span id="selectedTeamCount">{selected.size}</span>
 ```
 
 ### C.3 완료 조건
@@ -382,7 +394,35 @@ src/lib/orders.ts               ← submitStarterOrder
 
 ### D.2 StarterModal.tsx
 
-원본 `openStarterModal` / `closeStarterModal`은 전역 함수 + DOM 조작이다. React:
+**원본 (index.html `<script>`에서 확인):**
+
+```js
+function openStarterModal() {
+  document.getElementById("starterModal").classList.add("active");
+}
+function closeStarterModal() {
+  document.getElementById("starterModal").classList.remove("active");
+}
+function submitStarterOrder(e) {
+  e.preventDefault();
+  const bizName = document.getElementById("orderBizName").value;
+  const industry = document.getElementById("orderIndustry").value;
+  const email = document.getElementById("orderEmail").value;
+  const website = document.getElementById("orderWebsite").value;
+  if (bizName && email) {
+    const orders = JSON.parse(localStorage.getItem("kbizhub_orders") || "[]");
+    orders.push({ bizName, industry, email, website, date: new Date().toISOString(), amount: 29000 });
+    localStorage.setItem("kbizhub_orders", JSON.stringify(orders));
+    document.getElementById("orderForm").style.display = "none";
+    document.getElementById("orderSuccess").style.display = "block";
+  }
+}
+```
+
+**중요:** localStorage 키는 **`kbizhub_orders`** 다 (제안한 `kbizhub:orders` 아님).
+기존 사용자 데이터와 호환되도록 원본 키를 그대로 쓴다.
+
+React:
 
 ```tsx
 interface Props {
@@ -409,46 +449,55 @@ export function StarterModal({ open, onClose, onSubmitted }: Props) {
       setSubmitting(false);
     }
   }
-  // ...
+  // form 필드명: bizName, industry, email, website
 }
 ```
 
 ### D.3 lib/orders.ts — 타입 지정 주문 API
 
-원본 `submitStarterOrder()`가 어디로 보내는지 확인한다. 현재는 localStorage 또는 stub일 가능성이 높다.
+원본 `submitStarterOrder()`는 **`localStorage`의 `kbizhub_orders` 키**에 저장한다.
 
 ```ts
 export interface StarterOrder {
-  id: string;
-  plan: "starter";
-  amountKrw: 29000;
-  name: string;
+  bizName: string;
+  industry: string;
   email: string;
-  createdAt: string;
+  website: string;
+  date: string;
+  amount: 29000;
 }
 
 /**
  * 주문을 제출한다.
  *
- * 현재 백엔드가 없으므로 localStorage에 저장하고 성공을 흉내낸다.
- * 실제 결제 연동 시 이 함수 본문만 교체하면 UI는 그대로 동작한다.
+ * 현재 백엔드가 없으므로 localStorage에 저장한다. 실제 결제 연동 시 이 함수
+ * 본문만 교체하면 UI는 그대로 동작한다.
+ *
+ * 키 `kbizhub_orders`는 원본 index.html과 동일하다 — 기존 사용자 데이터 호환.
  */
 export async function submitStarterOrder(
   form: FormData,
 ): Promise<StarterOrder> {
   const order: StarterOrder = {
-    id: crypto.randomUUID(),
-    plan: "starter",
-    amountKrw: 29000,
-    name: String(form.get("name") ?? ""),
-    email: String(form.get("email") ?? ""),
-    createdAt: new Date().toISOString(),
+    bizName: String(form.get("bizName") ?? "").trim(),
+    industry: String(form.get("industry") ?? "").trim(),
+    email: String(form.get("email") ?? "").trim(),
+    website: String(form.get("website") ?? "").trim(),
+    date: new Date().toISOString(),
+    amount: 29000,
   };
 
-  const existing = JSON.parse(localStorage.getItem("kbizhub:orders") ?? "[]");
-  localStorage.setItem("kbizhub:orders", JSON.stringify([...existing, order]));
+  if (!order.bizName || !order.email) {
+    throw new Error("업체명과 이메일은 필수입니다");
+  }
 
-  await new Promise((r) => setTimeout(r, 400)); // UX: 버튼 상태 확인용
+  const existing = JSON.parse(
+    localStorage.getItem("kbizhub_orders") ?? "[]",
+  ) as StarterOrder[];
+  localStorage.setItem(
+    "kbizhub_orders",
+    JSON.stringify([...existing, order]),
+  );
   return order;
 }
 ```
