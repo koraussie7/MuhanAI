@@ -56,6 +56,9 @@ export interface I18nContent {
 		summarizing: string;
 		briefSummary: string;
 		briefError: string;
+		/** Shown when PYTHIA_WORLD_URL / SHADOWBROKER_URL are unset. */
+		enginesUnconfigured: string;
+		enginesUnconfiguredHint: string;
 	};
 	placeholder: {
 		underConstruction: string;
@@ -424,6 +427,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 		summarizing: "요약 중…",
 		briefSummary: "Pythia 브리핑 요약",
 		briefError: "요약 실패",
+		enginesUnconfigured: "엔진 미연결 · 설정",
+		enginesUnconfiguredHint: "PYTHIA_WORLD_URL과 SHADOWBROKER_URL이 설정되지 않아 오프라인 스냅샷을 표시 중입니다. 대시보드에서 확인하세요.",
 		},
 		placeholder: {
 			underConstruction: "이 섹션은 준비 중입니다.",
@@ -632,6 +637,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 		summarizing: "Summarizing…",
 		briefSummary: "Pythia briefing summary",
 		briefError: "Summary failed",
+		enginesUnconfigured: "Engines not configured",
+		enginesUnconfiguredHint: "PYTHIA_WORLD_URL and SHADOWBROKER_URL are unset, so an offline snapshot is shown. Review it in the dashboard.",
 		},
 		placeholder: {
 			underConstruction: "This section is under construction.",
@@ -839,6 +846,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 		summarizing: "要約中…",
 		briefSummary: "Pythiaブリーフ要約",
 		briefError: "要約失敗",
+		enginesUnconfigured: "エンジン未接続 · 設定",
+		enginesUnconfiguredHint: "PYTHIA_WORLD_URL と SHADOWBROKER_URL が未設定のため、オフラインスナップショットを表示しています。ダッシュボードで確認してください。",
 		},
 		placeholder: {
 			underConstruction: "このセクションは準備中です。",
@@ -1045,6 +1054,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 		summarizing: "摘要中…",
 		briefSummary: "Pythia简报摘要",
 		briefError: "摘要失败",
+		enginesUnconfigured: "引擎未连接 · 配置",
+		enginesUnconfiguredHint: "未设置 PYTHIA_WORLD_URL 和 SHADOWBROKER_URL，正在显示离线快照。请在仪表板中检查。",
 		},
 		placeholder: {
 			underConstruction: "此部分正在建设中。",
@@ -1253,6 +1264,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 		summarizing: "Resumiendo…",
 		briefSummary: "Resumen del informe Pythia",
 		briefError: "Error al resumir",
+		enginesUnconfigured: "Motores sin configurar",
+		enginesUnconfiguredHint: "PYTHIA_WORLD_URL y SHADOWBROKER_URL no están definidos, por lo que se muestra una instantánea sin conexión. Revísalo en el panel.",
 		},
 		placeholder: {
 			underConstruction: "Esta sección está en construcción.",
@@ -1461,6 +1474,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 		summarizing: "Zusammenfassen…",
 		briefSummary: "Pythia-Briefing-Zusammenfassung",
 		briefError: "Zusammenfassung fehlgeschlagen",
+		enginesUnconfigured: "Engines nicht konfiguriert",
+		enginesUnconfiguredHint: "PYTHIA_WORLD_URL und SHADOWBROKER_URL sind nicht gesetzt, daher wird ein Offline-Snapshot angezeigt. Prüfen Sie das im Dashboard.",
 		},
 		placeholder: {
 			underConstruction: "Dieser Abschnitt befindet sich im Aufbau.",
@@ -1670,6 +1685,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 		summarizing: "Résumé en cours…",
 		briefSummary: "Résumé du briefing Pythia",
 		briefError: "Échec du résumé",
+		enginesUnconfigured: "Moteurs non configurés",
+		enginesUnconfiguredHint: "PYTHIA_WORLD_URL et SHADOWBROKER_URL ne sont pas définis, un instantané hors ligne est donc affiché. Vérifiez-le dans le tableau de bord.",
 		},
 		placeholder: {
 			underConstruction: "Cette section est en construction.",
@@ -1877,6 +1894,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 		summarizing: "Resumindo…",
 		briefSummary: "Resumo do briefing Pythia",
 		briefError: "Falha ao resumir",
+		enginesUnconfigured: "Motores não configurados",
+		enginesUnconfiguredHint: "PYTHIA_WORLD_URL e SHADOWBROKER_URL não estão definidos, por isso é exibido um instantâneo offline. Verifique no painel.",
 		},
 		placeholder: {
 			underConstruction: "Esta seção está em construção.",
@@ -2083,6 +2102,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 		summarizing: "Đang tóm tắt…",
 		briefSummary: "Tóm tắt briefing Pythia",
 		briefError: "Lỗi tóm tắt",
+		enginesUnconfigured: "Chưa cấu hình engine",
+		enginesUnconfiguredHint: "PYTHIA_WORLD_URL và SHADOWBROKER_URL chưa được đặt nên đang hiển thị ảnh chụp ngoại tuyến. Kiểm tra trong bảng điều khiển.",
 		},
 			placeholder: {
 			underConstruction: "Phần này đang được xây dựng.",
@@ -2289,6 +2310,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, I18nContent> = {
 		summarizing: "सारांश बन रहा है…",
 		briefSummary: "Pythia ब्रीफिंग सारांश",
 		briefError: "सारांश विफल",
+		enginesUnconfigured: "इंजन कॉन्फ़िगर नहीं है",
+		enginesUnconfiguredHint: "PYTHIA_WORLD_URL और SHADOWBROKER_URL सेट नहीं हैं, इसलिए ऑफ़लाइन स्नैपशॉट दिखाया जा रहा है। डैशबोर्ड में जाँचें।",
 		},
 			placeholder: {
 			underConstruction: "यह अनुभाग निर्माणाधीन है।",

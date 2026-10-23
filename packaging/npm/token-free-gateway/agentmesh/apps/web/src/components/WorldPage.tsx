@@ -292,6 +292,24 @@ export const WorldPage: React.FC = () => {
 						</span>
 					)}
 				</div>
+				{/* Both world engines are unconfigured, so the panel is showing the
+				    deterministic offline snapshot. Link straight to the operator
+				    dashboard instead of leaving the reader to guess where to fix it. */}
+				{!live && (
+					<a
+						href="/dashboard"
+						data-testid="world-engine-setup-link"
+						title={t.world.enginesUnconfiguredHint}
+						style={{
+							fontSize: 11,
+							color: "#f59e0b",
+							textDecoration: "none",
+							borderBottom: "1px dotted currentColor",
+						}}
+					>
+						{t.world.enginesUnconfigured}
+					</a>
+				)}
 				<button
 					type="button"
 					onClick={() => load()}
