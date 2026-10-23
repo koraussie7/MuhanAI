@@ -300,7 +300,18 @@ export const WorldGlobe = ({
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const globeRef = useRef<GlobeInstance | null>(null);
 	const [ready, setReady] = useState(false);
+	const [globeError, setGlobeError] = useState<string | null>(null);
 	const [refreshing, setRefreshing] = useState(false);
+
+	const hasWebGL = useMemo(() => {
+		if (typeof document === "undefined") return false;
+		try {
+			const c = document.createElement("canvas");
+			return !!(c.getContext("webgl2") || c.getContext("webgl"));
+		} catch {
+			return false;
+		}
+	}, []);
 
 	const usingDemo = demoFallback && events.length === 0;
 	const live = isOnline && !usingDemo;
@@ -310,46 +321,66 @@ export const WorldGlobe = ({
 	);
 
 	// 글로브 초기화 — 마운트 시 1회. 컨테이너 크기는 ResizeObserver로 동기화.
+	// WebGL이 없거나 globe.gl 초기화가 실패해도 페이지를 죽이지 않고 폴백 UI를 보여준다.
 	useEffect(() => {
 		const el = containerRef.current;
 		if (!el) return;
 
-		const chart = GlobeChart(el);
-		chart
-			.globeImageUrl(GLOBE_TEXTURE)
-			.atmosphereColor("#38bdf8")
-			.pointsMerge(false)
-			.pointsTransitionDuration(600)
-			.pointAltitude((): number => 0.015)
-			.pointColor((point: object): string => (point as GlobePoint).color)
-			.pointRadius((point: object) => (point as GlobePoint).radius)
-			.pointLabel((point: object) => (point as GlobePoint).label)
-			.width(el.clientWidth || FALLBACK_WIDTH)
-			.height(el.clientHeight || FALLBACK_HEIGHT);
+		if (!hasWebGL) {
+			setGlobeError("이 브라우저에서는 WebGL을 사용할 수 없습니다.");
+			setReady(false);
+			return;
+		}
 
-		chart.pointOfView({ lat: 25, lng: 20, altitude: 2.4 });
+		let chart: GlobeInstance | null = null;
+		try {
+			chart = GlobeChart(el);
+			chart
+				.globeImageUrl(GLOBE_TEXTURE)
+				.atmosphereColor("#38bdf8")
+				.pointsMerge(false)
+				.pointsTransitionDuration(600)
+				.pointAltitude((): number => 0.015)
+				.pointColor((point: object): string => (point as GlobePoint).color)
+				.pointRadius((point: object) => (point as GlobePoint).radius)
+				.pointLabel((point: object) => (point as GlobePoint).label)
+				.width(el.clientWidth || FALLBACK_WIDTH)
+				.height(el.clientHeight || FALLBACK_HEIGHT);
 
-		// Osiris 느낌의 자동 회전 — 마커에 hover하면 잠시 멈춘다.
-		const controls = chart.controls();
-		controls.autoRotate = true;
-		controls.autoRotateSpeed = 0.6;
-		controls.enablePan = false;
-		chart.onPointHover((point: object | null) => {
-			controls.autoRotate = point === null;
-		});
+			chart.pointOfView({ lat: 25, lng: 20, altitude: 2.4 });
 
-		globeRef.current = chart;
-		setReady(true);
+			// Osiris 느낌의 자동 회전 — 마커에 hover하면 잠시 멈춘다.
+			const controls = chart.controls();
+			controls.autoRotate = true;
+			controls.autoRotateSpeed = 0.6;
+			controls.enablePan = false;
+			chart.onPointHover((point: object | null) => {
+				controls.autoRotate = point === null;
+			});
+
+			globeRef.current = chart;
+			setReady(true);
+			setGlobeError(null);
+		} catch (err) {
+			// WebGL 없음 / three.js 초기화 실패 — 페이지를 죽이지 않는다.
+			setGlobeError(err instanceof Error ? err.message : "지구본을 표시할 수 없습니다.");
+			setReady(false);
+			return;
+		}
 
 		const observer = new ResizeObserver(() => {
-			chart.width(el.clientWidth || FALLBACK_WIDTH).height(el.clientHeight || FALLBACK_HEIGHT);
+			chart?.width(el.clientWidth || FALLBACK_WIDTH).height(el.clientHeight || FALLBACK_HEIGHT);
 		});
 		observer.observe(el);
 
 		return () => {
 			observer.disconnect();
 			globeRef.current = null;
-			chart._destructor();
+			try {
+				chart?._destructor();
+			} catch {
+				/* teardown 실패는 무시 */
+			}
 		};
 	}, []);
 
@@ -395,6 +426,17 @@ export const WorldGlobe = ({
 		>
 			{/* globe.gl이 이 컨테이너를 캔버스로 채운다 */}
 			<div ref={containerRef} className="absolute inset-0" />
+
+		{/* globe.gl 초기화 실패 시 폴백 UI */}
+		{globeError && (
+			<div data-testid="world-globe-fallback"
+				className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-xs text-white/60">
+				<ScanLine size={24} />
+				<span>3D 지구본을 표시할 수 없습니다</span>
+				<span className="text-white/40">{globeError}</span>
+				<span className="text-white/40">이벤트 목록은 아래에서 확인할 수 있습니다</span>
+			</div>
+		)}
 
 			{/* 상태 배지 + 마지막 갱신 시각 */}
 			<div className="absolute top-3 left-3 flex items-center gap-2">
