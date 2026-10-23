@@ -26,6 +26,7 @@ import { llmMeshRoutes } from "./llm-mesh-routes.js";
 import { llmRoutes } from "./llm-routes.js";
 import { mcpRoutes } from "./mcp-routes.js";
 import { networkRoutes } from "./network-routes.js";
+import { glassesRoutes } from "./glasses-routes.js";
 import { noemaRoutes } from "./noema-routes.js";
 import { omniRouteRoutes } from "./omniroute-routes.js";
 import { openaiCompatRoutes } from "./openai-compat-routes.js";
@@ -82,6 +83,9 @@ const PUBLIC_PATH_PREFIXES = [
 	"/api/mesh",
 	// The glasses PWA reads the shared knowledge lake without a device token.
 	"/api/knowledge",
+	// Device auth is the glasses routes' own concern (HMAC device tokens), not
+	// the X-API-Key this middleware enforces for operator endpoints.
+	"/api/glasses",
 	"/api/auth",
 	"/api/health",
 	"/rpc",
@@ -231,6 +235,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
 	await app.register(hivebearRoutes);
 	await app.register(knowledgeRoutes);
 	await app.register(networkRoutes);
+	await app.register(glassesRoutes);
 	await app.register(agentsRoutes);
 	await app.register(computeRoutes);
 	await app.register(llmMeshRoutes);
