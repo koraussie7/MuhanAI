@@ -17,6 +17,8 @@
 export interface MinimaConfig {
   nodeUrl?: string;
   apiKey?: string;
+  /** Minima node WebSocket endpoint (dada/mds use it for push updates). */
+  wsUrl?: string;
   /** "testnet" | "mainnet" */
   network?: "testnet" | "mainnet";
   /** Injectable fetch for tests (defaults to global fetch) */
@@ -31,6 +33,23 @@ export interface MinimaTransaction {
   token: string;
   blockHeight: number;
   confirmed: boolean;
+  /** Raw node-reported state, e.g. "confirmed" | "pending" | "failed". */
+  status?: string;
+}
+
+/**
+ * Block header as returned by the Minima `block` RPC.
+ *
+ * Named `MinimaBlockInfo` because `rpc.ts` imports it under that name; the
+ * older `MinimaBlock` shape is kept below for callers already using it.
+ */
+export interface MinimaBlockInfo {
+  block: number;
+  difficulty: number;
+  hash: string;
+  timemilli: number;
+  size: number;
+  transactions: number;
 }
 
 export interface DADABalance {

@@ -2,7 +2,11 @@
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
 		"outDir": "./types",
-		"rootDir": "./src"
+		"rootDir": "./src",
+		// libp2p/pubsub dispatches events through the DOM EventTarget API, and
+		// the code references CustomEvent. Node 18+ has it at runtime; the
+		// type only exists under the DOM lib.
+		"lib": ["ES2022", "DOM"]
 	},
 	"include": ["src/**/*"],
 	"exclude": ["node_modules", "dist", "types"]

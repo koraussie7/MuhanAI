@@ -116,7 +116,7 @@ export class MdsAgentMemory {
    * @param params - Data to store
    * @returns { txid, blockHeight, cid }
    */
-  async store(params: MDSStoreParams): Promise<MDSStoreResult> {
+  async store(params: MDSStoreParams): Promise<MDSCommandResult<MDSStoreResult>> {
     const state = [
       params.address,
       params.cid,
@@ -151,7 +151,7 @@ export class MdsAgentMemory {
    * @param params - Namespace and optional filters
    * @returns List of stored items with pagination
    */
-  async list(params: MDSListParams): Promise<MDSListResult> {
+  async list(params: MDSListParams): Promise<MDSCommandResult<MDSListResult>> {
     return this.request<MDSListResult>("list", {
       namespace: params.namespace,
       address: params.address,
@@ -186,11 +186,11 @@ export function mdsCmd<T>(config: MDSConfig, cmd: string, params: Record<string,
   // Map high-level methods to MDS commands
   switch (cmd) {
     case "store":
-      return client.store(params as any);
+      return client.store(params as any) as Promise<MDSCommandResult<T>>;
     case "retrieve":
-      return client.retrieve(params as any);
+      return client.retrieve(params as any) as Promise<MDSCommandResult<T>>;
     case "list":
-      return client.list(params as any);
+      return client.list(params as any) as Promise<MDSCommandResult<T>>;
     case "delete":
       return client.delete(params.cid, params.namespace);
     default:

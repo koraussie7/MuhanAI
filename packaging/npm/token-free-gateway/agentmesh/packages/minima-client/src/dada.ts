@@ -32,6 +32,8 @@ export interface DadaSendResult {
 export interface DadaBalanceResult extends DADABalance {
   tokenId: string;
   lastUpdated: number;
+  /** Optional fiat estimate; populated only when a price oracle is wired in. */
+  usdValue?: number;
 }
 
 /**
@@ -69,6 +71,7 @@ export class DadaClient {
     return {
       address,
       token: this.tokenId,
+      tokenId: this.tokenId,
       amount: balance.confirmed,
       usdValue: undefined, // Could be added via price oracle
       lastUpdated: Date.now(),
