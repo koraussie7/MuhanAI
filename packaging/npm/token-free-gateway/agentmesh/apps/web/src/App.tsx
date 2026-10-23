@@ -72,6 +72,7 @@ import { TravelPage } from "./components/find/TravelPage";
 import { getMenuTranslation } from "./components/menu-i18n";
 import { RightPanel } from "./components/RightPanel";
 import { Sidebar } from "./components/Sidebar";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { type SupportedLanguage, useI18n } from "./i18n";
 import { ROUTES, routeByPath } from "./routes.js";
 
@@ -651,9 +652,11 @@ export function App() {
 
 						{/* World — Pythia World Engine */}
 						{activeSection === "world" && (
-							<Suspense fallback={<PageSkeleton />}>
-								<WorldPageLazy />
-							</Suspense>
+							<ErrorBoundary label="World">
+								<Suspense fallback={<PageSkeleton />}>
+									<WorldPageLazy />
+								</Suspense>
+							</ErrorBoundary>
 						)}
 						{/* Pythia */}
 						{activeSection === "pythia" && (

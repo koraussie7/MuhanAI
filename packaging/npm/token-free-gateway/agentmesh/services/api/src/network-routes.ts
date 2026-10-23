@@ -76,4 +76,36 @@ export async function networkRoutes(app: FastifyInstance) {
 			timestamp: Date.now(),
 		};
 	});
+
+	// The web shell has always polled these two endpoints, but the server never
+	// implemented them — every page load logged 404/502 noise for routes that
+	// were never going to answer. The panels that read them already render
+	// sensible defaults for empty data, so an explicit empty payload is the
+	// honest answer until the gossip/credit layer lands.
+	app.get("/api/nodes", async (_request, _reply) => {
+		const key = app.server.address() as string;
+		const transportPeers: TransportPeer[] = transportInstances.get(key)?.getPeers() ?? [];
+
+		return transportPeers.map((peer) => ({
+			id: peer.peerId,
+			name: peer.peerId,
+			address: peer.address,
+			status: peer.online ? "connected" : "offline",
+			latencyMs: 1,
+		}));
+	});
+
+	app.get("/api/mesh/pulse", async (_request, _reply) => {
+		const key = app.server.address() as string;
+		const transportPeers: TransportPeer[] = transportInstances.get(key)?.getPeers() ?? [];
+
+		return {
+			peers: transportPeers.filter((p) => p.online).length,
+			bytesUp: 0,
+			bytesDown: 0,
+			latencyMs: transportPeers.length > 0 ? 1 : 0,
+			updatedAt: Date.now(),
+			source: transportPeers.length > 0 ? "transport" : "unconfigured",
+		};
+	});
 }

@@ -1,6 +1,7 @@
 import { pino } from "pino";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildApp } from "./server.js";
+import { resetCosmosGraph } from "./cosmos-routes.js";
 import { buildOfflineBrief, getPythiaWorldUrl, getShadowBrokerConfig } from "./world-routes.js";
 
 const originalFetch = globalThis.fetch;
@@ -159,6 +160,205 @@ describe("World API routes", () => {
 			const body = res.json();
 			expect(body.configured).toBe(false);
 			expect(body.reachable).toBe(false);
+		} finally {
+			await app.close();
+		}
+	});
+});
+
+describe("World API — PYTHIA /agent/view contract", () => {
+	beforeEach(() => {
+		process.env.DISABLE_AUTH = "true";
+		process.env.PYTHIA_WORLD_URL = "http://localhost:8088";
+	});
+	afterEach(() => {
+		delete process.env.DISABLE_AUTH;
+		delete process.env.PYTHIA_WORLD_URL;
+		globalThis.fetch = originalFetch;
+	});
+
+	// PYTHIA groups events by domain and uses week/month/year horizons. Reading
+	// only a flat `events` array made every live payload arrive as zero events,
+	// and the panel's unused-horizon tabs stayed empty.
+	it("normalises events_by_domain and the week/month/year horizons", async () => {
+		globalThis.fetch = (async () =>
+			new Response(
+				JSON.stringify({
+					summary: "Two conflicts active, one flood watch.",
+					domains: ["conflict", "disaster"],
+					events_by_domain: {
+						conflict: [
+							{
+								id: "evt-a",
+								title: "Border skirmish",
+								lat: 33.3,
+								lng: 44.4,
+								salience: 0.8,
+								source: "gdelt",
+								ts: 1_700_000_000_000,
+							},
+						],
+						disaster: [{ id: "evt-b", title: "Flood watch", lat: 10, lng: 20, salience: 0.45 }],
+					},
+					event_count: 2,
+					predictions: [
+						{
+							id: "pred-a",
+							statement: "Escalation likely",
+							horizon: "week",
+							probability: 0.71,
+							base_probability: 0.4,
+							reasoning: "Two independent feeds agree.",
+						},
+						{ id: "pred-b", title: "Famine risk", horizon: "month", probability: 0.3 },
+					],
+				}),
+				{ status: 200, headers: { "content-type": "application/json" } },
+			)) as typeof fetch;
+
+		const app = await buildApp({ enableTransport: false, logger: pino({ level: "silent" }) });
+		try {
+			const res = await app.inject({ method: "GET", url: "/api/world/brief" });
+			expect(res.statusCode).toBe(200);
+			const body = res.json();
+
+			expect(body.source).toBe("pythia");
+			// Both domains survive, each stamped with its group key.
+			expect(body.events).toHaveLength(2);
+			const conflict = body.events.find((e: { id: string }) => e.id === "evt-a");
+			expect(conflict.domain).toBe("conflict");
+			expect(conflict.latitude).toBe(33.3);
+			expect(conflict.longitude).toBe(44.4);
+			expect(conflict.severity).toBe("alert"); // salience 0.8
+			expect(conflict.timestamp).toBe(new Date(1_700_000_000_000).toISOString());
+
+			const flood = body.events.find((e: { id: string }) => e.id === "evt-b");
+			expect(flood.severity).toBe("watch"); // salience 0.45
+
+			// week -> 1w, month -> 1m
+			expect(body.predictions.map((p: { horizon: string }) => p.horizon)).toEqual(["1w", "1m"]);
+			expect(body.predictions[0].title).toBe("Escalation likely");
+			expect(body.predictions[0].rationale).toBe("Two independent feeds agree.");
+			// confidence derived from the distance off base rate
+			expect(body.predictions[0].confidence).toBeCloseTo(0.81, 5);
+		} finally {
+			await app.close();
+		}
+	});
+});
+
+describe("World API — live events reach the ontology graph", () => {
+	beforeEach(async () => {
+		process.env.DISABLE_AUTH = "true";
+		process.env.PYTHIA_WORLD_URL = "http://localhost:8088";
+		await resetCosmosGraph();
+	});
+	afterEach(async () => {
+		delete process.env.DISABLE_AUTH;
+		delete process.env.PYTHIA_WORLD_URL;
+		globalThis.fetch = originalFetch;
+		await resetCosmosGraph();
+	});
+
+	// The panel polls /api/world/brief while streaming. Before this, live events
+	// showed on the globe but never became concepts, so the ontology sidebar sat
+	// on its offline fixture with zero entities.
+	it("records live events as concepts and exposes them via the ontograph snapshot", async () => {
+		globalThis.fetch = (async () =>
+			new Response(
+				JSON.stringify({
+					summary: "Quake and conflict active.",
+					domains: ["seismic", "conflict"],
+					events_by_domain: {
+						seismic: [
+							{ id: "q1", title: "M5.2 near Anchorage", lat: 61.2, lng: -149.9, salience: 0.5 },
+						],
+						conflict: [{ id: "c1", title: "Border incident", lat: 33.3, lng: 44.4, salience: 0.8 }],
+					},
+					predictions: [],
+				}),
+				{ status: 200, headers: { "content-type": "application/json" } },
+			)) as typeof fetch;
+
+		const app = await buildApp({ enableTransport: false, logger: pino({ level: "silent" }) });
+		try {
+			// Poll twice — the second call must not duplicate concepts.
+			await app.inject({ method: "GET", url: "/api/world/brief" });
+			await app.inject({ method: "GET", url: "/api/world/brief" });
+
+			const res = await app.inject({ method: "GET", url: "/api/ontograph/snapshot" });
+			expect(res.statusCode).toBe(200);
+			const body = res.json();
+
+			// Live concepts exist, so the panel leaves its offline fixture.
+			expect(body.source).toBe("ontograph");
+			const labels = body.entities.map((e: { label: string }) => e.label);
+			expect(labels).toContain("M5.2 near Anchorage");
+			expect(labels).toContain("Border incident");
+			// Deduped: two polls, two distinct concepts.
+			expect(labels.filter((l: string) => l === "Border incident")).toHaveLength(1);
+
+			// Coordinates survive so the globe can fly to the entity.
+			const quake = body.entities.find((e: { label: string }) => e.label === "M5.2 near Anchorage");
+			expect(quake.latitude).toBeCloseTo(61.2);
+			expect(quake.longitude).toBeCloseTo(-149.9);
+		} finally {
+			await app.close();
+		}
+	});
+});
+
+describe("World API — misplaced coordinates from upstream", () => {
+	beforeEach(() => {
+		process.env.DISABLE_AUTH = "true";
+		process.env.PYTHIA_WORLD_URL = "http://localhost:8088";
+	});
+	afterEach(() => {
+		delete process.env.DISABLE_AUTH;
+		delete process.env.PYTHIA_WORLD_URL;
+		globalThis.fetch = originalFetch;
+	});
+
+	// Osiris sends transposed pairs. A latitude beyond ±90 settles it — the row
+	// must be (lng, lat) — so those are corrected. Pairs where both readings are
+	// legal (31.272,49.487) are deliberately left alone: guessing would move
+	// markers to the wrong continent and hide the real upstream bug.
+	it("swaps only the pairs whose latitude cannot be a latitude", async () => {
+		globalThis.fetch = (async () =>
+			new Response(
+				JSON.stringify({
+					summary: "s",
+					domains: ["conflict"],
+					events_by_domain: {
+						conflict: [
+							{ id: "bad", title: "Impossible latitude", lat: 120.5, lng: 31.046 },
+							{ id: "ok", title: "Good event", lat: -33.86, lng: 151.2 },
+							{ id: "amb", title: "Ambiguous", lat: 34.851, lng: 31.046 },
+						],
+					},
+					predictions: [],
+				}),
+				{ status: 200, headers: { "content-type": "application/json" } },
+			)) as typeof fetch;
+
+		const app = await buildApp({ enableTransport: false, logger: pino({ level: "silent" }) });
+		try {
+			const body = (await app.inject({ method: "GET", url: "/api/world/brief" })).json();
+			const byId = Object.fromEntries(
+				body.events.map((e: { id: string }) => [e.id, e]),
+			) as Record<string, { latitude?: number; longitude?: number }>;
+
+			// 120.5 cannot be a latitude -> read as (lng, lat).
+			expect(byId.bad?.latitude).toBeCloseTo(31.046);
+			expect(byId.bad?.longitude).toBeCloseTo(120.5);
+
+			// A legal pair is untouched.
+			expect(byId.ok?.latitude).toBeCloseTo(-33.86);
+			expect(byId.ok?.longitude).toBeCloseTo(151.2);
+
+			// Both readings legal -> no guess either way.
+			expect(byId.amb?.latitude).toBeCloseTo(34.851);
+			expect(byId.amb?.longitude).toBeCloseTo(31.046);
 		} finally {
 			await app.close();
 		}

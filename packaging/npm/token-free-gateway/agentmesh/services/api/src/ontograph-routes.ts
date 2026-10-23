@@ -110,12 +110,16 @@ export async function buildLiveOntograph(): Promise<OntographSnapshot | null> {
 				signalScore: c.signalScore,
 				domain: c.domain,
 			};
-			// Geo concepts carry coordinates in metadata (world feed ingestion
-			// writes location lat/lng when the upstream provides it).
+			// Geo concepts carry coordinates in metadata. Ingestion stores a
+			// GeoCoordinates object (`{ geo: { latitude, longitude } }`), while the
+			// PYTHIA wire format uses `{ lat, lng }` — accept both, plus the legacy
+			// flat `{ latitude, longitude }` still present in older logs.
 			const meta = c.metadata;
 			if (meta && typeof meta === "object") {
-				const lat = (meta as Record<string, unknown>).latitude;
-				const lng = (meta as Record<string, unknown>).longitude;
+				const record = meta as Record<string, unknown>;
+				const nested = record.geo as Record<string, unknown> | undefined;
+				const lat = nested?.latitude ?? nested?.lat ?? record.latitude;
+				const lng = nested?.longitude ?? nested?.lng ?? record.longitude;
 				if (typeof lat === "number" && typeof lng === "number") {
 					out.latitude = lat;
 					out.longitude = lng;

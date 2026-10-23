@@ -30,6 +30,7 @@ import {
 	type CosmosEvent,
 	type CosmosEventInput,
 	conceptId,
+	conceptObservationEvents,
 	createJsonlLog,
 	createMemoryLog,
 	emptyProjection,
@@ -82,6 +83,27 @@ async function appendToGraph(events: CosmosEventInput[]): Promise<CosmosEvent[]>
 	const live = await cosmosProjection();
 	for (const event of appended) applyEvent(live, event);
 	return appended;
+}
+
+/**
+ * Record external observations (world feed, sensors) into the cosmic graph.
+ *
+ * Exposed so route modules that own their own fetch loop can feed the graph
+ * without duplicating the projection-fold logic. Best-effort: a logging
+ * failure must never break the request that produced the observation.
+ */
+export async function recordObservations(
+	events: Parameters<typeof conceptObservationEvents>[0],
+	input: Parameters<typeof conceptObservationEvents>[1],
+): Promise<number> {
+	try {
+		const batch = conceptObservationEvents(events, input);
+		if (batch.length === 0) return 0;
+		await appendToGraph(batch);
+		return batch.length;
+	} catch {
+		return 0;
+	}
 }
 
 /** Test/dev reset: drop the in-memory graph entirely. */

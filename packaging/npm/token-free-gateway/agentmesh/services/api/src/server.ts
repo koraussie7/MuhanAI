@@ -78,6 +78,8 @@ const PUBLIC_PATH_PREFIXES = [
 	"/api/pulse",
 	"/api/network",
 	"/api/agents",
+	"/api/nodes",
+	"/api/mesh",
 	"/api/auth",
 	"/api/health",
 	"/rpc",

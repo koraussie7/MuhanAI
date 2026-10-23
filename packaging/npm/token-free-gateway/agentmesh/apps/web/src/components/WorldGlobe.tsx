@@ -32,7 +32,13 @@ type GlobeInstance = {
 	_destructor: () => void;
 };
 
-const GlobeChart = Globe as unknown as (el: HTMLElement) => GlobeInstance;
+/**
+ * globe.gl is an ES class (Kapsule factory). Calling it without `new` returns
+ * an empty object and attaches nothing — no canvas, no exception, which is how
+ * this page silently rendered a blank card. The old `as unknown as` cast hid
+ * exactly that from the compiler.
+ */
+const GlobeChart = Globe as unknown as new (el: HTMLElement) => GlobeInstance;
 import { RefreshCw, ScanLine } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { WorldEvent } from "../lib/world-types";
@@ -300,7 +306,18 @@ export const WorldGlobe = ({
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const globeRef = useRef<GlobeInstance | null>(null);
 	const [ready, setReady] = useState(false);
+	const [globeError, setGlobeError] = useState<string | null>(null);
 	const [refreshing, setRefreshing] = useState(false);
+
+	const hasWebGL = useMemo(() => {
+		if (typeof document === "undefined") return false;
+		try {
+			const c = document.createElement("canvas");
+			return !!(c.getContext("webgl2") || c.getContext("webgl"));
+		} catch {
+			return false;
+		}
+	}, []);
 
 	const usingDemo = demoFallback && events.length === 0;
 	const live = isOnline && !usingDemo;
@@ -310,46 +327,81 @@ export const WorldGlobe = ({
 	);
 
 	// 글로브 초기화 — 마운트 시 1회. 컨테이너 크기는 ResizeObserver로 동기화.
+	// WebGL이 없거나 globe.gl 초기화가 실패해도 페이지를 죽이지 않고 폴백 UI를 보여준다.
 	useEffect(() => {
 		const el = containerRef.current;
 		if (!el) return;
 
-		const chart = GlobeChart(el);
-		chart
-			.globeImageUrl(GLOBE_TEXTURE)
-			.atmosphereColor("#38bdf8")
-			.pointsMerge(false)
-			.pointsTransitionDuration(600)
-			.pointAltitude((): number => 0.015)
-			.pointColor((point: object): string => (point as GlobePoint).color)
-			.pointRadius((point: object) => (point as GlobePoint).radius)
-			.pointLabel((point: object) => (point as GlobePoint).label)
-			.width(el.clientWidth || FALLBACK_WIDTH)
-			.height(el.clientHeight || FALLBACK_HEIGHT);
+		if (!hasWebGL) {
+			setGlobeError("이 브라우저에서는 WebGL을 사용할 수 없습니다.");
+			setReady(false);
+			return;
+		}
 
-		chart.pointOfView({ lat: 25, lng: 20, altitude: 2.4 });
+		let chart: GlobeInstance | null = null;
+		try {
+			chart = new GlobeChart(el);
+			chart
+				.globeImageUrl(GLOBE_TEXTURE)
+				.atmosphereColor("#38bdf8")
+				.pointsMerge(false)
+				.pointsTransitionDuration(600)
+				.pointAltitude((): number => 0.015)
+				.pointColor((point: object): string => (point as GlobePoint).color)
+				.pointRadius((point: object) => (point as GlobePoint).radius)
+				.pointLabel((point: object) => (point as GlobePoint).label)
+				.width(el.clientWidth || FALLBACK_WIDTH)
+				.height(el.clientHeight || FALLBACK_HEIGHT);
 
-		// Osiris 느낌의 자동 회전 — 마커에 hover하면 잠시 멈춘다.
-		const controls = chart.controls();
-		controls.autoRotate = true;
-		controls.autoRotateSpeed = 0.6;
-		controls.enablePan = false;
-		chart.onPointHover((point: object | null) => {
-			controls.autoRotate = point === null;
-		});
+			chart.pointOfView({ lat: 25, lng: 20, altitude: 2.4 });
 
-		globeRef.current = chart;
-		setReady(true);
+			// Osiris 느낌의 자동 회전 — 마커에 hover하면 잠시 멈춘다.
+			// globe.gl's controls() can return undefined before three.js has finished
+			// attaching OrbitControls; assigning to it threw "Cannot set properties
+			// of undefined", which the catch below turned into a fallback card even
+			// though WebGL was fine. Rotation is cosmetic — skip it, keep the globe.
+			const controls = chart.controls();
+			if (controls) {
+				controls.autoRotate = true;
+				controls.autoRotateSpeed = 0.6;
+				controls.enablePan = false;
+				chart.onPointHover((point: object | null) => {
+					if (controls) controls.autoRotate = point === null;
+				});
+			}
+
+			globeRef.current = chart;
+			setReady(true);
+			setGlobeError(null);
+		} catch (err) {
+			// WebGL 없음 / three.js 초기화 실패 — 페이지를 죽이지 않는다.
+			setGlobeError(err instanceof Error ? err.message : "지구본을 표시할 수 없습니다.");
+			setReady(false);
+			return;
+		}
 
 		const observer = new ResizeObserver(() => {
-			chart.width(el.clientWidth || FALLBACK_WIDTH).height(el.clientHeight || FALLBACK_HEIGHT);
+			chart?.width(el.clientWidth || FALLBACK_WIDTH).height(el.clientHeight || FALLBACK_HEIGHT);
 		});
 		observer.observe(el);
 
 		return () => {
 			observer.disconnect();
 			globeRef.current = null;
-			chart._destructor();
+			try {
+				chart?._destructor();
+			} catch {
+				/* teardown 실패는 무시 */
+			}
+			// globe.gl은 canvas를 컨테이너에 직접 붙이고 _destructor()는 그것을
+			// 치운다. React StrictMode는 effect를 mount→cleanup→mount로 두 번
+			// 돌리는데, 같은 DOM 노드를 재사용하므로 두 번째 mount가 이미 파괴된
+			// 컨테이너에 붙으려다 아무것도 그리지 않는다(예외도 없음). 노드를
+			// 비워 두 번째 mount가 새로 만들 수 있게 한다.
+			//
+			// 이 정리 코드는 재실행 전에 돌기 때문에, 여기서 비우지 않으면
+			// 캔버스가 남아 있는지 여부에 따라 두 번째 결과가 달라진다.
+			el.replaceChildren();
 		};
 	}, []);
 
@@ -396,6 +448,17 @@ export const WorldGlobe = ({
 			{/* globe.gl이 이 컨테이너를 캔버스로 채운다 */}
 			<div ref={containerRef} className="absolute inset-0" />
 
+		{/* globe.gl 초기화 실패 시 폴백 UI */}
+		{globeError && (
+			<div data-testid="world-globe-fallback"
+				className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-xs text-white/60">
+				<ScanLine size={24} />
+				<span>3D 지구본을 표시할 수 없습니다</span>
+				<span className="text-white/40">{globeError}</span>
+				<span className="text-white/40">이벤트 목록은 아래에서 확인할 수 있습니다</span>
+			</div>
+		)}
+
 			{/* 상태 배지 + 마지막 갱신 시각 */}
 			<div className="absolute top-3 left-3 flex items-center gap-2">
 				<span
@@ -438,8 +501,10 @@ export const WorldGlobe = ({
 				<span className="text-white/50">{points.length} markers</span>
 			</div>
 
-			{/* 로딩 인디케이터 */}
-			{!ready && (
+			{/* 로딩 인디케이터 — 오류 폴백이 떠 있으면 사라져야 한다.
+			    예전에는 !ready 만 봤기 때문에 초기화가 실패하면 스피너가
+			    영원히 돌았고, 폴백 위에 겹쳐 "무한 로딩"으로 보었다. */}
+			{!ready && !globeError && (
 				<div className="absolute inset-0 flex items-center justify-center">
 					<div className="flex items-center gap-2 rounded-lg bg-white/5 px-4 py-2 text-sm text-white/60 backdrop-blur-sm">
 						<RefreshCw size={14} className="animate-spin" />
