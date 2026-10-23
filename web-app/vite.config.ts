@@ -357,18 +357,19 @@ function mcpRpcPlugin(): Plugin {
 /**
  * Every URL path that serves the v2 dashboard page.
  *
- * `/dashboard` is the original injection point. `/dashboard2` is an additive
- * alias for the same self-contained page: it lets v2 be linked and shared on
- * its own URL without taking over `/dashboard` from the React SPA route, and
- * without the two shadowing each other.
+ * `/dashboard` is NOT here: it belongs to the React SPA, which is what
+ * production serves (verified live — /dashboard returns the SPA shell, while
+ * /dashboard2 returns the v2 page). Caddyfile.muhanai says the same thing:
+ * "`/dashboard` is intentionally NOT covered: it stays with the React SPA".
+ *
+ * This list previously also contained /dashboard, which made the dev server
+ * disagree with production and broke tests/sanitize-dashboard.test.ts.
  *
  * Kept as the single list the dev-server middleware matches against so the
  * Vite and production (Caddy/nginx) rules cannot disagree about which paths
  * resolve to the static page.
  */
 export const DASHBOARD_V2_ROUTES = [
-	"/dashboard",
-	"/dashboard/",
 	"/dashboard2",
 	"/dashboard2/",
 ] as const;

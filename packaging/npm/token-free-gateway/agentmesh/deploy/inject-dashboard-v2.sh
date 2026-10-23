@@ -2,7 +2,10 @@
 set -euo pipefail
 
 # ============================================================
-# MuhanAI Dashboard v2 — inject into muhanai.com/dashboard
+# MuhanAI Dashboard v2 — inject into muhanai.com/dashboard2
+#
+# `/dashboard` is deliberately NOT included: it belongs to the React SPA, which
+# is what production serves there. Only /dashboard2 resolves to the v2 page.
 # Run on the 110 server (ssh 110) from the repo/deploy dir.
 #
 # Idempotent: safe to re-run. It will
@@ -55,7 +58,7 @@ src = open(path, encoding="utf-8").read()
 if "@dashboard" in src:
     sys.exit(0)
 
-block = """\t@dashboard path /dashboard /dashboard/ /dashboard2 /dashboard2/
+block = """\t@dashboard path /dashboard2 /dashboard2/
 \thandle @dashboard {
 \t\trewrite * /dashboard-v2.html
 \t\tfile_server

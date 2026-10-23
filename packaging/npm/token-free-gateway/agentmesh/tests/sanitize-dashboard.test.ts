@@ -163,7 +163,10 @@ describe("dashboard v2 URLs — dev server and deploy configs agree", () => {
 	const routes = viteDashboardRoutes();
 
 	it("reads the canonical route list from the Vite config", () => {
-		expect(routes).toEqual(["/dashboard", "/dashboard/", "/dashboard2", "/dashboard2/"]);
+		// /dashboard belongs to the React SPA. Production serves the SPA shell
+		// there and the v2 page only at /dashboard2, and Caddyfile.muhanai says
+		// so explicitly. Vite listing /dashboard made the dev server disagree.
+		expect(routes).toEqual(["/dashboard2", "/dashboard2/"]);
 	});
 
 	it("Caddy matches exactly those paths and serves the v2 page for them", () => {
