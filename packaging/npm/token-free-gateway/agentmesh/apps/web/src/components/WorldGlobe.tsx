@@ -387,6 +387,15 @@ export const WorldGlobe = ({
 			} catch {
 				/* teardown 실패는 무시 */
 			}
+			// globe.gl은 canvas를 컨테이너에 직접 붙이고 _destructor()는 그것을
+			// 치운다. React StrictMode는 effect를 mount→cleanup→mount로 두 번
+			// 돌리는데, 같은 DOM 노드를 재사용하므로 두 번째 mount가 이미 파괴된
+			// 컨테이너에 붙으려다 아무것도 그리지 않는다(예외도 없음). 노드를
+			// 비워 두 번째 mount가 새로 만들 수 있게 한다.
+			//
+			// 이 정리 코드는 재실행 전에 돌기 때문에, 여기서 비우지 않으면
+			// 캔버스가 남아 있는지 여부에 따라 두 번째 결과가 달라진다.
+			el.replaceChildren();
 		};
 	}, []);
 
