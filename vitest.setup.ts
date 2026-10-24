@@ -1,0 +1,1 @@
+// Vitest setup file — jsdom 환경에서 전역 모킹 등 공통 설정이 필요하면ここに 추가
